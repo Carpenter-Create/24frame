@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { HouseLink } from "@/components/chrome/house-link";
 
 import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { cn } from "@/lib/cn";
@@ -46,7 +46,7 @@ export function SocialActivityPills({
           SOCIAL_ACTIVITY_PILLS.map((pill, index) => {
             const on = segmentedItemOn(index, selectedIndex);
             return (
-              <Link
+              <HouseLink
                 key={pill}
                 href={socialProfileActivityHref(baseHref, pill)}
                 scroll={false}
@@ -59,7 +59,7 @@ export function SocialActivityPills({
                 )}
               >
                 {socialActivityPillLabel(pill)}
-              </Link>
+              </HouseLink>
             );
           })
         }

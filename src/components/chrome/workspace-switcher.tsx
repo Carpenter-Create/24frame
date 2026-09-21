@@ -9,7 +9,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { useRouter } from "next/navigation";
 import { useHousePathname } from "./house-client-shell";
 import { CaretDown } from "@phosphor-icons/react";
@@ -324,7 +324,7 @@ export function WorkspaceSwitcher({
           );
           if (presentation === "sheet" && !selected) {
             return (
-              <Link
+              <HouseLink
                 key={pill.id}
                 href={pill.href}
                 prefetch
@@ -340,7 +340,7 @@ export function WorkspaceSwitcher({
               >
                 <HouseNavPendingProbe href={pill.href} onPending={markPending} />
                 {optionBody}
-              </Link>
+              </HouseLink>
             );
           }
           return (

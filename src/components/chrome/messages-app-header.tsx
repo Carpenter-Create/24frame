@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   CaretDown,
@@ -83,13 +83,13 @@ function MessagesThreadHeader({ title }: { title: string }) {
         data-ask-globee-title-cluster=""
         className="flex min-w-0 flex-1 items-center gap-[var(--space-2)]"
       >
-        <Link
+        <HouseLink
           href={askGlobeeLandingHref()}
           aria-label={ASK_GLOBEE.backLabel}
           className="flex size-4 shrink-0 items-center justify-center text-ink max-md:text-ink-3"
         >
           <CaretLeft className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-        </Link>
+        </HouseLink>
         <AskGlobeeHistoryPopover
           conversations={conversations}
           currentId={chrome?.id ?? null}

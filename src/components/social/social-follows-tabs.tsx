@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HouseLink } from "@/components/chrome/house-link";
 
 import { cn } from "@/lib/cn";
 import { SOCIAL_PROFILE_TAB_CLASS } from "@/lib/social-chrome";
@@ -24,7 +24,7 @@ export function SocialFollowsTabs({
     <div data-social-follows-tabs="" className="flex flex-col bg-surface">
       <div className="flex items-start">
         {SOCIAL_FOLLOWS_TABS.map((tab) => (
-          <Link
+          <HouseLink
             key={tab}
             href={socialProfileFollowsHref(handle, tab, query)}
             data-social-follows-tab={tab}
@@ -37,7 +37,7 @@ export function SocialFollowsTabs({
           >
             {socialFollowsTabLabel(tab, counts ? counts[tab] : undefined)}
             <span className={cn("h-0.5 w-full", active === tab ? "bg-accent" : "bg-transparent")} />
-          </Link>
+          </HouseLink>
         ))}
       </div>
       <div className="h-px w-full bg-hairline" />

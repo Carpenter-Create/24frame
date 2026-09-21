@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { useRouter } from "next/navigation";
 import { useHousePathname } from "./house-client-shell";
 
@@ -169,7 +169,7 @@ export function HousePhoneBottomNav({
               );
             }
             return (
-              <Link
+              <HouseLink
                 key={item.href}
                 href={item.href}
                 prefetch
@@ -184,7 +184,7 @@ export function HousePhoneBottomNav({
               >
                 <HouseNavPendingProbe href={item.href} onPending={markPending} />
                 {chip}
-              </Link>
+              </HouseLink>
             );
           })}
         </div>

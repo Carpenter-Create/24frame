@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HouseLink } from "@/components/chrome/house-link";
 
 import { HouseChipRail } from "@/components/chrome/house-chip-rail";
 import { socialTopicRailChipClass, SOCIAL_TOPIC_RAIL_ROWS } from "@/lib/social-chrome";
@@ -25,7 +25,7 @@ export function SocialHomeTopics({
         renderItem={(label) => {
           const selected = label === active;
           return (
-            <Link
+            <HouseLink
               key={label}
               href={socialHomeLensHref(label, active)}
               data-social-home-topic={label}
@@ -34,7 +34,7 @@ export function SocialHomeTopics({
               className={socialTopicRailChipClass(selected)}
             >
               {label}
-            </Link>
+            </HouseLink>
           );
         }}
       />

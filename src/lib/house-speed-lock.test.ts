@@ -81,6 +81,28 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(followChunk).not.toContain("revalidatePath");
   });
 
+  it("routes chrome and Social dest taps through one HouseLink", () => {
+    const surfaces = [
+      "src/components/chrome/side-nav.tsx",
+      "src/components/chrome/house-phone-bottom-nav.tsx",
+      "src/components/chrome/workspace-switcher.tsx",
+      "src/components/chrome/house-lead-chrome.tsx",
+      "src/components/social/social-home-tabs.tsx",
+      "src/components/social/social-home-topics.tsx",
+      "src/components/social/social-profile-tabs.tsx",
+      "src/components/social/social-follows-tabs.tsx",
+      "src/components/social/social-activity-pills.tsx",
+    ];
+    for (const path of surfaces) {
+      const src = readFileSync(path, "utf8");
+      expect(src).toContain("HouseLink");
+      expect(src).not.toContain('import Link from "next/link"');
+    }
+    const primitive = readFileSync("src/components/chrome/house-link.tsx", "utf8");
+    expect(primitive).toContain("navigateOwned");
+    expect(primitive).toContain("data-house-link");
+  });
+
   it("mounts the house client shell so dock taps keep screens alive", () => {
     const layout = readFileSync("src/app/(app)/layout.tsx", "utf8");
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HouseLink } from "@/components/chrome/house-link";
 
 import { cn } from "@/lib/cn";
 import { SOCIAL_HOME_TAB_CLASS } from "@/lib/social-chrome";
@@ -8,7 +8,7 @@ export function SocialHomeTabs({ active }: { active: SocialHomeLane }) {
   return (
     <div data-social-home-tabs="" className="hidden flex-col bg-surface md:flex">
       <div className="flex items-start">
-        <Link
+        <HouseLink
           href={socialHomeLaneHref("following")}
           data-social-home-tab="following"
           data-social-home-tab-active={active === "following" ? "" : undefined}
@@ -21,8 +21,8 @@ export function SocialHomeTabs({ active }: { active: SocialHomeLane }) {
           <span
             className={cn("h-[3px] w-full rounded-[2px]", active === "following" ? "bg-accent" : "bg-transparent")}
           />
-        </Link>
-        <Link
+        </HouseLink>
+        <HouseLink
           href={socialHomeLaneHref("for-you")}
           data-social-home-tab="for-you"
           data-social-home-tab-active={active === "for-you" ? "" : undefined}
@@ -35,7 +35,7 @@ export function SocialHomeTabs({ active }: { active: SocialHomeLane }) {
           <span
             className={cn("h-[3px] w-full rounded-[2px]", active === "for-you" ? "bg-accent" : "bg-transparent")}
           />
-        </Link>
+        </HouseLink>
       </div>
       <div className="h-px w-full bg-hairline" />
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { useRouter } from "next/navigation";
 import { useHousePathname } from "./house-client-shell";
 import { useRef } from "react";
@@ -97,7 +97,7 @@ export function SideNav({
       );
     }
     return (
-      <Link
+      <HouseLink
         key={item.href}
         href={item.href}
         // Aggregation: VIEWPORT prefetch off, HOVER prefetch on. The sidebar
@@ -121,7 +121,7 @@ export function SideNav({
         {glyph}
         {label}
         {badge}
-      </Link>
+      </HouseLink>
     );
   };
 

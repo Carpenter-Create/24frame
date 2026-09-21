@@ -6,7 +6,7 @@
 // All time SoT). Never a wrapping chip row. Home Revenue uses
 // this. Do not invent a second grammar or a local pending fork.
 
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { useRouter } from "next/navigation";
 
 import { HousePageSelect } from "@/components/chrome/house-page-select";
@@ -70,7 +70,7 @@ export function HousePeriodPresets({
           items.map((item, index) => {
             const on = segmentedItemOn(index, selectedIndex);
             return (
-              <Link
+              <HouseLink
                 key={item.key}
                 href={item.href}
                 aria-pressed={on}
@@ -83,7 +83,7 @@ export function HousePeriodPresets({
                 {...(chipDataAttr ? { [chipDataAttr]: item.key } : {})}
               >
                 {item.label}
-              </Link>
+              </HouseLink>
             );
           })
         }
