@@ -444,6 +444,35 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("Impressions");
   });
 
+  it("shows the locked Highlights empty state as curated collections", async () => {
+    stubClient({
+      profile: ensured,
+      posts: [
+        {
+          id: "p1",
+          body: "First engine note",
+          author_id: "u1",
+          group_id: null,
+          like_count: 2,
+          created_at: "2026-09-13T12:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(
+      await SocialProfilePage({ searchParams: Promise.resolve({ tab: "highlights" }) }),
+    );
+    expect(html).toContain('data-social-profile-tab="highlights"');
+    expect(html).toContain(SOCIAL.profile.highlightsEmpty);
+    expect(html).toContain(SOCIAL.profile.highlightsEmptyHint);
+    expect(html).not.toContain("Live stories appear here for 24 hours.");
+    expect(html).not.toMatch(/24 hours/i);
+    expect(html).not.toContain("First engine note");
+    expect(html).not.toContain("data-social-author-history");
+    expect(html).not.toContain(SOCIAL.profile.creditsEmpty);
+  });
+
   it("shows the locked Credits blank empty state and no invented credits", async () => {
     stubClient({
       profile: ensured,

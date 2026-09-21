@@ -333,6 +333,35 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-author-posts");
   });
 
+  it("shows the locked Highlights empty state as curated collections", async () => {
+    stubClient({
+      posts: [
+        {
+          id: "p9",
+          body: "Public engine note",
+          author_id: "u2",
+          group_id: null,
+          like_count: 1,
+          created_at: "2026-09-13T12:00:00.000Z",
+        },
+      ],
+    });
+    const html = renderToStaticMarkup(
+      await SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@ada" }),
+        searchParams: Promise.resolve({ tab: "highlights" }),
+      }),
+    );
+    expect(html).toContain('data-social-profile-tab="highlights"');
+    expect(html).toContain(SOCIAL.profile.highlightsEmpty);
+    expect(html).toContain(SOCIAL.profile.highlightsEmptyHint);
+    expect(html).not.toContain("Live stories appear here for 24 hours.");
+    expect(html).not.toMatch(/24 hours/i);
+    expect(html).not.toContain("Public engine note");
+    expect(html).not.toContain("data-social-author-history");
+    expect(html).not.toContain(SOCIAL.profile.creditsEmpty);
+  });
+
   it("shows the locked Credits blank empty state on a public profile", async () => {
     stubClient({
       posts: [

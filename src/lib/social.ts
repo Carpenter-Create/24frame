@@ -643,7 +643,7 @@ export const SOCIAL = {
     activityCommented: "Commented",
     highlightsTab: "Highlights",
     highlightsEmpty: "No highlights yet.",
-    highlightsEmptyHint: "Live stories appear here for 24 hours.",
+    highlightsEmptyHint: "Pin lasting collections from your Stories.",
     creditsTab: "Credits",
     creditsEmpty: "No credits yet",
     creditsEmptyHint: "Credits are the titles and roles attached to your name.",
