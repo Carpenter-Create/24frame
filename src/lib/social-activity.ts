@@ -1,12 +1,15 @@
 import { parsePostMedia } from "@/lib/social-media";
 import {
   SOCIAL,
+  SOCIAL_PROFILE_DEFAULT_TAB,
   SOCIAL_PROFILE_TAB_PARAM,
+  socialProfileTabHref,
   type SocialProfileTab,
 } from "@/lib/social";
 
 // Profile Activity tab pills. Exclusive filter — house SegmentedTrack.
-// Posts tab on the profile stays the IG grid. These pills are feed cards.
+// Activity is the default profile tab. Posts / Comments / Images / Videos
+// are pills on that feed — not a twin top-level Posts tab.
 
 export const SOCIAL_ACTIVITY_PILL_PARAM = "activity";
 export const SOCIAL_ACTIVITY_PILLS = ["posts", "comments", "images", "videos"] as const;
@@ -62,21 +65,31 @@ export function socialActivityEmptyCopy(pill: SocialActivityPill): {
 }
 
 export function socialProfileActivityHref(base: string, pill: SocialActivityPill): string {
+  if (pill === "posts") return base;
   const params = new URLSearchParams();
-  params.set(SOCIAL_PROFILE_TAB_PARAM, "activity");
-  if (pill !== "posts") params.set(SOCIAL_ACTIVITY_PILL_PARAM, pill);
+  params.set(SOCIAL_PROFILE_TAB_PARAM, SOCIAL_PROFILE_DEFAULT_TAB);
+  params.set(SOCIAL_ACTIVITY_PILL_PARAM, pill);
   return `${base}?${params.toString()}`;
+}
+
+export function socialProfileViewHref(
+  base: string,
+  tab: SocialProfileTab,
+  activity: SocialActivityPill = "posts",
+): string {
+  return tab === SOCIAL_PROFILE_DEFAULT_TAB
+    ? socialProfileActivityHref(base, activity)
+    : socialProfileTabHref(base, tab);
 }
 
 export function socialProfileTabSearch(
   tab: SocialProfileTab,
   activity?: SocialActivityPill,
 ): Record<string, string> {
-  if (tab === "posts") return {};
-  if (tab !== "activity") return { [SOCIAL_PROFILE_TAB_PARAM]: tab };
-  if (!activity || activity === "posts") return { [SOCIAL_PROFILE_TAB_PARAM]: "activity" };
+  if (tab !== SOCIAL_PROFILE_DEFAULT_TAB) return { [SOCIAL_PROFILE_TAB_PARAM]: tab };
+  if (!activity || activity === "posts") return {};
   return {
-    [SOCIAL_PROFILE_TAB_PARAM]: "activity",
+    [SOCIAL_PROFILE_TAB_PARAM]: SOCIAL_PROFILE_DEFAULT_TAB,
     [SOCIAL_ACTIVITY_PILL_PARAM]: activity,
   };
 }

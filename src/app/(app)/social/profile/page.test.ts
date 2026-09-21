@@ -154,10 +154,15 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-share-hint");
     expect(html).toContain("@ada");
     expect(html).toContain("data-social-profile-tabs");
-    expect(html).toContain(SOCIAL.profile.postsTab);
+    expect(html).toContain(SOCIAL.profile.activityTab);
+    expect(html).toContain(SOCIAL.profile.activityPosts);
     expect(html).toContain(SOCIAL.profile.highlightsTab);
     expect(html).toContain(SOCIAL.profile.creditsTab);
+    expect(html).toContain('data-social-profile-tab="activity"');
     expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).not.toContain('data-social-profile-tab="posts"');
+    expect(html).toContain("data-social-activity");
+    expect(html).toContain('data-social-activity-pill="posts"');
     expect(html).toContain("overflow-x-auto");
     expect(html).not.toContain("data-social-for-you");
     expect(html).not.toContain("data-social-for-you-skeleton");
@@ -197,8 +202,9 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-profile-bio");
     expect(html).toContain("First engine note");
     expect(html).toContain('data-social-post="p1"');
-    expect(html).toContain("data-social-author-history");
-    expect(html).toContain("data-social-author-posts");
+    expect(html).toContain("data-social-activity");
+    expect(html).toContain("data-social-activity-feed");
+    expect(html).not.toContain("data-social-author-history");
     expect(html).toContain(SOCIAL.profile.edit);
     expect(html).toContain('href="/social/profile/edit"');
     expect(html).not.toContain('href="#social-profile-edit"');
@@ -227,7 +233,8 @@ describe("Social profile public face", () => {
     const src = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
     expect(src).toContain("signedAvatarUrl");
     expect(src).not.toContain("SocialProfilePhotoForm");
-    expect(src).toContain("loadAuthorPosts");
+    expect(src).toContain("loadAuthorActivityPosts");
+    expect(src).not.toContain("SocialAuthorHistory");
     expect(src).not.toContain("putAvatarObject");
     expect(src).not.toContain("uploadAccountPhoto");
     expect(src).not.toContain("S3_AVATARS_BUCKET");
@@ -238,17 +245,18 @@ describe("Social profile public face", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderServerMarkup(await SocialProfilePage());
-    expect(html).toContain("data-social-author-empty");
-    expect(html).toContain(SOCIAL.profile.postsEmpty);
-    expect(html).toContain(SOCIAL.profile.sharePost);
-    expect(html).toContain("/social/create?kind=media");
-    const empty = html.slice(html.indexOf("data-social-author-empty"));
+    expect(html).toContain("data-social-empty");
+    expect(html).toContain(SOCIAL.profile.activityPostsEmpty);
+    expect(html).toContain(SOCIAL.profile.activityPostsEmptyHint);
+    expect(html).not.toContain(SOCIAL.profile.sharePost);
+    expect(html).not.toContain("/social/create?kind=media");
+    const empty = html.slice(html.indexOf("data-social-empty"));
     expect(empty).not.toContain(SOCIAL.profile.edit);
     expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
     expect(empty).not.toContain("/social/profile/edit");
     expect(empty).not.toContain(SOCIAL.profile.postsEmptyOwnHint);
-    expect(empty).not.toContain("py-[var(--space-12)]");
     expect(html.match(/href="\/social\/profile\/edit"/g)?.length).toBe(1);
+    expect(html).not.toContain("data-social-author-empty");
     expect(html).not.toContain("data-social-author-posts");
     expect(html).not.toContain("data-social-author-truncated");
     expect(html).not.toContain("Sets");
@@ -398,10 +406,20 @@ describe("Social profile public face", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderServerMarkup(await SocialProfilePage());
-    expect(html).toContain("data-social-author-truncated");
+    expect(html).toContain("data-social-activity-truncated");
     expect(html).toContain(SOCIAL.profile.postsTruncated);
     expect(html).toContain('data-social-post="p0"');
     expect(html).not.toContain(`data-social-post="p${SOCIAL_PROFILE_POSTS_PAGE}"`);
+    expect(html).not.toContain("data-social-author-truncated");
+  });
+
+  it("hard-redirects retired ?tab=posts to Activity + Posts", async () => {
+    stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    await expect(
+      SocialProfilePage({ searchParams: Promise.resolve({ tab: "posts" }) }),
+    ).rejects.toThrow("REDIRECT:/social/profile");
   });
 
   it("renders Activity pills and a calm Comments empty — not a bare list", async () => {

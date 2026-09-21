@@ -53,8 +53,11 @@ import {
   socialProfilePublicPath,
   socialProfilePublicUrl,
   socialProfileRewriteTarget,
+  isLegacySocialProfilePostsTab,
+  socialProfileLegacyPostsTabHref,
   socialProfileTabHref,
   socialProfileTabLabel,
+  SOCIAL_PROFILE_DEFAULT_TAB,
   SOCIAL_PROFILE_TABS,
   socialVanityInternalPath,
   stripHandleDecorators,
@@ -358,15 +361,22 @@ describe("profile opt-in", () => {
     expect(SOCIAL.home.videoPreparing).toBe("That video is still preparing.");
     expect(parseSocialHomeLane("for-you")).toBe("for-you");
     expect(socialHomeLaneHref("following")).toBe("/social");
-    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits", "activity"]);
+    expect(SOCIAL_PROFILE_TABS).toEqual(["activity", "highlights", "credits"]);
+    expect(SOCIAL_PROFILE_DEFAULT_TAB).toBe("activity");
     expect(parseSocialProfileTab("highlights")).toBe("highlights");
     expect(parseSocialProfileTab("credits")).toBe("credits");
     expect(parseSocialProfileTab("activity")).toBe("activity");
-    expect(parseSocialProfileTab("reels")).toBe("posts");
+    expect(parseSocialProfileTab("posts")).toBe("activity");
+    expect(parseSocialProfileTab("reels")).toBe("activity");
+    expect(parseSocialProfileTab(undefined)).toBe("activity");
+    expect(isLegacySocialProfilePostsTab("posts")).toBe(true);
+    expect(isLegacySocialProfilePostsTab("activity")).toBe(false);
+    expect(socialProfileLegacyPostsTabHref("/social/profile")).toBe("/social/profile");
+    expect(socialProfileLegacyPostsTabHref("/social/u/ada")).toBe("/social/u/ada");
     expect(socialProfileTabHref("/social/u/ada", "highlights")).toBe("/social/u/ada?tab=highlights");
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
-    expect(socialProfileTabHref("/social/u/ada", "activity")).toBe("/social/u/ada?tab=activity");
-    expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
+    expect(socialProfileTabHref("/social/u/ada", "activity")).toBe("/social/u/ada");
+    expect(socialProfileTabHref("/social/profile", "activity")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
     expect(socialProfileTabLabel("activity")).toBe("Activity");
     expect(parseSocialFollowsTab("following")).toBe("following");
@@ -396,7 +406,8 @@ describe("profile opt-in", () => {
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou.topics).toBe("Topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
-    expect(SOCIAL.profile.postsTab).toBe("Posts");
+    expect(SOCIAL.profile.activityTab).toBe("Activity");
+    expect(SOCIAL.profile.activityPosts).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
@@ -606,10 +617,14 @@ describe("social writes stay on the live spine", () => {
     }
     const own = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
     const pub = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
-    expect(own).toContain("loadAuthorPosts");
-    expect(own).toContain("SocialAuthorHistory");
-    expect(pub).toContain("loadAuthorPosts");
-    expect(pub).toContain("SocialAuthorHistory");
+    expect(own).toContain("loadAuthorActivityPosts");
+    expect(own).toContain("SocialActivityHistory");
+    expect(own).not.toContain("SocialAuthorHistory");
+    expect(own).toContain("isLegacySocialProfilePostsTab");
+    expect(pub).toContain("loadAuthorActivityPosts");
+    expect(pub).toContain("SocialActivityHistory");
+    expect(pub).not.toContain("SocialAuthorHistory");
+    expect(pub).toContain("isLegacySocialProfilePostsTab");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
     expect(forms).toContain("uploadSocialPostMedia");
     expect(forms).toContain("originalQuality");

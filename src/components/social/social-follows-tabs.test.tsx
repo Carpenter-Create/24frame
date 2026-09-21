@@ -25,6 +25,6 @@ describe("SocialFollowsTabs", () => {
     expect(html).toContain("bg-accent");
     expect(html).not.toContain("Subscriptions");
     expect(html).not.toContain("Flags");
-    expect(html).not.toContain(SOCIAL.profile.postsTab);
+    expect(html).not.toContain(SOCIAL.profile.activityTab);
   });
 });

@@ -628,7 +628,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(readFileSync("src/components/social/social-own-profile.tsx", "utf8")).toContain(
       "SocialWelcomeVideo",
     );
-    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits", "activity"]);
+    expect(SOCIAL_PROFILE_TABS).toEqual(["activity", "highlights", "credits"]);
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.activityTab).toBe("Activity");
     expect(profile).toContain("SocialActivityHistory");
@@ -676,8 +676,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(authorHistory).not.toContain("SOCIAL_PROFILE_GRID_CLASS");
     expect(authorHistory).not.toContain("data-social-profile-grid");
     expect(authorHistory).not.toContain("SOCIAL_PROFILE_TILE_CLASS");
-    expect(profile).not.toContain("<SocialHighlights cards={highlightCards} />\n          <SocialAuthorHistory");
-    expect(publicProfile).not.toContain("<SocialHighlights cards={highlightCards} />\n            <SocialAuthorHistory");
+    expect(profile).not.toContain("SocialAuthorHistory");
+    expect(publicProfile).not.toContain("SocialAuthorHistory");
+    expect(profile).toContain("SocialActivityHistory");
+    expect(publicProfile).toContain("SocialActivityHistory");
     expect(chrome).not.toContain("h-[140px]");
     expect(chrome).toContain("HOUSE_PILL_ITEM_CLASS");
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
@@ -685,7 +687,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("items-center");
     expect(empty).toContain("SocialProfilePostsEmpty");
     expect(empty).toContain("SOCIAL_PROFILE_POSTS_EMPTY_CLASS");
-    expect(profile).toContain("SOCIAL.profile.sharePost");
+    expect(profile).not.toContain("SOCIAL.profile.sharePost");
     expect(profile).not.toContain("SOCIAL.profile.completeIdentity");
     expect(profile).not.toContain("emptySecondary");
     expect(profile).not.toContain("postsEmptyOwnHint");

@@ -8,7 +8,6 @@ import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import {
-  SocialAuthorHistory,
   SocialHighlights,
   SocialProfileIdentity,
   socialAuthorPostCard,
@@ -22,29 +21,28 @@ import {
   socialMediaProxiesByPostId,
 } from "@/lib/social-edge";
 import {
+  isLegacySocialProfilePostsTab,
   parseProfileHandleParam,
   parseSocialProfileTab,
   SOCIAL,
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
-  socialCreateHref,
   socialMemberHref,
   socialPersonLabel,
   socialProfileCanonicalUrl,
   socialProfileCasingRedirect,
-  socialProfileTabHref,
+  socialProfileLegacyPostsTabHref,
   socialRelativeTime,
   socialStoryHref,
 } from "@/lib/social";
 import {
   parseSocialActivityPill,
   SOCIAL_ACTIVITY_PILL_PARAM,
-  socialProfileActivityHref,
+  socialProfileViewHref,
 } from "@/lib/social-activity";
 import {
   loadAuthorActivityComments,
   loadAuthorActivityPosts,
-  loadAuthorPosts,
   loadLikedPostIds,
   loadLiveStories,
   loadProfileMutuals,
@@ -81,23 +79,26 @@ export default async function SocialPublicProfilePage({
   ]);
   const { ctx, supabase } = session;
   const handle = parseProfileHandleParam(raw);
-  const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
+  const rawTab = sp[SOCIAL_PROFILE_TAB_PARAM];
+  const tab = parseSocialProfileTab(rawTab);
   const activity = parseSocialActivityPill(sp[SOCIAL_ACTIVITY_PILL_PARAM]);
   const own = await ensureOwnSocialProfile(supabase, ctx.user);
   // Null is a missing handle or an RLS-hidden row — same empty state.
   const member = handle ? await loadCachedSocialProfileByHandle(supabase, handle) : null;
+  const legacyPosts = isLegacySocialProfilePostsTab(rawTab);
 
   if (member) {
     const canonical = socialProfileCasingRedirect(handle, member.handle);
-    if (canonical) {
+    if (canonical || legacyPosts) {
+      const destBase = canonical ?? socialMemberHref(member.handle);
       redirect(
-        tab === "activity"
-          ? socialProfileActivityHref(canonical, activity)
-          : tab === "posts"
-            ? canonical
-            : socialProfileTabHref(canonical, tab),
+        legacyPosts
+          ? socialProfileLegacyPostsTabHref(destBase)
+          : socialProfileViewHref(destBase, tab, activity),
       );
     }
+  } else if (legacyPosts && handle) {
+    redirect(socialProfileLegacyPostsTabHref(socialMemberHref(handle)));
   }
 
   if (!member) {
@@ -123,7 +124,6 @@ export default async function SocialPublicProfilePage({
   const welcomeUrl = member.welcome_video_key ? socialMediaHref(member.welcome_video_key) : null;
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadCachedIsFollowing(supabase, ctx.user.id, member.id) : false;
-  const history = await loadAuthorPosts(supabase, member.id);
   const commentsPage =
     tab === "activity" && activity === "comments"
       ? await loadAuthorActivityComments(supabase, member.id)
@@ -136,9 +136,7 @@ export default async function SocialPublicProfilePage({
   const cardPosts =
     tab === "activity" && activity === "comments"
       ? commentParentPosts
-      : tab === "activity"
-        ? filtered.posts
-        : history.posts;
+      : filtered.posts;
   const parentAuthors =
     tab === "activity" && activity === "comments"
       ? await loadProfilesByIds(
@@ -236,7 +234,7 @@ export default async function SocialPublicProfilePage({
           ) : (
             <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
           )
-        ) : tab === "activity" ? (
+        ) : (
           <SocialActivityHistory
             baseHref={profileHref}
             pill={activity}
@@ -275,28 +273,6 @@ export default async function SocialPublicProfilePage({
                 }),
               };
             })}
-          />
-        ) : (
-          <SocialAuthorHistory
-            truncated={history.truncated}
-            emptyAction={{
-              href: isSelf ? socialCreateHref("media") : SOCIAL_ROUTES.create,
-              label: SOCIAL.profile.sharePost,
-            }}
-            posts={history.posts.map((post) =>
-              socialAuthorPostCard({
-                post,
-                authorHandle: member.handle,
-                authorName: socialPersonLabel({
-                  handle: member.handle,
-                  displayName: member.display_name,
-                }),
-                authorPhotoUrl: photoUrl,
-                liked: liked.has(post.id),
-                canLike: !!own,
-                media: media.get(post.id) ?? [],
-              }),
-            )}
           />
         )}
     </div>

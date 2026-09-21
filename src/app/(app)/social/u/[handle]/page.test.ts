@@ -167,17 +167,23 @@ describe("Social public profile", () => {
     expect(html).toContain("Writes engines.");
     expect(html).toContain("Public engine note");
     expect(html).toContain('data-social-post="p9"');
-    expect(html).toContain("data-social-author-history");
+    expect(html).toContain("data-social-activity");
+    expect(html).toContain("data-social-activity-feed");
+    expect(html).not.toContain("data-social-author-history");
     expect(html).toContain("data-social-follow");
     expect(html).toContain("data-social-share");
     expect(html).toContain("data-social-profile-tabs");
     expect(html).toContain('data-social-profile-stat="followers"');
     expect(html).toContain('href="/social/u/ada/follows"');
     expect(html).toContain('href="/social/u/ada/follows?tab=following"');
-    expect(html).toContain(SOCIAL.profile.postsTab);
+    expect(html).toContain(SOCIAL.profile.activityTab);
+    expect(html).toContain(SOCIAL.profile.activityPosts);
     expect(html).toContain(SOCIAL.profile.highlightsTab);
     expect(html).toContain(SOCIAL.profile.creditsTab);
+    expect(html).toContain('data-social-profile-tab="activity"');
     expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).not.toContain('data-social-profile-tab="posts"');
+    expect(html).toContain('data-social-activity-pill="posts"');
     expect(html).toContain("overflow-x-auto");
     expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
     expect(html).not.toContain("data-social-profile-url");
@@ -312,14 +318,15 @@ describe("Social public profile", () => {
   it("shows an honest empty state when that author has no posts", async () => {
     stubClient({ posts: [] });
     const html = await renderPublic();
-    expect(html).toContain("data-social-author-empty");
-    expect(html).toContain(SOCIAL.profile.postsEmpty);
-    const empty = html.slice(html.indexOf("data-social-author-empty"));
-    expect(empty).toContain(SOCIAL.profile.sharePost);
+    expect(html).toContain("data-social-empty");
+    expect(html).toContain(SOCIAL.profile.activityPostsEmpty);
+    expect(html).toContain(SOCIAL.profile.activityPostsEmptyHint);
+    const empty = html.slice(html.indexOf("data-social-empty"));
+    expect(empty).not.toContain(SOCIAL.profile.sharePost);
     expect(empty).not.toContain(SOCIAL.profile.edit);
     expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
     expect(empty).not.toContain(SOCIAL.profile.postsEmptyHint);
-    expect(empty).not.toContain("py-[var(--space-12)]");
+    expect(html).not.toContain("data-social-author-empty");
     expect(html).not.toContain("data-social-author-posts");
   });
 
@@ -357,7 +364,8 @@ describe("Social public profile", () => {
 
     const html = await renderPublic("@bob");
     expect(html).toContain("Bob One");
-    expect(html).toContain("data-social-author-history");
+    expect(html).toContain("data-social-activity");
+    expect(html).not.toContain("data-social-author-history");
     expect(html).not.toContain("data-social-follow");
     expect(html).not.toContain("data-social-profile-form");
     expect(html).not.toContain("data-social-profile-photo");
@@ -366,6 +374,26 @@ describe("Social public profile", () => {
   it("redirects a casing miss to the stored public URL", async () => {
     stubClient({ member: { ...ada, handle: "AdamC" } });
     await expect(renderPublic("adamc")).rejects.toThrow("REDIRECT:/@AdamC");
+  });
+
+  it("hard-redirects retired ?tab=posts to Activity + Posts", async () => {
+    stubClient();
+    await expect(
+      SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@ada" }),
+        searchParams: Promise.resolve({ tab: "posts" }),
+      }),
+    ).rejects.toThrow("REDIRECT:/social/u/ada");
+  });
+
+  it("maps a casing miss plus ?tab=posts onto the stored Activity land", async () => {
+    stubClient({ member: { ...ada, handle: "AdamC" } });
+    await expect(
+      SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "adamc" }),
+        searchParams: Promise.resolve({ tab: "posts" }),
+      }),
+    ).rejects.toThrow("REDIRECT:/@AdamC");
   });
 
   it("sets the public canonical to https://24frame.co/@handle", async () => {
@@ -429,8 +457,10 @@ describe("Social public profile", () => {
     const src = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     expect(src).toContain("socialAvatarHref");
     expect(src).toContain('export const runtime = "edge"');
-    expect(src).toContain("loadAuthorPosts");
-    expect(src).toContain("SocialAuthorHistory");
+    expect(src).toContain("loadAuthorActivityPosts");
+    expect(src).toContain("SocialActivityHistory");
+    expect(src).not.toContain("SocialAuthorHistory");
+    expect(src).toContain("isLegacySocialProfilePostsTab");
     expect(src).toContain("socialProfileCasingRedirect");
     expect(src).toContain("generateMetadata");
     expect(src).toContain("socialProfileCanonicalUrl");
