@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { SocialActivityHistory } from "@/components/social/social-activity-history";
 import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialEmpty } from "@/components/social/social-empty";
@@ -36,10 +37,18 @@ import {
   socialStoryHref,
 } from "@/lib/social";
 import {
+  parseSocialActivityPill,
+  SOCIAL_ACTIVITY_PILL_PARAM,
+  socialProfileActivityHref,
+} from "@/lib/social-activity";
+import {
+  loadAuthorActivityComments,
+  loadAuthorActivityPosts,
   loadAuthorPosts,
   loadLikedPostIds,
   loadLiveStories,
   loadProfileMutuals,
+  loadProfilesByIds,
 } from "@/lib/social-feed";
 import { loadCachedIsFollowing, loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -73,6 +82,7 @@ export default async function SocialPublicProfilePage({
   const { ctx, supabase } = session;
   const handle = parseProfileHandleParam(raw);
   const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
+  const activity = parseSocialActivityPill(sp[SOCIAL_ACTIVITY_PILL_PARAM]);
   const own = await ensureOwnSocialProfile(supabase, ctx.user);
   // Null is a missing handle or an RLS-hidden row — same empty state.
   const member = handle ? await loadCachedSocialProfileByHandle(supabase, handle) : null;
@@ -80,7 +90,13 @@ export default async function SocialPublicProfilePage({
   if (member) {
     const canonical = socialProfileCasingRedirect(handle, member.handle);
     if (canonical) {
-      redirect(tab === "posts" ? canonical : socialProfileTabHref(canonical, tab));
+      redirect(
+        tab === "activity"
+          ? socialProfileActivityHref(canonical, activity)
+          : tab === "posts"
+            ? canonical
+            : socialProfileTabHref(canonical, tab),
+      );
     }
   }
 
@@ -108,14 +124,40 @@ export default async function SocialPublicProfilePage({
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadCachedIsFollowing(supabase, ctx.user.id, member.id) : false;
   const history = await loadAuthorPosts(supabase, member.id);
-  const media = socialMediaProxiesByPostId(history.posts);
+  const commentsPage =
+    tab === "activity" && activity === "comments"
+      ? await loadAuthorActivityComments(supabase, member.id)
+      : { items: [], truncated: false };
+  const filtered =
+    tab === "activity" && activity !== "comments"
+      ? await loadAuthorActivityPosts(supabase, member.id, activity)
+      : { posts: [], truncated: false };
+  const commentParentPosts = commentsPage.items.map((item) => item.post);
+  const cardPosts =
+    tab === "activity" && activity === "comments"
+      ? commentParentPosts
+      : tab === "activity"
+        ? filtered.posts
+        : history.posts;
+  const parentAuthors =
+    tab === "activity" && activity === "comments"
+      ? await loadProfilesByIds(
+          supabase,
+          [...new Set(commentParentPosts.map((post) => post.author_id))],
+        )
+      : new Map();
+  const media = socialMediaProxiesByPostId(cardPosts);
   const liked = own
     ? await loadLikedPostIds(
         supabase,
         ctx.user.id,
-        history.posts.map((post) => post.id),
+        cardPosts.map((post) => post.id),
       )
     : new Set<string>();
+  const parentFaces =
+    tab === "activity" && activity === "comments"
+      ? socialAvatarFaces([...parentAuthors.keys()])
+      : new Map();
   const counts = await loadCachedProfileSocialCounts(supabase, member.id);
   const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
   const mutualFaces =
@@ -194,6 +236,46 @@ export default async function SocialPublicProfilePage({
           ) : (
             <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
           )
+        ) : tab === "activity" ? (
+          <SocialActivityHistory
+            baseHref={profileHref}
+            pill={activity}
+            truncated={activity === "comments" ? commentsPage.truncated : filtered.truncated}
+            posts={filtered.posts.map((post) =>
+              socialAuthorPostCard({
+                post,
+                authorHandle: member.handle,
+                authorName: socialPersonLabel({
+                  handle: member.handle,
+                  displayName: member.display_name,
+                }),
+                authorPhotoUrl: photoUrl,
+                liked: liked.has(post.id),
+                canLike: !!own,
+                media: media.get(post.id) ?? [],
+              }),
+            )}
+            comments={commentsPage.items.map((item) => {
+              const author = parentAuthors.get(item.post.author_id);
+              return {
+                commentId: item.comment.id,
+                body: item.comment.body,
+                commentedAt: item.comment.created_at,
+                post: socialAuthorPostCard({
+                  post: item.post,
+                  authorHandle: author?.handle ?? member.handle,
+                  authorName: socialPersonLabel({
+                    handle: author?.handle ?? member.handle,
+                    displayName: author?.display_name ?? member.display_name,
+                  }),
+                  authorPhotoUrl: parentFaces.get(item.post.author_id) ?? photoUrl,
+                  liked: liked.has(item.post.id),
+                  canLike: !!own,
+                  media: media.get(item.post.id) ?? [],
+                }),
+              };
+            })}
+          />
         ) : (
           <>
             <SocialHighlights cards={highlightCards} />

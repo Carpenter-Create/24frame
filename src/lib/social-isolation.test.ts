@@ -58,6 +58,7 @@ describe("social isolation lock", () => {
     expect(b3).not.toContain("from(\"follows\")");
     expect(b3).not.toContain("from(\"stories\")");
     expect(b3).not.toContain("from(\"story_views\")");
+    expect(b3).not.toContain("from(\"comments\")");
   });
 
   it("keeps Social writes on the user-scoped client", () => {
@@ -86,6 +87,8 @@ describe("social isolation lock", () => {
     const light = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
     expect(light).toContain("export async function toggleSocialFollow");
     expect(light).toContain("export async function toggleSocialLike");
+    expect(light).toContain("export async function createSocialComment");
+    expect(light).toContain("export async function deleteSocialComment");
     expect(actions).not.toContain("toggleSocialFollow");
     expect(light).toContain('from("follows")');
     expect(light).toContain("notify_new_follower");
@@ -108,9 +111,15 @@ describe("social isolation lock", () => {
     expect(light).not.toContain("social-mux-server");
     const likeApi = readFileSync("src/app/api/social/like/route.ts", "utf8");
     const postApi = readFileSync("src/app/api/social/post/route.ts", "utf8");
+    const commentApi = readFileSync("src/app/api/social/comment/route.ts", "utf8");
     expect(likeApi).toContain("toggleSocialLike");
     expect(likeApi).toContain('from "@/app/(app)/social/light-actions"');
     expect(postApi).toContain("writeSocialPost");
+    expect(commentApi).toContain("createSocialComment");
+    expect(commentApi).toContain("deleteSocialComment");
+    expect(commentApi).toContain('from "@/app/(app)/social/light-actions"');
+    expect(commentApi).not.toContain("@/lib/supabase/admin");
+    expect(commentApi).not.toContain("SERVICE_ROLE");
     expect(likeApi).not.toContain("@/lib/supabase/admin");
     expect(postApi).not.toContain("@/lib/supabase/admin");
     expect(likeApi).not.toContain("SERVICE_ROLE");

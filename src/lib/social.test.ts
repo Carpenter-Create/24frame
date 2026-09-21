@@ -358,14 +358,17 @@ describe("profile opt-in", () => {
     expect(SOCIAL.home.videoPreparing).toBe("That video is still preparing.");
     expect(parseSocialHomeLane("for-you")).toBe("for-you");
     expect(socialHomeLaneHref("following")).toBe("/social");
-    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
+    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits", "activity"]);
     expect(parseSocialProfileTab("highlights")).toBe("highlights");
     expect(parseSocialProfileTab("credits")).toBe("credits");
+    expect(parseSocialProfileTab("activity")).toBe("activity");
     expect(parseSocialProfileTab("reels")).toBe("posts");
     expect(socialProfileTabHref("/social/u/ada", "highlights")).toBe("/social/u/ada?tab=highlights");
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
+    expect(socialProfileTabHref("/social/u/ada", "activity")).toBe("/social/u/ada?tab=activity");
     expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
+    expect(socialProfileTabLabel("activity")).toBe("Activity");
     expect(parseSocialFollowsTab("following")).toBe("following");
     expect(parseSocialFollowsTab("reels")).toBe("followers");
     expect(parseSocialFollowsQuery("  Ada  ")).toBe("Ada");
@@ -508,6 +511,8 @@ describe("social writes stay on the live spine", () => {
     expect(light).toContain('from("likes")');
     expect(light).toContain("export async function toggleSocialFollow");
     expect(light).toContain("export async function toggleSocialLike");
+    expect(light).toContain("export async function createSocialComment");
+    expect(light).toContain("export async function deleteSocialComment");
     expect(actions).not.toContain("toggleSocialFollow");
     expect(actions).not.toContain("from \"@/lib/s3\"");
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");

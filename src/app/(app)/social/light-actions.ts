@@ -15,6 +15,7 @@ import {
   socialProfileFollowsHref,
   socialProfileHref,
 } from "@/lib/social";
+import { commentBodyError, commentInsertRow, normalizeCommentBody } from "@/lib/social-comments";
 import { bustSocialFollowHotCache } from "@/lib/social-hot-cache";
 import {
   isFollowUniqueViolation,
@@ -113,5 +114,53 @@ export async function toggleSocialLike(formData: FormData): Promise<ActionResult
     revalidatePath(socialGroupHref(slug));
     revalidatePath(`${socialGroupHref(slug)}/posts/${postId}`);
   }
+  return {};
+}
+
+type CommentActionResult = ActionResult & { id?: string; created_at?: string };
+
+export async function createSocialComment(formData: FormData): Promise<CommentActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const postId = String(formData.get("post_id") ?? "").trim();
+  const raw = String(formData.get("body") ?? "");
+  const body = normalizeCommentBody(raw);
+  if (!postId) return { error: SOCIAL.post.missing };
+  if (!body) return { error: commentBodyError(raw) };
+
+  const { data, error } = await supabase
+    .from("comments")
+    .insert(commentInsertRow({ postId, authorId: user.id, body }))
+    .select("id, created_at")
+    .single();
+  if (error || !data) return { error: error?.message || SOCIAL.post.commentFailed };
+
+  revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(SOCIAL_ROUTES.profile);
+  const slug = String(formData.get("group_slug") ?? "").trim();
+  if (slug) {
+    revalidatePath(socialGroupHref(slug));
+    revalidatePath(`${socialGroupHref(slug)}/posts/${postId}`);
+  }
+  return { id: data.id, created_at: data.created_at };
+}
+
+export async function deleteSocialComment(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const commentId = String(formData.get("comment_id") ?? "").trim();
+  if (!commentId) return { error: SOCIAL.post.missing };
+
+  const { error } = await supabase
+    .from("comments")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", commentId)
+    .eq("author_id", user.id);
+  if (error) return { error: error.message || SOCIAL.post.commentDeleteFailed };
+
+  revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(SOCIAL_ROUTES.profile);
   return {};
 }

@@ -83,6 +83,7 @@ export default async function SocialGroupPage({
             id: post.id,
             body: post.body,
             likeCount: post.like_count,
+            commentCount: post.comment_count,
             liked: liked.has(post.id),
             createdAt: post.created_at,
             authorId: post.author_id,

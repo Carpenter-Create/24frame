@@ -49,6 +49,7 @@ import {
 } from "@/lib/social-media-display";
 import { SocialAvatar } from "./social-avatar";
 import { SocialFeedVideo } from "./social-feed-video";
+import { SocialCommentTrigger } from "./social-comment-thread";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
@@ -351,14 +352,6 @@ export function SocialHighlights({
   );
 }
 
-function socialPostEngagement(post: SocialPostCardModel): string {
-  const likes = `${post.likeCount} ${SOCIAL.post.likes}`;
-  const comments = post.commentCount
-    ? ` · ${post.commentCount} ${SOCIAL.post.comments}`
-    : "";
-  return `${likes}${comments}`;
-}
-
 export function SocialAuthorHistory({
   posts,
   truncated,
@@ -501,8 +494,18 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
               groupSlug={post.groupSlug ?? undefined}
             />
           ) : (
-            <p>{socialPostEngagement(post)}</p>
+            <p>
+              {post.likeCount} {SOCIAL.post.likes}
+            </p>
           )}
+          <SocialCommentTrigger
+            post={{
+              id: post.id,
+              commentCount: post.commentCount,
+              groupSlug: post.groupSlug,
+              canComment: post.canLike,
+            }}
+          />
         </div>
       </div>
       <div data-social-post-mobile="" className="flex flex-col bg-surface md:hidden">
@@ -530,7 +533,15 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
             ) : (
               <SocialIcon name="heart" size={22} />
             )}
-            <SocialIcon name="chat-circle" size={22} />
+            <SocialCommentTrigger
+              post={{
+                id: post.id,
+                commentCount: post.commentCount,
+                groupSlug: post.groupSlug,
+                canComment: post.canLike,
+              }}
+              icon
+            />
             <SocialIcon name="paper-plane-tilt" size={22} />
           </div>
           <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
@@ -540,11 +551,14 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
               {post.body}
             </p>
           ) : null}
-          {post.commentCount ? (
-            <p className="t-body-sm text-ink-2">
-              {post.commentCount} {SOCIAL.post.comments}
-            </p>
-          ) : null}
+          <SocialCommentTrigger
+            post={{
+              id: post.id,
+              commentCount: post.commentCount,
+              groupSlug: post.groupSlug,
+              canComment: post.canLike,
+            }}
+          />
           <p className="text-[10px] font-medium uppercase tracking-[0.04em] text-ink-3">
             {socialRelativeTime(post.createdAt)}
           </p>

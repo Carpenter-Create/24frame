@@ -5,9 +5,11 @@ import { useSyncExternalStore } from "react";
 import {
   getSocialOptimisticServerSnapshot,
   mergeSocialLike,
+  readOptimisticCommentCount,
   readOptimisticLike,
   readOptimisticSocialPosts,
   socialOptimisticPostsFor,
+  subscribeOptimisticCommentCounts,
   subscribeOptimisticLikes,
   subscribeOptimisticSocialPosts,
   type SocialOptimisticLike,
@@ -25,6 +27,15 @@ export function useSocialLike(postId: string, server: SocialOptimisticLike): Soc
 
 export function useSocialLikeView(postId: string, liked: boolean, likeCount: number): SocialOptimisticLike {
   return useSocialLike(postId, { liked, likeCount });
+}
+
+export function useSocialCommentCount(postId: string, serverCount = 0): number {
+  const overlay = useSyncExternalStore(
+    subscribeOptimisticCommentCounts,
+    () => readOptimisticCommentCount(postId),
+    getSocialOptimisticServerSnapshot,
+  );
+  return overlay ?? serverCount;
 }
 
 export function useSocialOptimisticPosts(

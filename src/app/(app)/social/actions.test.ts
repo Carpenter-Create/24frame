@@ -18,7 +18,8 @@ import {
   presignSocialMediaUpload,
   updateSocialBio,
 } from "./actions";
-import { toggleSocialFollow, toggleSocialLike } from "./light-actions";
+import { createSocialComment, deleteSocialComment, toggleSocialFollow, toggleSocialLike } from "./light-actions";
+import { commentInsertRow } from "@/lib/social-comments";
 
 vi.mock("@/lib/s3-social-media", () => ({
   presignSocialMediaPut: vi.fn(),
@@ -81,11 +82,19 @@ function stub({
       return chain;
     });
     chain.maybeSingle = vi.fn(async () => ({ data: profile, error: null }));
-    chain.insert = vi.fn(async (row: unknown) => {
+    chain.insert = vi.fn((row: unknown) => {
       inserts.push({ table, row });
       const error = insertErrors[insertIndex] ?? insertError ?? null;
       insertIndex += 1;
-      return { data: null, error };
+      const result = {
+        data: table === "comments" ? { id: "c1", created_at: "2026-09-21T12:00:00.000Z" } : null,
+        error,
+      };
+      const next: Record<string, unknown> = {};
+      next.select = vi.fn(() => next);
+      next.single = vi.fn(async () => result);
+      next.then = (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve);
+      return next;
     });
     chain.update = vi.fn((row: unknown) => {
       updates.push({ table, row });
@@ -501,6 +510,37 @@ describe("social actions", () => {
     form.set("liked", "0");
     expect(await toggleSocialLike(form)).toEqual({});
     expect(inserts).toEqual([{ table: "likes", row: likeInsertRow("u1", "p1") }]);
+  });
+
+  it("creates a comment when a profile exists", async () => {
+    const { inserts } = stub({ profile: { id: "u1" } });
+    const form = new FormData();
+    form.set("post_id", "p1");
+    form.set("body", "  hello  ");
+    expect(await createSocialComment(form)).toEqual({
+      id: "c1",
+      created_at: "2026-09-21T12:00:00.000Z",
+    });
+    expect(inserts).toEqual([{ table: "comments", row: commentInsertRow({ postId: "p1", authorId: "u1", body: "hello" }) }]);
+  });
+
+  it("rejects an empty comment body", async () => {
+    stub({ profile: { id: "u1" } });
+    const form = new FormData();
+    form.set("post_id", "p1");
+    form.set("body", "   ");
+    expect(await createSocialComment(form)).toEqual({ error: SOCIAL.post.commentMissing });
+  });
+
+  it("soft-deletes own comment", async () => {
+    const { updates } = stub({ profile: { id: "u1" } });
+    const form = new FormData();
+    form.set("comment_id", "c1");
+    expect(await deleteSocialComment(form)).toEqual({});
+    expect(updates[0]).toMatchObject({
+      table: "comments",
+      row: { deleted_at: expect.any(String) },
+    });
   });
 
   it("opens a DM through the RPC and never inserts conversations", async () => {

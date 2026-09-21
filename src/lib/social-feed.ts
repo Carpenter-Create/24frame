@@ -19,6 +19,11 @@ import {
   type SocialFollowsTab,
 } from "@/lib/social";
 import {
+  socialPostMatchesActivityMedia,
+  type SocialActivityPill,
+} from "@/lib/social-activity";
+import type { SocialCommentRow } from "@/lib/social-comments";
+import {
   SOCIAL_MUTUALS_NAME_CAP,
   SOCIAL_MUTUALS_PROBE,
   emptySocialProfileMutuals,
@@ -43,12 +48,16 @@ export type SocialProfileRow = {
   website_url?: string | null;
 };
 
+export const SOCIAL_POST_FEED_SELECT =
+  "id, body, author_id, group_id, like_count, comment_count, created_at, media, category";
+
 export type SocialPostRow = {
   id: string;
   body: string | null;
   author_id: string;
   group_id: string | null;
   like_count: number;
+  comment_count: number;
   created_at: string;
   media: unknown;
   category?: string | null;
@@ -275,7 +284,7 @@ export async function loadFollowingPosts(
   if (authorIds.length === 0) return { posts: [], truncated: false, nextCursor: null };
   let query = supabase
     .from("posts")
-    .select("id, body, author_id, group_id, like_count, created_at, media, category")
+    .select(SOCIAL_POST_FEED_SELECT)
     .eq("status", "active")
     .is("group_id", null)
     .in("author_id", authorIds);
@@ -309,7 +318,7 @@ export async function loadAuthorPosts(
 ): Promise<SocialAuthorPostsPage> {
   const { data } = await supabase
     .from("posts")
-    .select("id, body, author_id, group_id, like_count, created_at, media, category")
+    .select(SOCIAL_POST_FEED_SELECT)
     .eq("status", "active")
     .is("group_id", null)
     .eq("author_id", authorId)
@@ -325,7 +334,7 @@ export async function loadVisiblePosts(
 ): Promise<SocialPostRow[]> {
   let query = supabase
     .from("posts")
-    .select("id, body, author_id, group_id, like_count, created_at, media, category")
+    .select(SOCIAL_POST_FEED_SELECT)
     .eq("status", "active");
   if (groupId) query = query.eq("group_id", groupId);
   const { data } = await query
@@ -612,4 +621,82 @@ export async function loadLikedPostIds(
     .eq("target_type", "post")
     .in("target_id", postIds);
   return new Set((data ?? []).map((row) => row.target_id));
+}
+
+export type SocialCommentsPage = {
+  comments: SocialCommentRow[];
+  truncated: boolean;
+};
+
+/** Oldest-first thread. RLS hides soft-deleted rows and invisible posts. */
+export async function loadPostComments(
+  supabase: ServerClient,
+  postId: string,
+): Promise<SocialCommentsPage> {
+  const { data } = await supabase
+    .from("comments")
+    .select("id, post_id, author_id, body, created_at")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
+    .range(...probeRange(SOCIAL_PROFILE_POSTS_PAGE));
+  const { rows, truncated } = splitProbe(data, SOCIAL_PROFILE_POSTS_PAGE);
+  return { comments: rows, truncated };
+}
+
+export type SocialActivityCommentItem = {
+  comment: SocialCommentRow;
+  post: SocialPostRow;
+};
+
+export type SocialActivityCommentsPage = {
+  items: SocialActivityCommentItem[];
+  truncated: boolean;
+};
+
+/**
+ * Activity Comments pill: this profile's comments on visible parent posts.
+ * Newest first. Join stays viewer-visible — posts RLS filters the parent.
+ */
+export async function loadAuthorActivityComments(
+  supabase: ServerClient,
+  authorId: string,
+): Promise<SocialActivityCommentsPage> {
+  const { data } = await supabase
+    .from("comments")
+    .select("id, post_id, author_id, body, created_at")
+    .eq("author_id", authorId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(...probeRange(SOCIAL_PROFILE_POSTS_PAGE));
+  const { rows, truncated } = splitProbe(data, SOCIAL_PROFILE_POSTS_PAGE);
+  const postIds = [...new Set(rows.map((row) => row.post_id))];
+  if (postIds.length === 0) return { items: [], truncated };
+
+  const { data: posts } = await supabase
+    .from("posts")
+    .select(SOCIAL_POST_FEED_SELECT)
+    .eq("status", "active")
+    .in("id", postIds);
+  const byId = new Map((posts ?? []).map((row) => [row.id, row]));
+  const items = rows
+    .map((comment) => {
+      const post = byId.get(comment.post_id);
+      return post ? { comment, post } : null;
+    })
+    .filter((row): row is SocialActivityCommentItem => !!row);
+  return { items, truncated };
+}
+
+export async function loadAuthorActivityPosts(
+  supabase: ServerClient,
+  authorId: string,
+  pill: Extract<SocialActivityPill, "posts" | "images" | "videos">,
+): Promise<SocialAuthorPostsPage> {
+  const page = await loadAuthorPosts(supabase, authorId);
+  if (pill === "posts") return page;
+  return {
+    posts: page.posts.filter((post) => socialPostMatchesActivityMedia(post.media, pill)),
+    truncated: page.truncated,
+  };
 }

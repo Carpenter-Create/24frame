@@ -14,6 +14,7 @@ import {
   followingWallKeysetOrFilter,
 } from "@/lib/social-home-bounds";
 import {
+  loadAuthorActivityComments,
   loadAuthorPosts,
   loadExploreMedia,
   loadExploreSearch,
@@ -34,6 +35,7 @@ function post(id: string, authorId = "u1"): SocialPostRow {
     author_id: authorId,
     group_id: null,
     like_count: 0,
+    comment_count: 0,
     created_at: "2026-09-13T12:00:00.000Z",
     media: [],
   };
@@ -50,6 +52,39 @@ function authorClient(rows: SocialPostRow[] | null) {
   return { from, select, statusEq, groupIs, authorEq, order, range };
 }
 
+describe("loadAuthorActivityComments", () => {
+  it("joins this profile's comments to visible parent posts, newest first", async () => {
+    const comments = [
+      {
+        id: "c1",
+        post_id: "p1",
+        author_id: "u1",
+        body: "their note",
+        created_at: "2026-09-21T12:00:00.000Z",
+      },
+    ];
+    const posts = [post("p1")];
+    const commentRange = vi.fn(async () => ({ data: comments, error: null }));
+    const commentOrderId = vi.fn(() => ({ range: commentRange }));
+    const commentOrder = vi.fn(() => ({ order: commentOrderId }));
+    const commentEq = vi.fn(() => ({ order: commentOrder }));
+    const commentSelect = vi.fn(() => ({ eq: commentEq }));
+    const postIn = vi.fn(async () => ({ data: posts, error: null }));
+    const postStatus = vi.fn(() => ({ in: postIn }));
+    const postSelect = vi.fn(() => ({ eq: postStatus }));
+    const from = vi.fn((table: string) =>
+      table === "comments" ? { select: commentSelect } : { select: postSelect },
+    );
+    const page = await loadAuthorActivityComments({ from } as never, "u1");
+    expect(from).toHaveBeenCalledWith("comments");
+    expect(commentSelect).toHaveBeenCalledWith("id, post_id, author_id, body, created_at");
+    expect(commentEq).toHaveBeenCalledWith("author_id", "u1");
+    expect(commentOrder).toHaveBeenCalledWith("created_at", { ascending: false });
+    expect(page.items).toEqual([{ comment: comments[0], post: posts[0] }]);
+    expect(page.truncated).toBe(false);
+  });
+});
+
 describe("loadAuthorPosts", () => {
   it("reads one author's public wall with a documented probe", async () => {
     const rows = [post("p1"), post("p2")];
@@ -58,7 +93,7 @@ describe("loadAuthorPosts", () => {
 
     expect(client.from).toHaveBeenCalledWith("posts");
     expect(client.select).toHaveBeenCalledWith(
-      "id, body, author_id, group_id, like_count, created_at, media, category",
+      "id, body, author_id, group_id, like_count, comment_count, created_at, media, category",
     );
     expect(client.statusEq).toHaveBeenCalledWith("status", "active");
     expect(client.groupIs).toHaveBeenCalledWith("group_id", null);
@@ -112,6 +147,7 @@ function wallPost(i: number, createdAt = `2026-09-14T12:00:${String(i).padStart(
     author_id: "u1",
     group_id: null,
     like_count: 0,
+    comment_count: 0,
     created_at: createdAt,
     media: [],
   };

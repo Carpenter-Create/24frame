@@ -612,8 +612,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(readFileSync("src/components/social/social-own-profile.tsx", "utf8")).toContain(
       "SocialWelcomeVideo",
     );
-    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
+    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits", "activity"]);
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
+    expect(SOCIAL.profile.activityTab).toBe("Activity");
+    expect(profile).toContain("SocialActivityHistory");
+    expect(publicProfile).toContain("SocialActivityHistory");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
     expect(icons).toContain('"film-slate"');
     expect(home).not.toContain("creditsEmpty");

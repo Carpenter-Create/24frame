@@ -147,6 +147,7 @@ describe("SocialPostCard faces", () => {
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
     expect(html).not.toContain("ring-accent");
+    expect(html).toContain("data-social-comment-open");
   });
 
   it("keeps author initials when the signed URL is null", () => {

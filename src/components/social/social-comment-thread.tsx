@@ -1,0 +1,302 @@
+"use client";
+
+import { useEffect, useId, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
+
+import { Close44 } from "@/components/chrome/house";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { SocialAvatar } from "@/components/social/social-avatar";
+import { SocialIcon } from "@/components/social/social-icon";
+import { useSocialCommentCount } from "@/components/social/use-social-optimistic";
+import { cn } from "@/lib/cn";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import {
+  SOCIAL_ACTION_CLASS,
+  SOCIAL_COMMENT_COMPOSER_CLASS,
+  SOCIAL_COMMENT_SHEET_HOST_CLASS,
+  SOCIAL_COMMENT_SHEET_SCRIM_CLASS,
+  SOCIAL_COMMENT_SHEET_SURFACE_CLASS,
+} from "@/lib/social-chrome";
+import { socialMemberHref, socialRelativeTime, SOCIAL } from "@/lib/social";
+import {
+  applyOptimisticCommentCount,
+  persistSocialComment,
+  persistSocialCommentDelete,
+  runSocialOptimisticMutation,
+} from "@/lib/social-optimistic";
+import type { SocialCommentCard } from "@/lib/social-comments";
+import { COMMENT_BODY_MAX, normalizeCommentBody } from "@/lib/social-comments";
+
+type ThreadPost = {
+  id: string;
+  commentCount?: number;
+  groupSlug?: string | null;
+  canComment: boolean;
+};
+
+export function SocialCommentTrigger({
+  post,
+  icon = false,
+}: {
+  post: ThreadPost;
+  icon?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const count = useSocialCommentCount(post.id, post.commentCount ?? 0);
+
+  return (
+    <>
+      <button
+        type="button"
+        data-social-comment-open=""
+        aria-label={SOCIAL.post.commentsTitle}
+        className={icon ? "text-ink" : "t-body-sm text-ink-2"}
+        onClick={() => setOpen(true)}
+      >
+        {icon ? (
+          <SocialIcon name="chat-circle" size={22} />
+        ) : (
+          <>
+            {count} {SOCIAL.post.comments}
+          </>
+        )}
+      </button>
+      {open ? (
+        <SocialCommentThread
+          postId={post.id}
+          groupSlug={post.groupSlug}
+          canComment={post.canComment}
+          commentCount={count}
+          onClose={() => setOpen(false)}
+        />
+      ) : null}
+    </>
+  );
+}
+
+export function SocialCommentThread({
+  postId,
+  groupSlug,
+  canComment,
+  commentCount,
+  onClose,
+}: {
+  postId: string;
+  groupSlug?: string | null;
+  canComment: boolean;
+  commentCount: number;
+  onClose: () => void;
+}) {
+  const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+  const [comments, setComments] = useState<SocialCommentCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [body, setBody] = useState("");
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [mounted, onClose]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      const res = await fetch(`/api/social/comments?post_id=${encodeURIComponent(postId)}`, {
+        cache: "no-store",
+      });
+      const json = (await res.json().catch(() => null)) as {
+        error?: string;
+        comments?: SocialCommentCard[];
+      } | null;
+      if (cancelled) return;
+      if (!res.ok || json?.error) {
+        setError(json?.error || SOCIAL.post.commentFailed);
+        setLoading(false);
+        return;
+      }
+      setComments(json?.comments ?? []);
+      applyOptimisticCommentCount(postId, json?.comments?.length ?? 0);
+      setLoading(false);
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [postId]);
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canComment || pending) return;
+    const nextBody = normalizeCommentBody(body);
+    if (!nextBody) {
+      setError(body.trim() ? SOCIAL.post.commentTooLong : SOCIAL.post.commentMissing);
+      return;
+    }
+
+    const tempId = crypto.randomUUID();
+    const optimistic: SocialCommentCard = {
+      id: tempId,
+      post_id: postId,
+      author_id: "me",
+      body: nextBody,
+      created_at: new Date().toISOString(),
+      authorHandle: null,
+      authorName: SOCIAL.home.you,
+      authorPhotoUrl: null,
+      canDelete: true,
+    };
+    const previous = comments;
+    const previousCount = commentCount;
+    setPending(true);
+    setError("");
+    setBody("");
+    runSocialOptimisticMutation({
+      apply: () => {
+        setComments((rows) => [...rows, optimistic]);
+        applyOptimisticCommentCount(postId, previousCount + 1);
+        return { previous, previousCount };
+      },
+      persist: async () => {
+        const form = new FormData();
+        form.set("post_id", postId);
+        form.set("body", nextBody);
+        if (groupSlug) form.set("group_slug", groupSlug);
+        const result = await persistSocialComment(form);
+        if (!result.error && result.id) {
+          setComments((rows) =>
+            rows.map((row) =>
+              row.id === tempId
+                ? { ...row, id: result.id ?? row.id, created_at: result.created_at ?? row.created_at }
+                : row,
+            ),
+          );
+        }
+        return result;
+      },
+      rollback: (token) => {
+        setComments(token.previous);
+        applyOptimisticCommentCount(postId, token.previousCount);
+        setBody(nextBody);
+      },
+      onError: (notice) => {
+        setError(notice);
+        setPending(false);
+      },
+      onSuccess: () => setPending(false),
+    });
+  }
+
+  function onDelete(comment: SocialCommentCard) {
+    const previous = comments;
+    const previousCount = commentCount;
+    runSocialOptimisticMutation({
+      apply: () => {
+        setComments((rows) => rows.filter((row) => row.id !== comment.id));
+        applyOptimisticCommentCount(postId, Math.max(0, previousCount - 1));
+        return { previous, previousCount };
+      },
+      persist: async () => {
+        const form = new FormData();
+        form.set("comment_id", comment.id);
+        return persistSocialCommentDelete(form);
+      },
+      rollback: (token) => {
+        setComments(token.previous);
+        applyOptimisticCommentCount(postId, token.previousCount);
+      },
+      onError: (notice) => setError(notice),
+    });
+  }
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div data-social-comment-thread="" className={SOCIAL_COMMENT_SHEET_HOST_CLASS} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <button type="button" className={SOCIAL_COMMENT_SHEET_SCRIM_CLASS} aria-label={SOCIAL.create.close} onClick={onClose} />
+      <div className={SOCIAL_COMMENT_SHEET_SURFACE_CLASS}>
+        <div className="flex h-14 shrink-0 items-center justify-between px-2">
+          <Close44 label={SOCIAL.create.close} onClick={onClose} />
+          <h2 id={titleId} className="t-body font-medium text-ink">
+            {SOCIAL.post.commentsTitle}
+          </h2>
+          <span className="size-11" />
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-2">
+          {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+          {loading ? null : comments.length === 0 ? (
+            <p data-social-comment-empty="" className="py-8 text-center t-body-sm text-ink-2">
+              {SOCIAL.post.commentEmpty}
+            </p>
+          ) : (
+            comments.map((comment) => (
+              <article key={comment.id} data-social-comment={comment.id} className="flex flex-col gap-1">
+                <div className="flex items-start gap-2">
+                  <SocialAvatar name={comment.authorName} photoUrl={comment.authorPhotoUrl} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="t-body-sm text-ink">
+                      {comment.authorHandle ? (
+                        <Link href={socialMemberHref(comment.authorHandle)} className="font-semibold">
+                          {comment.authorName}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold">{comment.authorName}</span>
+                      )}{" "}
+                      <span className="whitespace-pre-wrap break-words">{comment.body}</span>
+                    </p>
+                    <p className="t-label text-ink-3">{socialRelativeTime(comment.created_at)}</p>
+                  </div>
+                  {comment.canDelete ? (
+                    <button
+                      type="button"
+                      data-social-comment-delete=""
+                      className={TEXT_ACTION_CLASS}
+                      onClick={() => onDelete(comment)}
+                    >
+                      {SOCIAL.post.commentDelete}
+                    </button>
+                  ) : null}
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+        {canComment ? (
+          <form data-social-comment-composer="" className={SOCIAL_COMMENT_COMPOSER_CLASS} onSubmit={onSubmit}>
+            <textarea
+              name="body"
+              value={body}
+              maxLength={COMMENT_BODY_MAX}
+              rows={2}
+              placeholder={SOCIAL.post.commentPlaceholder}
+              className="min-h-9 min-w-0 flex-1 resize-none bg-transparent t-body text-ink placeholder:text-ink-3"
+              onChange={(event) => setBody(event.target.value)}
+            />
+            <button type="submit" disabled={pending || !body.trim()} className={cn(SOCIAL_ACTION_CLASS, "shrink-0")}>
+              {SOCIAL.post.commentSubmit}
+            </button>
+          </form>
+        ) : (
+          <p className="px-4 py-3 t-body-sm text-ink-2">{SOCIAL.cta.needProfile}</p>
+        )}
+      </div>
+    </div>,
+    document.body,
+  );
+}
