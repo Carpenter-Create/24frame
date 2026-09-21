@@ -29,8 +29,8 @@
 -- CREATE POLICY, REPLACE protect_post_privileged_columns. No DROP of
 -- existing dashboard objects. Forward-only.
 -- ROLLBACK: drop public.comments, public.refresh_comment_engagement,
--- public.protect_comment_columns; restore protect_post_privileged_columns
--- from 20260912180000_likes.sql.
+-- public.protect_comment_columns, public.enforce_comment_author_delete;
+-- restore protect_post_privileged_columns from 20260912180000_likes.sql.
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
@@ -110,6 +110,12 @@ language plpgsql
 set search_path to 'public'
 as $$
 begin
+  -- Definer apply of deleted_at after the client UPDATE passed RLS
+  -- while the row was still live (SELECT requires deleted_at IS NULL).
+  if current_setting('app.applying_comment_soft_delete', true) = 'on' then
+    return new;
+  end if;
+
   if tg_op = 'UPDATE' then
     if new.post_id is distinct from old.post_id
        or new.author_id is distinct from old.author_id
@@ -117,8 +123,36 @@ begin
        or new.created_at is distinct from old.created_at then
       raise exception 'comment fields are not client-writable';
     end if;
+
+    -- Client soft-delete: hold deleted_at null through RLS WITH CHECK /
+    -- SELECT on the new row, then apply as security definer.
+    if old.deleted_at is null and new.deleted_at is not null then
+      if auth.role() is distinct from 'service_role'
+         and new.author_id is distinct from (select auth.uid()) then
+        raise exception using errcode = '42501';
+      end if;
+      perform set_config('app.pending_comment_soft_delete', new.id::text, true);
+      new.deleted_at := old.deleted_at;
+    end if;
   end if;
   return new;
+end;
+$$;
+
+create or replace function public.enforce_comment_author_delete()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public'
+as $$
+begin
+  if auth.role() = 'service_role' then
+    return old;
+  end if;
+  if old.author_id is distinct from (select auth.uid()) then
+    raise exception using errcode = '42501';
+  end if;
+  return old;
 end;
 $$;
 
@@ -132,6 +166,19 @@ declare
   target uuid;
   delta integer := 0;
 begin
+  if tg_op = 'UPDATE'
+     and current_setting('app.applying_comment_soft_delete', true) is distinct from 'on'
+     and current_setting('app.pending_comment_soft_delete', true) = new.id::text then
+    perform set_config('app.applying_comment_soft_delete', 'on', true);
+    update public.comments
+       set deleted_at = clock_timestamp()
+     where id = new.id
+       and deleted_at is null;
+    perform set_config('app.applying_comment_soft_delete', '', true);
+    perform set_config('app.pending_comment_soft_delete', '', true);
+    return new;
+  end if;
+
   perform set_config('app.refreshing_post_comment_count', 'on', true);
 
   if tg_op = 'INSERT' then
@@ -155,6 +202,7 @@ begin
   end if;
 
   if delta = 0 or target is null then
+    perform set_config('app.refreshing_post_comment_count', '', true);
     if tg_op = 'DELETE' then
       return old;
     end if;
@@ -189,6 +237,11 @@ create trigger comments_protect_columns
   before update on public.comments
   for each row execute function public.protect_comment_columns();
 
+drop trigger if exists comments_enforce_author_delete on public.comments;
+create trigger comments_enforce_author_delete
+  before delete on public.comments
+  for each row execute function public.enforce_comment_author_delete();
+
 drop trigger if exists comments_refresh_engagement on public.comments;
 create trigger comments_refresh_engagement
   after insert or update or delete on public.comments
@@ -197,6 +250,8 @@ create trigger comments_refresh_engagement
 revoke execute on function public.protect_post_privileged_columns()
   from public, anon, authenticated, service_role;
 revoke execute on function public.protect_comment_columns()
+  from public, anon, authenticated, service_role;
+revoke execute on function public.enforce_comment_author_delete()
   from public, anon, authenticated, service_role;
 revoke execute on function public.refresh_comment_engagement()
   from public, anon, authenticated, service_role;
@@ -208,21 +263,15 @@ revoke execute on function public.refresh_comment_engagement()
 -- ----------------------------------------------------------------------------
 alter table public.comments enable row level security;
 
--- Authors keep SELECT on their own soft-deleted rows so UPDATE
--- deleted_at can succeed (Postgres WITH CHECK + SELECT). Readers
--- and loaders still hide deleted_at IS NOT NULL.
 drop policy if exists comments_select_visible on public.comments;
 create policy comments_select_visible on public.comments
   for select to authenticated
   using (
-    exists (
+    deleted_at is null
+    and exists (
       select 1
       from public.posts p
       where p.id = comments.post_id
-    )
-    and (
-      deleted_at is null
-      or author_id = (select auth.uid())
     )
   );
 
@@ -243,16 +292,29 @@ create policy comments_insert_author on public.comments
 drop policy if exists comments_update_own on public.comments;
 create policy comments_update_own on public.comments
   for update to authenticated
-  using (author_id = (select auth.uid()))
+  using (
+    author_id = (select auth.uid())
+    and deleted_at is null
+  )
   with check (
     author_id = (select auth.uid())
-    and deleted_at is not null
+    and deleted_at is null
   );
 
+-- USING is visibility of the delete attempt so a non-author hit
+-- raises 42501 from enforce_comment_author_delete (silent 0-row
+-- would skip the trigger). The trigger is the author gate.
 drop policy if exists comments_delete_own on public.comments;
 create policy comments_delete_own on public.comments
   for delete to authenticated
-  using (author_id = (select auth.uid()));
+  using (
+    deleted_at is null
+    and exists (
+      select 1
+      from public.posts p
+      where p.id = comments.post_id
+    )
+  );
 
 revoke all on public.comments from public, anon;
 revoke truncate on public.comments from authenticated;
@@ -312,6 +374,18 @@ begin
       and pg_get_function_identity_arguments(p.oid) = ''
   ) then
     raise exception 'refresh_comment_engagement missing';
+  end if;
+
+  if not exists (
+    select 1 from pg_trigger t
+    join pg_class c on c.oid = t.tgrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'comments'
+      and t.tgname = 'comments_enforce_author_delete'
+      and not t.tgisinternal
+  ) then
+    raise exception 'comments_enforce_author_delete trigger missing';
   end if;
 
   select string_agg(pol.polname, ', ' order by pol.polname) into v_bad_pol
