@@ -99,7 +99,10 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("handleInvalid");
     const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
     expect(saveSoT).toContain("socialHandleInputError");
-    expect(saveSoT).toContain("socialHandleDisplayError");
+    expect(saveSoT).not.toContain("socialHandleDisplayError");
+    expect(edit).toContain("socialHandleDisplayError");
+    const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    expect(forms).toContain("socialHandleDisplayError(next, prev)");
     expect(edit).not.toContain("app.24frame.co");
   });
 
