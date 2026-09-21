@@ -267,6 +267,9 @@ describe("Social profile public face", () => {
       identityMarkup.indexOf("data-social-profile-bio"),
     );
     expect(identityMarkup.indexOf("HouseChipRail")).toBeLessThan(
+      identityMarkup.indexOf("<SocialProfileLinkRow"),
+    );
+    expect(identityMarkup.indexOf("<SocialProfileLinkRow")).toBeLessThan(
       identityMarkup.indexOf("{actionRow}"),
     );
     expect(uiSrc).not.toContain("data-social-profile-handle");
@@ -525,7 +528,8 @@ describe("Social profile public face", () => {
     expect(withImdb).toContain("data-social-profile-imdb");
     expect(withImdb).toContain('data-social-profile-link="imdb"');
     expect(withImdb).toContain('href="https://www.imdb.com/name/nm0000158/"');
-    expect(withImdb).toContain(SOCIAL.profile.imdb);
+    expect(withImdb).toContain("imdb.com/name/nm0000158");
+    expect(withImdb).not.toContain(SOCIAL.profile.imdb);
     expect(withImdb).not.toContain(">https://www.imdb.com/name/nm0000158/<");
 
     const withLinks = renderToStaticMarkup(
@@ -539,9 +543,11 @@ describe("Social profile public face", () => {
     expect(withLinks).toContain("data-social-profile-links");
     expect(withLinks).toContain('data-social-profile-link="instagram"');
     expect(withLinks).toContain('href="https://instagram.com/ada"');
+    expect(withLinks).toContain(">instagram.com/ada<");
     expect(withLinks).not.toContain(">https://instagram.com/ada<");
-    expect(withLinks).toContain('aria-label="Instagram"');
+    expect(withLinks).not.toContain('aria-label="Instagram"');
     expect(withLinks).toContain('rel="noopener noreferrer"');
+    expect(withLinks).not.toContain("data-social-profile-links-more");
 
     const unknownHost = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -553,8 +559,28 @@ describe("Social profile public face", () => {
     );
     expect(unknownHost).toContain('data-social-profile-link="website"');
     expect(unknownHost).toContain('href="https://ada.example/press"');
-    expect(unknownHost).toContain('aria-label="Website"');
+    expect(unknownHost).toContain(">website<");
+    expect(unknownHost).not.toContain('aria-label="Website"');
     expect(unknownHost).not.toContain(">https://ada.example/press<");
+
+    const overflow = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        websiteUrl={JSON.stringify([
+          "https://instagram.com/ada",
+          "https://youtube.com/@ada",
+          "https://x.com/ada",
+        ])}
+      />,
+    );
+    expect(overflow).toContain(">instagram.com/ada<");
+    expect(overflow).toContain(">youtube.com/@ada<");
+    expect(overflow).toContain("data-social-profile-links-more");
+    expect(overflow).toContain(">+1<");
+    expect(overflow).not.toContain(">x.com/ada<");
+    expect(overflow).not.toContain("data-social-profile-links-sheet");
     expect(uiSrc).not.toContain("socialProfileRolesLine");
     expect(uiSrc).toContain("socialProfileRolesRailItems");
     expect(uiSrc).toContain("HouseChipRail");

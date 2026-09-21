@@ -261,7 +261,7 @@ describe("Social public profile", () => {
     expect(html).not.toContain("Actor");
   });
 
-  it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
+  it("renders Instagram as muted host text, not an icon, and omits the links row when empty", async () => {
     stubClient({
       member: { ...ada, website_url: "https://instagram.com/ada" },
     });
@@ -269,7 +269,8 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-profile-links");
     expect(html).toContain('data-social-profile-link="instagram"');
     expect(html).toContain('href="https://instagram.com/ada"');
-    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain(">instagram.com/ada<");
+    expect(html).not.toContain('aria-label="Instagram"');
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).not.toContain(">https://instagram.com/ada<");
 
@@ -286,6 +287,7 @@ describe("Social public profile", () => {
     const html = await renderPublic();
     expect(html).toContain("data-social-profile-imdb");
     expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(html).toContain("imdb.com/name/nm0000158");
     expect(html).not.toContain("Connect to scrape");
   });
 

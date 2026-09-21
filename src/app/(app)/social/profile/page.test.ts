@@ -359,12 +359,12 @@ describe("Social profile public face", () => {
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile-imdb");
     expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
-    expect(html).toContain(SOCIAL.profile.imdb);
+    expect(html).toContain("imdb.com/name/nm0000158");
     expect(html).not.toContain("Connect to scrape");
     expect(html).not.toContain(">https://www.imdb.com/name/nm0000158/<");
   });
 
-  it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
+  it("renders Instagram as muted host text, not an icon, and omits the links row when empty", async () => {
     stubClient({
       profile: { ...ensured, website_url: "https://instagram.com/ada" },
     });
@@ -378,8 +378,9 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-profile-links");
     expect(html).toContain('data-social-profile-link="instagram"');
     expect(html).toContain('href="https://instagram.com/ada"');
+    expect(html).toContain(">instagram.com/ada<");
     expect(html).not.toContain(">https://instagram.com/ada<");
-    expect(html).toContain('aria-label="Instagram"');
+    expect(html).not.toContain('aria-label="Instagram"');
     expect(html).toContain('rel="noopener noreferrer"');
   });
 
