@@ -75,7 +75,9 @@ describe("Social loading skeletons", () => {
     expect(profile).toContain("md:max-w-[892px]");
     expect(profile).toContain("bg-surface-muted");
     expect(profile).toContain("py-[var(--space-2)]");
-    expect(profile).not.toContain("aspect-square");
+    expect(profile).toContain("aspect-square");
+    expect(profile).toContain("self-stretch");
+    expect(profile).not.toContain("aspect-square w-full");
     expect(profile).not.toContain("data-social-profile-grid");
     expect(profile).not.toContain("data-social-for-you-skeleton");
     expect(create).toContain("data-social-create-skeleton");

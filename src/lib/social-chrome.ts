@@ -293,18 +293,20 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 // Public profile head — IG geometry, house chrome. One SoT for own
 // /social/profile and public /social/u/[handle]. Head row is avatar |
 // (display name → posts/followers/following stacked). Name is never
-// full-width above the avatar (that read as randomly floating). Stats
-// sit directly under the name in the right column, still max-w-xs so
-// the 3-up stays optically close — no stretch void across the 892
-// column. Bio · Role pills · links · actions stay full-width below
+// full-width above the avatar (that read as randomly floating). The
+// face stretches to the same band as the name+stats column — not a
+// leftover 72/88 disk floating beside a taller stack, and not taller
+// than that stack. Stats stay max-w-xs so the 3-up stays optically
+// close. Bio · Role pills · links · actions stay full-width below
 // the head row. Dedicated house-token air before Edit / Share (or
 // Follow / Share). Handle stays in chrome. Name wraps; never truncate.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
-export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
+export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-stretch gap-4";
 
-// Right column beside the 72/88 face. min-w-0 so a long display name
-// wraps instead of overflowing the phone canvas.
+// Right column beside the face. min-w-0 so a long display name wraps
+// instead of overflowing the phone canvas. justify-center keeps the
+// stack optically mid-band if the face floor wins (name-only).
 export const SOCIAL_PROFILE_META_CLASS =
   "flex min-w-0 flex-1 flex-col justify-center gap-1";
 
@@ -362,7 +364,7 @@ export const SOCIAL_AVATAR_LG_CLASS =
   "flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[length:var(--text-title)] font-semibold text-ink-2";
 
 export const SOCIAL_AVATAR_PROFILE_CLASS =
-  "flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[18px] font-semibold text-ink-2 md:size-[88px] md:text-[28px]";
+  "flex aspect-square h-auto min-h-[72px] min-w-[72px] w-auto shrink-0 self-stretch items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[18px] font-semibold text-ink-2 md:text-[28px]";
 
 export const SOCIAL_HANDLE_PILL_CLASS =
   "inline-flex items-center rounded-[8px] bg-surface-muted px-[10px] py-[6px] t-body-sm font-medium text-ink-2";
