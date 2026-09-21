@@ -11,6 +11,7 @@ import {
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
+  SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_BIO_CLASS,
   SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
@@ -228,16 +229,23 @@ export function SocialProfileIdentity({
       )
     : null;
   const actionRow = actions ? (
-    <div className="flex w-full items-center gap-2">
+    <div data-social-profile-actions="" className={SOCIAL_PROFILE_ACTIONS_CLASS}>
       {actions}
       {photoAction}
     </div>
   ) : photoAction ? (
-    <div className="flex w-full items-center gap-2">{photoAction}</div>
+    <div data-social-profile-actions="" className={SOCIAL_PROFILE_ACTIONS_CLASS}>
+      {photoAction}
+    </div>
   ) : null;
 
   return (
     <div data-social-profile-identity="" className={SOCIAL_PROFILE_IDENTITY_CLASS}>
+      {person.name ? (
+        <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
+          {person.name}
+        </p>
+      ) : null}
       <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_CLASS}>
         <SocialAvatar name={person.avatarName} photoUrl={photoUrl} ring={ring} size="profile" />
         {stats ? (
@@ -245,11 +253,6 @@ export function SocialProfileIdentity({
         ) : null}
       </div>
       <div data-social-profile-face="" className={SOCIAL_PROFILE_FACE_CLASS}>
-        {person.name ? (
-          <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
-            {person.name}
-          </p>
-        ) : null}
         {bio?.trim() ? (
           <p data-social-profile-bio="" className={SOCIAL_PROFILE_BIO_CLASS}>
             {bio}

@@ -19,6 +19,7 @@ import {
   SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
+  SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
@@ -108,6 +109,7 @@ export function SocialProfileCenterSkeleton() {
   return (
     <div className={SOCIAL_PROFILE_CENTER_CLASS}>
       <div className={SOCIAL_PROFILE_IDENTITY_CLASS}>
+        <Skeleton className="h-4 w-32" />
         <div className={SOCIAL_PROFILE_HEAD_CLASS}>
           <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
           <div className={SOCIAL_PROFILE_STATS_CLASS}>
@@ -119,14 +121,13 @@ export function SocialProfileCenterSkeleton() {
           </div>
         </div>
         <div className={SOCIAL_PROFILE_FACE_CLASS}>
-          <Skeleton className="h-4 w-32" />
           <Skeleton className="h-3 w-2/3" />
           <Skeleton className="h-7 w-24 rounded-full" />
+          <div className={SOCIAL_PROFILE_ACTIONS_CLASS}>
+            <Skeleton className="h-8 w-28 rounded-[8px]" />
+            <Skeleton className="h-8 w-20 rounded-[8px]" />
+          </div>
         </div>
-      </div>
-      <div className="flex gap-2">
-        <Skeleton className="h-8 w-28 rounded-[8px]" />
-        <Skeleton className="h-8 w-20 rounded-[8px]" />
       </div>
       <div className={SOCIAL_FEED_GUTTER_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (

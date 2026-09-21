@@ -291,11 +291,13 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 }
 
 // Public profile head — IG geometry, house chrome. One SoT for own
-// /social/profile and public /social/u/[handle]. Avatar | 3-up stats
-// on one row, items-center to the 72/88 face. Stats fill remaining
-// head width up to max-w-xs so the 3-up stays optically close —
-// no stretch void across the 892 column. Name · bio · Role pills ·
-// links · actions stack below. Handle stays in chrome.
+// /social/profile and public /social/u/[handle]. Display name first
+// (Adam 2026-09-20: name above the posts/followers/following counts).
+// Then avatar | 3-up stats on one row, items-center to the 72/88 face.
+// Stats fill remaining head width up to max-w-xs so the 3-up stays
+// optically close — no stretch void across the 892 column. Bio · Role
+// pills · links stack next. Dedicated house-token air before Edit /
+// Share (or Follow / Share). Handle stays in chrome.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
 export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
@@ -315,6 +317,11 @@ export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
 export const SOCIAL_PROFILE_FACE_CLASS = "flex flex-col items-start gap-1";
 
 export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-body font-semibold text-ink";
+
+// Roles → Edit/Share was cramped (face gap-1). Extra --space-3 before
+// the action row; no magic pixels. Same class for own + public.
+export const SOCIAL_PROFILE_ACTIONS_CLASS =
+  "mt-[var(--space-3)] flex w-full items-center gap-2";
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
 

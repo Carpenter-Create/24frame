@@ -297,15 +297,15 @@ describe("Social profile public face", () => {
     expect(roles).not.toContain("flex-wrap");
     expect(html).toContain("grid-cols-3");
     expect(html).not.toContain("data-social-profile-handle");
-    const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));
+    const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-face"));
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-stats");
     expect(head).toContain("max-w-xs");
     expect(head).toContain("items-center");
     expect(head).not.toContain("flex min-w-0 flex-1 items-center");
     expect(head).not.toContain("@ada");
-    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-bio"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-stats"));
+    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-bio"));
     expect(html.indexOf("data-social-profile-bio")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html).not.toContain("data-social-profile-mutuals");
     expect(html).not.toContain("Roles:");

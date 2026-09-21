@@ -388,6 +388,7 @@ describe("social profile roles", () => {
     expect(rolesSrc).not.toContain("SOCIAL_PROFILE_ROLES_DISPLAY_CAP");
     expect(rolesSrc).not.toContain('kind: "more"');
     expect(chromeSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
@@ -404,6 +405,8 @@ describe("social profile roles", () => {
     expect(identitySrc).not.toContain("data-social-profile-roles-more");
     expect(identitySrc).not.toContain('item.kind === "more"');
     expect(identitySrc).toContain("data-social-profile-head");
+    expect(identitySrc).toContain("data-social-profile-actions");
+    expect(identitySrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(identitySrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     const rolesBlock = identitySrc.slice(
       identitySrc.indexOf("<HouseChipRail"),
