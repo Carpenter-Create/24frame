@@ -130,11 +130,13 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(BIO_MAX).toBe(150);
     expect(SOCIAL.profile.bioPrivacy).toBe("Your bio shows on your public profile.");
     expect(bio).toContain("data-social-bio-done");
-    expect(bio).toContain('name="check"');
-    expect(bio).toContain("SOCIAL_PROFILE_BIO_DONE_CLASS");
+    expect(bio).toContain('icon: true');
+    const face = readFileSync("src/components/social/social-profile-edit-face.tsx", "utf8");
+    expect(face).toContain('name="check"');
+    expect(face).toContain("SOCIAL_PROFILE_BIO_DONE_CLASS");
     expect(bio).toContain("data-social-bio-privacy");
     expect(bio).toContain("maxLength={BIO_MAX}");
-    expect(bio).toContain('type="button"');
+    expect(face).toContain('type="button"');
     expect(bio).not.toContain("onKeyDown");
     expect(bio).not.toContain("preventDefault");
     expect(bio).toContain("normalizeBio(value)");
