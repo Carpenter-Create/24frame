@@ -14,8 +14,6 @@ import {
   socialGroupHref,
   socialGroupPostHref,
   socialPostHref,
-  socialProfileFollowsHref,
-  socialProfileHref,
 } from "@/lib/social";
 import { commentBodyError, commentInsertRow, normalizeCommentBody } from "@/lib/social-comments";
 import { bustSocialFollowHotCache } from "@/lib/social-hot-cache";
@@ -75,17 +73,6 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
   }
 
   await bustSocialFollowHotCache(user.id, followeeId);
-  revalidatePath(SOCIAL_ROUTES.home);
-  revalidatePath(SOCIAL_ROUTES.profile);
-  if (profile.handle) {
-    revalidatePath(socialProfileHref(profile.handle));
-    revalidatePath(socialProfileFollowsHref(profile.handle));
-  }
-  const handle = String(formData.get("handle") ?? "").trim();
-  if (handle) {
-    revalidatePath(socialProfileHref(handle));
-    revalidatePath(socialProfileFollowsHref(handle));
-  }
   return {};
 }
 

@@ -62,12 +62,13 @@ describe("social follow helpers", () => {
       src.indexOf("export function SocialFollowButton"),
       src.indexOf("export function SocialLikeButton"),
     );
-    expect(chunk).toContain("const result = await toggleSocialFollow");
+    expect(chunk).toContain("persistSocialFollow");
+    expect(chunk).toContain("runSocialOptimisticMutation");
+    expect(chunk).not.toContain("toggleSocialFollow");
     expect(chunk).not.toContain("router.refresh()");
     expect(chunk).toContain("setOverride");
-    expect(chunk).toContain("pending");
     expect(chunk).toContain("FormError");
-    expect(chunk).toContain("disabled={pending}");
+    expect(chunk).not.toContain("disabled={pending}");
     expect(chunk).toContain("followedConfirmCopy");
     expect(chunk).toContain("followButtonLabel");
     expect(chunk).toContain("followsYou");
@@ -79,9 +80,8 @@ describe("social follow helpers", () => {
     expect(chunk).toContain('aria-live="polite"');
     expect(chunk).toContain("setConfirm(false)");
     expect(chunk).toContain("if (next) setConfirm(true)");
-    expect(chunk.indexOf("setOverride(next)")).toBeLessThan(chunk.indexOf("await toggleSocialFollow"));
-    expect(chunk.indexOf("await toggleSocialFollow")).toBeLessThan(chunk.indexOf("if (next) setConfirm(true)"));
-    expect(chunk).not.toMatch(/await toggleSocialFollow\(formData\);\s*}/);
+    expect(chunk.indexOf("setOverride(next)")).toBeLessThan(chunk.indexOf("persistSocialFollow"));
+    expect(chunk.indexOf("persistSocialFollow")).toBeLessThan(chunk.indexOf("if (next) setConfirm(true)"));
   });
 
   it("labels Follow, Following, and Follow back from one helper", () => {

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useHousePathname } from "./house-client-shell";
 
 import {
   HouseNavPendingProbe,
@@ -89,7 +90,7 @@ export function HousePhoneBottomNav({
   coProductions?: boolean;
 }) {
   const workspace = clampWorkspaceMode(requestedWorkspace, isGcStaff);
-  const pathname = usePathname();
+  const pathname = useHousePathname();
   const router = useRouter();
   const { activePath, markPending } = useHouseNavPending();
   const hidden = useHousePhoneBottomNavHidden(pathname);

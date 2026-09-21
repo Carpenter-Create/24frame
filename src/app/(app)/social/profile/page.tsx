@@ -17,8 +17,12 @@ import {
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
 import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
+import {
+  signedAvatarUrls,
+  signedSocialMediaByPostId,
+  socialAvatarHref,
+  socialMediaHref,
+} from "@/lib/social-edge";
 import {
   isLegacySocialProfilePostsTab,
   parseSocialProfileTab,
@@ -114,11 +118,11 @@ async function SocialProfileMain({
       : Promise.resolve(null);
   const [photoUrl, coverUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, filtered] =
     await Promise.all([
-      signedAvatarUrl(profile.id),
-      profile.cover_key ? signedSocialMediaUrl(profile.cover_key) : Promise.resolve(null),
+      Promise.resolve(socialAvatarHref(profile.id)),
+      Promise.resolve(profile.cover_key ? socialMediaHref(profile.cover_key) : null),
       loadLiveStories(supabase, [profile.id]),
       loadCachedProfileSocialCounts(supabase, profile.id),
-      profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
+      Promise.resolve(profile.welcome_video_key ? socialMediaHref(profile.welcome_video_key) : null),
       cookies(),
       activityComments,
       activityPosts,

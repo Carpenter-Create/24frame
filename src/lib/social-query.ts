@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   socialCountsQueryKey,
   socialFollowQueryKey,
+  socialFollowingWallQueryKey,
   socialProfileQueryKey,
 } from "@/lib/social-cache-keys";
 import type { SocialProfileCounts } from "@/lib/social-feed";
@@ -62,6 +63,7 @@ export function applyOptimisticFollow(
         ? { ...old, following: Math.max(0, old.following + (input.following ? 1 : -1)) }
         : old,
   );
+  void queryClient.invalidateQueries({ queryKey: ["social", "following-wall", input.viewerId] });
 }
 
 export function invalidateSocialQueries(
@@ -76,5 +78,6 @@ export function invalidateSocialQueries(
     void queryClient.invalidateQueries({ queryKey: socialFollowQueryKey(input.viewerId, input.targetId) });
     void queryClient.invalidateQueries({ queryKey: socialCountsQueryKey(input.viewerId) });
     void queryClient.invalidateQueries({ queryKey: socialCountsQueryKey(input.targetId) });
+    void queryClient.invalidateQueries({ queryKey: socialFollowingWallQueryKey(input.viewerId) });
   }
 }

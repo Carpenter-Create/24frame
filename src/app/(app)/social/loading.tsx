@@ -4,5 +4,9 @@ import { SocialHomeSkeleton } from "@/components/social/social-skeletons";
 // dynamic segment. Parent (app)/loading.tsx is gone so a hop here cannot
 // paint the Aggregation dashboard skeleton over the sticky shell.
 export default function Loading() {
-  return <SocialHomeSkeleton />;
+  return (
+    <div data-house-rsc-fallback="">
+      <SocialHomeSkeleton />
+    </div>
+  );
 }

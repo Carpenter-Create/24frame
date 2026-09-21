@@ -10,7 +10,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useHousePathname } from "./house-client-shell";
 import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
@@ -113,7 +114,7 @@ function WorkspaceSwitcherPills({
   isGcStaff?: boolean;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = useHousePathname();
   const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
@@ -205,7 +206,7 @@ export function WorkspaceSwitcher({
   const staffGate = isGcStaff || options.some((option) => option.mode === "staff");
   const current = clampWorkspaceMode(requestedCurrent, staffGate);
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = useHousePathname();
   const { activePath, markPending } = useHouseNavPending();
   const hostRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);

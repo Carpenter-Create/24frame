@@ -94,7 +94,7 @@ describe("one face across chrome, Settings, and Social", () => {
     expect(formSrc).toContain("uploadAccountPhoto");
     expect(formSrc).toContain("cropAvatarFile");
     expect(formSrc).toContain("AccountAvatarCrop");
-    expect(socialProfileSrc).toContain("signedAvatarUrl(profile.id)");
+    expect(socialProfileSrc).toContain("socialAvatarHref(profile.id)");
     expect(socialProfileSrc).not.toContain("SocialProfilePhotoForm");
     expect(socialProfileSrc).not.toContain("uploadAccountPhoto");
     expect(socialProfileSrc).not.toContain("putAvatarObject");

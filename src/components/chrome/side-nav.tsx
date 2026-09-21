@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useHousePathname } from "./house-client-shell";
 import { useRef } from "react";
 import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { railDestinations, isSocialCreateDest, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
@@ -38,7 +39,7 @@ export function SideNav({
   workspace?: WorkspaceMode;
 }) {
   const workspace = clampWorkspaceMode(requestedWorkspace, isGcStaff);
-  const pathname = usePathname();
+  const pathname = useHousePathname();
   const social = workspace === "social";
   const { activePath, markPending, pendingHref } = useSocialNavPending();
   const pathForActive = social ? activePath : pathname;

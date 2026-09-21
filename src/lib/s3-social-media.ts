@@ -6,15 +6,13 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
   isForbiddenMediaBucket,
   isForbiddenMediaKey,
-  isSocialMuxMediaItem,
-  ownedMediaItems,
   SOCIAL_MEDIA_PUT_TTL_SECONDS,
   SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
   type SocialMediaContentType,
   type SocialMediaKind,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { socialMuxThumbnailUrl } from "@/lib/social-mux";
+import { socialMediaProxies, socialMediaProxiesByPostId } from "@/lib/social-edge";
 import {
   isMediaCloudfrontConfigured,
   signSocialMediaCloudfrontUrl,
@@ -134,37 +132,22 @@ export type SignedSocialMedia = {
   playbackId?: string;
 };
 
+/**
+ * Display SoT for feeds / Home / Explore / profile activity.
+ * Same-origin edge proxy — no CloudFront/S3 RSA on the page path.
+ * Privileged short-lived GETs stay on signedSocialMediaUrl / presignSocialMediaGet
+ * (media API, welcome/cover hops that need a direct object URL).
+ */
 export async function signedSocialMediaItems(
   media: unknown,
   authorId: string,
   lane: SocialMediaLane = "posts",
 ): Promise<SignedSocialMedia[]> {
-  const items = ownedMediaItems(media, authorId, lane);
-  const signed = await Promise.all(
-    items.map(async (item) => {
-      if (isSocialMuxMediaItem(item)) {
-        return {
-          kind: item.kind,
-          url: socialMuxThumbnailUrl(item.playbackId),
-          contentType: item.contentType,
-          playbackId: item.playbackId,
-        };
-      }
-      const url = await signedSocialMediaUrl(item.key);
-      return url ? { kind: item.kind, url, contentType: item.contentType } : null;
-    }),
-  );
-  return signed.filter((item): item is SignedSocialMedia => !!item);
+  return socialMediaProxies(media, authorId, lane);
 }
 
 export async function signedSocialMediaByPostId(
   posts: readonly { id: string; author_id: string; media: unknown }[],
 ): Promise<Map<string, SignedSocialMedia[]>> {
-  const entries = await Promise.all(
-    posts.map(
-      async (post) =>
-        [post.id, await signedSocialMediaItems(post.media, post.author_id)] as const,
-    ),
-  );
-  return new Map(entries);
+  return socialMediaProxiesByPostId(posts);
 }

@@ -14,8 +14,8 @@ import {
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialOptimisticFeed } from "@/components/social/social-optimistic-feed";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedAvatarUrls, signedSocialMediaByPostId } from "@/lib/social-edge";
+import { SocialFollowingWallBound } from "@/components/social/social-following-wall-bound";
 import {
   parseSocialCategoryParam,
   SOCIAL_CATEGORY_ALL,
@@ -28,14 +28,13 @@ import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { followingAuthorIds, SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
+  encodeFollowingWallCursor,
   parseFollowingWallCursorParam,
   socialFollowingWallHref,
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
 import {
   groupStoryRail,
-  loadFolloweeIds,
-  loadFollowingPosts,
   loadGroupsByIds,
   loadLikedPostIds,
   loadLiveStories,
@@ -49,6 +48,7 @@ import {
 } from "@/lib/social-feed";
 import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, socialPersonLabel, socialSearchHref, type SocialHomeLane } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { loadCachedFolloweeIds, loadCachedFollowingPosts } from "@/lib/social-hot-reads";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialHomePage({
@@ -79,7 +79,7 @@ export default async function SocialHomePage({
 async function loadHomeProfile(session: SocialSession) {
   const [profile, followees] = await Promise.all([
     ensureOwnSocialProfile(session.supabase, session.ctx.user),
-    loadFolloweeIds(session.supabase, session.ctx.user.id),
+    loadCachedFolloweeIds(session.supabase, session.ctx.user.id),
   ]);
   return { profile, followees };
 }
@@ -125,7 +125,7 @@ async function SocialHomeCenter({
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
   const [wall, storiesPage, suggested] = await Promise.all([
     profile
-      ? loadFollowingPosts(supabase, authorIds, { category, cursor })
+      ? loadCachedFollowingPosts(supabase, ctx.user.id, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
     lane === "for-you"
@@ -194,17 +194,28 @@ async function SocialHomeCenter({
       {lane === "for-you" ? (
         <SocialHomeForYouLane suggested={suggested} faces={faces} />
       ) : (
-        <SocialHomeFollowingWall
-          wall={wall}
-          posts={posts}
-          authors={authors}
-          faces={faces}
-          groups={groups}
-          liked={liked}
-          media={media}
-          profile={profile}
+        <SocialFollowingWallBound
+          viewerId={ctx.user.id}
           topic={topic}
-        />
+          cursor={
+            cursor
+              ? encodeFollowingWallCursor({ created_at: cursor.createdAt, id: cursor.id })
+              : null
+          }
+          wall={wall}
+        >
+          <SocialHomeFollowingWall
+            wall={wall}
+            posts={posts}
+            authors={authors}
+            faces={faces}
+            groups={groups}
+            liked={liked}
+            media={media}
+            profile={profile}
+            topic={topic}
+          />
+        </SocialFollowingWallBound>
       )}
     </div>
   );

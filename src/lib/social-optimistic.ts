@@ -4,6 +4,10 @@
 // apply/await/refresh loops or a second persist helper.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
+import {
+  runOptimisticMutation,
+  type OptimisticRun,
+} from "@/lib/optimistic-mutation";
 import { SOCIAL_CATEGORY_ALL } from "@/lib/social-categories";
 import { normalizePostBody, SOCIAL } from "@/lib/social";
 
@@ -11,6 +15,7 @@ export const SOCIAL_OPTIMISTIC_LOCK = {
   likeHref: "/api/social/like",
   postHref: "/api/social/post",
   commentHref: "/api/social/comment",
+  followHref: "/api/social/follow",
 } as const;
 
 export type SocialOptimisticLike = {
@@ -39,13 +44,7 @@ export type SocialOptimisticPost = {
   error?: string;
 };
 
-export type SocialOptimisticRun<T> = {
-  apply: () => T;
-  persist: () => Promise<{ error?: string }>;
-  rollback: (token: T) => void;
-  onError?: (error: string) => void;
-  onSuccess?: () => void;
-};
+export type SocialOptimisticRun<T> = OptimisticRun<T>;
 
 export type SocialPostPublishDraft = {
   body: string;
@@ -162,6 +161,10 @@ export function persistSocialPost(form: FormData): Promise<{ error?: string }> {
   return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.postHref, form);
 }
 
+export function persistSocialFollow(form: FormData): Promise<{ error?: string }> {
+  return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.followHref, form);
+}
+
 export async function persistSocialComment(
   form: FormData,
 ): Promise<{ error?: string; id?: string; created_at?: string }> {
@@ -226,21 +229,7 @@ export function endSocialPostPublishBusy(): void {
 }
 
 export function runSocialOptimisticMutation<T>(input: SocialOptimisticRun<T>): void {
-  const token = input.apply();
-  void Promise.resolve()
-    .then(() => input.persist())
-    .then((result) => {
-      if (result.error) {
-        input.rollback(token);
-        input.onError?.(result.error);
-        return;
-      }
-      input.onSuccess?.();
-    })
-    .catch((cause) => {
-      input.rollback(token);
-      input.onError?.(socialOptimisticPersistNotice(cause));
-    });
+  runOptimisticMutation({ ...input, fallback: ACCOUNT_PROFILE.saveFailed });
 }
 
 export function applyOptimisticLike(postId: string, next: SocialOptimisticLike): void {

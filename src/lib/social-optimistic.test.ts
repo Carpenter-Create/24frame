@@ -272,7 +272,9 @@ describe("Social optimistic mutation SoT", () => {
     expect(feed).toContain("SOCIAL_FEED_GUTTER_CLASS");
     expect(feed).not.toContain("className=\"flex flex-col gap-2\"");
     expect(feed.indexOf("notice")).toBeLessThan(feed.indexOf("if (merged.length === 0)"));
-    expect(followChunk).toContain("const result = await toggleSocialFollow");
+    expect(followChunk).toContain("persistSocialFollow");
+    expect(followChunk).toContain("runSocialOptimisticMutation");
+    expect(followChunk).not.toContain("toggleSocialFollow");
     expect(followChunk).toContain("followedConfirmCopy");
     expect(followChunk).not.toContain("router.refresh()");
     expect(roles).toContain("onChange(");

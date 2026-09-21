@@ -8,9 +8,11 @@ export default async function Loading() {
   const jar = await cookies();
   const overlay = readSocialProfileOptimisticCookie((name) => jar.get(name)?.value);
   return (
-    <SocialProfileOptimisticShell
-      serverOverlay={overlay}
-      fallback={<SocialProfileSkeleton />}
-    />
+    <div data-house-rsc-fallback="">
+      <SocialProfileOptimisticShell
+        serverOverlay={overlay}
+        fallback={<SocialProfileSkeleton />}
+      />
+    </div>
   );
 }

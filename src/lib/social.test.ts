@@ -579,7 +579,7 @@ describe("social writes stay on the live spine", () => {
     expect(actions).not.toContain("memberships");
     expect(actions).not.toContain(".from(\"profiles\").delete");
     expect(actions).not.toContain("from(\"organizations\")");
-    expect(pages).toContain("loadFollowingPosts");
+    expect(pages).toContain("loadCachedFollowingPosts");
     expect(pages).not.toContain("SocialPostCompose");
     expect(pages).toContain("SocialHomeTabs");
     expect(pages).toContain("SocialHomeComposer");
@@ -623,7 +623,7 @@ describe("social writes stay on the live spine", () => {
     ];
     for (const file of nodeSurfaces) {
       const src = readFileSync(file, "utf8");
-      expect(src).toMatch(/signedAvatarUrls?/);
+      expect(src).toMatch(/signedAvatarUrls?|socialAvatarHref/);
       expect(src).not.toContain("putAvatarObject");
       expect(src).not.toContain("uploadAccountPhoto");
       expect(src).not.toContain("S3_BUCKET");

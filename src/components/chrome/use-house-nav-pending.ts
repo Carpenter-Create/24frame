@@ -1,8 +1,9 @@
 "use client";
 
 import { useLinkStatus } from "next/link";
-import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
+
+import { useHousePathname } from "./house-client-shell";
 
 import {
   houseNavActivePath,
@@ -16,7 +17,7 @@ import {
 // covers the same tick. A settled pathname drops the optimistic href.
 
 export function useHouseNavPending() {
-  const pathname = usePathname();
+  const pathname = useHousePathname();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   const markPending = useCallback((href: string, event?: HouseNavClickLike) => {

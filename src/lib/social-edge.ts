@@ -27,6 +27,11 @@ export function socialAvatarFaces(userIds: readonly string[]): Map<string, strin
   return new Map(userIds.filter(Boolean).map((id) => [id, socialAvatarHref(id)]));
 }
 
+/** Display SoT. Same name callers already import from s3-avatars. Never RSA. */
+export function signedAvatarUrls(userIds: readonly string[]): Map<string, string | null> {
+  return socialAvatarFaces(userIds);
+}
+
 export type SocialEdgeMediaItem = {
   kind: "image" | "video";
   url: string;
@@ -59,4 +64,11 @@ export function socialMediaProxiesByPostId(
   posts: readonly { id: string; author_id: string; media: unknown }[],
 ): Map<string, SocialEdgeMediaItem[]> {
   return new Map(posts.map((post) => [post.id, socialMediaProxies(post.media, post.author_id)]));
+}
+
+/** Display SoT. Same name callers already import from s3-social-media. Never RSA. */
+export function signedSocialMediaByPostId(
+  posts: readonly { id: string; author_id: string; media: unknown }[],
+): Map<string, SocialEdgeMediaItem[]> {
+  return socialMediaProxiesByPostId(posts);
 }

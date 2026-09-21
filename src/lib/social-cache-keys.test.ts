@@ -5,8 +5,11 @@ import {
   SOCIAL_QUERY_STALE_MS,
   socialCountsCacheKey,
   socialCountsQueryKey,
+  socialFeedCacheKey,
   socialFollowCacheKey,
+  socialFolloweeSetCacheKey,
   socialFollowInvalidateKeys,
+  socialFollowingWallQueryKey,
   socialFollowQueryKey,
   socialProfileCacheKey,
   socialProfileHandleCacheKey,
@@ -30,6 +33,15 @@ describe("social cache keys — one SoT", () => {
     expect(socialProfileQueryKey("u1")).toEqual(["social", "profile", "u1"]);
     expect(socialCountsQueryKey("u1")).toEqual(["social", "counts", "u1"]);
     expect(socialFollowQueryKey("v", "t")).toEqual(["social", "follow", "v", "t"]);
+    expect(socialFollowingWallQueryKey("v", "Music", "c1")).toEqual([
+      "social",
+      "following-wall",
+      "v",
+      "Music",
+      "c1",
+    ]);
+    expect(socialFeedCacheKey("v")).toBe("social:feed:v");
+    expect(socialFolloweeSetCacheKey("v")).toBe("social:followees:v");
   });
 
   it("busts profile id plus named handles on write", () => {
@@ -41,11 +53,15 @@ describe("social cache keys — one SoT", () => {
     expect(socialProfileInvalidateKeys("u1")).toEqual(["social:profile:u1"]);
   });
 
-  it("busts the follow edge and both count keys", () => {
+  it("busts the follow edge, both count keys, and both feed snapshots", () => {
     expect(socialFollowInvalidateKeys("viewer", "target")).toEqual([
       "social:follow:viewer:target",
       "social:counts:viewer",
       "social:counts:target",
+      "social:followees:viewer",
+      "social:feed:viewer",
+      "social:followees:target",
+      "social:feed:target",
     ]);
   });
 });
