@@ -30,6 +30,23 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_EDIT_CLASS");
   });
 
+  it("labels master as LinkedIn header SoT", () => {
+    const src = readFileSync("src/lib/social-profile-cover.ts", "utf8");
+    expect(src).toContain("LinkedIn header SoT");
+    expect(src).toContain("1784");
+    expect(src).toContain("446");
+  });
+
+  it("exposes master dims in copy and upload UI", () => {
+    const social = readFileSync("src/lib/social.ts", "utf8");
+    expect(social).toContain("1784");
+    expect(social).toContain("446");
+    const upload = readFileSync("src/components/social/social-profile-cover-upload.tsx", "utf8");
+    expect(upload).toContain("masterWidth");
+    expect(upload).toContain("masterHeight");
+    expect(upload).toContain("data-social-profile-cover-dims");
+  });
+
   it("routes cover saves through the posts stills lane", () => {
     const media = readFileSync("src/lib/social-media.ts", "utf8");
     expect(media).toContain("profileCoverKeyFromMedia");
