@@ -42,6 +42,7 @@ export type SocialProfileRow = {
   status: string;
   bio?: string | null;
   welcome_video_key?: string | null;
+  cover_key?: string | null;
   crafts?: string[] | null;
   topics?: string[] | null;
   imdb_url?: string | null;

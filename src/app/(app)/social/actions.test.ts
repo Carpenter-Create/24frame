@@ -10,6 +10,7 @@ import {
   sendSocialDm,
   createSocialProfile,
   clearSocialWelcomeVideo,
+  saveSocialProfileCover,
   saveSocialWelcomeVideo,
   createSocialStory,
   openSocialDm,
@@ -358,6 +359,26 @@ describe("social actions", () => {
     bad.set("last_name", "Lovelace");
     bad.set("links", JSON.stringify(["not-a-url"]));
     expect(await createSocialProfile(bad)).toEqual({ error: SOCIAL.profile.linkInvalid });
+  });
+
+  it("saves the profile cover pointer from a single owned still", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { updates } = stub({
+      profile: { id: author, handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set(
+      "media",
+      JSON.stringify([
+        { kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" },
+      ]),
+    );
+    expect(await saveSocialProfileCover(form)).toEqual({});
+    expect(updates).toEqual([
+      { table: "profiles", row: { cover_key: `posts/${author}/${object}.jpg` } },
+    ]);
   });
 
   it("saves and clears the welcome video pointer without deleting media", async () => {

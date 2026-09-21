@@ -149,6 +149,7 @@ export function SocialProfileEditForm({
     displayName,
     bio,
     photoUrl,
+    coverUrl: null,
     welcomeVideoUrl,
     crafts,
     topics,

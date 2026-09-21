@@ -198,6 +198,14 @@ export function welcomeVideoKeyFromMedia(raw: unknown, userId: string): string |
   return only.kind === "video" ? only.key : null;
 }
 
+/** One current profile-cover still key, or null. Posts lane, image only. */
+export function profileCoverKeyFromMedia(raw: unknown, userId: string): string | null {
+  const items = mediaItemsForInsert(raw, userId, "posts");
+  if (!items.ok || items.items.length !== 1) return null;
+  const only = items.items[0];
+  return only.kind === "image" ? only.key : null;
+}
+
 export function mediaItemsForInsert(
   raw: unknown,
   userId: string,

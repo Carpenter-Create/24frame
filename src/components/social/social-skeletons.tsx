@@ -16,6 +16,10 @@ import {
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
+  SOCIAL_PROFILE_COVER_CLASS,
+  SOCIAL_PROFILE_COVER_EMPTY_CLASS,
+  SOCIAL_PROFILE_COVER_STACK_CLASS,
+  SOCIAL_PROFILE_HEAD_OVERLAP_CLASS,
   SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
@@ -111,7 +115,10 @@ export function SocialProfileCenterSkeleton() {
   return (
     <div className={SOCIAL_PROFILE_CENTER_CLASS}>
       <div className={SOCIAL_PROFILE_IDENTITY_CLASS}>
-        <div className={SOCIAL_PROFILE_HEAD_CLASS}>
+        <div className={SOCIAL_PROFILE_COVER_STACK_CLASS}>
+          <Skeleton className={`${SOCIAL_PROFILE_COVER_CLASS} ${SOCIAL_PROFILE_COVER_EMPTY_CLASS}`} />
+          <div className={SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}>
+            <div className={SOCIAL_PROFILE_HEAD_CLASS}>
           <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
           <div className={SOCIAL_PROFILE_META_CLASS}>
             <Skeleton className="h-4 w-32" />
@@ -121,6 +128,8 @@ export function SocialProfileCenterSkeleton() {
                 <Skeleton className="h-8 w-10" />
                 <Skeleton className="h-8 w-10" />
               </div>
+            </div>
+          </div>
             </div>
           </div>
         </div>

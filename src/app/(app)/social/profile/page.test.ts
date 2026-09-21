@@ -214,7 +214,9 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-bio-form");
     expect(html).not.toContain("data-social-profile-photo");
     expect(html).not.toContain(SOCIAL.profile.uploadPhoto);
-    expect(html).not.toContain('type="file"');
+    expect(html).toContain("data-social-profile-cover");
+    expect(html).toContain("data-social-profile-cover-edit");
+    expect(html).toContain("data-social-profile-avatar-edit");
     expect(html).toContain("AL");
   });
 

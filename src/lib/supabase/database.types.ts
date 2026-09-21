@@ -530,6 +530,7 @@ export type Database = {
           avatar_key: string | null
           bio: string | null
           birth_date: string | null
+          cover_key: string | null
           crafts: string[]
           created_at: string
           credits: Json
@@ -568,6 +569,7 @@ export type Database = {
           avatar_key?: string | null
           bio?: string | null
           birth_date?: string | null
+          cover_key?: string | null
           crafts?: string[]
           created_at?: string
           credits?: Json
@@ -606,6 +608,7 @@ export type Database = {
           avatar_key?: string | null
           bio?: string | null
           birth_date?: string
+          cover_key?: string | null
           crafts?: string[]
           created_at?: string
           credits?: Json

@@ -122,6 +122,7 @@ export default async function SocialPublicProfilePage({
   const isSelf = member.id === ctx.user.id;
   const photoUrl = socialAvatarHref(member.id);
   const welcomeUrl = member.welcome_video_key ? socialMediaHref(member.welcome_video_key) : null;
+  const coverUrl = member.cover_key ? socialMediaHref(member.cover_key) : null;
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadCachedIsFollowing(supabase, ctx.user.id, member.id) : false;
   const commentsPage =
@@ -184,6 +185,7 @@ export default async function SocialPublicProfilePage({
           name={member.display_name}
           handle={member.handle}
           photoUrl={photoUrl}
+          coverUrl={coverUrl}
           bio={member.bio}
           roles={member.crafts}
           topics={member.topics}
