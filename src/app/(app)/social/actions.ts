@@ -58,7 +58,7 @@ import {
   socialPublicDisplayName,
   socialDmHref,
   socialGroupHref,
-  socialHandleRequiredError,
+  socialHandleInputError,
   socialNameRequiredError,
   socialMediaRuleMessage,
   socialProfileHref,
@@ -85,10 +85,9 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   const supabase = await createClient();
 
   const raw = String(formData.get("handle") ?? "");
-  const required = socialHandleRequiredError(raw);
-  if (required) return { error: required };
-  const handle = normalizeHandle(raw);
-  if (!handle) return { error: SOCIAL.profile.handleInvalid };
+  const formatError = socialHandleInputError(raw);
+  if (formatError) return { error: formatError };
+  const handle = normalizeHandle(raw)!;
 
   const collision = await lookupHandleCollision(supabase, handle);
   const taken = handleTakenError({ ownerId: user.id, collisionId: collision?.id ?? null });

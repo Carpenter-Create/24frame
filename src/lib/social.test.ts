@@ -30,6 +30,8 @@ import {
   socialComposerPrompt,
   socialCreateHref,
   socialCreateWellCopy,
+  socialHandleDisplayError,
+  socialHandleInputError,
   socialHandleRequiredError,
   socialNameRequiredError,
   socialHomeLaneHref,
@@ -310,6 +312,14 @@ describe("profile opt-in", () => {
     expect(socialHandleRequiredError("@")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@@@")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@ada")).toBeNull();
+    expect(socialHandleInputError("@")).toBe(SOCIAL.profile.handleRequired);
+    expect(socialHandleInputError("@")).not.toBe(SOCIAL.profile.handleTaken);
+    expect(socialHandleDisplayError("@", SOCIAL.profile.handleTaken)).toBe(
+      SOCIAL.profile.handleRequired,
+    );
+    expect(socialHandleDisplayError("@ad", SOCIAL.profile.handleTaken)).toBe(
+      SOCIAL.profile.handleInvalid,
+    );
     expect(SOCIAL.profile.handleInvalid).toBe(
       "Enter a handle of 3–30 letters, numbers, periods, or underscores.",
     );

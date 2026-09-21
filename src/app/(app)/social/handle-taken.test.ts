@@ -69,6 +69,15 @@ describe("createSocialProfile handle uniqueness", () => {
     expect(updates).toEqual([]);
   });
 
+  it("returns required, not taken, for an empty @ handle", async () => {
+    stub({ handleOwner: { id: "u2" } });
+    const form = new FormData();
+    form.set("handle", "@");
+    const result = await createSocialProfile(form);
+    expect(result).toEqual({ error: SOCIAL.profile.handleRequired });
+    expect(result.error).not.toBe(SOCIAL.profile.handleTaken);
+  });
+
   it("saves when the handle is free", async () => {
     const { updates } = stub({ handleOwner: null });
     const form = new FormData();

@@ -17,6 +17,7 @@ import {
   normalizeBio,
   socialBioCount,
   socialBioEnterSubmits,
+  socialHandleDisplayError,
   socialProfilePublicUrl,
 } from "@/lib/social";
 import {
@@ -97,8 +98,11 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain("handleInvalid");
     const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
-    expect(saveSoT).toContain("socialHandleRequiredError");
-    expect(saveSoT).toContain("normalizeHandle");
+    expect(saveSoT).toContain("socialHandleInputError");
+    expect(saveSoT).not.toContain("socialHandleDisplayError");
+    expect(edit).toContain("socialHandleDisplayError");
+    const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    expect(forms).toContain("socialHandleDisplayError(next, prev)");
     expect(edit).not.toContain("app.24frame.co");
   });
 
@@ -282,6 +286,9 @@ describe("Social profile optimistic Save SoT", () => {
       ok: false,
       handleError: SOCIAL.profile.handleRequired,
     });
+    expect(
+      socialHandleDisplayError("@", SOCIAL.profile.handleTaken),
+    ).toBe(SOCIAL.profile.handleRequired);
     expect(checkSocialProfileEditSave({ ...draft, imdbUrl: "not-imdb" })).toEqual({
       ok: false,
       error: SOCIAL.profile.imdbInvalid,

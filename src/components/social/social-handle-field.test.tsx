@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL, socialProfilePublicUrl } from "@/lib/social";
+import { SOCIAL_HANDLE_FIELD_LABEL_CLASS } from "@/lib/social-chrome";
 import { SocialHandleField } from "./social-handle-field";
 
 describe("SocialHandleField", () => {
@@ -44,11 +45,30 @@ describe("SocialHandleField", () => {
   it("keeps the required-handle check on the profile submit path", () => {
     const form = readFileSync("src/components/social/social-forms.tsx", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
-    expect(form).toContain("socialHandleRequiredError");
-    expect(form).toContain("normalizeHandle");
+    const field = readFileSync("src/components/social/social-handle-field.tsx", "utf8");
+    expect(form).toContain("socialHandleInputError");
+    expect(form).toContain("socialHandleDisplayError");
     expect(form).toContain("SocialHandleField");
-    expect(actions).toContain("socialHandleRequiredError");
-    expect(actions).toContain("normalizeHandle");
+    expect(actions).toContain("socialHandleInputError");
+    expect(actions).toContain("lookupHandleCollision");
     expect(actions).toContain("profileInsertRow");
+    expect(field).toContain("SOCIAL_HANDLE_FIELD_LABEL_CLASS");
+    expect(field).not.toContain("<Label");
+    expect(field).not.toContain("t-label");
+  });
+
+  it("uses sentence-case house labels, not t-label uppercase", () => {
+    const html = renderToStaticMarkup(
+      <SocialHandleField id="social-handle" name="handle" defaultHandle="" />,
+    );
+    expect(html).toContain(SOCIAL_HANDLE_FIELD_LABEL_CLASS);
+    expect(html).not.toContain("t-label");
+    expect(html).not.toContain("uppercase");
+  });
+
+  it("never maps an empty @ draft to a taken error on the create form", () => {
+    const form = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    expect(form).toContain("socialHandleDisplayError(next, prev)");
+    expect(form).not.toContain("socialHandleRequiredError");
   });
 });

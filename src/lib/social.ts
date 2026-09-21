@@ -843,6 +843,21 @@ export function socialHandleRequiredError(raw: string): string | null {
   return handleDisplay(raw) ? null : SOCIAL.profile.handleRequired;
 }
 
+/** Required / invalid only — never collision (taken). Runs before any async uniqueness check. */
+export function socialHandleInputError(raw: string): string | null {
+  const required = socialHandleRequiredError(raw);
+  if (required) return required;
+  if (!normalizeHandle(raw)) return SOCIAL.profile.handleInvalid;
+  return null;
+}
+
+/** Sync validation wins over a stale taken error when the draft is empty or invalid. */
+export function socialHandleDisplayError(raw: string, error: string): string {
+  const sync = socialHandleInputError(raw);
+  if (sync) return sync;
+  return error;
+}
+
 /** Bare unique-ish seed from the sign-in email local-part. Not a display name. */
 export function suggestedHandleSeed(email: string, userId: string): string {
   const local = (email.split("@")[0] ?? "").toLowerCase();
