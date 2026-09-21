@@ -32,11 +32,12 @@ import {
   SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS,
   SOCIAL_TOPIC_CHIP_ROW_CLASS,
   SOCIAL_TOPIC_RAIL_CHIP_CLASS,
+  SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS,
   SOCIAL_TOPIC_RAIL_CLASS,
   SOCIAL_TOPIC_RAIL_ROWS,
 } from "@/lib/social-chrome";
-import { HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/house-shell";
-import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
+import { HOUSE_PILL_SELECTED_CLASS, HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/house-shell";
+import { SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_LABELS, SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
 import { SOCIAL, SOCIAL_ROUTES, socialSearchHref } from "@/lib/social";
@@ -106,7 +107,11 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_ROW_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CHIP_CLASS);
+    expect(html).toContain(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS);
+    expect(html).toContain(HOUSE_PILL_SELECTED_CLASS);
     expect(SOCIAL_TOPIC_RAIL_CHIP_CLASS).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
     expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
     expect(html).not.toContain("text-[11px]");
     expect(html).not.toContain("py-[5px]");
@@ -129,8 +134,10 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_CATEGORY_TOPICS).toHaveLength(15);
     const row = html.slice(html.indexOf('data-house-chip-rail-row="0"'));
     const chips = [...row.matchAll(/data-social-home-topic="([^"]+)"/g)].map((match) => match[1]);
-    expect(chips).toEqual([...SOCIAL_CATEGORY_TOPICS]);
-    expect(chips).toEqual(sortTopicsAlpha(chips));
+    expect(chips[0]).toBe(SOCIAL_CATEGORY_ALL);
+    expect(chips).toEqual([...SOCIAL_CATEGORY_LABELS]);
+    expect(chips.slice(1)).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect(chips.slice(1)).toEqual(sortTopicsAlpha(chips.slice(1)));
     expect(row).toContain("Acting");
     expect(row).toContain("AI filmmaking");
   });

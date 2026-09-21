@@ -27,6 +27,7 @@ import {
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
   HOUSE_SCROLL_ROW_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
 } from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
@@ -335,16 +336,23 @@ export const SOCIAL_PROFILE_ROLES_ROW_CLASS = HOUSE_CHIP_RAIL_CLASS;
 export const SOCIAL_PROFILE_ROLE_PILL_CLASS =
   `w-fit ${HOUSE_PILL_ITEM_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
 
-// Home Topics aliases the house chip rail. Not SegmentedTrack: this is
-// a bank of lenses, not a selected exclusive menu.
-// Adam 2026-09-20: one horizontal chip row on desktop. Phone uses the
-// same one-row scroll rail (never truncate — scroll). House default
-// HOUSE_CHIP_RAIL_ROWS stays 2 for every other chip-rail consumer.
+// Home Topics aliases the house chip rail. Not SegmentedTrack: lenses
+// stay discrete chips (All first). Selected uses HOUSE_PILL_SELECTED_CLASS
+// (accent fill + white). Idle stays HOUSE_CHIP_RAIL_CHIP_CLASS.
+// Adam 2026-09-20: one horizontal chip row. Phone: same one-row scroll
+// (never truncate — scroll). HOUSE_CHIP_RAIL_ROWS stays 2 for every
+// other chip-rail consumer.
 export const SOCIAL_TOPIC_RAIL_ROWS = 1;
 export const SOCIAL_TOPIC_RAIL_CLASS = HOUSE_CHIP_RAIL_CLASS;
 export const SOCIAL_TOPIC_RAIL_STACK_CLASS = HOUSE_CHIP_RAIL_STACK_CLASS;
 export const SOCIAL_TOPIC_CHIP_ROW_CLASS = HOUSE_CHIP_RAIL_ROW_CLASS;
 export const SOCIAL_TOPIC_RAIL_CHIP_CLASS = HOUSE_CHIP_RAIL_CHIP_CLASS;
+export const SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS =
+  `${HOUSE_SEGMENTED_ITEM_BASE_CLASS} ${HOUSE_PILL_SELECTED_CLASS}`;
+
+export function socialTopicRailChipClass(selected: boolean): string {
+  return selected ? SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS : SOCIAL_TOPIC_RAIL_CHIP_CLASS;
+}
 
 export const SOCIAL_FIRST_WIN_CLASS =
   "flex flex-col items-center justify-center gap-2.5 rounded-[8px] border border-hairline bg-surface px-5 pb-4 pt-5 text-center";
