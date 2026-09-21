@@ -34,7 +34,9 @@ import {
 import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
+  SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_ROW_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
@@ -333,12 +335,19 @@ describe("Social profile public face", () => {
     );
     expect(withStats).toContain("data-social-profile-head");
     expect(withStats).toContain(SOCIAL_PROFILE_HEAD_CLASS);
+    expect(SOCIAL_PROFILE_HEAD_CLASS).toContain("items-center");
+    expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("items-start");
     expect(withStats).toContain(SOCIAL_AVATAR_PROFILE_CLASS);
     expect(withStats).toContain("size-[72px]");
     expect(withStats).toContain("md:size-[88px]");
     expect(withStats).not.toContain("size-24");
     expect(withStats).toContain("data-social-profile-stats");
     expect(withStats).toContain(SOCIAL_PROFILE_STATS_CLASS);
+    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("max-w-xs");
+    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("flex-1");
+    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("items-center");
+    expect(SOCIAL_PROFILE_STATS_CLASS).not.toBe("flex min-w-0 flex-1 items-center");
+    expect(withStats).not.toContain("flex min-w-0 flex-1 items-center");
     expect(withStats).toContain("grid-cols-3");
     expect(withStats).toContain(SOCIAL_PROFILE_STAT_CLASS);
     expect(withStats).toContain("flex-col");
@@ -480,6 +489,29 @@ describe("Social profile public face", () => {
     const empty = renderToStaticMarkup(<SocialAuthorHistory posts={[]} truncated={false} />);
     expect(empty).toContain("data-social-author-empty");
     expect(empty).toContain(SOCIAL.profile.postsEmpty);
+    expect(empty).toContain(SOCIAL_PROFILE_POSTS_EMPTY_CLASS);
+    expect(empty).not.toContain(SOCIAL_EMPTY_PANEL_CLASS);
+    expect(empty).not.toContain("py-[var(--space-12)]");
+    expect(empty).not.toContain(SOCIAL.profile.edit);
+    expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
+    expect(empty).not.toContain(SOCIAL.profile.postsEmptyHint);
+    expect(empty).not.toContain(SOCIAL.profile.postsEmptyOwnHint);
+
+    const withCreate = renderToStaticMarkup(
+      <SocialAuthorHistory
+        posts={[]}
+        truncated={false}
+        emptyAction={{ href: "/social/create?kind=media", label: SOCIAL.profile.sharePost }}
+      />,
+    );
+    expect(withCreate).toContain(SOCIAL.profile.sharePost);
+    expect(withCreate).toContain("/social/create?kind=media");
+    expect(withCreate).not.toContain(SOCIAL.profile.edit);
+    expect(withCreate).not.toContain(SOCIAL.profile.completeIdentity);
+    expect(withCreate).not.toContain("/social/profile/edit");
+    expect(uiSrc).toContain("SocialProfilePostsEmpty");
+    expect(uiSrc).not.toContain("emptySecondary");
+    expect(uiSrc).not.toContain("emptyHint");
 
     const truncated = renderToStaticMarkup(<SocialAuthorHistory posts={[]} truncated />);
     expect(truncated).toContain("data-social-author-truncated");

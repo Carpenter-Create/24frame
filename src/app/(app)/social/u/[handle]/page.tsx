@@ -199,7 +199,6 @@ export default async function SocialPublicProfilePage({
             <SocialHighlights cards={highlightCards} />
             <SocialAuthorHistory
               truncated={history.truncated}
-              emptyHint={SOCIAL.profile.postsEmptyHint}
               emptyAction={{
                 href: isSelf ? socialCreateHref("media") : SOCIAL_ROUTES.create,
                 label: SOCIAL.profile.sharePost,

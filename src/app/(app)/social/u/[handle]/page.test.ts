@@ -216,6 +216,9 @@ describe("Social public profile", () => {
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-stats");
+    expect(head).toContain("max-w-xs");
+    expect(head).toContain("items-center");
+    expect(head).not.toContain("flex min-w-0 flex-1 items-center");
     expect(head).not.toContain("@ada");
     expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
     expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-bio"));
@@ -301,6 +304,12 @@ describe("Social public profile", () => {
     const html = await renderPublic();
     expect(html).toContain("data-social-author-empty");
     expect(html).toContain(SOCIAL.profile.postsEmpty);
+    const empty = html.slice(html.indexOf("data-social-author-empty"));
+    expect(empty).toContain(SOCIAL.profile.sharePost);
+    expect(empty).not.toContain(SOCIAL.profile.edit);
+    expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
+    expect(empty).not.toContain(SOCIAL.profile.postsEmptyHint);
+    expect(empty).not.toContain("py-[var(--space-12)]");
     expect(html).not.toContain("data-social-author-posts");
   });
 

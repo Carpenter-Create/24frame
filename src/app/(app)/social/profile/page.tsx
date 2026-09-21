@@ -172,9 +172,7 @@ async function SocialProfileMain({
           <SocialHighlights cards={highlightCards} />
           <SocialAuthorHistory
             truncated={history.truncated}
-            emptyHint={SOCIAL.profile.postsEmptyOwnHint}
-            emptyAction={{ href: SOCIAL_ROUTES.profileEdit, label: SOCIAL.profile.completeIdentity }}
-            emptySecondary={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
+            emptyAction={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
             posts={history.posts.map((post) =>
               socialAuthorPostCard({
                 post,

@@ -45,7 +45,7 @@ import { SocialAvatar } from "./social-avatar";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
-import { SocialEmpty } from "./social-empty";
+import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
 import { SocialMediaImage } from "./social-media-image";
 import { SocialProfileLinkRow } from "./social-profile-links";
@@ -341,30 +341,18 @@ function socialPostEngagement(post: SocialPostCardModel): string {
 export function SocialAuthorHistory({
   posts,
   truncated,
-  emptyHint,
   emptyAction,
-  emptySecondary,
 }: {
   posts: readonly SocialPostCardModel[];
   truncated: boolean;
-  emptyHint?: string;
   emptyAction?: { href: string; label: string };
-  emptySecondary?: { href: string; label: string };
 }) {
   const mediaPosts = posts.filter((post) => post.media.length > 0);
   const textPosts = posts.filter((post) => post.media.length === 0);
   return (
     <div data-social-author-history="" className="flex flex-col gap-[var(--space-4)]">
       {posts.length === 0 ? (
-        <div data-social-author-empty="">
-          <SocialEmpty
-            icon="image"
-            title={SOCIAL.profile.postsEmpty}
-            hint={emptyHint ?? SOCIAL.profile.postsEmptyHint}
-            action={emptyAction}
-            secondary={emptySecondary}
-          />
-        </div>
+        <SocialProfilePostsEmpty action={emptyAction} />
       ) : (
         <div data-social-author-posts="" className="flex flex-col gap-[var(--space-4)]">
           {mediaPosts.length > 0 ? (

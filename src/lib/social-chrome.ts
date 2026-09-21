@@ -108,6 +108,11 @@ export const SOCIAL_CARD_MUTED_CLASS =
 export const SOCIAL_EMPTY_PANEL_CLASS =
   `flex flex-col items-center justify-center gap-[var(--space-4)] ${SOCIAL_SURFACE_RADIUS_CLASS} bg-surface-muted px-[var(--space-6)] py-[var(--space-12)] text-center`;
 
+// Profile Posts empty — own + public one SoT. Quiet: no tall muted
+// well, no second Edit. Title is the one short line.
+export const SOCIAL_PROFILE_POSTS_EMPTY_CLASS =
+  "flex flex-col items-center justify-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-4)] text-center";
+
 export const SOCIAL_EMPTY_ACTION_CLASS =
   "inline-flex items-center justify-center rounded-[8px] bg-accent px-[var(--space-4)] py-[10px] t-body-sm font-medium text-accent-contrast";
 
@@ -259,13 +264,16 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 
 // Public profile head — IG geometry, house chrome. One SoT for own
 // /social/profile and public /social/u/[handle]. Avatar | 3-up stats
-// on one row; name · bio · Role pills · links · actions stack below.
-// Handle stays in chrome, never beside the avatar. Avatar stays 72/88.
+// on one row, items-center to the 72/88 face. Stats fill remaining
+// head width up to max-w-xs so the 3-up stays optically close —
+// no stretch void across the 892 column. Name · bio · Role pills ·
+// links · actions stack below. Handle stays in chrome.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
 export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
 
-export const SOCIAL_PROFILE_STATS_CLASS = "flex min-w-0 flex-1 items-center";
+export const SOCIAL_PROFILE_STATS_CLASS =
+  "flex min-w-0 max-w-xs flex-1 items-center";
 
 export const SOCIAL_PROFILE_STATS_GRID_CLASS = "grid w-full grid-cols-3";
 
