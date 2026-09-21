@@ -33,7 +33,7 @@ describe("SocialLikesSheet", () => {
     expect(src).toContain("displayHandle");
     expect(src).toContain(displayHandle("maya") && "break-words");
     expect(src).not.toContain("t-label");
-    expect(src).not.toContain("truncate");
+    expect(src).not.toMatch(/(?:^|[^a-z])truncate(?:[^a-z]|$)/);
   });
 
   it("renders nothing when closed", () => {

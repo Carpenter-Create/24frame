@@ -815,7 +815,7 @@ describe("SocialPostCard media", () => {
     expect(postCard).not.toContain("aspect-square");
     expect(postMedia).not.toContain("aspect-square");
     expect(postMedia).toContain("socialMediaFrameClass");
-    expect(postCard).toContain("<SocialPostMedia items={post.media} />");
+    expect(postCard).toContain("<SocialPostMedia items={post.media} href={permalink ? href : undefined} />");
   });
 
   it("leads hairline rows with author, then media and copy", () => {
