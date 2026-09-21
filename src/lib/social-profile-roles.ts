@@ -4,16 +4,14 @@
 // IMDb help-page category clone. Persist ordered slugs on
 // profiles.crafts. primary_role stays the first selected slug.
 // UI label is Professions — not Topics, not Category, not crafts.
-// Public header is one house chip-rail row of gray pills: first ~3
-// Roles as their own chips, then one muted +N pill. Phone scrolls
-// sideways (Topics SoT). Desktop uses the same one-row rail — ~3 +N
-// match that density. Omit when empty.
+// Public header is one house chip-rail row of gray pills: every
+// selected Role as its own chip, in crafts order. Phone scrolls
+// sideways (Topics SoT). Desktop uses the same one-row rail. No +N
+// / more chip — overflow scrolls. Omit when empty.
 // Edit max 5. Select and write stay sync. Not on SocialPersonRow.
 // Investor is a Business add. Bio middots stay the author's copy.
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
-export const SOCIAL_PROFILE_ROLES_DISPLAY_CAP = 3;
-export const SOCIAL_PROFILE_ROLES_FACE = SOCIAL_PROFILE_ROLES_DISPLAY_CAP;
 export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
 
 export const SOCIAL_PROFILE_ROLE_GROUPS = [
@@ -344,40 +342,14 @@ export function socialProfileRoleChips(raw: unknown): {
   }));
 }
 
-export function socialProfileRolesFace(raw: unknown): {
-  shown: { slug: string; label: string }[];
-  extra: number;
-} {
-  const chips = socialProfileRoleChips(raw);
-  if (chips.length <= SOCIAL_PROFILE_ROLES_DISPLAY_CAP) {
-    return { shown: chips, extra: 0 };
-  }
-  return {
-    shown: chips.slice(0, SOCIAL_PROFILE_ROLES_DISPLAY_CAP),
-    extra: chips.length - SOCIAL_PROFILE_ROLES_DISPLAY_CAP,
-  };
-}
-
-export function socialProfileRolesMoreLabel(extra: number): string {
-  return extra > 0 ? `+${extra}` : "";
-}
-
-export type SocialProfileRolesRailItem =
-  | { kind: "role"; slug: string; label: string }
-  | { kind: "more"; label: string };
+export type SocialProfileRolesRailItem = { kind: "role"; slug: string; label: string };
 
 export function socialProfileRolesRailItems(raw: unknown): SocialProfileRolesRailItem[] {
-  const { shown, extra } = socialProfileRolesFace(raw);
-  if (shown.length === 0) return [];
-  const items: SocialProfileRolesRailItem[] = shown.map((role) => ({
+  return socialProfileRoleChips(raw).map((role) => ({
     kind: "role",
     slug: role.slug,
     label: role.label,
   }));
-  if (extra > 0) {
-    items.push({ kind: "more", label: socialProfileRolesMoreLabel(extra) });
-  }
-  return items;
 }
 
 export function filterSocialProfileRoleGroups(query: string) {

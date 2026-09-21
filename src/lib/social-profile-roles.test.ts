@@ -4,8 +4,6 @@ import { describe, expect, it } from "vitest";
 import {
   SOCIAL_PROFILE_ROLES,
   SOCIAL_PROFILE_ROLES_COUNT,
-  SOCIAL_PROFILE_ROLES_DISPLAY_CAP,
-  SOCIAL_PROFILE_ROLES_FACE,
   SOCIAL_PROFILE_ROLES_MAX,
   SOCIAL_PROFILE_ROLE_GROUPS,
   SOCIAL_PROFILE_ROLE_SLUG_ALIASES,
@@ -16,8 +14,6 @@ import {
   socialProfileRoleChips,
   socialProfileRoleLabel,
   socialProfileRolesCountLabel,
-  socialProfileRolesFace,
-  socialProfileRolesMoreLabel,
   socialProfileRolesRailItems,
   socialProfileRolesWrite,
   toggleSocialProfileRole,
@@ -50,8 +46,6 @@ describe("social profile roles", () => {
     expect(labels.join(" ")).not.toContain("PrefViz");
     expect(slugs).not.toContain("previs");
     expect(SOCIAL_PROFILE_ROLES_MAX).toBe(5);
-    expect(SOCIAL_PROFILE_ROLES_DISPLAY_CAP).toBe(3);
-    expect(SOCIAL_PROFILE_ROLES_FACE).toBe(SOCIAL_PROFILE_ROLES_DISPLAY_CAP);
     expect(SOCIAL_PROFILE_ROLES_COUNT).toBe("{n} / {max}");
     expect(socialProfileRolesCountLabel(3)).toBe("3 / 5");
     expect(
@@ -285,90 +279,64 @@ describe("social profile roles", () => {
     expect(toggleSocialProfileRole(["actor"], "nope")).toEqual(["actor"]);
   });
 
-  it("caps display pills at 3 +N in crafts order and omits when empty", () => {
-    expect(socialProfileRolesFace([])).toEqual({ shown: [], extra: 0 });
-    expect(socialProfileRolesFace(null)).toEqual({ shown: [], extra: 0 });
-    expect(socialProfileRolesFace(["actor"])).toEqual({
-      shown: [{ slug: "actor", label: "Actor" }],
-      extra: 0,
-    });
-    expect(socialProfileRolesFace(["actor", "producer"])).toEqual({
-      shown: [
-        { slug: "actor", label: "Actor" },
-        { slug: "producer", label: "Producer" },
-      ],
-      extra: 0,
-    });
-    expect(socialProfileRolesFace(["actor", "producer", "screenwriter"])).toEqual({
-      shown: [
-        { slug: "actor", label: "Actor" },
-        { slug: "producer", label: "Producer" },
-        { slug: "screenwriter", label: "Screenwriter" },
-      ],
-      extra: 0,
-    });
-    expect(socialProfileRolesFace(["actor", "producer", "screenwriter", "investor"])).toEqual({
-      shown: [
-        { slug: "actor", label: "Actor" },
-        { slug: "producer", label: "Producer" },
-        { slug: "screenwriter", label: "Screenwriter" },
-      ],
-      extra: 1,
-    });
-    expect(
-      socialProfileRolesFace(["actor", "producer", "screenwriter", "investor", "director"]),
-    ).toEqual({
-      shown: [
-        { slug: "actor", label: "Actor" },
-        { slug: "producer", label: "Producer" },
-        { slug: "screenwriter", label: "Screenwriter" },
-      ],
-      extra: 2,
-    });
-    expect(socialProfileRolesFace(["investor", "actor", "producer"]).shown.map((role) => role.slug)).toEqual([
-      "investor",
-      "actor",
-      "producer",
-    ]);
-    expect(socialProfileRolesFace(["screenwriter", "investor"]).shown.map((role) => role.slug)).not.toEqual([
-      "investor",
-      "screenwriter",
-    ]);
-    expect(socialProfileRolesMoreLabel(0)).toBe("");
-    expect(socialProfileRolesMoreLabel(1)).toBe("+1");
-    expect(socialProfileRolesMoreLabel(2)).toBe("+2");
+  it("lists every selected Role on the profile rail and omits when empty", () => {
     expect(socialProfileRolesRailItems([])).toEqual([]);
+    expect(socialProfileRolesRailItems(null)).toEqual([]);
+    expect(socialProfileRolesRailItems(["actor"])).toEqual([
+      { kind: "role", slug: "actor", label: "Actor" },
+    ]);
     expect(socialProfileRolesRailItems(["actor", "producer"])).toEqual([
       { kind: "role", slug: "actor", label: "Actor" },
       { kind: "role", slug: "producer", label: "Producer" },
     ]);
+    expect(socialProfileRolesRailItems(["actor", "producer", "screenwriter"])).toEqual([
+      { kind: "role", slug: "actor", label: "Actor" },
+      { kind: "role", slug: "producer", label: "Producer" },
+      { kind: "role", slug: "screenwriter", label: "Screenwriter" },
+    ]);
     expect(
-      socialProfileRolesRailItems([
-        "executive_producer",
-        "music_supervisor",
-        "composer",
-        "musician",
-        "music_director",
-      ]),
+      socialProfileRolesRailItems(["actor", "producer", "screenwriter", "investor"]),
     ).toEqual([
+      { kind: "role", slug: "actor", label: "Actor" },
+      { kind: "role", slug: "producer", label: "Producer" },
+      { kind: "role", slug: "screenwriter", label: "Screenwriter" },
+      { kind: "role", slug: "investor", label: "Investor" },
+    ]);
+    const five = socialProfileRolesRailItems([
+      "executive_producer",
+      "music_supervisor",
+      "composer",
+      "musician",
+      "music_director",
+    ]);
+    expect(five).toEqual([
       { kind: "role", slug: "executive_producer", label: "Executive Producer" },
       { kind: "role", slug: "music_supervisor", label: "Music Supervisor" },
       { kind: "role", slug: "composer", label: "Composer" },
-      { kind: "more", label: "+2" },
+      { kind: "role", slug: "musician", label: "Musician" },
+      { kind: "role", slug: "music_director", label: "Music Director" },
+    ]);
+    expect(five).toHaveLength(5);
+    expect(five.every((item) => item.kind === "role")).toBe(true);
+    expect(socialProfileRolesRailItems(["investor", "actor", "producer"]).map((role) => role.slug)).toEqual([
+      "investor",
+      "actor",
+      "producer",
+    ]);
+    expect(socialProfileRolesRailItems(["screenwriter", "investor"]).map((role) => role.slug)).not.toEqual([
+      "investor",
+      "screenwriter",
     ]);
   });
 
   it("lists every selected Profession in crafts order and moves by id", () => {
     expect(socialProfileRoleChips([])).toEqual([]);
     expect(socialProfileRoleChips(["actor"])).toEqual([{ slug: "actor", label: "Actor" }]);
-    expect(socialProfileRolesFace([])).toEqual({ shown: [], extra: 0 });
-    expect(socialProfileRolesFace(["actor", "producer"])).toEqual({
-      shown: [
-        { slug: "actor", label: "Actor" },
-        { slug: "producer", label: "Producer" },
-      ],
-      extra: 0,
-    });
+    expect(socialProfileRolesRailItems([])).toEqual([]);
+    expect(socialProfileRolesRailItems(["actor", "producer"])).toEqual([
+      { kind: "role", slug: "actor", label: "Actor" },
+      { kind: "role", slug: "producer", label: "Producer" },
+    ]);
     expect(
       socialProfileRoleChips(["actor", "producer", "screenwriter", "investor", "director"]),
     ).toEqual([
@@ -412,12 +380,13 @@ describe("social profile roles", () => {
     const editSrc = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
     const chromeSrc = readFileSync("src/lib/social-chrome.ts", "utf8");
     const identitySrc = readFileSync("src/components/social/social-ui.tsx", "utf8");
-    expect(rolesSrc).toContain("socialProfileRolesFace");
-    expect(rolesSrc).toContain("socialProfileRolesMoreLabel");
     expect(rolesSrc).toContain("socialProfileRolesRailItems");
+    expect(rolesSrc).not.toContain("socialProfileRolesFace");
+    expect(rolesSrc).not.toContain("socialProfileRolesMoreLabel");
     expect(rolesSrc).not.toContain("socialProfileRolesLine");
     expect(rolesSrc).not.toContain("SOCIAL_PROFILE_ROLES_SEP");
-    expect(rolesSrc).toContain("SOCIAL_PROFILE_ROLES_DISPLAY_CAP");
+    expect(rolesSrc).not.toContain("SOCIAL_PROFILE_ROLES_DISPLAY_CAP");
+    expect(rolesSrc).not.toContain('kind: "more"');
     expect(chromeSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
@@ -432,6 +401,8 @@ describe("social profile roles", () => {
     expect(identitySrc).toContain("HouseChipRail");
     expect(identitySrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
     expect(identitySrc).not.toContain("socialProfileRolesLine");
+    expect(identitySrc).not.toContain("data-social-profile-roles-more");
+    expect(identitySrc).not.toContain('item.kind === "more"');
     expect(identitySrc).toContain("data-social-profile-head");
     expect(identitySrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     const rolesBlock = identitySrc.slice(
