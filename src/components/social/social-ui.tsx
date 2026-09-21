@@ -16,6 +16,7 @@ import {
   SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
+  SOCIAL_PROFILE_META_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
@@ -241,15 +242,19 @@ export function SocialProfileIdentity({
 
   return (
     <div data-social-profile-identity="" className={SOCIAL_PROFILE_IDENTITY_CLASS}>
-      {person.name ? (
-        <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
-          {person.name}
-        </p>
-      ) : null}
       <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_CLASS}>
         <SocialAvatar name={person.avatarName} photoUrl={photoUrl} ring={ring} size="profile" />
-        {stats ? (
-          <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
+        {person.name || stats ? (
+          <div data-social-profile-meta="" className={SOCIAL_PROFILE_META_CLASS}>
+            {person.name ? (
+              <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
+                {person.name}
+              </p>
+            ) : null}
+            {stats ? (
+              <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
+            ) : null}
+          </div>
         ) : null}
       </div>
       <div data-social-profile-face="" className={SOCIAL_PROFILE_FACE_CLASS}>

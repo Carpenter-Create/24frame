@@ -291,16 +291,22 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 }
 
 // Public profile head — IG geometry, house chrome. One SoT for own
-// /social/profile and public /social/u/[handle]. Display name first
-// (Adam 2026-09-20: name above the posts/followers/following counts).
-// Then avatar | 3-up stats on one row, items-center to the 72/88 face.
-// Stats fill remaining head width up to max-w-xs so the 3-up stays
-// optically close — no stretch void across the 892 column. Bio · Role
-// pills · links stack next. Dedicated house-token air before Edit /
-// Share (or Follow / Share). Handle stays in chrome.
+// /social/profile and public /social/u/[handle]. Head row is avatar |
+// (display name → posts/followers/following stacked). Name is never
+// full-width above the avatar (that read as randomly floating). Stats
+// sit directly under the name in the right column, still max-w-xs so
+// the 3-up stays optically close — no stretch void across the 892
+// column. Bio · Role pills · links · actions stay full-width below
+// the head row. Dedicated house-token air before Edit / Share (or
+// Follow / Share). Handle stays in chrome. Name wraps; never truncate.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
 export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
+
+// Right column beside the 72/88 face. min-w-0 so a long display name
+// wraps instead of overflowing the phone canvas.
+export const SOCIAL_PROFILE_META_CLASS =
+  "flex min-w-0 flex-1 flex-col justify-center gap-1";
 
 export const SOCIAL_PROFILE_STATS_CLASS =
   "flex min-w-0 max-w-xs flex-1 items-center";
