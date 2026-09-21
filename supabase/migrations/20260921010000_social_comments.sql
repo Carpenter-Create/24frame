@@ -146,6 +146,13 @@ security definer
 set search_path to 'public'
 as $$
 begin
+  -- FK cascade from profiles (auth.users → profiles → comments) fires
+  -- this BEFORE DELETE at depth > 1 without a client JWT. Direct
+  -- client deletes stay at depth 1 and still require author or
+  -- service_role.
+  if pg_trigger_depth() > 1 then
+    return old;
+  end if;
   if auth.role() = 'service_role' then
     return old;
   end if;
