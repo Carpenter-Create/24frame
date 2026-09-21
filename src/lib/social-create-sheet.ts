@@ -40,13 +40,13 @@ export const SOCIAL_CREATE_TILES = [
     id: "write",
     label: SOCIAL.create.write,
     href: socialCreateHref("text"),
-    icon: "text-t",
+    icon: "pencil-simple",
   },
   {
     id: "live",
     label: SOCIAL.create.goLive,
     href: SOCIAL_ROUTES.createLive,
-    icon: "camera",
+    icon: "broadcast",
   },
 ] as const satisfies readonly {
   id: string;
@@ -69,10 +69,10 @@ export const SOCIAL_CREATE_SHEET_HOST_CLASS =
   `${APP_SHEET_HOST_CLASS} ${APP_SHEET_MODAL_PROMOTE_HOST}`;
 
 export const SOCIAL_CREATE_SHEET_SURFACE_CLASS =
-  `${APP_SHEET_SURFACE_CLASS} relative z-10 w-full shadow-none ${APP_SHEET_MODAL_PROMOTE_SURFACE}`;
+  `${APP_SHEET_SURFACE_CLASS} relative z-10 w-full ${APP_SHEET_MODAL_PROMOTE_SURFACE}`;
 
 export const SOCIAL_CREATE_SHEET_HEAD_CLASS =
-  `${APP_SHEET_HEAD_CLASS} relative justify-between`;
+  `${APP_SHEET_HEAD_CLASS} relative justify-between md:border-b md:border-hairline`;
 
 export const SOCIAL_CREATE_SHEET_TITLE_CLASS =
   "pointer-events-none absolute inset-0 flex items-center justify-center t-body font-medium text-ink";
@@ -81,19 +81,19 @@ export const SOCIAL_CREATE_SHEET_TITLE_CLASS =
 export const SOCIAL_CREATE_SHEET_SCRIM_CLASS =
   "absolute inset-0 bg-ink/40 app-sheet-scrim-fade";
 
-// One equal row. Never truncate — labels wrap/stack.
+// One equal row. More vertical air than original. Never truncate — labels wrap/stack.
 export const SOCIAL_CREATE_TILES_CLASS =
-  "grid w-full grid-cols-3 gap-[var(--space-4)]";
+  "grid w-full grid-cols-3 gap-[var(--space-6)]";
 
 // Tile chrome stays quiet. Selected lives on the well — not a
 // full-tile enterprise hover card, not a Mercury dest chip.
 export const SOCIAL_CREATE_TILE_CLASS =
-  "group flex min-w-0 flex-col items-center justify-center gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-2)] py-[var(--space-5)] text-ink";
+  "group flex min-w-0 flex-col items-center justify-center gap-[var(--space-3)] px-[var(--space-2)] py-[var(--space-6)] text-ink";
 
-// Muted house-radius well at rest. Hover/active: Sporty Blue wash +
-// accent icon. One primary, sharp. Not a colored orb.
+// Circular well (~64px), muted rest fill. Hover/active: Sporty Blue wash +
+// accent icon. Coinbase-calm creator tile. Not a colored orb.
 export const SOCIAL_CREATE_TILE_WELL_CLASS =
-  "flex size-14 items-center justify-center rounded-[var(--radius-lg)] bg-surface-muted transition-colors group-hover:bg-accent-wash group-active:bg-accent-wash";
+  "flex size-16 items-center justify-center rounded-full bg-surface-muted transition-colors group-hover:bg-accent-wash group-active:bg-accent-wash";
 
 export const SOCIAL_CREATE_TILE_ICON_CLASS =
   "text-ink transition-colors group-hover:text-accent group-active:text-accent";

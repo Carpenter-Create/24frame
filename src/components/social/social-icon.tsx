@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Broadcast,
   Camera,
   CameraRotate,
   CaretLeft,
@@ -67,6 +68,7 @@ const ICONS: Record<SocialPhosphorIconName, Icon> = {
   "caret-right": CaretRight,
   x: X,
   heart: Heart,
+  broadcast: Broadcast,
 };
 
 export function SocialIcon({

@@ -66,7 +66,7 @@ export const APP_SHEET_MODAL_PROMOTE_HOST =
   "md:items-center md:justify-center";
 
 export const APP_SHEET_MODAL_PROMOTE_SURFACE =
-  "md:w-auto md:min-w-[20rem] md:max-w-[min(92vw,28rem)] md:rounded-b-[16px] md:pb-[var(--space-6)] md:shadow-[var(--elevation)]";
+  "md:w-auto md:min-w-[22rem] md:max-w-[min(92vw,28rem)] md:rounded-b-[16px] md:border md:border-hairline md:pb-[var(--space-6)] md:shadow-[var(--elevation)]";
 
 // Thread ··· item glyphs only — surface chrome is MenuSurface.
 export const THREAD_POPOVER_ICON_CLASS = "size-4 shrink-0 text-ink-3";

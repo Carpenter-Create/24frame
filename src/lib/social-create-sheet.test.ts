@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { SOCIAL, SOCIAL_ROUTES, socialCreateHref } from "./social";
 import {
+  SOCIAL_CREATE_SHEET_HEAD_CLASS,
   SOCIAL_CREATE_SHEET_HOST_CLASS,
   SOCIAL_CREATE_SHEET_PRESENTATION,
   SOCIAL_CREATE_SHEET_SCRIM_CLASS,
@@ -64,8 +65,11 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("backdrop-blur");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain(APP_SHEET_MODAL_PROMOTE_SURFACE);
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:w-auto");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:min-w-[22rem]");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:max-w-[min(92vw,28rem)]");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:rounded-b-[16px]");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:border");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:border-hairline");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:shadow-[var(--elevation)]");
 
     // Scrim: opaque wash, no frost
@@ -89,9 +93,9 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_CREATE_TILE_WELL_CLASS).toContain("group-hover:bg-accent-wash");
     expect(SOCIAL_CREATE_TILE_WELL_CLASS).toContain("group-active:bg-accent-wash");
     expect(SOCIAL_CREATE_TILE_WELL_CLASS).toContain("transition-colors");
-    expect(SOCIAL_CREATE_TILE_WELL_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(SOCIAL_CREATE_TILE_WELL_CLASS).toContain("rounded-full");
+    expect(SOCIAL_CREATE_TILE_WELL_CLASS).toContain("size-16");
     expect(SOCIAL_CREATE_TILE_WELL_CLASS).not.toContain("border");
-    expect(SOCIAL_CREATE_TILE_WELL_CLASS).not.toContain("rounded-full");
     expect(SOCIAL_CREATE_TILE_WELL_CLASS).not.toContain("shadow");
     expect(SOCIAL_CREATE_TILE_ICON_CLASS).toContain("group-hover:text-accent");
     expect(SOCIAL_CREATE_TILE_ICON_CLASS).toContain("group-active:text-accent");
@@ -102,7 +106,12 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_CREATE_TILE_LABEL_CLASS).not.toContain("truncate");
     expect(SOCIAL_CREATE_TILE_LABEL_CLASS).not.toContain("t-label");
     expect(SOCIAL_CREATE_TILE_LABEL_CLASS).not.toContain("uppercase");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("shadow-none");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("shadow-none");
+
+    // Desktop head hairline — dialog-grade separator
+    expect(SOCIAL_CREATE_SHEET_HEAD_CLASS).toContain("md:border-b");
+    expect(SOCIAL_CREATE_SHEET_HEAD_CLASS).toContain("md:border-hairline");
+
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).not.toContain("bg-ink/60");
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).not.toContain("bg-ink/80");
 
