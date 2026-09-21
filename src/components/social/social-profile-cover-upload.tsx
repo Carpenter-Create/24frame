@@ -15,6 +15,11 @@ import {
   readAccountAvatarCropPreview,
 } from "@/lib/account-avatar-crop";
 import { SOCIAL } from "@/lib/social";
+import { SOCIAL_COVER_BYTES_ROUTE } from "@/lib/social-edge";
+import {
+  coverFailureCopy,
+  coverPreviewIsLocal,
+} from "@/lib/social-profile-cover-load";
 import {
   COVER_CROP_MAX_BYTES,
   COVER_CROP_OUTPUT_HEIGHT,
@@ -42,27 +47,22 @@ import { patchSocialProfileOptimistic } from "@/lib/social-profile-edit";
 
 type CoverMode = "idle" | "menu" | "reposition";
 
-function measureCoverImage(url: string): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const image = new window.Image();
-    image.onload = () => {
-      if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-        resolve({ width: image.naturalWidth, height: image.naturalHeight });
-        return;
-      }
-      reject(new Error("cover"));
-    };
-    image.onerror = () => reject(new Error("cover"));
-    image.src = url;
-  });
-}
-
-async function coverFileFromUrl(url: string): Promise<File> {
-  const response = await fetch(url);
+async function fileFromResponse(response: Response): Promise<File> {
   if (!response.ok) throw new Error(SOCIAL.profile.coverCropFailed);
   const blob = await response.blob();
   const type = blob.type.startsWith("image/") ? blob.type : "image/jpeg";
   return new File([blob], "cover-source", { type });
+}
+
+/** Same-origin owner bytes. redirect:error so a CDN 302 is never followed. */
+async function fileFromOwnCover(): Promise<File> {
+  const response = await fetch(SOCIAL_COVER_BYTES_ROUTE, { redirect: "error" });
+  return fileFromResponse(response);
+}
+
+async function fileFromLocalPreview(url: string): Promise<File> {
+  const response = await fetch(url);
+  return fileFromResponse(response);
 }
 
 export function SocialProfileCoverUpload({
@@ -167,36 +167,16 @@ export function SocialProfileCoverUpload({
     fileRef.current?.click();
   }
 
-  async function beginReposition() {
+  function beginReposition() {
     const url = coverUrl?.trim();
     if (!url || uploading) return;
-    const gen = ++loadGen.current;
+    loadGen.current += 1;
     setError("");
     setRepositionFile(null);
     setRepositionSize(null);
     setPanOffset({ x: 0, y: 0 });
     rememberPreview(url, false);
     setMode("reposition");
-    try {
-      const file = await coverFileFromUrl(url);
-      if (loadGen.current !== gen) return;
-      const next = await readAccountAvatarCropPreview(file);
-      if (loadGen.current !== gen) {
-        URL.revokeObjectURL(next.url);
-        return;
-      }
-      setRepositionFile(file);
-      rememberPreview(next.url, true);
-      setRepositionSize({ width: next.width, height: next.height });
-    } catch {
-      if (loadGen.current !== gen) return;
-      try {
-        const size = await measureCoverImage(url);
-        if (loadGen.current === gen) setRepositionSize(size);
-      } catch {
-        if (loadGen.current === gen) setError(SOCIAL.profile.coverCropFailed);
-      }
-    }
   }
 
   async function removeCover() {
@@ -274,7 +254,7 @@ export function SocialProfileCoverUpload({
       if (!file) {
         const url = coverUrl?.trim() || repositionPreview;
         if (!url) throw new Error(SOCIAL.profile.coverCropFailed);
-        file = await coverFileFromUrl(url);
+        file = coverPreviewIsLocal(url) ? await fileFromLocalPreview(url) : await fileFromOwnCover();
       }
       let size = repositionSize;
       if (!size) {
@@ -356,14 +336,13 @@ export function SocialProfileCoverUpload({
         onPreview?.(null);
         patchSocialProfileOptimistic({ coverUrl: null });
         URL.revokeObjectURL(previewUrl);
-        setError(
-          e instanceof Error && e.message
-            ? e.message
-            : SOCIAL.profile.coverCropFailed,
-        );
-      } else {
-        setError(SOCIAL.profile.coverCropFailed);
       }
+      setError(
+        coverFailureCopy(
+          e,
+          previewUrl ? SOCIAL.home.uploadFailed : SOCIAL.profile.coverCropFailed,
+        ),
+      );
     } finally {
       setUploading(false);
     }
@@ -447,6 +426,13 @@ export function SocialProfileCoverUpload({
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerUp}
+              onLoad={(event) => {
+                const image = event.currentTarget;
+                if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+                  setRepositionSize({ width: image.naturalWidth, height: image.naturalHeight });
+                }
+              }}
+              onError={() => setError(SOCIAL.profile.coverCropFailed)}
             />
           ) : null}
         </>
