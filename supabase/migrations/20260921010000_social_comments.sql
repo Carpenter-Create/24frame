@@ -208,6 +208,9 @@ revoke execute on function public.refresh_comment_engagement()
 -- ----------------------------------------------------------------------------
 alter table public.comments enable row level security;
 
+-- Authors keep SELECT on their own soft-deleted rows so UPDATE
+-- deleted_at can succeed (Postgres WITH CHECK + SELECT). Readers
+-- and loaders still hide deleted_at IS NOT NULL.
 drop policy if exists comments_select_visible on public.comments;
 create policy comments_select_visible on public.comments
   for select to authenticated
