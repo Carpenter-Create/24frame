@@ -249,7 +249,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_EMPTY_PANEL_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_ROW_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_GUTTER_CLASS");
-    expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col gap-[var(--space-2)] bg-surface-muted");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toBe(
+      "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]",
+    );
+    expect(SOCIAL_FEED_GUTTER_CLASS).toContain("py-[var(--space-2)]");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
@@ -648,6 +651,17 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_PROFILE_PLAY_CLASS");
     expect(chrome).toContain("aspect-square w-full");
     expect(chrome).toContain("grid-cols-3 gap-px");
+    const authorHistory = card.slice(
+      card.indexOf("export function SocialAuthorHistory"),
+      card.indexOf("export function socialAuthorPostCard"),
+    );
+    expect(authorHistory).toContain("SocialPostCard");
+    expect(authorHistory).toContain("SOCIAL_FEED_GUTTER_CLASS");
+    expect(authorHistory).not.toContain("SOCIAL_PROFILE_GRID_CLASS");
+    expect(authorHistory).not.toContain("data-social-profile-grid");
+    expect(authorHistory).not.toContain("SOCIAL_PROFILE_TILE_CLASS");
+    expect(profile).not.toContain("<SocialHighlights cards={highlightCards} />\n          <SocialAuthorHistory");
+    expect(publicProfile).not.toContain("<SocialHighlights cards={highlightCards} />\n            <SocialAuthorHistory");
     expect(chrome).not.toContain("h-[140px]");
     expect(chrome).toContain("HOUSE_PILL_ITEM_CLASS");
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");

@@ -238,12 +238,13 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
 export const SOCIAL_FEED_ROW_CLASS =
   `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
 
-// Facebook gray gutter — muted canvas between surface posts.
+// Facebook gray gutter — muted canvas frames every surface post.
 // Light --bg and --surface are both white; surface-muted (#f4f4f6)
-// is the visible band. ~8px house space-2. Stack gap only — never
-// per-card margin that doubles the band.
+// is the visible band. ~8px house space-2. Stack gap between cards
+// plus py so the first and last cards are framed — never per-card
+// margin that doubles the band.
 export const SOCIAL_FEED_GUTTER_CLASS =
-  "flex flex-col gap-[var(--space-2)] bg-surface-muted";
+  "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]";
 
 // Comment thread — house app-sheet rise. Same host/scrim as Create.
 // Composer stays at the bottom. Do not fork a second sheet grammar.

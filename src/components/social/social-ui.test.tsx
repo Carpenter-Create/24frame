@@ -40,7 +40,6 @@ import {
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
-  SOCIAL_PROFILE_PLAY_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
@@ -528,7 +527,10 @@ describe("Social profile public face", () => {
     expect(history).toContain("data-social-author-history");
     expect(history).toContain("data-social-author-posts");
     expect(history).toContain(SOCIAL_FEED_GUTTER_CLASS);
-    expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col gap-[var(--space-2)] bg-surface-muted");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toBe(
+      "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]",
+    );
+    expect(SOCIAL_FEED_GUTTER_CLASS).toContain("py-[var(--space-2)]");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
     expect(history).toContain("flex flex-col bg-surface md:hidden");
     expect(history).toContain("border border-hairline bg-surface");
@@ -540,7 +542,7 @@ describe("Social profile public face", () => {
     expect(history).not.toContain("data-social-profile-grid");
   });
 
-  it("keeps media posts on the IG square grid and text cards below with FB gutters", () => {
+  it("renders media and text posts as chronological feed cards, not an IG grid", () => {
     const html = renderToStaticMarkup(
       <SocialAuthorHistory
         truncated={false}
@@ -578,30 +580,20 @@ describe("Social profile public face", () => {
         ]}
       />,
     );
-    expect(html).toContain("data-social-profile-grid");
-    expect(html).toContain(SOCIAL_PROFILE_GRID_CLASS);
-    expect(html).toContain(SOCIAL_PROFILE_TILE_CLASS);
-    expect(html).toContain("aspect-square");
-    expect(html).toContain("grid-cols-3");
-    expect(html).toContain("gap-px");
-    expect(html).toContain("data-social-profile-play");
-    expect(html).toContain(SOCIAL_PROFILE_PLAY_CLASS);
-    expect(html).toContain('data-social-icon="play"');
+    expect(html).not.toContain("data-social-profile-grid");
+    expect(html).not.toContain(SOCIAL_PROFILE_GRID_CLASS);
+    expect(html).not.toContain(SOCIAL_PROFILE_TILE_CLASS);
+    expect(html).not.toContain("aspect-square");
+    expect(html).not.toContain("data-social-profile-play");
     expect(html).toContain(SOCIAL_FEED_GUTTER_CLASS);
+    expect(html).toContain("aspect-video");
+    expect(html).toContain('data-social-post="clip"');
+    expect(html).toContain("Mux smoke");
+    expect(html).toContain(SOCIAL.home.videoKind);
     expect(html).toContain('data-social-post="note"');
     expect(html).toContain("First caption post test");
-    const grid = html.slice(
-      html.indexOf("data-social-profile-grid"),
-      html.indexOf('data-social-post="note"'),
-    );
-    expect(grid).toContain('data-social-post="clip"');
-    expect(grid).not.toContain("Mux smoke");
-    expect(grid).not.toContain(SOCIAL.home.videoKind);
-    expect(grid).not.toContain("line-clamp-2");
-    expect(SOCIAL_PROFILE_TILE_CLASS).toContain("aspect-square");
-    expect(SOCIAL_PROFILE_TILE_CLASS).not.toContain("h-[140px]");
-    expect(SOCIAL_PROFILE_TILE_CLASS).not.toContain("p-2.5");
-    expect(SOCIAL_PROFILE_GRID_CLASS).not.toContain("gap-1.5");
+    expect(html).toContain(SOCIAL.post.comments);
+    expect(html.indexOf('data-social-post="clip"')).toBeLessThan(html.indexOf('data-social-post="note"'));
   });
 
   it("shows an honest empty state and names the bound when truncated", () => {

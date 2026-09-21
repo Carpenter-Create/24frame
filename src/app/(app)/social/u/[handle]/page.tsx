@@ -277,30 +277,27 @@ export default async function SocialPublicProfilePage({
             })}
           />
         ) : (
-          <>
-            <SocialHighlights cards={highlightCards} />
-            <SocialAuthorHistory
-              truncated={history.truncated}
-              emptyAction={{
-                href: isSelf ? socialCreateHref("media") : SOCIAL_ROUTES.create,
-                label: SOCIAL.profile.sharePost,
-              }}
-              posts={history.posts.map((post) =>
-                socialAuthorPostCard({
-                  post,
-                  authorHandle: member.handle,
-                  authorName: socialPersonLabel({
-                    handle: member.handle,
-                    displayName: member.display_name,
-                  }),
-                  authorPhotoUrl: photoUrl,
-                  liked: liked.has(post.id),
-                  canLike: !!own,
-                  media: media.get(post.id) ?? [],
+          <SocialAuthorHistory
+            truncated={history.truncated}
+            emptyAction={{
+              href: isSelf ? socialCreateHref("media") : SOCIAL_ROUTES.create,
+              label: SOCIAL.profile.sharePost,
+            }}
+            posts={history.posts.map((post) =>
+              socialAuthorPostCard({
+                post,
+                authorHandle: member.handle,
+                authorName: socialPersonLabel({
+                  handle: member.handle,
+                  displayName: member.display_name,
                 }),
-              )}
-            />
-          </>
+                authorPhotoUrl: photoUrl,
+                liked: liked.has(post.id),
+                canLike: !!own,
+                media: media.get(post.id) ?? [],
+              }),
+            )}
+          />
         )}
     </div>
   );

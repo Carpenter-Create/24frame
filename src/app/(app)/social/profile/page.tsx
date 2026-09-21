@@ -249,27 +249,24 @@ async function SocialProfileMain({
           })}
         />
       ) : (
-        <>
-          <SocialHighlights cards={highlightCards} />
-          <SocialAuthorHistory
-            truncated={history.truncated}
-            emptyAction={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
-            posts={history.posts.map((post) =>
-              socialAuthorPostCard({
-                post,
-                authorHandle: profile.handle,
-                authorName: socialPersonLabel({
-                  handle: profile.handle,
-                  displayName: profile.display_name,
-                }),
-                authorPhotoUrl: photoUrl,
-                liked: liked.has(post.id),
-                canLike: true,
-                media: media.get(post.id) ?? [],
+        <SocialAuthorHistory
+          truncated={history.truncated}
+          emptyAction={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
+          posts={history.posts.map((post) =>
+            socialAuthorPostCard({
+              post,
+              authorHandle: profile.handle,
+              authorName: socialPersonLabel({
+                handle: profile.handle,
+                displayName: profile.display_name,
               }),
-            )}
-          />
-        </>
+              authorPhotoUrl: photoUrl,
+              liked: liked.has(post.id),
+              canLike: true,
+              media: media.get(post.id) ?? [],
+            }),
+          )}
+        />
       )}
     </>
   );

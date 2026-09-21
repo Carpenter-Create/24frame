@@ -13,14 +13,11 @@ import {
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_BIO_CLASS,
   SOCIAL_PROFILE_FACE_CLASS,
-  SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
-  SOCIAL_PROFILE_PLAY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
-  SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
 import {
@@ -40,10 +37,8 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
-import { SOCIAL_ICON_SIZE_PROFILE_PLAY } from "@/lib/social-icons";
 import {
   SOCIAL_POST_IMAGE_SIZES,
-  SOCIAL_PROFILE_TILE_IMAGE_SIZES,
   socialMediaFrameClass,
   type SocialMediaOrientation,
 } from "@/lib/social-media-display";
@@ -186,14 +181,6 @@ function SocialPostMediaFrame({ item }: { item: SocialPostMediaItem }) {
     <div data-social-post-image="" className={frame}>
       <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />
     </div>
-  );
-}
-
-function SocialProfileVideoGlyph() {
-  return (
-    <span data-social-profile-play="" className={SOCIAL_PROFILE_PLAY_CLASS}>
-      <SocialIcon name="play" size={SOCIAL_ICON_SIZE_PROFILE_PLAY} active />
-    </span>
   );
 }
 
@@ -361,45 +348,13 @@ export function SocialAuthorHistory({
   truncated: boolean;
   emptyAction?: { href: string; label: string };
 }) {
-  const mediaPosts = posts.filter((post) => post.media.length > 0);
-  const textPosts = posts.filter((post) => post.media.length === 0);
   return (
     <div data-social-author-history="" className="flex flex-col">
       {posts.length === 0 ? (
         <SocialProfilePostsEmpty action={emptyAction} />
       ) : (
         <div data-social-author-posts="" className={SOCIAL_FEED_GUTTER_CLASS}>
-          {mediaPosts.length > 0 ? (
-            <div
-              data-social-profile-grid=""
-              className={SOCIAL_PROFILE_GRID_CLASS}
-            >
-              {mediaPosts.map((post) => {
-                const first = post.media[0];
-                if (!first) return null;
-                return (
-                  <article
-                    key={post.id}
-                    data-social-post={post.id}
-                    className={SOCIAL_PROFILE_TILE_CLASS}
-                  >
-                    {first.kind === "video" ? (
-                      <SocialFeedVideo
-                        item={first}
-                        className="absolute inset-0 size-full object-cover"
-                      />
-                    ) : (
-                      <div data-social-post-image="" className="absolute inset-0">
-                        <SocialMediaImage src={first.url} sizes={SOCIAL_PROFILE_TILE_IMAGE_SIZES} />
-                      </div>
-                    )}
-                    {first.kind === "video" ? <SocialProfileVideoGlyph /> : null}
-                  </article>
-                );
-              })}
-            </div>
-          ) : null}
-          {textPosts.map((post) => (
+          {posts.map((post) => (
             <SocialPostCard key={post.id} post={post} />
           ))}
         </div>
