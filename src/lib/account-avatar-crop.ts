@@ -137,3 +137,117 @@ export async function cropAvatarFile(
     bitmap.close();
   }
 }
+
+// --- Rectangular viewport crop (profile cover 4:1) ---
+
+export function rectCoverDrawSize(
+  imageWidth: number,
+  imageHeight: number,
+  viewWidth: number,
+  viewHeight: number,
+  scale: number,
+): { width: number; height: number } {
+  const safeScale = Math.min(AVATAR_CROP_MAX_SCALE, Math.max(AVATAR_CROP_MIN_SCALE, scale));
+  const cover = Math.max(viewWidth / imageWidth, viewHeight / imageHeight) * safeScale;
+  return { width: imageWidth * cover, height: imageHeight * cover };
+}
+
+export function clampRectCropOffset(
+  offsetX: number,
+  offsetY: number,
+  drawWidth: number,
+  drawHeight: number,
+  viewWidth: number,
+  viewHeight: number,
+): { offsetX: number; offsetY: number } {
+  const minX = Math.min(0, viewWidth - drawWidth);
+  const minY = Math.min(0, viewHeight - drawHeight);
+  return {
+    offsetX: Math.min(0, Math.max(minX, offsetX)),
+    offsetY: Math.min(0, Math.max(minY, offsetY)),
+  };
+}
+
+export function defaultRectCropFrame(
+  imageWidth: number,
+  imageHeight: number,
+  viewWidth: number,
+  viewHeight: number,
+): AvatarCropFrame {
+  const draw = rectCoverDrawSize(imageWidth, imageHeight, viewWidth, viewHeight, 1);
+  return {
+    scale: 1,
+    offsetX: (viewWidth - draw.width) / 2,
+    offsetY: (viewHeight - draw.height) / 2,
+  };
+}
+
+export function rectCropSourceRect(
+  imageWidth: number,
+  imageHeight: number,
+  viewWidth: number,
+  viewHeight: number,
+  frame: AvatarCropFrame,
+): { sx: number; sy: number; sw: number; sh: number } {
+  const draw = rectCoverDrawSize(imageWidth, imageHeight, viewWidth, viewHeight, frame.scale);
+  const clamped = clampRectCropOffset(
+    frame.offsetX,
+    frame.offsetY,
+    draw.width,
+    draw.height,
+    viewWidth,
+    viewHeight,
+  );
+  const pixelScale = draw.width / imageWidth;
+  return {
+    sx: -clamped.offsetX / pixelScale,
+    sy: -clamped.offsetY / pixelScale,
+    sw: viewWidth / pixelScale,
+    sh: viewHeight / pixelScale,
+  };
+}
+
+export async function cropRectFile(
+  file: File,
+  frame: AvatarCropFrame,
+  viewWidth: number,
+  viewHeight: number,
+  outputWidth: number,
+  outputHeight: number,
+  outputName: string,
+  maxBytes?: number,
+): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const source = rectCropSourceRect(bitmap.width, bitmap.height, viewWidth, viewHeight, frame);
+    const canvas = document.createElement("canvas");
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not crop photo.");
+    ctx.drawImage(
+      bitmap,
+      source.sx,
+      source.sy,
+      source.sw,
+      source.sh,
+      0,
+      0,
+      outputWidth,
+      outputHeight,
+    );
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (next) => (next ? resolve(next) : reject(new Error("Could not crop photo."))),
+        AVATAR_CROP_OUTPUT_TYPE,
+        AVATAR_CROP_OUTPUT_QUALITY,
+      );
+    });
+    if (maxBytes && blob.size > maxBytes) {
+      throw new Error(`Photo must be ${Math.floor(maxBytes / (1024 * 1024))} MB or smaller.`);
+    }
+    return new File([blob], outputName, { type: AVATAR_CROP_OUTPUT_TYPE });
+  } finally {
+    bitmap.close();
+  }
+}
