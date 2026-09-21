@@ -58,6 +58,16 @@ export const APP_SHEET_HAIRLINE_CLASS = "h-px w-full bg-hairline";
 
 export const APP_SHEET_SCRIM_CLASS = "absolute inset-0 bg-ink/24 app-sheet-scrim-fade";
 
+// Desktop modal promotion — apply alongside APP_SHEET_HOST_CLASS and
+// APP_SHEET_SURFACE_CLASS to upgrade a phone bottom sheet to a centered
+// modal card on md+. Phone layout stays untouched. Pattern mirrors
+// DIALOG_SHEET_CLASS (dialog.tsx) which does the reverse (dialog → sheet).
+export const APP_SHEET_MODAL_PROMOTE_HOST =
+  "md:items-center md:justify-center";
+
+export const APP_SHEET_MODAL_PROMOTE_SURFACE =
+  "md:w-auto md:min-w-[20rem] md:max-w-[min(92vw,28rem)] md:rounded-b-[16px] md:pb-[var(--space-6)] md:shadow-[var(--elevation)]";
+
 // Thread ··· item glyphs only — surface chrome is MenuSurface.
 export const THREAD_POPOVER_ICON_CLASS = "size-4 shrink-0 text-ink-3";
 

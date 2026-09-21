@@ -46,7 +46,7 @@ describe("SocialCreateSheet", () => {
       }),
     );
     expect(html).toContain("data-social-create-sheet");
-    expect(html).toContain('data-social-create-sheet-presentation="imessage-new-message"');
+    expect(html).toContain('data-social-create-sheet-presentation="responsive"');
     expect(html).toContain("data-social-create-tiles");
     expect(html).toContain('role="dialog"');
     expect(html).toContain(SOCIAL.create.title);

@@ -7,6 +7,8 @@ import {
   APP_SHEET_HAIRLINE_CLASS,
   APP_SHEET_HEAD_CLASS,
   APP_SHEET_HOST_CLASS,
+  APP_SHEET_MODAL_PROMOTE_HOST,
+  APP_SHEET_MODAL_PROMOTE_SURFACE,
   APP_SHEET_MOTION_DURATION_MS,
   APP_SHEET_MOTION_EASING,
   APP_SHEET_RISE_CLASS,
@@ -136,5 +138,18 @@ describe("house sheet lock", () => {
     expect(THREAD_POPOVER_ICON_CLASS).toContain("text-ink-3");
     expect(THREAD_POPOVER_ICON_CLASS).not.toContain("t-body");
     expect(THREAD_POPOVER_ICON_CLASS).not.toContain("min-w-");
+  });
+
+  it("provides modal-promote classes: phone sheet → desktop centered modal", () => {
+    expect(APP_SHEET_MODAL_PROMOTE_HOST).toContain("md:items-center");
+    expect(APP_SHEET_MODAL_PROMOTE_HOST).toContain("md:justify-center");
+    expect(APP_SHEET_MODAL_PROMOTE_HOST).not.toContain("justify-end");
+
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:w-auto");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:max-w-[min(92vw,28rem)]");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:rounded-b-[16px]");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:shadow-[var(--elevation)]");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).not.toContain("backdrop-blur");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).not.toContain("frost");
   });
 });

@@ -1,5 +1,8 @@
 import {
   APP_SHEET_HEAD_CLASS,
+  APP_SHEET_HOST_CLASS,
+  APP_SHEET_MODAL_PROMOTE_HOST,
+  APP_SHEET_MODAL_PROMOTE_SURFACE,
   APP_SHEET_SURFACE_CLASS,
 } from "@/lib/house-sheet";
 import {
@@ -10,10 +13,10 @@ import {
 import type { SocialPhosphorIconName } from "@/lib/social-icons";
 
 // Social Create chooser. Adam lock 2026-09-20; presentation + craft
-// refine same day.
-// Presentation: iMessage New Message — sheet rises over the dimmed
-// Social feed. Title Create. X dismiss. Scrim dismiss. House rise
-// (calm precision, no bounce).
+// refine same day. Desktop lock 2026-09-21: FB centered modal on md+.
+// Presentation: responsive — phone: iMessage New Message bottom sheet,
+// desktop (md+): Facebook Create-post centered modal card. Bounded
+// width, rounded, shadow, dim scrim. Same tiles/content both sizes.
 // Register: Coinbase institutional — modern trust, calm precision,
 // one Sporty Blue primary, sharp selected states, quiet helpers —
 // still social/creator/fun enough for Media · Write · Go live.
@@ -60,13 +63,13 @@ export function socialCreateTile(
   return SOCIAL_CREATE_TILES.find((tile) => tile.id === id) ?? null;
 }
 
-export const SOCIAL_CREATE_SHEET_PRESENTATION = "imessage-new-message";
+export const SOCIAL_CREATE_SHEET_PRESENTATION = "responsive";
 
 export const SOCIAL_CREATE_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
+  `${APP_SHEET_HOST_CLASS} ${APP_SHEET_MODAL_PROMOTE_HOST}`;
 
 export const SOCIAL_CREATE_SHEET_SURFACE_CLASS =
-  `${APP_SHEET_SURFACE_CLASS} relative z-10 w-full shadow-none`;
+  `${APP_SHEET_SURFACE_CLASS} relative z-10 w-full shadow-none ${APP_SHEET_MODAL_PROMOTE_SURFACE}`;
 
 export const SOCIAL_CREATE_SHEET_HEAD_CLASS =
   `${APP_SHEET_HEAD_CLASS} relative justify-between`;
