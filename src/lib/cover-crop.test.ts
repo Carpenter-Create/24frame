@@ -187,6 +187,29 @@ describe("cover upload component (FB-exact)", () => {
     expect(src).toContain("onPointerMove");
     expect(src).toContain("onPointerUp");
     expect(src).toContain("panOffset");
+    expect(src).toContain("touch-none");
+  });
+
+  it("toggles the cover menu without the outside press eating the next open", () => {
+    expect(src).toContain("nextCoverPillMode");
+    expect(src).toContain("coverMenuClosesOnDocumentPress");
+    expect(src).toContain("setTimeout");
+    expect(src).toContain('addEventListener("mousedown"');
+    expect(src).toContain('addEventListener("keydown"');
+    expect(src).not.toContain('addEventListener("pointerdown"');
+    expect(src).toContain("stopPropagation()");
+    const upload = src.slice(
+      src.indexOf("function beginUpload"),
+      src.indexOf("async function beginReposition"),
+    );
+    const reposition = src.slice(
+      src.indexOf("async function beginReposition"),
+      src.indexOf("async function removeCover"),
+    );
+    expect(upload).toContain("fileRef.current?.click()");
+    expect(reposition).not.toContain("fileRef");
+    expect(reposition).toContain("coverFileFromUrl");
+    expect(reposition).toContain('setMode("reposition")');
   });
 
   it("clears file input on cancel", () => {
@@ -225,6 +248,7 @@ describe("cover chrome tokens", () => {
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS");
+    expect(chrome).toContain("pointer-events-none absolute inset-0 z-10");
   });
 
   it("menu drops below the pill (top, not bottom)", () => {

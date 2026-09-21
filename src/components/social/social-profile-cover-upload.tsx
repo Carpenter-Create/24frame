@@ -26,6 +26,10 @@ import {
   SOCIAL_PROFILE_COVER_LOCK_A,
 } from "@/lib/social-profile-cover";
 import {
+  coverMenuClosesOnDocumentPress,
+  nextCoverPillMode,
+} from "@/lib/social-profile-cover-menu";
+import {
   SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS,
   SOCIAL_PROFILE_COVER_MENU_CLASS,
   SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS,
@@ -38,6 +42,29 @@ import { patchSocialProfileOptimistic } from "@/lib/social-profile-edit";
 
 type CoverMode = "idle" | "menu" | "reposition";
 
+function measureCoverImage(url: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const image = new window.Image();
+    image.onload = () => {
+      if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+        resolve({ width: image.naturalWidth, height: image.naturalHeight });
+        return;
+      }
+      reject(new Error("cover"));
+    };
+    image.onerror = () => reject(new Error("cover"));
+    image.src = url;
+  });
+}
+
+async function coverFileFromUrl(url: string): Promise<File> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(SOCIAL.profile.coverCropFailed);
+  const blob = await response.blob();
+  const type = blob.type.startsWith("image/") ? blob.type : "image/jpeg";
+  return new File([blob], "cover-source", { type });
+}
+
 export function SocialProfileCoverUpload({
   coverUrl,
   onPreview,
@@ -47,6 +74,8 @@ export function SocialProfileCoverUpload({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const ownedPreview = useRef<string | null>(null);
+  const loadGen = useRef(0);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [mode, setMode] = useState<CoverMode>("idle");
@@ -67,23 +96,57 @@ export function SocialProfileCoverUpload({
 
   const hasCover = Boolean(coverUrl?.trim());
 
-  const closeMenu = useCallback(() => {
-    if (mode === "menu") setMode("idle");
+  // Arm the outside listener on a later turn than the open click so that
+  // gesture cannot close the menu. A press on the pill is stopped above
+  // and is not an outside close; the click toggles.
+  useEffect(() => {
+    if (mode !== "menu") return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMode((current) => (current === "menu" ? "idle" : current));
+    };
+    const onPointer = (event: MouseEvent) => {
+      const host = menuRef.current;
+      const inside = Boolean(host?.contains(event.target as Node));
+      if (!coverMenuClosesOnDocumentPress("menu", inside)) return;
+      setMode((current) => (current === "menu" ? "idle" : current));
+    };
+    const timer = window.setTimeout(() => {
+      document.addEventListener("mousedown", onPointer);
+      document.addEventListener("keydown", onKey);
+    }, 0);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [mode]);
 
   useEffect(() => {
-    if (mode !== "menu") return;
-    function onClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        closeMenu();
-      }
-    }
-    document.addEventListener("pointerdown", onClickOutside);
-    return () => document.removeEventListener("pointerdown", onClickOutside);
-  }, [mode, closeMenu]);
+    return () => {
+      loadGen.current += 1;
+      const prev = ownedPreview.current;
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+    };
+  }, []);
+
+  const releaseOwnedPreview = useCallback(() => {
+    const prev = ownedPreview.current;
+    if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+    ownedPreview.current = null;
+  }, []);
+
+  const rememberPreview = useCallback(
+    (url: string, owned: boolean) => {
+      releaseOwnedPreview();
+      if (owned && url.startsWith("blob:")) ownedPreview.current = url;
+      setRepositionPreview(url);
+    },
+    [releaseOwnedPreview],
+  );
 
   function clearReposition() {
-    if (repositionPreview) URL.revokeObjectURL(repositionPreview);
+    releaseOwnedPreview();
     setRepositionFile(null);
     setRepositionPreview(null);
     setRepositionSize(null);
@@ -92,7 +155,10 @@ export function SocialProfileCoverUpload({
   }
 
   function cancelReposition() {
+    loadGen.current += 1;
     clearReposition();
+    setUploading(false);
+    setError("");
     setMode("idle");
   }
 
@@ -101,9 +167,36 @@ export function SocialProfileCoverUpload({
     fileRef.current?.click();
   }
 
-  function beginReposition() {
-    setMode("idle");
-    fileRef.current?.click();
+  async function beginReposition() {
+    const url = coverUrl?.trim();
+    if (!url || uploading) return;
+    const gen = ++loadGen.current;
+    setError("");
+    setRepositionFile(null);
+    setRepositionSize(null);
+    setPanOffset({ x: 0, y: 0 });
+    rememberPreview(url, false);
+    setMode("reposition");
+    try {
+      const file = await coverFileFromUrl(url);
+      if (loadGen.current !== gen) return;
+      const next = await readAccountAvatarCropPreview(file);
+      if (loadGen.current !== gen) {
+        URL.revokeObjectURL(next.url);
+        return;
+      }
+      setRepositionFile(file);
+      rememberPreview(next.url, true);
+      setRepositionSize({ width: next.width, height: next.height });
+    } catch {
+      if (loadGen.current !== gen) return;
+      try {
+        const size = await measureCoverImage(url);
+        if (loadGen.current === gen) setRepositionSize(size);
+      } catch {
+        if (loadGen.current === gen) setError(SOCIAL.profile.coverCropFailed);
+      }
+    }
   }
 
   async function removeCover() {
@@ -136,7 +229,7 @@ export function SocialProfileCoverUpload({
       .then((next) => {
         clearReposition();
         setRepositionFile(file);
-        setRepositionPreview(next.url);
+        rememberPreview(next.url, true);
         setRepositionSize({ width: next.width, height: next.height });
         setPanOffset({ x: 0, y: 0 });
         setMode("reposition");
@@ -146,9 +239,9 @@ export function SocialProfileCoverUpload({
       });
   }
 
-  function computeCropFrame(): AvatarCropFrame {
-    if (!repositionSize) return { scale: 1, offsetX: 0, offsetY: 0 };
-    const { width: imgW, height: imgH } = repositionSize;
+  function computeCropFrame(size: { width: number; height: number } | null): AvatarCropFrame {
+    if (!size) return { scale: 1, offsetX: 0, offsetY: 0 };
+    const { width: imgW, height: imgH } = size;
     const viewW = COVER_CROP_VIEW_WIDTH;
     const viewH = COVER_CROP_VIEW_HEIGHT;
     const cover = Math.max(viewW / imgW, viewH / imgH);
@@ -171,14 +264,27 @@ export function SocialProfileCoverUpload({
   }
 
   async function onSaveReposition() {
-    if (!repositionFile || uploading) return;
+    if (uploading) return;
     setError("");
     setUploading(true);
+    let previewUrl: string | null = null;
 
     try {
-      const frame = computeCropFrame();
+      let file = repositionFile;
+      if (!file) {
+        const url = coverUrl?.trim() || repositionPreview;
+        if (!url) throw new Error(SOCIAL.profile.coverCropFailed);
+        file = await coverFileFromUrl(url);
+      }
+      let size = repositionSize;
+      if (!size) {
+        const measured = await readAccountAvatarCropPreview(file);
+        size = { width: measured.width, height: measured.height };
+        URL.revokeObjectURL(measured.url);
+      }
+      const frame = computeCropFrame(size);
       const cropped = await cropRectFile(
-        repositionFile,
+        file,
         frame,
         COVER_CROP_VIEW_WIDTH,
         COVER_CROP_VIEW_HEIGHT,
@@ -188,7 +294,7 @@ export function SocialProfileCoverUpload({
         COVER_CROP_MAX_BYTES,
       );
 
-      const previewUrl = URL.createObjectURL(cropped);
+      previewUrl = URL.createObjectURL(cropped);
       onPreview?.(previewUrl);
       patchSocialProfileOptimistic({ coverUrl: previewUrl });
 
@@ -246,13 +352,18 @@ export function SocialProfileCoverUpload({
         setMode("idle");
       }
     } catch (e) {
-      onPreview?.(null);
-      patchSocialProfileOptimistic({ coverUrl: null });
-      setError(
-        e instanceof Error && e.message
-          ? e.message
-          : SOCIAL.profile.coverCropFailed,
-      );
+      if (previewUrl) {
+        onPreview?.(null);
+        patchSocialProfileOptimistic({ coverUrl: null });
+        URL.revokeObjectURL(previewUrl);
+        setError(
+          e instanceof Error && e.message
+            ? e.message
+            : SOCIAL.profile.coverCropFailed,
+        );
+      } else {
+        setError(SOCIAL.profile.coverCropFailed);
+      }
     } finally {
       setUploading(false);
     }
@@ -328,13 +439,14 @@ export function SocialProfileCoverUpload({
               src={repositionPreview}
               alt=""
               draggable={false}
-              className="absolute inset-0 size-full cursor-grab select-none object-cover opacity-70 active:cursor-grabbing"
+              className="absolute inset-0 size-full cursor-grab touch-none select-none object-cover opacity-70 active:cursor-grabbing"
               style={{
                 objectPosition: `calc(50% + ${panOffset.x}px) calc(50% + ${panOffset.y}px)`,
               }}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
             />
           ) : null}
         </>
@@ -342,17 +454,28 @@ export function SocialProfileCoverUpload({
 
       {/* --- Idle / menu mode: pill + dropdown below cover --- */}
       {!isReposition ? (
-        <div className="absolute bottom-3 right-3 z-10" ref={menuRef}>
+        <div
+          className="absolute bottom-3 right-3 z-20"
+          ref={menuRef}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
           <button
             type="button"
             data-social-profile-cover-edit=""
             disabled={uploading}
             aria-busy={uploading}
+            aria-expanded={mode === "menu"}
+            aria-haspopup="menu"
             aria-label={
               hasCover ? SOCIAL.profile.editCover : SOCIAL.profile.addCover
             }
             className={SOCIAL_PROFILE_COVER_PILL_CLASS}
-            onClick={() => setMode(mode === "menu" ? "idle" : "menu")}
+            onClick={() => {
+              setMode((current) => {
+                if (current === "reposition") return current;
+                return nextCoverPillMode(current);
+              });
+            }}
           >
             <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_HEADER} />
             <span>
