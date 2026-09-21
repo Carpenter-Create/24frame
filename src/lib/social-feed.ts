@@ -679,12 +679,25 @@ export async function loadAuthorActivityComments(
     .eq("status", "active")
     .in("id", postIds);
   const byId = new Map((posts ?? []).map((row) => [row.id, row]));
-  const items = rows
-    .map((comment) => {
-      const post = byId.get(comment.post_id);
-      return post ? { comment, post } : null;
-    })
-    .filter((row): row is SocialActivityCommentItem => !!row);
+  const items: SocialActivityCommentItem[] = [];
+  for (const comment of rows) {
+    const post = byId.get(comment.post_id);
+    if (!post) continue;
+    items.push({
+      comment,
+      post: {
+        id: post.id,
+        body: post.body,
+        author_id: post.author_id,
+        group_id: post.group_id,
+        like_count: post.like_count,
+        comment_count: post.comment_count,
+        created_at: post.created_at,
+        media: post.media,
+        category: post.category,
+      },
+    });
+  }
   return { items, truncated };
 }
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useId, useState, type FormEvent } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 
 import { Close44 } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Textarea } from "@/components/ui/textarea";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
 import { useSocialCommentCount } from "@/components/social/use-social-optimistic";
@@ -89,7 +89,6 @@ export function SocialCommentThread({
   onClose: () => void;
 }) {
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
   const [comments, setComments] = useState<SocialCommentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -97,11 +96,6 @@ export function SocialCommentThread({
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return undefined;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -112,7 +106,7 @@ export function SocialCommentThread({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [mounted, onClose]);
+  }, [onClose]);
 
   useEffect(() => {
     let cancelled = false;
@@ -225,9 +219,7 @@ export function SocialCommentThread({
     });
   }
 
-  if (!mounted) return null;
-
-  return createPortal(
+  return (
     <div data-social-comment-thread="" className={SOCIAL_COMMENT_SHEET_HOST_CLASS} role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <button type="button" className={SOCIAL_COMMENT_SHEET_SCRIM_CLASS} aria-label={SOCIAL.create.close} onClick={onClose} />
       <div className={SOCIAL_COMMENT_SHEET_SURFACE_CLASS}>
@@ -279,13 +271,15 @@ export function SocialCommentThread({
         </div>
         {canComment ? (
           <form data-social-comment-composer="" className={SOCIAL_COMMENT_COMPOSER_CLASS} onSubmit={onSubmit}>
-            <textarea
+            <Textarea
+              id="social-comment-body"
               name="body"
               value={body}
               maxLength={COMMENT_BODY_MAX}
               rows={2}
+              variant="bare"
               placeholder={SOCIAL.post.commentPlaceholder}
-              className="min-h-9 min-w-0 flex-1 resize-none bg-transparent t-body text-ink placeholder:text-ink-3"
+              className="min-h-9 min-w-0 flex-1 resize-none px-0 py-1"
               onChange={(event) => setBody(event.target.value)}
             />
             <button type="submit" disabled={pending || !body.trim()} className={cn(SOCIAL_ACTION_CLASS, "shrink-0")}>
@@ -296,7 +290,6 @@ export function SocialCommentThread({
           <p className="px-4 py-3 t-body-sm text-ink-2">{SOCIAL.cta.needProfile}</p>
         )}
       </div>
-    </div>,
-    document.body,
+    </div>
   );
 }
