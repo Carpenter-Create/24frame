@@ -333,16 +333,31 @@ export function socialHomeLaneHref(lane: SocialHomeLane): string {
 }
 
 export const SOCIAL_PROFILE_TAB_PARAM = "tab";
-export const SOCIAL_PROFILE_TABS = ["posts", "highlights", "credits", "activity"] as const;
+export const SOCIAL_PROFILE_TABS = ["activity", "highlights", "credits"] as const;
 export type SocialProfileTab = (typeof SOCIAL_PROFILE_TABS)[number];
+export const SOCIAL_PROFILE_DEFAULT_TAB: SocialProfileTab = "activity";
+/** Retired top-level Posts tab. Bookmarks hard-redirect to Activity + Posts pill. */
+export const SOCIAL_PROFILE_LEGACY_POSTS_TAB = "posts";
+
+export function isLegacySocialProfilePostsTab(
+  raw: string | string[] | undefined | null,
+): boolean {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value === SOCIAL_PROFILE_LEGACY_POSTS_TAB;
+}
 
 export function parseSocialProfileTab(raw: string | string[] | undefined | null): SocialProfileTab {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "highlights" || value === "credits" || value === "activity" ? value : "posts";
+  return value === "highlights" || value === "credits" ? value : SOCIAL_PROFILE_DEFAULT_TAB;
 }
 
 export function socialProfileTabHref(base: string, tab: SocialProfileTab): string {
-  return tab === "posts" ? base : `${base}?${SOCIAL_PROFILE_TAB_PARAM}=${tab}`;
+  return tab === SOCIAL_PROFILE_DEFAULT_TAB ? base : `${base}?${SOCIAL_PROFILE_TAB_PARAM}=${tab}`;
+}
+
+/** Retired `?tab=posts` lands on Activity with the Posts pill selected. */
+export function socialProfileLegacyPostsTabHref(base: string): string {
+  return base;
 }
 
 export function socialProfileTabLabel(tab: SocialProfileTab): string {
@@ -351,10 +366,8 @@ export function socialProfileTabLabel(tab: SocialProfileTab): string {
       return SOCIAL.profile.highlightsTab;
     case "credits":
       return SOCIAL.profile.creditsTab;
-    case "activity":
-      return SOCIAL.profile.activityTab;
     default:
-      return SOCIAL.profile.postsTab;
+      return SOCIAL.profile.activityTab;
   }
 }
 
@@ -614,7 +627,6 @@ export const SOCIAL = {
     shareDownload: "Download",
     shareClose: "Close",
     shareCopied: "Copied",
-    postsTab: "Posts",
     activityTab: "Activity",
     activityPosts: "Posts",
     activityComments: "Comments",

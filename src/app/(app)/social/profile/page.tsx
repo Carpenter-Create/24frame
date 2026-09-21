@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -12,7 +13,6 @@ import { SocialProfileCenterSkeleton } from "@/components/social/social-skeleton
 import { SocialOwnProfileFace } from "@/components/social/social-own-profile";
 import { SocialActivityHistory } from "@/components/social/social-activity-history";
 import {
-  SocialAuthorHistory,
   SocialHighlights,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
@@ -20,12 +20,13 @@ import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } f
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
+  isLegacySocialProfilePostsTab,
   parseSocialProfileTab,
   SOCIAL,
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
-  socialCreateHref,
   socialPersonLabel,
+  socialProfileLegacyPostsTabHref,
   socialRelativeTime,
   socialStoryHref,
   type SocialProfileTab,
@@ -38,7 +39,6 @@ import {
 import {
   loadAuthorActivityComments,
   loadAuthorActivityPosts,
-  loadAuthorPosts,
   loadLikedPostIds,
   loadLiveStories,
   loadProfilesByIds,
@@ -62,7 +62,11 @@ export default async function SocialProfilePage({
     requireSocialSession(),
     searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
   ]);
-  const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
+  const rawTab = sp[SOCIAL_PROFILE_TAB_PARAM];
+  if (isLegacySocialProfilePostsTab(rawTab)) {
+    redirect(socialProfileLegacyPostsTabHref(SOCIAL_ROUTES.profile));
+  }
+  const tab = parseSocialProfileTab(rawTab);
   const activity = parseSocialActivityPill(sp[SOCIAL_ACTIVITY_PILL_PARAM]);
   const { profile, error: ensureError } = await ensureOwnSocialProfileResult(session.supabase, session.ctx.user);
 
@@ -108,11 +112,10 @@ async function SocialProfileMain({
     tab === "activity" && activity !== "comments"
       ? loadAuthorActivityPosts(supabase, profile.id, activity)
       : Promise.resolve(null);
-  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl, jar, commentsPage, filtered] =
+  const [photoUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, filtered] =
     await Promise.all([
       signedAvatarUrl(profile.id),
       loadLiveStories(supabase, [profile.id]),
-      loadAuthorPosts(supabase, profile.id),
       loadCachedProfileSocialCounts(supabase, profile.id),
       profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
       cookies(),
@@ -139,9 +142,7 @@ async function SocialProfileMain({
   const cardPosts =
     tab === "activity" && activity === "comments"
       ? commentParentPosts
-      : tab === "activity"
-        ? activityFeedPosts
-        : history.posts;
+      : activityFeedPosts;
   const parentAuthors =
     tab === "activity" && activity === "comments"
       ? await loadProfilesByIds(
@@ -208,7 +209,7 @@ async function SocialProfileMain({
         ) : (
           <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
         )
-      ) : tab === "activity" ? (
+      ) : (
         <SocialActivityHistory
           baseHref={SOCIAL_ROUTES.profile}
           pill={activity}
@@ -247,25 +248,6 @@ async function SocialProfileMain({
               }),
             };
           })}
-        />
-      ) : (
-        <SocialAuthorHistory
-          truncated={history.truncated}
-          emptyAction={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
-          posts={history.posts.map((post) =>
-            socialAuthorPostCard({
-              post,
-              authorHandle: profile.handle,
-              authorName: socialPersonLabel({
-                handle: profile.handle,
-                displayName: profile.display_name,
-              }),
-              authorPhotoUrl: photoUrl,
-              liked: liked.has(post.id),
-              canLike: true,
-              media: media.get(post.id) ?? [],
-            }),
-          )}
         />
       )}
     </>

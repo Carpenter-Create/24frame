@@ -6,6 +6,8 @@ import {
   socialActivityPillLabel,
   socialPostMatchesActivityMedia,
   socialProfileActivityHref,
+  socialProfileTabSearch,
+  socialProfileViewHref,
   SOCIAL_ACTIVITY_PILLS,
 } from "@/lib/social-activity";
 import { SOCIAL } from "@/lib/social";
@@ -18,10 +20,15 @@ describe("activity pills", () => {
     expect(parseSocialActivityPill("videos")).toBe("videos");
     expect(parseSocialActivityPill("boost")).toBe("posts");
     expect(socialActivityPillLabel("comments")).toBe(SOCIAL.profile.activityComments);
-    expect(socialProfileActivityHref("/social/profile", "posts")).toBe("/social/profile?tab=activity");
+    expect(socialProfileActivityHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileActivityHref("/social/u/ada", "comments")).toBe(
       "/social/u/ada?tab=activity&activity=comments",
     );
+    expect(socialProfileViewHref("/social/u/ada", "activity", "posts")).toBe("/social/u/ada");
+    expect(socialProfileViewHref("/social/u/ada", "highlights")).toBe("/social/u/ada?tab=highlights");
+    expect(socialProfileTabSearch("activity")).toEqual({});
+    expect(socialProfileTabSearch("activity", "posts")).toEqual({});
+    expect(socialProfileTabSearch("credits")).toEqual({ tab: "credits" });
   });
 
   it("keeps image-only and video-only posts off the mixed roll", () => {
