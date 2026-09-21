@@ -12,8 +12,10 @@ vi.mock("next/image", () => ({
   }) => createElement("img", { src, className, alt: "" }),
 }));
 
-import { SOCIAL, socialProfilePublicUrl } from "@/lib/social";
+import { SETTINGS_DIALOG_LABEL_CLASS, SETTINGS_DRILL_ROW_CLASS } from "@/lib/settings";
+import { SOCIAL } from "@/lib/social";
 import { SOCIAL_PROFILE_EDIT_LABEL_CLASS } from "@/lib/social-chrome";
+import { socialProfileRolesRowSummary } from "@/lib/social-profile-roles";
 import { SocialProfileEditForm } from "./social-profile-edit";
 
 vi.mock("next/navigation", () => ({
@@ -30,7 +32,7 @@ vi.mock("@/app/(app)/social/actions", () => ({
 }));
 
 describe("SocialProfileEditForm", () => {
-  it("renders First, Middle, Last name, Username @ field, live URL, Bio row, and Add link", () => {
+  it("renders First, Middle, Last name, Username @ field, Bio row, and Add link", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
@@ -49,8 +51,11 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain('id="social-edit-first-name"');
     expect(html).toContain('id="social-edit-middle-name"');
     expect(html).toContain(SOCIAL_PROFILE_EDIT_LABEL_CLASS);
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).toContain(SETTINGS_DIALOG_LABEL_CLASS);
     expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).toContain("whitespace-nowrap");
     expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).toContain("w-32");
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).not.toContain("t-label");
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).not.toContain("uppercase");
     expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).not.toContain("w-[88px]");
     expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).not.toContain("truncate");
     expect(html).not.toContain("type=\"checkbox\"");
@@ -62,9 +67,9 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.username);
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain('value="ada"');
-    expect(html).toContain("data-social-handle-url");
-    expect(html).toContain(socialProfilePublicUrl("ada"));
-    expect(html).toContain("https://24frame.co/@ada");
+    expect(html).not.toContain("data-social-handle-url");
+    expect(html).not.toContain("https://24frame.co/@ada");
+    expect(html).not.toContain("https://24frame.co/@");
     expect(html).toContain("Writes engines.");
     expect(html).toContain("Second line.");
     expect(html).toContain("whitespace-pre-wrap");
@@ -80,14 +85,20 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("data-social-profile-edit-welcome");
     expect(html).toContain(SOCIAL.profile.welcomeAdd);
     expect(html).not.toContain(SOCIAL.profile.welcomeRemove);
-    expect(html).toContain("data-social-profile-edit-roles");
+    expect(html).toContain("data-social-profile-edit-roles-open");
     expect(html).toContain("data-social-profile-edit-topics");
     expect(html).toContain(SOCIAL.profile.roles);
     expect(html).toContain(SOCIAL.profile.topics);
-    expect(html).toContain(SOCIAL.profile.rolesSearch);
+    expect(html).toContain(SOCIAL.profile.rolesAdd);
+    expect(html).toContain(socialProfileRolesRowSummary([]));
+    expect(html).toContain(SETTINGS_DRILL_ROW_CLASS);
     expect(html).toContain(SOCIAL.profile.topicsSearch);
-    expect(html).toContain('id="social-edit-roles-search"');
+    expect(html).not.toContain(SOCIAL.profile.rolesSearch);
+    expect(html).not.toContain('id="social-edit-roles-search"');
     expect(html).not.toContain("data-social-profile-edit-roles-selected");
+    expect(html).not.toContain("data-social-profile-edit-roles-count");
+    expect(html).not.toContain(SOCIAL.profile.rolesHint);
+    expect(html).not.toContain(SOCIAL.profile.rolesLimit);
     expect(html).toContain("data-social-profile-edit-imdb");
     expect(html).toContain(SOCIAL.profile.imdb);
     expect(html).toContain('id="social-edit-imdb"');
@@ -115,7 +126,7 @@ describe("SocialProfileEditForm", () => {
       />,
     );
     expect(cased).toContain('value="AdamC"');
-    expect(cased).toContain("https://24frame.co/@AdamC");
+    expect(cased).not.toContain("https://24frame.co/@AdamC");
     expect(cased).not.toContain("/social/@");
   });
 
@@ -152,7 +163,7 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("data-social-welcome-video");
   });
 
-  it("shows selected Professions chips from persisted crafts and never a Category label", () => {
+  it("shows one Professions drill-in row from persisted crafts and never a Category label", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
@@ -162,18 +173,20 @@ describe("SocialProfileEditForm", () => {
         crafts={["actor", "producer", "screenwriter"]}
       />,
     );
-    expect(html).toContain("data-social-profile-edit-roles-count");
-    expect(html).toContain("3 / 5");
-    expect(html).toContain("data-social-profile-edit-roles-selected");
-    expect(html).toContain('data-social-profile-role-chip="actor"');
-    expect(html).toContain('data-social-profile-role-chip="producer"');
-    expect(html).toContain('data-social-profile-role-chip="screenwriter"');
-    expect(html.indexOf('data-social-profile-role-chip="actor"')).toBeLessThan(
-      html.indexOf('data-social-profile-role-chip="producer"'),
-    );
+    expect(html).toContain("data-social-profile-edit-roles-open");
+    expect(html).toContain(socialProfileRolesRowSummary(["actor", "producer", "screenwriter"]));
+    expect(html).toContain("Actor +2");
+    expect(html).toContain(SETTINGS_DRILL_ROW_CLASS);
+    expect(html).not.toContain("data-social-profile-edit-roles-count");
+    expect(html).not.toContain("3 / 5");
+    expect(html).not.toContain("data-social-profile-edit-roles-selected");
+    expect(html).not.toContain('data-social-profile-role-chip="actor"');
+    expect(html).not.toContain('id="social-edit-roles-search"');
+    expect(html).not.toContain(SOCIAL.profile.rolesSearch);
+    expect(html).not.toContain(SOCIAL.profile.rolesHint);
     expect(html).not.toContain("Category");
-    expect(html).toContain("Actress");
-    expect(html).toContain("Writer: Screenplay");
+    expect(html).not.toContain("Actress");
+    expect(html).not.toContain("Writer: Screenplay");
   });
 
   it("loads persisted website_url links so they can be edited or removed", () => {
@@ -192,11 +205,13 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.addLink);
   });
 
-  it("shows the empty-handle preview URL", () => {
+  it("keeps Username and omits a derived Profile URL on the Edit face", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm handle="" displayName="" bio="" photoUrl={null} />,
     );
-    expect(html).toContain("https://24frame.co/@");
     expect(html).toContain(`placeholder="${SOCIAL.profile.usernamePlaceholder}"`);
+    expect(html).toContain(SOCIAL.profile.username);
+    expect(html).not.toContain("https://24frame.co/@");
+    expect(html).not.toContain("data-social-handle-url");
   });
 });

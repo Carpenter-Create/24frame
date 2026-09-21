@@ -13,8 +13,9 @@ import {
 } from "@/app/(app)/social/actions";
 import { AccountAvatarCrop } from "@/components/account/account-avatar-crop";
 import { SocialAvatar } from "@/components/social/social-avatar";
+import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
-import { SocialProfileRolesField } from "@/components/social/social-profile-roles";
+import { SocialProfileRolesEditor } from "@/components/social/social-profile-roles";
 import { SocialProfileTopicsField } from "@/components/social/social-profile-topics";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -36,9 +37,11 @@ import {
   SOCIAL_PROFILE_EDIT_BODY_CLASS,
   SOCIAL_PROFILE_EDIT_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_DONE_CLASS,
+  SOCIAL_PROFILE_EDIT_ERROR_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS,
   SOCIAL_PROFILE_EDIT_HEADER_CLASS,
+  SOCIAL_PROFILE_EDIT_HELP_CLASS,
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_LABEL_CLASS,
   SOCIAL_PROFILE_EDIT_PHOTO_CLASS,
@@ -55,7 +58,6 @@ import {
   bareHandle,
   composeSocialDisplayName,
   handleFieldValue,
-  socialProfilePublicUrl,
   splitSocialDisplayName,
   stripHandleDecorators,
 } from "@/lib/social";
@@ -64,7 +66,7 @@ import {
   composeSocialWebsiteUrlField,
   parseSocialWebsiteUrlField,
 } from "@/lib/social-profile-links";
-import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
+import { parseSocialProfileRoles, socialProfileRolesRowSummary } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { useAppQueryClient } from "@/components/query-provider";
 import {
@@ -177,8 +179,6 @@ export function SocialProfileEditForm({
     const urls = parseSocialWebsiteUrlField(seed.websiteUrl);
     return urls.length > 0 ? urls : [""];
   });
-  const preview = socialProfilePublicUrl(bareHandle(username));
-
   function applyHandle(raw: string) {
     setUsername(`@${stripHandleDecorators(raw)}`);
     setHandleError("");
@@ -370,6 +370,16 @@ export function SocialProfileEditForm({
     }).finally(() => {
       setPending(false);
     });
+  }
+
+  if (face === "roles") {
+    return (
+      <SocialProfileRolesEditor
+        value={roles}
+        onChange={setRoles}
+        onBack={() => setFace(socialProfileEditFace(false))}
+      />
+    );
   }
 
   if (face === "bio") {
@@ -579,16 +589,19 @@ export function SocialProfileEditForm({
                 </div>
               </div>
               {handleError ? (
-                <p data-social-handle-required="" className="t-label text-ink">
+                <p data-social-handle-required="" className={SOCIAL_PROFILE_EDIT_ERROR_CLASS}>
                   {handleError}
                 </p>
               ) : null}
-              <p data-social-handle-url="" className="t-label text-ink-2">
-                {preview}
-              </p>
             </div>
             <div className="h-px bg-hairline" />
-            <SocialProfileRolesField value={roles} onChange={setRoles} />
+            <SettingsDrillRow
+              kind="roles"
+              label={SOCIAL.profile.roles}
+              value={socialProfileRolesRowSummary(roles)}
+              itemAttr="data-social-profile-edit-roles-open"
+              onClick={() => setFace(socialProfileEditFace("roles"))}
+            />
             <div className="h-px bg-hairline" />
             <SocialProfileTopicsField value={interestTopics} onChange={setInterestTopics} />
             <div className="h-px bg-hairline" />
@@ -607,7 +620,7 @@ export function SocialProfileEditForm({
                   className="min-w-0 flex-1"
                   autoComplete="url"
                 />
-                <p className="t-label text-ink-2">{SOCIAL.profile.imdbHint}</p>
+                <p className={SOCIAL_PROFILE_EDIT_HELP_CLASS}>{SOCIAL.profile.imdbHint}</p>
               </div>
             </div>
             <div className="h-px bg-hairline" />

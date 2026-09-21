@@ -15,6 +15,8 @@ import {
   socialProfileRoleLabel,
   socialProfileRolesCountLabel,
   socialProfileRolesRailItems,
+  socialProfileRolesRowSummary,
+  socialProfileRolesSelectedLabel,
   socialProfileRolesWrite,
   toggleSocialProfileRole,
 } from "./social-profile-roles";
@@ -48,6 +50,18 @@ describe("social profile roles", () => {
     expect(SOCIAL_PROFILE_ROLES_MAX).toBe(5);
     expect(SOCIAL_PROFILE_ROLES_COUNT).toBe("{n} / {max}");
     expect(socialProfileRolesCountLabel(3)).toBe("3 / 5");
+    expect(socialProfileRolesSelectedLabel(5)).toBe("5 selected");
+    expect(socialProfileRolesRowSummary([])).toBe("Add");
+    expect(socialProfileRolesRowSummary(["executive_producer"])).toBe("Executive Producer");
+    expect(
+      socialProfileRolesRowSummary([
+        "executive_producer",
+        "music_supervisor",
+        "composer",
+        "executive",
+        "investor",
+      ]),
+    ).toBe("Executive Producer +4");
     expect(
       SOCIAL_PROFILE_ROLE_GROUPS.map((group) => [
         group.id,
@@ -427,13 +441,19 @@ describe("social profile roles", () => {
     expect(affinitySrc).not.toContain('slug: "actor"');
     expect(fieldSrc).toContain("toggleSocialProfileRole");
     expect(fieldSrc).toContain("onChange(toggleSocialProfileRole");
+    expect(fieldSrc).toContain("SocialProfileRolesEditor");
+    expect(fieldSrc).toContain("data-social-profile-roles-back");
     expect(fieldSrc).not.toContain("createSocialProfile");
     expect(fieldSrc).not.toContain("await");
     const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
     expect(saveSoT).toContain('form.set("crafts"');
     expect(saveSoT).toContain("parseSocialProfileRoles");
     expect(editSrc).toContain("checkSocialProfileEditSave");
+    expect(editSrc).toContain("SettingsDrillRow");
+    expect(editSrc).toContain("socialProfileRolesRowSummary");
+    expect(editSrc).toContain("SocialProfileRolesEditor");
     expect(editSrc).toContain("onChange={setRoles}");
+    expect(editSrc).not.toContain("SocialProfileRolesField");
     expect(editSrc).not.toContain("createSocialProfile");
     expect(editSrc).toContain("persistSocialProfileEdit");
     expect(socialProfileRolesWrite.toString()).not.toMatch(/await|Promise|then/);

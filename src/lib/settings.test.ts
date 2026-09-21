@@ -373,6 +373,7 @@ describe("settings hub lock", () => {
     expect(settingsSrc).toContain("Shared SoT for");
     expect(settingsSrc).toContain("Rights Holder / Legal Entities");
     expect(settingsSrc).toContain("Get Help");
+    expect(settingsSrc).toContain("Social Edit Profile professions");
     expect(settingsSrc).toContain("one SoT");
     expect(settingsSrc).toContain("never header pills");
     expect(settingsSrc).not.toContain("companyHref");

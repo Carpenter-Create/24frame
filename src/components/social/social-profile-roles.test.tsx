@@ -6,7 +6,7 @@ import {
   SOCIAL_TOPIC_CHIP_BANK_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
 } from "@/lib/social-chrome";
-import { SocialProfileRolesField } from "./social-profile-roles";
+import { SocialProfileRolesEditor, SocialProfileRolesField } from "./social-profile-roles";
 
 describe("SocialProfileRolesField", () => {
   it("renders Professions search, grouped pill bank, and selected house chips in order", () => {
@@ -70,5 +70,23 @@ describe("SocialProfileRolesField", () => {
     expect(html).not.toContain(SOCIAL.profile.rolesHint);
     expect(html).toContain('data-social-profile-role-chip="investor"');
     expect(html).toContain("disabled");
+  });
+
+  it("keeps the existing chip bank on the professions select face with a back affordance", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileRolesEditor
+        value={["investor", "actor"]}
+        onChange={() => undefined}
+        onBack={() => undefined}
+      />,
+    );
+    expect(html).toContain("data-social-profile-roles");
+    expect(html).toContain("data-social-profile-roles-back");
+    expect(html).toContain("data-social-profile-edit-roles");
+    expect(html).toContain(SOCIAL.profile.rolesSearch);
+    expect(html).toContain('id="social-edit-roles-search"');
+    expect(html).toContain("data-social-profile-edit-roles-selected");
+    expect(html).toContain('data-social-profile-role-group="writer"');
+    expect(html).toContain('data-social-icon="caret-left"');
   });
 });

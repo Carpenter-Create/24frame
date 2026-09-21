@@ -166,7 +166,8 @@ export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 
 // Coinbase / Apple Settings grammar — one SoT. Shared SoT for
 // Settings index, Profile, Preferences, Rights Holder / Legal Entities,
-// and Get Help. Do not fork a lookalike row.
+// Get Help, and Social Edit Profile professions. Do not fork a
+// lookalike row.
 // Row: label · muted secondary · chevron. Whole row tappable.
 // Read-only rows drop the chevron. Inset group: quiet label above,
 // rows on one muted house surface. Add / Invite are trailing rows

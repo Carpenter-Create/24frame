@@ -73,7 +73,10 @@ describe("Social profile edit page", () => {
     expect(html).toContain("data-social-profile-edit");
     expect(html).toContain(SOCIAL.profile.edit);
     expect(html).toContain(SOCIAL.profile.username);
-    expect(html).toContain("https://24frame.co/@ada");
+    expect(html).not.toContain("https://24frame.co/@ada");
+    expect(html).toContain(SOCIAL.profile.roles);
+    expect(html).toContain(SOCIAL.profile.rolesAdd);
+    expect(html).toContain("data-social-profile-edit-roles-open");
     expect(html).toContain(SOCIAL.profile.addLink);
     expect(html).not.toContain("Education");
   });
