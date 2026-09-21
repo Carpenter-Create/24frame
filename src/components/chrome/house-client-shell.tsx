@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type MouseEvent,
   type ReactNode,
@@ -18,10 +19,13 @@ import {
   houseHrefKey,
   housePaintedKeys,
   housePathFromLocation,
+  houseReadScroll,
   houseReconcileOwnedHref,
   houseRememberPainted,
+  houseRememberScroll,
   houseScreenKey,
   houseShouldClientNavigate,
+  houseShouldKeepAlive,
   houseTouchOrder,
   parseHouseHref,
 } from "@/lib/house-client-shell";
@@ -171,11 +175,12 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   const nextKey = houseScreenKey(nextPath, nextSearchPrefixed);
   const house = useHouseClient();
   const [store, setStore] = useState<ScreenStore>(EMPTY_STORE);
+  const previousKey = useRef<string | null>(null);
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
 
   let nextStore = store;
-  if (!fallback && !(nextKey in store.nodes)) {
+  if (!fallback && houseShouldKeepAlive(nextPath) && !(nextKey in store.nodes)) {
     nextStore = nextScreenStore(store, nextKey, children);
   }
   if (activeKey in nextStore.nodes) {
@@ -191,6 +196,20 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   // Unknown dest: paint the live RSC (or its loading.tsx). Known dest: the
   // mounted tree wins — never overwrite a warm screen with a skeleton.
   const ingress = known ? null : children;
+
+  useEffect(() => {
+    const scroller = document.querySelector(`[${HOUSE_CLIENT_SHELL.scrollAttr}]`);
+    if (!(scroller instanceof HTMLElement)) {
+      previousKey.current = activeKey;
+      return;
+    }
+    const from = previousKey.current;
+    if (from && from !== activeKey) {
+      houseRememberScroll(from, scroller.scrollTop);
+      scroller.scrollTop = houseReadScroll(activeKey);
+    }
+    previousKey.current = activeKey;
+  }, [activeKey]);
 
   return (
     <>

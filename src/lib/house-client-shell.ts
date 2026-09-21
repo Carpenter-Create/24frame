@@ -1,4 +1,11 @@
-import { SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL_ACTIVITY_PILL_PARAM } from "@/lib/social-activity";
+import {
+  SOCIAL_CREATE_KIND_PARAM,
+  SOCIAL_FOLLOWS_SEARCH_PARAM,
+  SOCIAL_HOME_LANE_PARAM,
+  SOCIAL_PROFILE_TAB_PARAM,
+  SOCIAL_ROUTES,
+} from "@/lib/social";
 import { SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
 import { SOCIAL_FOLLOWING_WALL_CURSOR_PARAM } from "@/lib/social-home-bounds";
 import { EDUCATION_ROOT, HOME_ROOT, SOCIAL_ROOT, STAFF_ROOT } from "@/lib/workspace";
@@ -17,6 +24,7 @@ export const HOUSE_CLIENT_SHELL = {
   rscFallbackAttr: "data-house-rsc-fallback",
   screenAttr: "data-house-screen",
   screenActiveAttr: "data-house-screen-active",
+  scrollAttr: "data-house-lead-scroll",
 } as const;
 
 const HOUSE_EXACT_SCREENS = new Set<string>([
@@ -41,21 +49,41 @@ export function isHouseClientOwnedPath(pathname: string): boolean {
   return false;
 }
 
-export function houseScreenKey(pathname: string, search = ""): string {
-  const path = pathname || "/";
-  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  if (path === SOCIAL_ROUTES.home || path === `${SOCIAL_ROUTES.home}/`) {
-    const topic = params.get(SOCIAL_CATEGORY_PARAM) ?? "";
-    const lane = params.get(SOCIAL_HOME_LANE_PARAM) ?? "";
-    const cursor = params.get(SOCIAL_FOLLOWING_WALL_CURSOR_PARAM) ?? "";
-    if (!topic && !lane && !cursor) return SOCIAL_ROUTES.home;
-    return `${SOCIAL_ROUTES.home}?${new URLSearchParams({
-      ...(topic ? { [SOCIAL_CATEGORY_PARAM]: topic } : {}),
-      ...(lane ? { [SOCIAL_HOME_LANE_PARAM]: lane } : {}),
-      ...(cursor ? { [SOCIAL_FOLLOWING_WALL_CURSOR_PARAM]: cursor } : {}),
-    }).toString()}`;
+export function houseShouldKeepAlive(pathname: string): boolean {
+  // Live capture keeps camera/mic on mount. Hidden keep-alive would
+  // leave the stream open after a dock tap. Cold RSC remounts those dests.
+  return pathname !== SOCIAL_ROUTES.createLive && pathname !== SOCIAL_ROUTES.storiesNew;
+}
+
+export function houseScreenQueryNames(pathname: string): readonly string[] {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname || "/";
+  if (path === SOCIAL_ROUTES.home) {
+    return [SOCIAL_CATEGORY_PARAM, SOCIAL_HOME_LANE_PARAM, SOCIAL_FOLLOWING_WALL_CURSOR_PARAM];
   }
-  return path;
+  if (path === SOCIAL_ROUTES.explore || path === SOCIAL_ROUTES.search) {
+    return ["q"];
+  }
+  if (path === SOCIAL_ROUTES.create) return [SOCIAL_CREATE_KIND_PARAM];
+  if (path === SOCIAL_ROUTES.profile || /^\/social\/u\/[^/]+$/.test(path)) {
+    return [SOCIAL_PROFILE_TAB_PARAM, SOCIAL_ACTIVITY_PILL_PARAM];
+  }
+  if (path.startsWith("/social/u/") && path.endsWith("/follows")) {
+    return [SOCIAL_PROFILE_TAB_PARAM, SOCIAL_FOLLOWS_SEARCH_PARAM];
+  }
+  if (path === HOME_ROOT || path === "/") return ["period"];
+  return [];
+}
+
+export function houseScreenKey(pathname: string, search = ""): string {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname || "/";
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const picked = new URLSearchParams();
+  for (const name of houseScreenQueryNames(path)) {
+    const value = params.get(name)?.trim() ?? "";
+    if (value) picked.set(name, value);
+  }
+  const query = picked.toString();
+  return query ? `${path}?${query}` : path;
 }
 
 export function houseHrefKey(href: string): string {
@@ -87,7 +115,9 @@ export function houseShouldClientNavigate(
   dest: string,
   cachedKeys: Iterable<string>,
 ): boolean {
-  if (!isHouseClientOwnedPath(parseHouseHref(dest).pathname)) return false;
+  const parsed = parseHouseHref(dest);
+  if (!isHouseClientOwnedPath(parsed.pathname)) return false;
+  if (!houseShouldKeepAlive(parsed.pathname)) return false;
   return new Set(cachedKeys).has(houseHrefKey(dest));
 }
 
@@ -114,6 +144,15 @@ export function houseReconcileOwnedHref(
 }
 
 const paintedScreens = new Set<string>();
+const houseScroll = new Map<string, number>();
+
+export function houseRememberScroll(key: string, top: number): void {
+  houseScroll.set(key, Math.max(0, top));
+}
+
+export function houseReadScroll(key: string): number {
+  return houseScroll.get(key) ?? 0;
+}
 
 export function houseRememberPainted(key: string): string[] {
   const next = houseTouchOrder([...paintedScreens], key);
@@ -135,4 +174,5 @@ export function housePaintedKeys(): string[] {
 
 export function resetHousePaintedForTests(): void {
   paintedScreens.clear();
+  houseScroll.clear();
 }

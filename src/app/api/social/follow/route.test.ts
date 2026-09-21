@@ -23,11 +23,24 @@ describe("POST /api/social/follow", () => {
     expect(toggleSocialFollow).not.toHaveBeenCalled();
   });
 
+  it("rejects a malformed follow payload before the action", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "ada@example.com" });
+    const form = new FormData();
+    form.set("followee_id", "not-a-uuid");
+    form.set("following", "1");
+    const res = await POST(
+      new Request("http://localhost/api/social/follow", { method: "POST", body: form }),
+    );
+    expect(res.status).toBe(400);
+    expect(toggleSocialFollow).not.toHaveBeenCalled();
+  });
+
   it("writes through toggleSocialFollow and stays off the server-action tree", async () => {
     vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "ada@example.com" });
     vi.mocked(toggleSocialFollow).mockResolvedValue({});
     const form = new FormData();
-    form.set("followee_id", "u2");
+    form.set("followee_id", "11111111-1111-4111-8111-111111111111");
+    form.set("following", "0");
     const res = await POST(
       new Request("http://localhost/api/social/follow", { method: "POST", body: form }),
     );
@@ -38,6 +51,8 @@ describe("POST /api/social/follow", () => {
     expect(SOCIAL_OPTIMISTIC_LOCK.followHref).toBe("/api/social/follow");
     const src = readFileSync("src/app/api/social/follow/route.ts", "utf8");
     expect(src).toContain("toggleSocialFollow");
+    expect(src).toContain("followPersistSchema");
+    expect(src).toContain('z.string().uuid()');
     expect(src).toContain('from "@/app/(app)/social/light-actions"');
     expect(src).not.toContain("router.refresh");
     expect(src).not.toContain("revalidatePath");

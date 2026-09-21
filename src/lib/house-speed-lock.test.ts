@@ -80,6 +80,9 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
       light.indexOf("export async function toggleSocialLike"),
     );
     expect(followChunk).not.toContain("revalidatePath");
+    const followApi = readFileSync("src/app/api/social/follow/route.ts", "utf8");
+    expect(followApi).toContain("followPersistSchema");
+    expect(followApi).toContain("z.string().uuid()");
   });
 
   it("routes chrome and Social dest taps through one HouseLink", () => {
@@ -122,6 +125,8 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(provider).toContain("HOUSE_CLIENT_SHELL.rscFallbackAttr");
     expect(provider).toContain("houseReconcileOwnedHref");
     expect(provider).toContain("touchScreenStore");
+    expect(provider).toContain("houseShouldKeepAlive");
+    expect(provider).toContain("houseRememberScroll");
     expect(loading).toContain("data-house-rsc-fallback");
   });
 

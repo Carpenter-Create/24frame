@@ -5,10 +5,13 @@ import {
   HOUSE_CLIENT_SHELL,
   houseHrefKey,
   housePaintedKeys,
+  houseReadScroll,
   houseReconcileOwnedHref,
   houseRememberPainted,
+  houseRememberScroll,
   houseScreenKey,
   houseShouldClientNavigate,
+  houseShouldKeepAlive,
   houseTouchOrder,
   houseWorkspaceLandKey,
   isHouseClientOwnedPath,
@@ -30,14 +33,37 @@ describe("house client shell SoT", () => {
     expect(isHouseClientOwnedPath("/login")).toBe(false);
   });
 
-  it("keys Home by dest and Social Home by topic/lane/cursor", () => {
+  it("keys dests by the query params that change the painted tree", () => {
     expect(houseScreenKey("/social")).toBe("/social");
     expect(houseScreenKey("/social", "?topic=Music")).toBe("/social?topic=Music");
-    expect(houseScreenKey("/social/explore", "?q=ada")).toBe("/social/explore");
+    expect(houseScreenKey("/social/explore", "?q=ada")).toBe("/social/explore?q=ada");
+    expect(houseScreenKey("/social/profile", "?tab=credits")).toBe("/social/profile?tab=credits");
+    expect(houseScreenKey("/social/profile", "?tab=activity&activity=likes")).toBe(
+      "/social/profile?tab=activity&activity=likes",
+    );
+    expect(houseScreenKey("/social/u/ada/follows", "?tab=following&q=ada")).toBe(
+      "/social/u/ada/follows?tab=following&q=ada",
+    );
+    expect(houseScreenKey("/home", "?period=ytd")).toBe("/home?period=ytd");
     expect(houseHrefKey("/social/explore")).toBe("/social/explore");
+    expect(houseShouldClientNavigate("/social/profile?tab=credits", ["/social/profile"])).toBe(false);
     expect(houseWorkspaceLandKey("/social/u/ada")).toBe("/social");
     expect(houseWorkspaceLandKey("/home/news")).toBe("/home");
     expect(HOUSE_CLIENT_SHELL.cacheCap).toBeGreaterThanOrEqual(6);
+  });
+
+  it("does not keep live camera dests mounted", () => {
+    expect(houseShouldKeepAlive("/social/create/live")).toBe(false);
+    expect(houseShouldKeepAlive("/social/stories/new")).toBe(false);
+    expect(houseShouldKeepAlive("/social")).toBe(true);
+    expect(houseShouldClientNavigate("/social/create/live", ["/social/create/live"])).toBe(false);
+  });
+
+  it("remembers scroll per screen key", () => {
+    resetHousePaintedForTests();
+    houseRememberScroll("/social", 480);
+    expect(houseReadScroll("/social")).toBe(480);
+    expect(houseReadScroll("/social/explore")).toBe(0);
   });
 
   it("remembers painted screens for warm client hops", () => {
