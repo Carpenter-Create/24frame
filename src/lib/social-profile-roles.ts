@@ -4,14 +4,14 @@
 // IMDb help-page category clone. Persist ordered slugs on
 // profiles.crafts. primary_role stays the first selected slug.
 // UI label is Professions — not Topics, not Category, not crafts.
-// Public header is one compact house gray pill: first ~3 labels
-// middot-joined, then +N. Omit when empty. Edit max 5. Select and
-// write stay sync. Not on SocialPersonRow. Investor is a Business add.
+// Public header is one wrap row of house gray pills: first ~3 Roles
+// as their own chips, then one muted +N pill. Omit when empty.
+// Edit max 5. Select and write stay sync. Not on SocialPersonRow.
+// Investor is a Business add. Bio middots stay the author's copy.
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
 export const SOCIAL_PROFILE_ROLES_DISPLAY_CAP = 3;
 export const SOCIAL_PROFILE_ROLES_FACE = SOCIAL_PROFILE_ROLES_DISPLAY_CAP;
-export const SOCIAL_PROFILE_ROLES_SEP = " · ";
 export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
 
 export const SOCIAL_PROFILE_ROLE_GROUPS = [
@@ -356,14 +356,9 @@ export function socialProfileRolesFace(raw: unknown): {
   };
 }
 
-export function socialProfileRolesLine(raw: unknown): string | null {
-  const { shown, extra } = socialProfileRolesFace(raw);
-  if (shown.length === 0) return null;
-  const line = shown.map((role) => role.label).join(SOCIAL_PROFILE_ROLES_SEP);
-  return extra > 0 ? `${line} +${extra}` : line;
+export function socialProfileRolesMoreLabel(extra: number): string {
+  return extra > 0 ? `+${extra}` : "";
 }
-
-export const socialProfileRolesFaceLine = socialProfileRolesLine;
 
 export function filterSocialProfileRoleGroups(query: string) {
   const needle = query.trim().toLowerCase();

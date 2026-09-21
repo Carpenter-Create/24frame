@@ -158,7 +158,12 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.creditsTab);
     expect(html).toContain('data-social-profile-tab="credits"');
     expect(html).toContain("overflow-x-auto");
-    expect(html).toContain("data-social-for-you");
+    expect(html).not.toContain("data-social-for-you");
+    expect(html).not.toContain("data-social-for-you-skeleton");
+    expect(html).toContain("mx-auto");
+    expect(html).toContain("md:max-w-[892px]");
+    expect(html).not.toContain("max-w-[935px]");
+    expect(html).not.toContain("lg:max-w-[892px]");
     expect(html).toContain("data-social-share");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Reels");
@@ -251,7 +256,7 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-profile-topics");
   });
 
-  it("prints the Professions gray pill under the display name and omits it when crafts is empty", async () => {
+  it("prints individual Profession pills after bio and omits them when crafts is empty", async () => {
     stubClient({
       profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
     });
@@ -264,10 +269,15 @@ describe("Social profile public face", () => {
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain('data-social-profile-role="actor"');
+    expect(html).toContain('data-social-profile-role="producer"');
+    expect(html).toContain('data-social-profile-role="screenwriter"');
     expect(html).toContain("Actor");
-    expect(html).toContain("Actor · Producer · Screenwriter +1");
+    expect(html).not.toContain("Actor · Producer");
+    expect(html).not.toContain("Actor · Producer · Screenwriter +1");
     expect(html).toContain("data-social-profile-roles-more");
+    expect(html).toContain("+1");
     expect(html).toContain("bg-surface-muted");
+    expect(html).toContain("flex-wrap");
     expect(html).toContain("grid-cols-3");
     expect(html).not.toContain("Investor");
     expect(html).not.toContain("data-social-profile-handle");
@@ -276,8 +286,8 @@ describe("Social profile public face", () => {
     expect(head).toContain("data-social-profile-stats");
     expect(head).not.toContain("@ada");
     expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-roles"));
-    expect(html.indexOf("data-social-profile-roles")).toBeLessThan(html.indexOf("data-social-profile-bio"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-bio"));
+    expect(html.indexOf("data-social-profile-bio")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html).not.toContain("data-social-profile-mutuals");
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");

@@ -9,10 +9,7 @@ import {
   useSocialProfileSaveHop,
 } from "@/components/social/use-social-profile-optimistic";
 import { HOUSE_PAGE_CANVAS_CLASS } from "@/lib/house-shell";
-import {
-  SOCIAL_HOME_CENTER_CLASS,
-  SOCIAL_HOME_LAYOUT_CLASS,
-} from "@/lib/social-chrome";
+import { SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
 import {
   SOCIAL_PROFILE_IDENTITY_EMPTY,
   clearSocialProfileOptimistic,
@@ -40,8 +37,7 @@ function SocialProfileOptimisticIdentity({
   const view = mergeSocialProfileIdentity(SOCIAL_PROFILE_IDENTITY_EMPTY, overlay);
   if (!view.handle && !view.displayName) return null;
   return (
-    <div data-social-profile-optimistic="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
+    <div data-social-profile-optimistic="" className={SOCIAL_PROFILE_CENTER_CLASS}>
         <SocialProfileIdentity
           name={view.displayName}
           handle={view.handle}
@@ -53,7 +49,6 @@ function SocialProfileOptimisticIdentity({
           imdbUrl={view.imdbUrl}
         />
         {view.welcomeVideoUrl ? <SocialWelcomeVideo src={view.welcomeVideoUrl} /> : null}
-      </div>
     </div>
   );
 }

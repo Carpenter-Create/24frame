@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import {
@@ -14,7 +13,7 @@ import {
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
-import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
 import {
   socialAvatarFaces,
   socialAvatarHref,
@@ -38,11 +37,9 @@ import {
 } from "@/lib/social";
 import {
   loadAuthorPosts,
-  loadFolloweeIds,
   loadLikedPostIds,
   loadLiveStories,
   loadProfileMutuals,
-  loadSuggestedPeople,
 } from "@/lib/social-feed";
 import { loadCachedIsFollowing, loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -120,18 +117,11 @@ export default async function SocialPublicProfilePage({
       )
     : new Set<string>();
   const counts = await loadCachedProfileSocialCounts(supabase, member.id);
-  const followees = await loadFolloweeIds(supabase, ctx.user.id);
   const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
   const mutualFaces =
     mutuals && mutuals.people.length > 0
       ? socialAvatarFaces(mutuals.people.map((person) => person.id))
       : new Map();
-  const suggested = await loadSuggestedPeople(
-    supabase,
-    [ctx.user.id, member.id, ...followees.ids],
-    { topics: own?.topics ?? [], crafts: own?.crafts ?? [] },
-  );
-  const faces = suggested.length > 0 ? socialAvatarFaces(suggested.map((person) => person.id)) : new Map();
   const highlightCards = liveStories.map((story) => ({
     id: story.id,
     href: socialStoryHref(story.id),
@@ -141,8 +131,7 @@ export default async function SocialPublicProfilePage({
   const profileHref = socialMemberHref(member.handle);
 
   return (
-    <div data-social-member="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
+    <div data-social-member="" className={SOCIAL_PROFILE_CENTER_CLASS}>
         <h1 className="sr-only">
           {socialPersonLabel({ handle: member.handle, displayName: member.display_name })}
         </h1>
@@ -232,8 +221,6 @@ export default async function SocialPublicProfilePage({
             />
           </>
         )}
-      </div>
-      <SocialForYouRail people={suggested} faces={faces} />
     </div>
   );
 }

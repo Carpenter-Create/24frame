@@ -66,7 +66,7 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_PILL_ACTIVE_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
-  SOCIAL_PROFILE_ROLES_PILL_CLASS,
+  SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_TOPIC_CHIP_MEASURE_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
 } from "@/lib/social-chrome";
@@ -320,11 +320,12 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
     expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).not.toContain("text-[11px]");
     expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).not.toContain("py-[5px]");
-    expect(SOCIAL_PROFILE_ROLES_PILL_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
-    expect(SOCIAL_PROFILE_ROLES_PILL_CLASS).toContain(HOUSE_FILTER_OFF_CLASS);
-    expect(SOCIAL_PROFILE_ROLES_PILL_CLASS).toContain("bg-surface-muted");
-    expect(SOCIAL_PROFILE_ROLES_PILL_CLASS).not.toContain("text-[11px]");
-    expect(SOCIAL_PROFILE_ROLES_PILL_CLASS).not.toContain("overflow-x-auto");
+    expect(SOCIAL_PROFILE_ROLE_PILL_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
+    expect(SOCIAL_PROFILE_ROLE_PILL_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
+    expect(SOCIAL_PROFILE_ROLE_PILL_CLASS).toContain(HOUSE_FILTER_OFF_CLASS);
+    expect(SOCIAL_PROFILE_ROLE_PILL_CLASS).toContain("bg-surface-muted");
+    expect(SOCIAL_PROFILE_ROLE_PILL_CLASS).not.toContain("text-[11px]");
+    expect(SOCIAL_PROFILE_ROLE_PILL_CLASS).not.toContain("overflow-x-auto");
     expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
     expect(SOCIAL_PILL_IDLE_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(SOCIAL_PILL_ACTIVE_CLASS).not.toContain("bg-accent");

@@ -183,7 +183,11 @@ describe("Social public profile", () => {
     expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).not.toContain("Copies ");
     expect(html).not.toContain("data-social-share-hint");
-    expect(html).toContain("data-social-for-you");
+    expect(html).not.toContain("data-social-for-you");
+    expect(html).toContain("mx-auto");
+    expect(html).toContain("md:max-w-[892px]");
+    expect(html).not.toContain("max-w-[935px]");
+    expect(html).not.toContain("lg:max-w-[892px]");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("data-social-open-dm");
     expect(html).not.toContain("data-social-profile-form");
@@ -194,17 +198,19 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-imdb");
   });
 
-  it("prints the Professions gray pill when crafts are set and omits a Professions prefix", async () => {
+  it("prints individual Profession pills after bio and omits a Professions prefix", async () => {
     stubClient({
       member: { ...ada, crafts: ["actor", "producer"] },
     });
     const html = await renderPublic();
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain('data-social-profile-role="actor"');
+    expect(html).toContain('data-social-profile-role="producer"');
     expect(html).toContain("Actor");
     expect(html).toContain("Producer");
-    expect(html).toContain("Actor · Producer");
+    expect(html).not.toContain("Actor · Producer");
     expect(html).toContain("bg-surface-muted");
+    expect(html).toContain("flex-wrap");
     expect(html).not.toContain("data-social-profile-roles-more");
     expect(html).not.toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));
@@ -212,8 +218,8 @@ describe("Social public profile", () => {
     expect(head).toContain("data-social-profile-stats");
     expect(head).not.toContain("@ada");
     expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-roles"));
-    expect(html.indexOf("data-social-profile-roles")).toBeLessThan(html.indexOf("data-social-profile-bio"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-bio"));
+    expect(html.indexOf("data-social-profile-bio")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");
     expect(html).not.toContain("Topics:");

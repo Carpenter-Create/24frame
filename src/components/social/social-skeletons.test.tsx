@@ -70,6 +70,9 @@ describe("Social loading skeletons", () => {
     expect(home).toContain("data-social-for-you-skeleton");
     expect(home).not.toContain("data-social-recent-chats-skeleton");
     expect(profile).toContain("data-social-profile-skeleton");
+    expect(profile).toContain("mx-auto");
+    expect(profile).toContain("md:max-w-[892px]");
+    expect(profile).not.toContain("data-social-for-you-skeleton");
     expect(create).toContain("data-social-create-skeleton");
     expect(stories).toContain("data-social-stories-index-skeleton");
     expect(viewer).toContain("data-social-story-viewer-skeleton");
