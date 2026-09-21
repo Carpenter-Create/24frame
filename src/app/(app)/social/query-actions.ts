@@ -11,7 +11,10 @@ import {
   parseSocialCategoryParam,
   SOCIAL_CATEGORY_ALL,
 } from "@/lib/social-categories";
-import type { SocialFollowingWallPage, SocialProfileCounts, SocialProfileRow } from "@/lib/social-feed";
+import { signedAvatarUrls, signedSocialMediaByPostId } from "@/lib/social-edge";
+import { loadGroupsByIds, loadLikedPostIds, loadProfilesByIds } from "@/lib/social-feed";
+import type { SocialProfileCounts, SocialProfileRow } from "@/lib/social-feed";
+import { socialFollowingWallView, type SocialFollowingWallView } from "@/lib/social-following-wall";
 import { followingAuthorIds } from "@/lib/social-home";
 import { parseFollowingWallCursorParam } from "@/lib/social-home-bounds";
 import { loadSocialSession } from "@/lib/social-session";
@@ -37,16 +40,36 @@ export async function readSocialFollowState(targetId: string): Promise<boolean> 
 export async function readSocialFollowingWall(input: {
   topic?: string;
   cursor?: string | null;
-}): Promise<SocialFollowingWallPage | null> {
+}): Promise<SocialFollowingWallView | null> {
   const session = await loadSocialSession();
   if (!session) return null;
   const followees = await loadCachedFolloweeIds(session.supabase, session.ctx.user.id);
   const topic = parseSocialCategoryParam(input.topic);
   const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
-  return loadCachedFollowingPosts(
+  const wall = await loadCachedFollowingPosts(
     session.supabase,
     session.ctx.user.id,
     followingAuthorIds(session.ctx.user.id, followees.ids),
     { category, cursor: parseFollowingWallCursorParam(input.cursor ?? undefined) },
   );
+  const authorIds = [...new Set(wall.posts.map((post) => post.author_id))];
+  const groupIds = [...new Set(wall.posts.map((post) => post.group_id).filter((id): id is string => !!id))];
+  const [authors, groups, liked] = await Promise.all([
+    loadProfilesByIds(session.supabase, authorIds),
+    loadGroupsByIds(session.supabase, groupIds),
+    loadLikedPostIds(
+      session.supabase,
+      session.ctx.user.id,
+      wall.posts.map((post) => post.id),
+    ),
+  ]);
+  return socialFollowingWallView({
+    wall,
+    authors,
+    faces: signedAvatarUrls(authorIds),
+    groups,
+    liked,
+    media: signedSocialMediaByPostId(wall.posts),
+    canLike: true,
+  });
 }

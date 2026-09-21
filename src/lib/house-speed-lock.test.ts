@@ -70,7 +70,8 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(sot).toContain("runOptimisticMutation");
     expect(sot).toContain('followHref: "/api/social/follow"');
     expect(follow).toContain("runSocialOptimisticMutation");
-    expect(follow).toContain("persistSocialFollow");
+    expect(follow).toContain("persistSocialFollowLatest");
+    expect(follow).toContain("beginSocialFollowEpoch");
     expect(follow).not.toContain("toggleSocialFollow");
     expect(follow).not.toContain("disabled={pending}");
     expect(follow).not.toContain("const result = await toggleSocialFollow");
@@ -92,6 +93,10 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
       "src/components/social/social-profile-tabs.tsx",
       "src/components/social/social-follows-tabs.tsx",
       "src/components/social/social-activity-pills.tsx",
+      "src/components/social/social-profile-stats.tsx",
+      "src/components/social/social-profile-edit-face.tsx",
+      "src/components/social/social-profile-edit.tsx",
+      "src/app/(app)/social/profile/page.tsx",
     ];
     for (const path of surfaces) {
       const src = readFileSync(path, "utf8");
@@ -115,6 +120,23 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(provider).toContain("history.pushState");
     expect(provider).toContain("navigateOwned");
     expect(provider).toContain("HOUSE_CLIENT_SHELL.rscFallbackAttr");
+    expect(provider).toContain("houseReconcileOwnedHref");
+    expect(provider).toContain("touchScreenStore");
     expect(loading).toContain("data-house-rsc-fallback");
+  });
+
+  it("lets Query own the Following wall after boot", () => {
+    const bound = readFileSync("src/components/social/social-following-wall-bound.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/social/query-actions.ts", "utf8");
+    const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
+    const face = readFileSync("src/components/social/social-own-profile.tsx", "utf8");
+    expect(bound).toContain("query.data ?? wall");
+    expect(bound).toContain("SocialOptimisticFeed");
+    expect(bound).not.toContain("return children");
+    expect(actions).toContain("socialFollowingWallView");
+    expect(actions).toContain("signedSocialMediaByPostId");
+    expect(home).toContain("socialFollowingWallView");
+    expect(face).toContain("socialProfileQueryKey");
+    expect(face).toContain("query.data");
   });
 });

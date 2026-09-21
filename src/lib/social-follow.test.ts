@@ -62,7 +62,7 @@ describe("social follow helpers", () => {
       src.indexOf("export function SocialFollowButton"),
       src.indexOf("export function SocialLikeButton"),
     );
-    expect(chunk).toContain("persistSocialFollow");
+    expect(chunk).toContain("persistSocialFollowLatest");
     expect(chunk).toContain("runSocialOptimisticMutation");
     expect(chunk).not.toContain("toggleSocialFollow");
     expect(chunk).not.toContain("router.refresh()");

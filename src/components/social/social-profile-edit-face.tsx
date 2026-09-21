@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
 
+import { HouseLink } from "@/components/chrome/house-link";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
   SOCIAL_PROFILE_BIO_DONE_CLASS,
@@ -54,9 +54,9 @@ export function SocialProfileEditFace({
               <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
             </button>
           ) : (
-            <Link href={backHref} className={SOCIAL_PROFILE_EDIT_BACK_CLASS} aria-label={SOCIAL.profile.back}>
+            <HouseLink href={backHref} className={SOCIAL_PROFILE_EDIT_BACK_CLASS} aria-label={SOCIAL.profile.back}>
               <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
-            </Link>
+            </HouseLink>
           )}
           <h1 className="min-w-0 flex-1 text-center text-[17px] font-semibold text-ink">{title}</h1>
           {done ? (

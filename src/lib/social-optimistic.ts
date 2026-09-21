@@ -165,6 +165,51 @@ export function persistSocialFollow(form: FormData): Promise<{ error?: string }>
   return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.followHref, form);
 }
 
+const followEpoch = new Map<string, number>();
+const followPersistTail = new Map<string, Promise<unknown>>();
+const followPersisted = new Map<string, boolean>();
+
+export function socialFollowPersistKey(viewerId: string, targetId: string): string {
+  return `${viewerId}:${targetId}`;
+}
+
+export function rememberSocialFollowBaseline(key: string, following: boolean): void {
+  if (!followPersisted.has(key)) followPersisted.set(key, following);
+}
+
+export function beginSocialFollowEpoch(key: string): number {
+  const next = (followEpoch.get(key) ?? 0) + 1;
+  followEpoch.set(key, next);
+  return next;
+}
+
+export function socialFollowEpochIsCurrent(key: string, epoch: number): boolean {
+  return followEpoch.get(key) === epoch;
+}
+
+export function persistSocialFollowLatest(
+  key: string,
+  epoch: number,
+  desired: boolean,
+  extras: { followeeId: string; handle: string },
+): Promise<{ error?: string }> {
+  const prev = followPersistTail.get(key) ?? Promise.resolve();
+  const next = prev.then(async () => {
+    if (!socialFollowEpochIsCurrent(key, epoch)) return {};
+    const from = followPersisted.get(key);
+    if (from === desired) return {};
+    const form = new FormData();
+    form.set("followee_id", extras.followeeId);
+    form.set("handle", extras.handle);
+    form.set("following", from ? "1" : "0");
+    const result = await persistSocialFollow(form);
+    if (!result.error) followPersisted.set(key, desired);
+    return result;
+  });
+  followPersistTail.set(key, next.catch(() => undefined));
+  return next;
+}
+
 export async function persistSocialComment(
   form: FormData,
 ): Promise<{ error?: string; id?: string; created_at?: string }> {
@@ -430,6 +475,9 @@ export function resetSocialOptimisticForTests(): void {
   likeEpoch.clear();
   likePersistTail.clear();
   likePersisted.clear();
+  followEpoch.clear();
+  followPersistTail.clear();
+  followPersisted.clear();
   commentCounts.clear();
   posts = [];
   postPublishBusy = false;

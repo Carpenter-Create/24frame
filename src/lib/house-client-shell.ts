@@ -91,13 +91,32 @@ export function houseShouldClientNavigate(
   return new Set(cachedKeys).has(houseHrefKey(dest));
 }
 
+export function houseTouchOrder(
+  order: readonly string[],
+  key: string,
+  cap: number = HOUSE_CLIENT_SHELL.cacheCap,
+): string[] {
+  return [key, ...order.filter((item) => item !== key)].slice(0, cap);
+}
+
+// Warm client hops keep ownedHref until Next catches up. A later cold
+// Next navigation (uncached dest, form GET, router.push) must drop it
+// so chrome and the screen cache follow the live RSC dest.
+export function houseReconcileOwnedHref(
+  ownedHref: string | null,
+  nextHref: string,
+  previousNextHref: string,
+): string | null {
+  if (!ownedHref) return null;
+  if (houseHrefKey(ownedHref) === houseHrefKey(nextHref)) return null;
+  if (houseHrefKey(nextHref) !== houseHrefKey(previousNextHref)) return null;
+  return ownedHref;
+}
+
 const paintedScreens = new Set<string>();
 
 export function houseRememberPainted(key: string): string[] {
-  const next = [key, ...[...paintedScreens].filter((item) => item !== key)].slice(
-    0,
-    HOUSE_CLIENT_SHELL.cacheCap,
-  );
+  const next = houseTouchOrder([...paintedScreens], key);
   paintedScreens.clear();
   for (const item of next) paintedScreens.add(item);
   return next;

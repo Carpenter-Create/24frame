@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 
+import { HouseLink } from "@/components/chrome/house-link";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
@@ -196,9 +196,9 @@ async function SocialProfileMain({
         stats={counts ?? undefined}
         actions={
           <>
-            <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
+            <HouseLink href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
               {SOCIAL.profile.edit}
-            </Link>
+            </HouseLink>
             <SocialShareButton handle={identity.handle} stretch />
           </>
         }

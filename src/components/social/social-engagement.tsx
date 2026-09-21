@@ -9,12 +9,16 @@ import { useAppQueryClient } from "@/components/query-provider";
 import { useSocialLike } from "@/components/social/use-social-optimistic";
 import {
   applyOptimisticLike,
+  beginSocialFollowEpoch,
   beginSocialLikeEpoch,
   nextSocialLikeState,
-  persistSocialFollow,
+  persistSocialFollowLatest,
   persistSocialLikeLatest,
+  rememberSocialFollowBaseline,
   rememberSocialLikeBaseline,
   runSocialOptimisticMutation,
+  socialFollowEpochIsCurrent,
+  socialFollowPersistKey,
   socialLikeEpochIsCurrent,
 } from "@/lib/social-optimistic";
 import { SOCIAL_QUERY_STALE_MS, socialFollowQueryKey } from "@/lib/social-cache-keys";
@@ -166,7 +170,9 @@ function SocialFollowButtonView({
         onSubmit={(event) => {
           event.preventDefault();
           const next = !isFollowing;
-          const form = new FormData(event.currentTarget);
+          const key = socialFollowPersistKey(viewerId ?? "me", followeeId);
+          rememberSocialFollowBaseline(key, isFollowing);
+          const epoch = beginSocialFollowEpoch(key);
           runSocialOptimisticMutation({
             apply: () => {
               setError("");
@@ -181,8 +187,10 @@ function SocialFollowButtonView({
               }
               return isFollowing;
             },
-            persist: () => persistSocialFollow(form),
+            persist: () =>
+              persistSocialFollowLatest(key, epoch, next, { followeeId, handle }),
             rollback: (previous) => {
+              if (!socialFollowEpochIsCurrent(key, epoch)) return;
               setOverride(previous);
               if (queryClient && viewerId) {
                 applyOptimisticFollow(queryClient, {
@@ -192,8 +200,12 @@ function SocialFollowButtonView({
                 });
               }
             },
-            onError: (notice) => setError(notice),
+            onError: (notice) => {
+              if (!socialFollowEpochIsCurrent(key, epoch)) return;
+              setError(notice);
+            },
             onSuccess: () => {
+              if (!socialFollowEpochIsCurrent(key, epoch)) return;
               if (next) setConfirm(true);
             },
           });

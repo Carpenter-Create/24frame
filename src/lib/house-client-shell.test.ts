@@ -5,9 +5,11 @@ import {
   HOUSE_CLIENT_SHELL,
   houseHrefKey,
   housePaintedKeys,
+  houseReconcileOwnedHref,
   houseRememberPainted,
   houseScreenKey,
   houseShouldClientNavigate,
+  houseTouchOrder,
   houseWorkspaceLandKey,
   isHouseClientOwnedPath,
   resetHousePaintedForTests,
@@ -57,6 +59,24 @@ describe("house client shell SoT", () => {
     );
     expect(houseShouldClientNavigate("/login", cached)).toBe(false);
     expect(houseShouldClientNavigate("/social", [])).toBe(false);
+  });
+
+  it("clears owned href when Next navigates to a different dest", () => {
+    expect(houseReconcileOwnedHref("/social", "/social", "/social/explore")).toBeNull();
+    expect(houseReconcileOwnedHref("/social", "/social/explore", "/social/explore")).toBe(
+      "/social",
+    );
+    expect(houseReconcileOwnedHref("/social", "/social/search", "/social/explore")).toBeNull();
+    expect(houseReconcileOwnedHref(null, "/social", "/social")).toBeNull();
+  });
+
+  it("touches a revisited screen to the front of the cap", () => {
+    expect(houseTouchOrder(["/social", "/social/explore", "/home"], "/home", 8)).toEqual([
+      "/home",
+      "/social",
+      "/social/explore",
+    ]);
+    expect(houseTouchOrder(["/a", "/b", "/c"], "/d", 3)).toEqual(["/d", "/a", "/b"]);
   });
 
   it("treats the RSC fallback marker as a skeleton, not a screen", () => {

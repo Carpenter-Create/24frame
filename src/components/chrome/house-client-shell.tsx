@@ -18,9 +18,11 @@ import {
   houseHrefKey,
   housePaintedKeys,
   housePathFromLocation,
+  houseReconcileOwnedHref,
   houseRememberPainted,
   houseScreenKey,
   houseShouldClientNavigate,
+  houseTouchOrder,
   parseHouseHref,
 } from "@/lib/house-client-shell";
 import { houseNavIgnorePendingClick, type HouseNavClickLike } from "@/lib/house-nav-pending";
@@ -64,13 +66,20 @@ export function isHouseRscFallback(node: ReactNode): boolean {
 
 function nextScreenStore(store: ScreenStore, key: string, node: ReactNode): ScreenStore {
   if (store.nodes[key] === node && store.order[0] === key) return store;
-  const order = [key, ...store.order.filter((item) => item !== key)].slice(
-    0,
-    HOUSE_CLIENT_SHELL.cacheCap,
-  );
+  const order = houseTouchOrder(store.order, key);
   const nodes: Record<string, ReactNode> = { [key]: node };
   for (const item of order) {
     if (item !== key && item in store.nodes) nodes[item] = store.nodes[item];
+  }
+  return { order, nodes };
+}
+
+function touchScreenStore(store: ScreenStore, key: string): ScreenStore {
+  if (!(key in store.nodes) || store.order[0] === key) return store;
+  const order = houseTouchOrder(store.order, key);
+  const nodes: Record<string, ReactNode> = {};
+  for (const item of order) {
+    if (item in store.nodes) nodes[item] = store.nodes[item];
   }
   return { order, nodes };
 }
@@ -82,9 +91,14 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
   const nextSearchPrefixed = nextSearch ? `?${nextSearch}` : "";
   const nextHref = housePathFromLocation(nextPath, nextSearchPrefixed);
   const [ownedHref, setOwnedHref] = useState<string | null>(null);
+  const [seenNextHref, setSeenNextHref] = useState(nextHref);
 
-  if (ownedHref && houseHrefKey(ownedHref) === houseHrefKey(nextHref)) {
-    setOwnedHref(null);
+  const reconciled = houseReconcileOwnedHref(ownedHref, nextHref, seenNextHref);
+  if (reconciled !== ownedHref) {
+    setOwnedHref(reconciled);
+  }
+  if (houseHrefKey(seenNextHref) !== houseHrefKey(nextHref)) {
+    setSeenNextHref(nextHref);
   }
 
   const href = ownedHref ?? nextHref;
@@ -162,13 +176,15 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
 
   let nextStore = store;
   if (!fallback && !(nextKey in store.nodes)) {
-    const remembered = nextScreenStore(store, nextKey, children);
-    if (remembered !== store) {
-      nextStore = remembered;
-      setStore(remembered);
-      houseRememberPainted(nextKey);
-      houseForgetUnlisted(remembered.order);
-    }
+    nextStore = nextScreenStore(store, nextKey, children);
+  }
+  if (activeKey in nextStore.nodes) {
+    nextStore = touchScreenStore(nextStore, activeKey);
+  }
+  if (nextStore !== store) {
+    setStore(nextStore);
+    houseRememberPainted(nextStore.order[0] ?? activeKey);
+    houseForgetUnlisted(nextStore.order);
   }
 
   const known = activeKey in nextStore.nodes;
