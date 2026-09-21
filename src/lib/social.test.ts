@@ -409,6 +409,11 @@ describe("profile opt-in", () => {
     expect(SOCIAL.profile.activityTab).toBe("Activity");
     expect(SOCIAL.profile.activityPosts).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
+    expect(SOCIAL.profile.highlightsEmpty).toBe("No highlights yet.");
+    expect(SOCIAL.profile.highlightsEmptyHint).toBe("Pin lasting collections from your Stories.");
+    expect(SOCIAL.profile.highlightsEmptyHint).not.toMatch(/24 hours/i);
+    expect(SOCIAL.profile.highlightsEmptyHint).not.toMatch(/live stories/i);
+    expect(SOCIAL.profile).not.toHaveProperty("highlightsEmptyOwnHint");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
     expect(SOCIAL.profile.creditsEmptyHint).toBe("Credits are the titles and roles attached to your name.");
