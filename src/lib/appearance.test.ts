@@ -67,7 +67,12 @@ describe("appearance copy", () => {
     expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.label)).not.toContain("Auto");
   });
 
-  it("shares gc-theme with the header toggle and Settings Preferences — no second store", () => {
+  it("shares gc-theme with the avatar Theme page — no second store", () => {
+    const themePage = readFileSync(join(here, "../app/(app)/settings/theme/page.tsx"), "utf8");
+    const preferencesPane = readFileSync(
+      join(here, "../components/settings/preferences-settings.tsx"),
+      "utf8",
+    );
     expect(THEME_STORAGE_KEY).toBe("gc-theme");
     expect(themeSrc).toContain("THEME_STORAGE_KEY");
     expect(themeSrc).toContain("applyDocumentThemePreference");
@@ -75,12 +80,20 @@ describe("appearance copy", () => {
     expect(prefsSrc).toContain("APPEARANCE_FLYOUT_OPTIONS");
     expect(prefsSrc).toContain("useThemePreference");
     expect(prefsSrc).toContain("AppearanceThemePicker");
-    expect(prefsSrc).toContain("AppearanceThemeRow");
+    expect(prefsSrc).not.toContain("AppearanceThemeRow");
+    expect(prefsSrc).not.toContain("AppearancePreferences");
     expect(prefsSrc).not.toContain("localStorage.setItem");
     expect(prefsSrc).not.toContain("THEME_STORAGE_KEY");
+    expect(themePage).toContain("AppearanceThemePicker");
+    expect(themePage).toContain("SETTINGS.themeHref");
+    expect(preferencesPane).not.toContain("AppearanceThemePicker");
+    expect(preferencesPane).not.toContain("AppearanceThemeRow");
+    expect(preferencesPane).not.toContain("AppearancePreferences");
     expect(sheetSrc).not.toContain("applyDocumentThemePreference");
     expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS");
     expect(existsSync(join(here, "../app/(app)/settings/appearance/page.tsx"))).toBe(false);
+    expect(existsSync(join(here, "../app/(app)/settings/preferences/theme/page.tsx"))).toBe(false);
+    expect(existsSync(join(here, "../app/(app)/settings/theme/page.tsx"))).toBe(true);
   });
 
   it("sections Appearance on the house muted module — selected reads on gray", () => {
@@ -95,7 +108,8 @@ describe("appearance copy", () => {
     expect(APPEARANCE_SETTINGS_OPTION_CLASS).not.toContain("justify-between");
     expect(APPEARANCE_SETTINGS_CARD_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
     expect(APPEARANCE_SETTINGS_LIST_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
-    expect(prefsSrc).toContain("APPEARANCE_SETTINGS_CARD_CLASS");
+    expect(prefsSrc).toContain("APPEARANCE_SETTINGS_LIST_CLASS");
+    expect(prefsSrc).not.toContain("APPEARANCE_SETTINGS_CARD_CLASS");
     expect(prefsSrc).not.toContain("t-section");
   });
 });

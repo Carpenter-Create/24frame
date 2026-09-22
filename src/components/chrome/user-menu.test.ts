@@ -176,11 +176,13 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).not.toContain("/account/company");
   });
 
-  it("keeps Profile as a Settings pane href and Appearance off any page door", () => {
+  it("keeps Profile as a Settings pane href and Theme on /settings/theme", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
     expect(USER_MENU.profile).toBe("Profile");
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
+    expect(USER_MENU.theme).toBe("Theme");
+    expect(USER_MENU.themeHref).toBe("/settings/theme");
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");
@@ -190,13 +192,15 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU.appearance).toBe("Appearance");
     expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ABSENT).not.toContain("Appearance");
+    expect(USER_MENU_ABSENT).not.toContain("Theme");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("theme");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(APPEARANCE.back).toBe("Back");
     expect(APPEARANCE.back).not.toBe("Back to main menu");
   });
 
   it("desktop panel items are the same list as mobile", () => {
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Theme", "Get Help"]);
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_PHONE_ITEMS");
@@ -226,7 +230,7 @@ describe("UserMenu actions", () => {
     expect(sheetSrc).not.toContain("admin@ccbfg.com");
   });
 
-  it("keeps theme off the avatar sheet — desktop header toggle stays the chrome SoT", () => {
+  it("keeps the theme picker off the avatar sheet — Theme drills to /settings/theme", () => {
     expect(sheetSrc).toContain("data-account-menu-face");
     expect(sheetSrc).not.toContain("AccountSheetAppearance");
     expect(sheetSrc).not.toContain("AccountAppearanceRow");
@@ -254,7 +258,7 @@ describe("UserMenu actions", () => {
 });
 
 describe("UserMenu Mercury quiet craft", () => {
-  it("keeps the header theme toggle in HouseLeadChrome on every breakpoint", () => {
+  it("keeps the header sun/moon off HouseLeadChrome — Theme is the avatar door", () => {
     const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
     const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
     expect(shellSrc).not.toContain("ThemeToggle");
@@ -262,12 +266,10 @@ describe("UserMenu Mercury quiet craft", () => {
     expect(shellSrc).not.toContain("ThemeGlyph");
     expect(menuSrc).not.toContain("ThemeToggle");
     expect(menuSrc).not.toContain("ThemeGlyph");
-    expect(leadSrc).toContain("ThemeToggle");
-    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).not.toContain("ThemeToggle");
+    expect(leadSrc).not.toContain("theme-toggle");
     expect(leadSrc).not.toContain("data-app-header-desktop-trailing");
     expect(leadSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
-    expect(leadSrc.indexOf("<ThemeToggle />")).toBeLessThan(
-      leadSrc.indexOf("<AskAssistantHeaderLink"),
-    );
+    expect(sheetSrc).toContain('kind === "settings"');
   });
 });

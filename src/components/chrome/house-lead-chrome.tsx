@@ -4,7 +4,6 @@ import { ActivityBell } from "@/components/activity/activity-bell";
 import { BrandLogo } from "./brand-logo";
 import { AskAssistantHeaderLink } from "./ask-assistant-header";
 import { WorkspaceSwitcher } from "./workspace-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/cn";
 import type { ActivityItem } from "@/lib/activity";
 import {
@@ -131,7 +130,6 @@ export function HouseLeadChrome({
           >
             <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />
           </div>
-          <ThemeToggle />
           <AskAssistantHeaderLink />
           <ActivityBell unread={activityUnread} items={activityItems} workspace={workspace} />
           {accountMenu}

@@ -73,6 +73,7 @@ const RETIRED_SETTINGS_PAGES = [
   "src/app/(app)/account/agreements/page.tsx",
   "src/app/(app)/account/company/page.tsx",
   "src/app/(app)/refer/page.tsx",
+  "src/app/(app)/settings/preferences/theme/page.tsx",
 ] as const;
 
 describe("settings hub lock", () => {
@@ -90,9 +91,12 @@ describe("settings hub lock", () => {
     expect(SETTINGS.security).toBe("Security");
     expect(SETTINGS.securityHref).toBe("/settings/security");
     expect(SETTINGS.theme).toBe("Theme");
-    expect(SETTINGS.themeHref).toBe("/settings/preferences/theme");
+    expect(SETTINGS.theme).toBe(USER_MENU.theme);
+    expect(SETTINGS.themeHref).toBe("/settings/theme");
+    expect(SETTINGS.themeHref).toBe(USER_MENU.themeHref);
     expect(SETTINGS.themeHelper).toBe("Choose Light, Dark, or System default.");
     expect(SETTINGS.notificationsHref).toBe("/settings/preferences/notifications");
+    expect(SETTINGS.locationHref).toBe("/settings/preferences/location");
     expect(SETTINGS.profileNameHref).toBe("/settings/profile/name");
     expect(SETTINGS).not.toHaveProperty("sectionQuery");
     expect(SETTINGS.agreements).toBe("Agreements");
@@ -151,8 +155,9 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/organization/entities/new")).toBe("organization");
     expect(settingsHubSection("/settings/organization/roles")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
-    expect(settingsHubSection("/settings/preferences/theme")).toBe("preferences");
+    expect(settingsHubSection("/settings/theme")).toBeNull();
     expect(settingsHubSection("/settings/preferences/notifications")).toBe("preferences");
+    expect(settingsHubSection("/settings/preferences/location")).toBe("preferences");
     expect(settingsHubSection("/settings/profile/name")).toBe("profile");
     expect(settingsHubSection("/settings/security")).toBe("security");
     expect(settingsHubSection("")).toBe("profile");
@@ -222,6 +227,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Aggregation");
     expect(SETTINGS.agreementsEmpty).not.toMatch(/accepted yet|download|view agreement/i);
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("theme");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("help");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("agreements");
@@ -297,11 +303,15 @@ describe("settings hub lock", () => {
       href: "/settings",
       label: "Settings",
     });
-    expect(settingsHeaderBack("/settings/preferences/theme")).toEqual({
+    expect(settingsHeaderBack("/settings/theme")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/preferences/notifications")).toEqual({
       href: "/settings/preferences",
       label: "Preferences",
     });
-    expect(settingsHeaderBack("/settings/preferences/notifications")).toEqual({
+    expect(settingsHeaderBack("/settings/preferences/location")).toEqual({
       href: "/settings/preferences",
       label: "Preferences",
     });

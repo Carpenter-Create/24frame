@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { APPEARANCE, APPEARANCE_SETTINGS_CARD_CLASS } from "@/lib/appearance";
+import { PreferencesSettings } from "@/components/settings/preferences-settings";
 import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
+import { EMPTY_PROFILE_LOCATION, LOCATION } from "@/lib/location";
 import {
   NOTIFICATION_PREF_DEFAULTS,
   NOTIFICATION_PREF_EVENTS,
@@ -38,6 +40,9 @@ vi.mock("./actions", () => ({
   loadOwnNotificationPrefs: vi.fn(async () => NOTIFICATION_PREF_DEFAULTS),
   saveNotificationPref: vi.fn(),
 }));
+vi.mock("@/app/(app)/settings/preferences/location/actions", () => ({
+  loadProfileLocation: vi.fn(async () => ({ city: "Austin", region: "TX", country: "US" })),
+}));
 
 function ctx(isGcStaff: boolean) {
   return {
@@ -61,7 +66,7 @@ describe("SettingsPreferencesPage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(false) as never);
   });
 
-  it("shows Appearance and the notification matrix — not an empty pane", async () => {
+  it("shows the notification matrix — Theme stays off Preferences", async () => {
     const html = renderToStaticMarkup(await SettingsPreferencesPage());
     expect(html).toContain('data-settings-hub="preferences"');
     expect(html).toMatch(/<h1[^>]*>Preferences<\/h1>/);
@@ -71,23 +76,28 @@ describe("SettingsPreferencesPage", () => {
     expect(paneSrc).toContain("settingsPaneTitle");
     expect(paneSrc).not.toContain("SETTINGS.title");
     expect(html).toContain('data-settings-pref-index=""');
-    expect(html).toContain('data-settings-drill-row="theme"');
-    expect(html).toContain(`href="${SETTINGS.themeHref}"`);
+    expect(html).not.toContain('data-settings-drill-row="theme"');
+    expect(html).not.toContain(`href="${SETTINGS.themeHref}"`);
+    expect(html).not.toContain('data-settings-section="appearance"');
+    expect(html).not.toContain('data-settings-appearance=""');
+    expect(html).not.toContain("System default");
+    expect(html).not.toContain(">Appearance<");
+    expect(html).not.toContain("data-settings-speech-learning");
+    expect(html).not.toContain("Learn from typed and dictated text");
     expect(html).toContain('data-settings-drill-row="notifications"');
     expect(html).toContain(`href="${SETTINGS.notificationsHref}"`);
+    expect(html).toContain('data-settings-drill-row="location"');
+    expect(html).toContain(`href="${SETTINGS.locationHref}"`);
+    expect(html).toContain(LOCATION.title);
+    expect(html).toContain("Austin, TX, US");
+    expect(paneSrc).not.toContain("truncate");
     expect(html).toContain("md:hidden");
     expect(html).toContain("hidden md:block");
     expect(html).toContain('data-settings-pref-desktop=""');
     expect(html).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
     expect(paneSrc).toContain("SETTINGS_CONTENT_MEASURE_CLASS");
     expect(paneSrc).toContain("constrained measure");
-    expect(html).toContain('data-settings-section="appearance"');
-    expect(html).toContain('data-settings-appearance=""');
-    expect(html).toContain(APPEARANCE.title);
-    expect(html).toContain(APPEARANCE.systemDefault);
-    expect(html).toContain(APPEARANCE.dark);
-    expect(html).toContain(APPEARANCE.light);
-    expect(html).toContain(SETTINGS.theme);
+    expect(html).not.toContain(SETTINGS.themeHelper);
     expect(html).toContain('data-settings-section="notifications"');
     expect(html).toContain('data-settings-notification-matrix=""');
     expect(html).toContain(NOTIFICATION_PREFS.title);
@@ -109,7 +119,7 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(NOTIFICATION_PREFS.groups.education);
     expect(html).toContain(NOTIFICATION_PREFS.groups.account);
     expect(html).toContain(NOTIFICATION_PREFS.groups.reporting);
-    expect(html).toContain(APPEARANCE_SETTINGS_CARD_CLASS);
+    expect(html).not.toContain("data-settings-section=\"appearance\"");
     expect(html).toContain(NOTIFICATION_PREF_WRAP_CLASS);
     expect(html).toContain('data-settings-notification-wrap=""');
     expect(NOTIFICATION_PREF_WRAP_CLASS).not.toContain(HOUSE_MODULE_CLASS);
@@ -142,10 +152,24 @@ describe("SettingsPreferencesPage", () => {
     expect(paneSrc).not.toContain("data-settings-manage-courses");
     expect(paneSrc).not.toContain("manageCoursesHref");
     expect(paneSrc).not.toContain("settingsManageCoursesVisible");
-    expect(paneSrc).toContain("AppearancePreferences");
-    expect(paneSrc).toContain("AppearanceThemeRow");
+    expect(paneSrc).not.toContain("AppearancePreferences");
+    expect(paneSrc).not.toContain("AppearanceThemeRow");
+    expect(paneSrc).not.toContain("AppearanceThemePicker");
+    expect(paneSrc).not.toContain("SpeechLearningPreference");
     expect(paneSrc).toContain("NotificationPreferences");
     expect(paneSrc).toContain("SettingsDrillRow");
+  });
+
+  it("shows the empty location placeholder when no place is saved", () => {
+    const html = renderToStaticMarkup(
+      createElement(PreferencesSettings, {
+        prefs: NOTIFICATION_PREF_DEFAULTS,
+        location: EMPTY_PROFILE_LOCATION,
+      }),
+    );
+    expect(html).toContain('data-settings-drill-row="location"');
+    expect(html).toContain(LOCATION.empty);
+    expect(html).not.toContain("Austin, TX, US");
   });
 
   it("never shows Manage courses on Preferences, including staff", async () => {

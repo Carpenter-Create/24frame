@@ -40,8 +40,9 @@ const SETTINGS_PANES = [
 
 const SETTINGS_EDIT_PANES = [
   "src/app/(app)/settings/profile/name/page.tsx",
-  "src/app/(app)/settings/preferences/theme/page.tsx",
+  "src/app/(app)/settings/theme/page.tsx",
   "src/app/(app)/settings/preferences/notifications/page.tsx",
+  "src/app/(app)/settings/preferences/location/page.tsx",
   "src/app/(app)/settings/organization/company/page.tsx",
   "src/app/(app)/settings/organization/entities/new/page.tsx",
   "src/app/(app)/settings/organization/entities/[entityId]/page.tsx",
@@ -116,8 +117,9 @@ describe("SettingsPageLead", () => {
     );
     expect(html).toContain('data-settings-page-lead-helper=""');
     expect(html).toContain(SETTINGS.themeHelper);
-    expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
-    expect(html).toContain("Preferences");
+    expect(html).toContain(`href="${SETTINGS.href}"`);
+    expect(html).toContain("Settings");
+    expect(html).not.toContain(`href="${SETTINGS.preferencesHref}"`);
     expect(html).toMatch(/<h1[^>]*>Theme<\/h1>/);
   });
 

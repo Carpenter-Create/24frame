@@ -2,8 +2,9 @@ import type { WorkspaceMode } from "@/lib/workspace";
 
 // Learn from transcripts + typed text only. Tag source voice|typed.
 // Never store raw audio. Preference defaults ON (opt-out). Lawyers
-// own T&Cs / privacy copy — this file holds the short settings label
-// and the ingest hook only.
+// own T&Cs / privacy copy — this file holds the short label and the
+// ingest hook. Adam 2026-09-22: not a Preferences subsection. Do not
+// mount it on Settings. No new Settings home in this slice.
 
 export const SPEECH_LEARNING_STORAGE_KEY = "gc-speech-learning";
 export const SPEECH_LEARNING_EVENT = "gc-speech-learning";

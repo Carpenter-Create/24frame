@@ -16,9 +16,9 @@
 // optimistic dest light on tap. No under-top dest chip rail. No
 // peer workspace pill rail.
 // Phone OS dark is not the product theme. One house SoT.
-// Trailing is search (when needed) · theme · 24Frame AI · bell ·
-// avatar. Sun/moon is shared immediately left of Ask on every
-// breakpoint. One trail. No phone-only sun/moon twin.
+// Trailing is search (when needed) · 24Frame AI · bell ·
+// avatar. Color mode is the avatar Theme row only (Adam lock
+// 2026-09-22). No header sun/moon.
 // Ask AI is header + Home module only (#465).
 // Craft is Elevated Mercury (reference, not a pixel clone, not
 // Nextdoor frost): one floating pill, house surface fill, hairline,

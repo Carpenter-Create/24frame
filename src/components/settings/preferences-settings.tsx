@@ -1,11 +1,7 @@
-import {
-  AppearancePreferences,
-  AppearanceThemeRow,
-} from "@/components/settings/appearance-preferences";
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
-import { SpeechLearningPreference } from "@/components/settings/speech-learning-preference";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
+import { composeLocationLabel, LOCATION, type ProfileLocation } from "@/lib/location";
 import type { NotificationPrefs } from "@/lib/notification-prefs";
 import { NOTIFICATION_PREFS } from "@/lib/notification-prefs";
 import {
@@ -17,23 +13,30 @@ import {
   settingsPaneTitle,
 } from "@/lib/settings";
 
-// Preferences pane — Appearance (gc-theme SoT) + speech-learning
-// opt-out + notification matrix. Never a You / Social / Education /
-// Aggregation spine.
+// Preferences pane — Location drill and the notification matrix.
+// Theme is the avatar-menu door at /settings/theme, not this pane.
+// Speech-learning is parked off Preferences (Adam 2026-09-22).
+// The gc-speech-learning store stays; this pane does not surface it.
+// Never a You / Social / Education / Aggregation spine.
 // Course management lives on the Education operator workspace,
 // not a Preferences row. Not a CMS. Not GC Staff admin.
 //
-// Mobile: Coinbase drill-in. Theme and Notifications are one-row
-// summaries. Instant switches stay on the Notifications pane.
-// Desktop keeps the on-page Appearance card and matrix inside
-// SETTINGS_CONTENT_MEASURE_CLASS — constrained measure, not
-// full-bleed rows.
+// Location is a Coinbase drill on phone and desktop. The muted
+// value is the composed place, or the empty placeholder.
+// Mobile also drills to Notifications. Instant switches stay
+// on the Notifications pane.
+// Desktop keeps the matrix inside SETTINGS_CONTENT_MEASURE_CLASS —
+// constrained measure, not full-bleed rows.
 
 export function PreferencesSettings({
   prefs,
+  location,
 }: {
   prefs: NotificationPrefs;
+  location: ProfileLocation;
 }) {
+  const locationValue =
+    composeLocationLabel(location.city, location.region, location.country) || LOCATION.empty;
   return (
     <div data-settings-page="" data-settings-hub="preferences" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="preferences" className={SETTINGS_SECTION_CLASS}>
@@ -41,21 +44,25 @@ export function PreferencesSettings({
           title={settingsPaneTitle("preferences")}
           pathname={SETTINGS.preferencesHref}
         />
-        <div data-settings-pref-index="" className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
-          <AppearanceThemeRow />
+        <div data-settings-pref-index="" className={SETTINGS_DRILL_LIST_CLASS}>
           <SettingsDrillRow
-            kind="notifications"
-            label={NOTIFICATION_PREFS.title}
-            href={SETTINGS.notificationsHref}
+            kind="location"
+            label={LOCATION.title}
+            value={locationValue}
+            href={SETTINGS.locationHref}
           />
-          <SpeechLearningPreference />
+          <div className="md:hidden">
+            <SettingsDrillRow
+              kind="notifications"
+              label={NOTIFICATION_PREFS.title}
+              href={SETTINGS.notificationsHref}
+            />
+          </div>
         </div>
         <div
           data-settings-pref-desktop=""
           className={`hidden md:block ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
         >
-          <AppearancePreferences />
-          <SpeechLearningPreference />
           <NotificationPreferences initialPrefs={prefs} />
         </div>
       </section>

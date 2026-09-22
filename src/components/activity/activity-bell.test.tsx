@@ -225,7 +225,7 @@ describe("ActivityBell", () => {
     expect(html).toContain("md:hidden");
   });
 
-  it("matches #391 chrome idle weight on theme and the desktop bell", () => {
+  it("matches #391 chrome idle weight on the desktop bell — header sun/moon is gone", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
     // Phone header trailing is its own 24px literal. Dock is 28px.
@@ -239,11 +239,12 @@ describe("ActivityBell", () => {
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-5 shrink-0 hidden md:block");
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
-    expect(themeSrc).toContain("PHOSPHOR_CHROME_ICON_CLASS");
+    expect(themeSrc).not.toContain("PHOSPHOR_CHROME_ICON_CLASS");
+    expect(themeSrc).not.toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(themeSrc).not.toContain("Sun");
+    expect(themeSrc).not.toContain("Moon");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
-    expect(themeSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
-    expect(themeSrc).toContain("weight={PHOSPHOR_CHROME_IDLE_WEIGHT}");
     expect(bellSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(bellSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
     expect(bellSrc).toContain(
@@ -257,7 +258,7 @@ describe("ActivityBell", () => {
       expect(src).not.toContain('weight="duotone"');
       expect(src).not.toContain("strokeWidth");
     }
-    expect(themeSrc).toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
+    expect(themeSrc).not.toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
     expect(bellSrc).not.toContain('"size-6');
     expect(bellSrc).not.toContain('"size-4');
   });

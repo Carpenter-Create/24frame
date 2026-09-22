@@ -364,7 +364,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Settings — Get Help, then Log out with the footer", () => {
+  it("lists Settings — Theme — Get Help, then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
     const settingsClass = attrClass(html, 'data-sheet-group-item="settings"');
@@ -380,12 +380,17 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("Workspace");
     expect(group).not.toContain("Profile");
     expect(group).not.toContain("Appearance");
-    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Get Help"));
+    expect(group).toContain("Theme");
+    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Theme"));
+    expect(group.indexOf("Theme")).toBeLessThan(group.indexOf("Get Help"));
     expect(html.indexOf("Get Help")).toBeLessThan(html.indexOf("Log out"));
     expect(html).not.toContain("24Frame AI");
     expect(html).not.toContain('data-sheet-group-item="workspace"');
     expect(html).not.toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="settings"');
+    expect(html).toContain('data-sheet-group-item="theme"');
+    expect(html).toContain('href="/settings/theme"');
+    expect(html).not.toContain("/settings/preferences/theme");
     expect(html).not.toContain('data-sheet-group-item="askAssistant"');
     expect(html).not.toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
@@ -890,7 +895,11 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(html).not.toContain("Workspace");
     expect(html).not.toContain("Profile");
     expect(html).toContain("Settings");
+    expect(html).toContain("Theme");
     expect(html).not.toContain("Appearance");
+    expect(html).toContain('href="/settings/theme"');
+    expect(html.indexOf("Settings")).toBeLessThan(html.indexOf(">Theme<"));
+    expect(html.indexOf(">Theme<")).toBeLessThan(html.indexOf("Get Help"));
     expect(html).not.toContain("Agreements");
     expect(html).toContain("Get Help");
     expect(html).toContain("data-account-sheet-help-rule");

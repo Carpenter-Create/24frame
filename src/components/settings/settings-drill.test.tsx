@@ -158,17 +158,16 @@ describe("SettingsEditPane", () => {
           title: SETTINGS.theme,
           helper: SETTINGS.themeHelper,
           pathname: SETTINGS.themeHref,
-          hub: "preferences",
         },
         createElement("div", { "data-theme-control": "" }, "picker"),
       ),
     );
     expect(html).toContain('data-settings-edit-pane=""');
-    expect(html).toContain('data-settings-hub="preferences"');
+    expect(html).not.toContain('data-settings-hub="preferences"');
     expect(html).toContain('data-settings-page-lead=""');
     expect(html).toContain(SETTINGS.themeHelper);
     expect(html).toContain(SETTINGS_EDIT_HELPER_CLASS);
-    expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
+    expect(html).toContain(`href="${SETTINGS.href}"`);
     expect(html).toContain("picker");
     expect(html).toMatch(/<h1[^>]*>Theme<\/h1>/);
   });

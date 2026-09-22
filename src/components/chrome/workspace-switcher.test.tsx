@@ -427,16 +427,13 @@ describe("workspace switcher placement", () => {
     expect(trailing).toContain("{trailingNav}");
     expect(trailing).toContain('data-app-header-trailing-nav="" className="md:hidden"');
     expect(trailing).toContain("<AskAssistantHeaderLink />");
-    expect(trailing).toContain("<ThemeToggle />");
+    expect(trailing).not.toContain("ThemeToggle");
     expect(trailing).toContain("<ActivityBell");
     expect(trailing).toContain("{accountMenu}");
     expect(trailing.indexOf("{trailingNav}")).toBeLessThan(
       trailing.indexOf("WorkspaceSwitcher"),
     );
     expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(
-      trailing.indexOf("<ThemeToggle />"),
-    );
-    expect(trailing.indexOf("<ThemeToggle />")).toBeLessThan(
       trailing.indexOf("<AskAssistantHeaderLink />"),
     );
     expect(trailing.indexOf("<AskAssistantHeaderLink />")).toBeLessThan(

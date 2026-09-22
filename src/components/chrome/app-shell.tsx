@@ -257,13 +257,13 @@ export function AppShell({
           Phone IA A: Asset 8 emblem on every workspace + workspace
           word+chevron. Tap opens the workspace sheet. No hamburger.
           Local dests live in HousePhoneBottomNav. Home dests are Home
-          + Industry news. Trailing is search (if needed) · theme ·
-          24Frame AI · bell · avatar. Sun/moon is shared immediately
-          left of Ask on every breakpoint. One trail. No phone-only
-          sun/moon twin. Ask AI is header + Home module only
+          + Industry news. Trailing is search (if needed) ·
+          24Frame AI · bell · avatar. Color mode is the avatar Theme
+          row only (Adam lock 2026-09-22). No header sun/moon.
+          Ask AI is header + Home module only
           (#465). Emblem links workspace
           home; it does not open the rail. Desktop keeps switcher ·
-          theme · Ask · bell · avatar. Brand sits on the full-width top, not a
+          Ask · bell · avatar. Brand sits on the full-width top, not a
           second rail chrome. Period stays on the Dashboard org row.
           No org switcher on any route. Aggregation mid-lead stays
           empty. Education mounts a quiet course/video search
