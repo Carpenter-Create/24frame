@@ -25,10 +25,12 @@
 --   5. member_can() updated to check custom role capabilities
 --   6. RPCs: create_org_custom_role, list_org_custom_roles
 --   7. org_team / org_pending_invites updated for custom role info
+--   8. last-owner guard follows member_can()'s custom-role override
 --
 -- DESTRUCTIVE OPS (draft only; founder applies after CoS review):
 --   CREATE TABLE + INDEX + TRIGGER + POLICY + FUNCTION + ALTER TABLE.
 --   ALTER member_can (replaces function body).
+--   Replaces tg_memberships_last_owner_guard body (same signature).
 --   No DROP of existing objects. No row deletes. Forward-only.
 -- ============================================================================
 
@@ -292,3 +294,93 @@ grant execute on function public.list_org_custom_roles(uuid)
 -- ----------------------------------------------------------------------------
 grant select, insert, update on public.org_custom_roles to authenticated;
 grant select, insert on public.org_custom_role_capabilities to authenticated;
+
+-- ----------------------------------------------------------------------------
+-- 11. Last-owner guard follows the custom-role override
+--
+-- member_can() ignores org_role once custom_role_id is set, so a limited
+-- custom role strips manage_team while role stays account_owner. The guard
+-- from 20260726000500 only watched role and status, and its "still an owner"
+-- early return skipped custom_role_id changes entirely. A sole owner could
+-- assign that limited role to themselves, or a co-owner could be stripped
+-- and then the acting owner could demote: the other row still counted.
+--
+-- An active account_owner counts only while manage_team remains (no custom
+-- role, or a custom role that grants it). manage_team is the client recovery
+-- path: it can clear custom_role_id and restore the enum bundle, including
+-- billing and settings. custom_role_id null keeps the previous meaning.
+-- Capability rows are insert-only for authenticated, so the client strips
+-- manage_team by changing custom_role_id, which this trigger sees.
+-- ----------------------------------------------------------------------------
+create or replace function public.tg_memberships_last_owner_guard()
+  returns trigger
+  language plpgsql security definer set search_path = public
+as $$
+declare
+  v_org       uuid := coalesce(old.org_id, new.org_id);
+  v_remaining int;
+  v_old_keeps boolean;
+  v_new_keeps boolean;
+begin
+  -- Only interesting when a recoverable owner stops being one.
+  v_old_keeps := old.role = 'account_owner'
+    and old.status = 'active'
+    and (
+      old.custom_role_id is null
+      or exists (
+        select 1 from public.org_custom_role_capabilities c
+        where c.role_id = old.custom_role_id
+          and c.capability = 'manage_team'
+      )
+    );
+
+  if tg_op = 'UPDATE' then
+    v_new_keeps := new.role = 'account_owner'
+      and new.status = 'active'
+      and (
+        new.custom_role_id is null
+        or exists (
+          select 1 from public.org_custom_role_capabilities c
+          where c.role_id = new.custom_role_id
+            and c.capability = 'manage_team'
+        )
+      );
+    if v_old_keeps and v_new_keeps then
+      return new;
+    end if;
+    if not v_old_keeps then
+      return new;
+    end if;
+  elsif tg_op = 'DELETE' then
+    if not v_old_keeps then
+      return old;
+    end if;
+  end if;
+
+  select count(*) into v_remaining
+  from public.memberships m
+  where m.org_id = v_org
+    and m.role = 'account_owner'
+    and m.status = 'active'
+    and (
+      m.custom_role_id is null
+      or exists (
+        select 1 from public.org_custom_role_capabilities c
+        where c.role_id = m.custom_role_id
+          and c.capability = 'manage_team'
+      )
+    );
+
+  if v_remaining = 0 then
+    raise exception
+      'Organization % would be left with no active account owner. Promote another member to account_owner first.',
+      v_org
+      using errcode = 'raise_exception',
+            hint = 'Promote another member first; the two changes may be separate requests.';
+  end if;
+
+  return coalesce(new, old);
+end;
+$$;
+
+revoke execute on function public.tg_memberships_last_owner_guard() from public, anon, authenticated, service_role;
