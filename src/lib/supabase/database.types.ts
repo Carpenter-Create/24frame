@@ -39,6 +39,7 @@ export type Database = {
           accepted_at: string | null
           accepted_by: string | null
           created_at: string
+          custom_role_id: string | null
           email: string
           entity_scope: Database["public"]["Enums"]["entity_scope"]
           expires_at: string
@@ -58,6 +59,7 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           created_at?: string
+          custom_role_id?: string | null
           email: string
           entity_scope?: Database["public"]["Enums"]["entity_scope"]
           expires_at: string
@@ -77,6 +79,7 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           created_at?: string
+          custom_role_id?: string | null
           email?: string
           entity_scope?: Database["public"]["Enums"]["entity_scope"]
           expires_at?: string
@@ -2169,6 +2172,7 @@ export type Database = {
       memberships: {
         Row: {
           created_at: string
+          custom_role_id: string | null
           entity_scope: Database["public"]["Enums"]["entity_scope"]
           id: string
           org_id: string
@@ -2179,6 +2183,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_role_id?: string | null
           entity_scope?: Database["public"]["Enums"]["entity_scope"]
           id?: string
           org_id: string
@@ -2189,6 +2194,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_role_id?: string | null
           entity_scope?: Database["public"]["Enums"]["entity_scope"]
           id?: string
           org_id?: string
@@ -2313,6 +2319,77 @@ export type Database = {
             foreignKeyName: "organization_payout_details_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_custom_role_capabilities: {
+        Row: {
+          capability: string
+          role_id: string
+        }
+        Insert: {
+          capability: string
+          role_id: string
+        }
+        Update: {
+          capability?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_custom_role_capabilities_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "org_custom_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_custom_roles: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          id?: string
+          name: string
+          org_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          name?: string
+          org_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_custom_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_custom_roles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -3327,6 +3404,15 @@ export type Database = {
         Returns: string
       }
       create_org_and_membership: { Args: { p_name: string }; Returns: string }
+      create_org_custom_role: {
+        Args: {
+          p_capabilities: string[]
+          p_description: string
+          p_name: string
+          p_org: string
+        }
+        Returns: string
+      }
       create_portal_link: {
         Args: {
           p_asset_id: string
@@ -3592,6 +3678,18 @@ export type Database = {
       mark_direct_conversation_read: {
         Args: { p_conversation: string; p_seen_at: string }
         Returns: undefined
+      }
+      list_org_custom_roles: {
+        Args: { p_org: string }
+        Returns: {
+          capabilities: string[]
+          created_at: string
+          description: string
+          id: string
+          member_count: number
+          name: string
+          status: string
+        }[]
       }
       mark_notifications_read: { Args: { p_ids: string[] }; Returns: undefined }
       member_can: {

@@ -2,11 +2,13 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { SETTINGS } from "@/lib/settings";
+import { ACCOUNT_INVITE } from "@/lib/account-invite";
 
-describe("organization settings hosts Team", () => {
-  it("renders Team on the Organization pane — not a Settings rail row", () => {
+describe("organization settings hosts Team with Mercury Users grammar", () => {
+  it("renders Team on the Organization pane with Roles link and Invite a user", () => {
     const pane = readFileSync("src/components/settings/organization-settings.tsx", "utf8");
     const settings = readFileSync("src/lib/settings.ts", "utf8");
+    const teamForm = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
     expect(pane).toContain("data-settings-section=\"team\"");
     expect(pane).toContain("data-settings-section=\"entities\"");
     expect(pane).toContain("TeamInviteForm");
@@ -16,9 +18,16 @@ describe("organization settings hosts Team", () => {
     expect(pane).not.toContain("<Card>");
     expect(pane).not.toContain("CardBody");
     expect(pane).not.toContain("card-surface");
+    expect(pane).toContain("currentUserId");
     expect(SETTINGS.team).toBe("Team");
+    expect(SETTINGS.roles).toBe("Roles");
+    expect(SETTINGS.rolesHref).toBe("/settings/organization/roles");
     expect(settings).toContain("Team invite");
-    expect(settings).toContain("/gc/clients");
     expect(settings).not.toContain("organizationHref: \"/settings/team\"");
+    expect(teamForm).toContain("data-roles-link");
+    expect(teamForm).toContain("youSuffix");
+    expect(teamForm).not.toContain("data-team-list-head");
+    expect(ACCOUNT_INVITE.youSuffix).toBe("(you)");
+    expect(ACCOUNT_INVITE.rolesLink).toBe("Roles");
   });
 });

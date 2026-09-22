@@ -32,6 +32,7 @@ const SETTINGS_PANES = [
   "src/components/chrome/settings-hub-list.tsx",
   "src/components/settings/profile-settings.tsx",
   "src/components/settings/organization-settings.tsx",
+  "src/app/(app)/settings/organization/roles/page.tsx",
   "src/components/settings/preferences-settings.tsx",
   "src/app/(app)/settings/agreements/page.tsx",
   "src/app/(app)/settings/refer/page.tsx",

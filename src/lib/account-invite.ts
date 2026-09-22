@@ -94,6 +94,8 @@ export const ACCOUNT_INVITE = {
   statusColumn: "Status",
   sentColumn: "Sent",
   acceptedColumn: "Accepted",
+  rolesLink: "Roles",
+  youSuffix: "(you)",
   revoke: "Withdraw",
   revoking: "Withdrawing…",
   revoked: "Invite withdrawn.",

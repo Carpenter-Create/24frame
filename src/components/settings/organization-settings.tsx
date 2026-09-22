@@ -19,6 +19,9 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyProfileForm } from "@/app/(app)/account/company-profile-form";
 
+// Rights Holder pane: company, legal entities, and Team.
+// Roles is a house drill row to /settings/organization/roles.
+// Invite stays a trailing row in the group — never a header pill.
 export async function OrganizationSettings() {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
@@ -111,6 +114,7 @@ export async function OrganizationSettings() {
                 members={members}
                 pending={pending}
                 entities={entities}
+                currentUserId={ctx.user.id}
               />
             </section>
           </>
