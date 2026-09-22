@@ -4,10 +4,9 @@
 // IMDb help-page category clone. Persist ordered slugs on
 // profiles.crafts. primary_role stays the first selected slug.
 // UI label is Professions — not Topics, not Category, not crafts.
-// Public header is one house chip-rail row of gray pills: every
-// selected Role as its own chip, in crafts order. Phone scrolls
-// sideways (Topics SoT). Desktop uses the same one-row rail. No +N
-// / more chip — overflow scrolls. Omit when empty.
+// Public header is individual gray pills in crafts order. Face shows
+// the first three; overflow is a quiet +N that reveals the rest
+// (wrap, never a clipping rail). Omit when empty.
 // Edit max 5. Select and write stay sync. Not on SocialPersonRow.
 // Investor is a Business add. Bio middots stay the author's copy.
 // Edit face is one Settings drill-in row. Selecting stays on the
@@ -16,6 +15,8 @@
 import { SOCIAL } from "@/lib/social";
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
+/** Public face shows this many pills, then +N. */
+export const SOCIAL_PROFILE_ROLES_FACE_MAX = 3;
 export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
 
 export const SOCIAL_PROFILE_ROLE_GROUPS = [
@@ -368,6 +369,25 @@ export function socialProfileRolesRailItems(raw: unknown): SocialProfileRolesRai
     slug: role.slug,
     label: role.label,
   }));
+}
+
+/** Public face: first ~3 pills, then +N. Full list stays on the chips helper. */
+export function socialProfileRolesFace(raw: unknown): {
+  face: { slug: string; label: string }[];
+  overflow: number;
+} {
+  const chips = socialProfileRoleChips(raw);
+  if (chips.length <= SOCIAL_PROFILE_ROLES_FACE_MAX) {
+    return { face: chips, overflow: 0 };
+  }
+  return {
+    face: chips.slice(0, SOCIAL_PROFILE_ROLES_FACE_MAX),
+    overflow: chips.length - SOCIAL_PROFILE_ROLES_FACE_MAX,
+  };
+}
+
+export function socialProfileRolesMoreLabel(overflow: number): string {
+  return `+${overflow}`;
 }
 
 export function filterSocialProfileRoleGroups(query: string) {

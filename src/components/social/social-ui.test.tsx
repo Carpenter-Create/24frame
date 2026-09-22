@@ -22,7 +22,6 @@ vi.mock("next/dynamic", () => ({
     },
 }));
 
-import { HOUSE_CHIP_RAIL_CLASS } from "@/lib/house-chip-rail";
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
   SocialAuthorHistory,
@@ -46,7 +45,6 @@ import {
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
-  SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_PROFILE_ROLES_ROW_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
@@ -229,6 +227,9 @@ describe("Social profile public face", () => {
     expect(identity).not.toContain("data-social-profile-handle");
     expect(identity).not.toContain("@ada");
     expect(identity.indexOf("data-social-profile-head")).toBeLessThan(
+      identity.indexOf("data-social-profile-face"),
+    );
+    expect(identity.indexOf("data-social-profile-face")).toBeLessThan(
       identity.indexOf("data-social-profile-name"),
     );
     const identityHead = identity.slice(
@@ -239,9 +240,12 @@ describe("Social profile public face", () => {
     expect(identityHead).not.toContain("md:-mt-[35px]");
     expect(identityHead).toContain("border-2 border-surface");
     expect(identityHead).toContain("data-social-avatar");
-    expect(identityHead).toContain("data-social-profile-meta");
-    expect(identityHead).toContain("data-social-profile-name");
-    expect(identityHead).toContain("Ada Lovelace");
+    expect(identityHead).not.toContain("data-social-profile-meta");
+    expect(identityHead).not.toContain("data-social-profile-name");
+    expect(identityHead).not.toContain("Ada Lovelace");
+    const identityFace = identity.slice(identity.indexOf("data-social-profile-face"));
+    expect(identityFace).toContain("data-social-profile-name");
+    expect(identityFace).toContain("Ada Lovelace");
     expect(identity).not.toContain("data-social-profile-stats");
     expect(identity).not.toContain("data-social-profile-mutuals");
     expect(identity).not.toContain("data-social-profile-url");
@@ -267,22 +271,31 @@ describe("Social profile public face", () => {
       identityMarkup.indexOf("data-social-profile-meta"),
     );
     expect(identityMarkup.indexOf("data-social-profile-meta")).toBeLessThan(
-      identityMarkup.indexOf("data-social-profile-name"),
-    );
-    expect(identityMarkup.indexOf("data-social-profile-name")).toBeLessThan(
       identityMarkup.indexOf("SocialProfileStats"),
     );
-    expect(identityMarkup.indexOf("data-social-profile-head")).toBeLessThan(
+    expect(identityMarkup.indexOf("SocialProfileStats")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-face"),
     );
     expect(identityMarkup.indexOf("data-social-profile-face")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-name"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-name")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-bio"),
     );
-    expect(identityMarkup.indexOf("HouseChipRail")).toBeLessThan(
+    expect(identityMarkup.indexOf("data-social-profile-bio")).toBeLessThan(
+      identityMarkup.indexOf("<SocialProfileRolesRow"),
+    );
+    expect(identityMarkup.indexOf("<SocialProfileRolesRow")).toBeLessThan(
       identityMarkup.indexOf("<SocialProfileLinkRow"),
     );
     expect(identityMarkup.indexOf("<SocialProfileLinkRow")).toBeLessThan(
       identityMarkup.indexOf("{actionRow}"),
+    );
+    expect(identityMarkup.indexOf("{actionRow}")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-topics"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-topics")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-mutuals"),
     );
     expect(uiSrc).not.toContain("data-social-profile-handle");
     expect(identity).toContain("Writes engines.");
@@ -304,31 +317,26 @@ describe("Social profile public face", () => {
     expect(withRoles).toContain('data-social-profile-role="actor"');
     expect(withRoles).toContain('data-social-profile-role="producer"');
     expect(withRoles).toContain('data-social-profile-role="screenwriter"');
-    expect(withRoles).toContain('data-social-profile-role="investor"');
+    expect(withRoles).not.toContain('data-social-profile-role="investor"');
     expect(withRoles).toContain("Actor");
     expect(withRoles).toContain("Producer");
     expect(withRoles).toContain("Screenwriter");
-    expect(withRoles).toContain("Investor");
+    expect(withRoles).not.toContain(">Investor<");
     expect(withRoles).not.toContain("Actor · Producer");
     expect(withRoles).not.toContain(" · ");
-    expect(withRoles).not.toContain("data-social-profile-roles-more");
-    expect(withRoles).not.toContain("+1");
+    expect(withRoles).toContain("data-social-profile-roles-more");
+    expect(withRoles).toContain(">+1<");
     expect(withRoles).not.toContain("Roles:");
     expect(withRoles).not.toContain("Professions:");
     expect(withRoles).not.toContain("Topics:");
     expect(withRoles).toContain(SOCIAL_PROFILE_ROLES_ROW_CLASS);
     expect(withRoles).toContain(SOCIAL_PROFILE_ROLE_PILL_CLASS);
-    expect(SOCIAL_PROFILE_ROLES_RAIL_ROWS).toBe(1);
-    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toBe(HOUSE_CHIP_RAIL_CLASS);
-    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toContain("overflow-x-auto");
-    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toContain("no-scrollbar");
-    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).not.toContain("flex-wrap");
-    expect(withRoles).toContain("data-house-chip-rail");
-    expect(withRoles).toContain('data-house-chip-rail-row="0"');
-    expect(withRoles).not.toContain('data-house-chip-rail-row="1"');
-    expect(withRoles).toContain("overflow-x-auto");
-    expect(withRoles).toContain("no-scrollbar");
-    expect(withRoles).not.toContain("flex-wrap");
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toContain("flex-wrap");
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).not.toContain("overflow-x-auto");
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).not.toContain("no-scrollbar");
+    expect(withRoles).not.toContain("data-house-chip-rail");
+    expect(withRoles).toContain("flex-wrap");
+    expect(withRoles).not.toContain("overflow-x-auto");
     expect(withRoles).toContain("bg-surface-muted");
     expect(withRoles).toContain("rounded-full");
     expect(withRoles).toContain("t-body-sm");
@@ -345,7 +353,7 @@ describe("Social profile public face", () => {
       withRoles.indexOf('data-social-profile-role="screenwriter"'),
     );
     expect(withRoles.indexOf('data-social-profile-role="screenwriter"')).toBeLessThan(
-      withRoles.indexOf('data-social-profile-role="investor"'),
+      withRoles.indexOf("data-social-profile-roles-more"),
     );
 
     const adamDesktop = renderToStaticMarkup(
@@ -366,15 +374,15 @@ describe("Social profile public face", () => {
     expect(adamDesktop).toContain('data-social-profile-role="executive_producer"');
     expect(adamDesktop).toContain('data-social-profile-role="music_supervisor"');
     expect(adamDesktop).toContain('data-social-profile-role="composer"');
-    expect(adamDesktop).toContain('data-social-profile-role="musician"');
-    expect(adamDesktop).toContain('data-social-profile-role="music_director"');
+    expect(adamDesktop).not.toContain('data-social-profile-role="musician"');
+    expect(adamDesktop).not.toContain('data-social-profile-role="music_director"');
     expect(adamDesktop).toContain("Executive Producer");
     expect(adamDesktop).toContain("Music Supervisor");
     expect(adamDesktop).toContain("Composer");
-    expect(adamDesktop).toContain("Musician");
-    expect(adamDesktop).toContain("Music Director");
-    expect(adamDesktop).not.toContain("data-social-profile-roles-more");
-    expect(adamDesktop).not.toContain("+2");
+    expect(adamDesktop).not.toContain(">Musician<");
+    expect(adamDesktop).not.toContain(">Music Director<");
+    expect(adamDesktop).toContain("data-social-profile-roles-more");
+    expect(adamDesktop).toContain(">+2<");
     expect(adamDesktop).not.toContain("Executive Producer · Music Supervisor · Composer +2");
     expect(adamDesktop).not.toContain("Executive Producer · Music Supervisor");
     expect(adamDesktop).toContain("Founder · Investor · Music Executive");
@@ -386,21 +394,15 @@ describe("Social profile public face", () => {
     );
     const adamRoles = adamDesktop.slice(
       adamDesktop.indexOf("data-social-profile-roles"),
-      adamDesktop.indexOf('data-social-profile-role="music_director"') + 280,
+      adamDesktop.indexOf("data-social-profile-roles-more") + 80,
     );
-    expect(adamRoles).toContain("data-house-chip-rail");
-    expect(adamRoles).toContain('data-house-chip-rail-row="0"');
-    expect(adamRoles).not.toContain('data-house-chip-rail-row="1"');
-    expect(adamRoles).toContain("overflow-x-auto");
-    expect(adamRoles).toContain("no-scrollbar");
-    expect(adamRoles).not.toContain("flex-wrap");
+    expect(adamRoles).not.toContain("data-house-chip-rail");
+    expect(adamRoles).toContain("flex-wrap");
+    expect(adamRoles).not.toContain("overflow-x-auto");
     expect(adamRoles).toContain("Executive Producer");
     expect(adamRoles).toContain("Music Supervisor");
     expect(adamRoles).toContain("Composer");
-    expect(adamRoles).toContain("Musician");
-    expect(adamRoles).toContain("Music Director");
-    expect(adamRoles).not.toContain("+2");
-    expect(adamRoles).not.toContain("data-social-profile-roles-more");
+    expect(adamRoles).toContain("data-social-profile-roles-more");
 
     const withTopics = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -433,8 +435,13 @@ describe("Social profile public face", () => {
     expect(withStats).toContain(SOCIAL_PROFILE_META_CLASS);
     expect(SOCIAL_PROFILE_HEAD_CLASS).toContain("items-center");
     expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("items-start");
-    expect(SOCIAL_PROFILE_META_CLASS).toContain("flex-col");
+    expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("justify-between");
+    expect(SOCIAL_PROFILE_META_CLASS).toContain("w-fit");
+    expect(SOCIAL_PROFILE_META_CLASS).toContain("self-stretch");
+    expect(SOCIAL_PROFILE_META_CLASS).toContain("items-center");
     expect(SOCIAL_PROFILE_META_CLASS).toContain("min-w-0");
+    expect(SOCIAL_PROFILE_META_CLASS).not.toContain("flex-1");
+    expect(SOCIAL_PROFILE_META_CLASS).not.toContain("justify-between");
     expect(SOCIAL_PROFILE_META_CLASS).not.toContain("truncate");
     expect(withStats).toContain(SOCIAL_AVATAR_PROFILE_CLASS);
     expect(withStats).toContain("size-[72px]");
@@ -472,23 +479,23 @@ describe("Social profile public face", () => {
     );
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-meta");
-    expect(head).toContain("data-social-profile-name");
+    expect(head).not.toContain("data-social-profile-name");
     expect(head).toContain("data-social-profile-stats");
     expect(head).not.toContain("data-social-profile-handle");
     expect(head).not.toContain("data-social-profile-roles");
     expect(head).not.toContain("data-social-profile-bio");
+    expect(head).not.toContain("Ada Lovelace");
     expect(head).not.toContain("@ada");
-    const meta = head.slice(head.indexOf("data-social-profile-meta"));
-    expect(meta.indexOf("data-social-profile-name")).toBeLessThan(
-      meta.indexOf("data-social-profile-stats"),
-    );
     expect(head.indexOf("data-social-avatar")).toBeLessThan(
       head.indexOf("data-social-profile-meta"),
     );
-    expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
-      withStats.indexOf("data-social-profile-stats"),
+    expect(head.indexOf("data-social-profile-meta")).toBeLessThan(
+      head.indexOf("data-social-profile-stats"),
     );
     expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
+      withStats.indexOf("data-social-profile-name"),
+    );
+    expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
       withStats.indexOf("data-social-profile-bio"),
     );
     expect(withStats.indexOf("data-social-profile-bio")).toBeLessThan(
@@ -594,10 +601,10 @@ describe("Social profile public face", () => {
     expect(overflow).not.toContain(">x.com/ada<");
     expect(overflow).not.toContain("data-social-profile-links-sheet");
     expect(uiSrc).not.toContain("socialProfileRolesLine");
-    expect(uiSrc).toContain("socialProfileRolesRailItems");
-    expect(uiSrc).toContain("HouseChipRail");
-    expect(uiSrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
-    expect(uiSrc).not.toContain("data-social-profile-roles-more");
+    expect(uiSrc).toContain("SocialProfileRolesRow");
+    expect(uiSrc).not.toContain("HouseChipRail");
+    expect(uiSrc).not.toContain("socialProfileRolesRailItems");
+    expect(uiSrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
     expect(uiSrc).not.toContain('item.kind === "more"');
     expect(
       uiSrc.slice(
@@ -1065,7 +1072,9 @@ describe("Social profile cover band", () => {
     );
     expect(head).toContain("-mt-[29px]");
     expect(head).toContain("md:-mt-[35px]");
-    expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-name");
+    expect(head).not.toContain("Ada Lovelace");
+    expect(html.indexOf("data-social-profile-face")).toBeLessThan(html.indexOf("Ada Lovelace"));
   });
 
   it("keeps the empty band, Add cover chrome, and avatar hang on the owner profile", () => {
@@ -1089,7 +1098,9 @@ describe("Social profile cover band", () => {
     );
     expect(head).toContain("-mt-[29px]");
     expect(head).toContain("md:-mt-[35px]");
-    expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-name");
+    expect(head).not.toContain("Ada Lovelace");
+    expect(html.indexOf("data-social-profile-face")).toBeLessThan(html.indexOf("Ada Lovelace"));
   });
 
   it("keeps the photo and edit chrome when the owner has a cover", () => {

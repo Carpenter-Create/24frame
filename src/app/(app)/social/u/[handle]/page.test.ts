@@ -171,7 +171,8 @@ describe("Social public profile", () => {
       html.indexOf("data-social-profile-face"),
     );
     expect(head).toContain("data-social-avatar");
-    expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-name");
+    expect(head).not.toContain("Ada Lovelace");
     expect(head).not.toContain("-mt-[29px]");
     expect(head).not.toContain("md:-mt-[35px]");
     expect(head).not.toContain("h-[112px]");
@@ -235,7 +236,11 @@ describe("Social public profile", () => {
     );
     expect(head).toContain("-mt-[29px]");
     expect(head).toContain("md:-mt-[35px]");
-    expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-name");
+    expect(head).not.toContain("Ada Lovelace");
+    const face = html.slice(html.indexOf("data-social-profile-face"));
+    expect(face).toContain("data-social-profile-name");
+    expect(face.indexOf("data-social-profile-name")).toBeLessThan(face.indexOf("Ada Lovelace"));
   });
 
   it("prints individual Profession pills after bio and omits a Professions prefix", async () => {
@@ -250,32 +255,30 @@ describe("Social public profile", () => {
     expect(html).toContain("Producer");
     expect(html).not.toContain("Actor · Producer");
     expect(html).toContain("bg-surface-muted");
-    expect(html).toContain("data-house-chip-rail");
-    expect(html).toContain('data-house-chip-rail-row="0"');
-    expect(html).not.toContain('data-house-chip-rail-row="1"');
+    expect(html).not.toContain("data-house-chip-rail");
     const roles = html.slice(
       html.indexOf("data-social-profile-roles"),
       html.indexOf('data-social-profile-role="producer"') + 80,
     );
-    expect(roles).toContain("overflow-x-auto");
-    expect(roles).toContain("no-scrollbar");
-    expect(roles).not.toContain("flex-wrap");
+    expect(roles).toContain("flex-wrap");
+    expect(roles).not.toContain("overflow-x-auto");
     expect(html).not.toContain("data-social-profile-roles-more");
     expect(html).not.toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-face"));
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-meta");
-    expect(head).toContain("data-social-profile-name");
+    expect(head).not.toContain("data-social-profile-name");
     expect(head).toContain("data-social-profile-stats");
     expect(head).toContain("w-fit");
     expect(head).toContain("inline-flex");
     expect(head).not.toContain("max-w-xs");
     expect(head).not.toContain("grid w-full grid-cols-3");
     expect(head).not.toContain("flex min-w-0 max-w-xs flex-1 items-center");
+    expect(head).not.toContain("justify-between");
     expect(head).not.toContain("@ada");
-    expect(head.indexOf("data-social-profile-name")).toBeLessThan(head.indexOf("data-social-profile-stats"));
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-stats"));
-    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-bio"));
+    expect(head).not.toContain("Ada Lovelace");
+    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-bio"));
     expect(html.indexOf("data-social-profile-bio")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");

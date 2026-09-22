@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { HouseChipRail } from "@/components/chrome/house-chip-rail";
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
@@ -25,8 +24,7 @@ import {
   SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
-  SOCIAL_PROFILE_ROLES_RAIL_ROWS,
-  SOCIAL_TOPIC_CHIP_CLASS,
+  SOCIAL_PROFILE_ROLES_ROW_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -44,7 +42,7 @@ import {
   type SocialProfileMutuals,
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
-import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
+import { SocialProfileRolesRow } from "@/components/social/social-profile-roles";
 import { socialProfileRendersCoverBand } from "@/lib/social-profile-cover";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
@@ -246,7 +244,6 @@ export function SocialProfileIdentity({
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
-  const roleRailItems = socialProfileRolesRailItems(roles ?? []);
   const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
   const followedBy = mutuals
@@ -286,58 +283,41 @@ export function SocialProfileIdentity({
               />
               {photoAction}
             </div>
-            {person.name || stats ? (
+            {stats ? (
               <div data-social-profile-meta="" className={SOCIAL_PROFILE_META_CLASS}>
-                {person.name ? (
-                  <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
-                    {person.name}
-                  </p>
-                ) : null}
-                {stats ? (
-                  <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
-                ) : null}
+                <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
               </div>
             ) : null}
           </div>
         </div>
       </div>
       <div data-social-profile-face="" className={SOCIAL_PROFILE_FACE_CLASS}>
+        {person.name ? (
+          <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
+            {person.name}
+          </p>
+        ) : null}
         {bio?.trim() ? (
           <p data-social-profile-bio="" className={SOCIAL_PROFILE_BIO_CLASS}>
             {bio}
           </p>
         ) : null}
-        {roleRailItems.length > 0 ? (
-          <HouseChipRail
-            data-social-profile-roles=""
-            rows={SOCIAL_PROFILE_ROLES_RAIL_ROWS}
-            items={roleRailItems}
-            renderItem={(item) => (
-              <span
-                key={item.slug}
-                data-social-profile-role={item.slug}
-                className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
-              >
-                {item.label}
-              </span>
-            )}
-          />
-        ) : null}
+        <SocialProfileRolesRow roles={roles} />
         <SocialProfileLinkRow links={links} />
+        {actionRow}
         {interestTopics.length > 0 ? (
-          <div data-social-profile-topics="" className="flex flex-wrap gap-2">
+          <div data-social-profile-topics="" className={SOCIAL_PROFILE_ROLES_ROW_CLASS}>
             {interestTopics.map((topic) => (
               <span
                 key={topic}
                 data-social-profile-topic={topic}
-                className={SOCIAL_TOPIC_CHIP_CLASS}
+                className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
               >
                 {topic}
               </span>
             ))}
           </div>
         ) : null}
-        {actionRow}
         {followedBy ? (
           <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
             <div data-social-profile-mutuals-faces="" className="flex shrink-0">

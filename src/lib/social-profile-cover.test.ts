@@ -76,14 +76,17 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(src).toContain("446");
   });
 
-  it("exposes master dims in copy and upload UI", () => {
+  it("keeps the upload master out of profile chrome", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
-    expect(social).toContain("1784");
-    expect(social).toContain("446");
+    expect(social).not.toContain("1784");
+    expect(social).not.toContain("446");
+    expect(social).not.toContain("coverDims");
     const upload = readFileSync("src/components/social/social-profile-cover-upload.tsx", "utf8");
-    expect(upload).toContain("masterWidth");
-    expect(upload).toContain("masterHeight");
-    expect(upload).toContain("data-social-profile-cover-dims");
+    expect(upload).not.toContain("masterWidth");
+    expect(upload).not.toContain("masterHeight");
+    expect(upload).not.toContain("data-social-profile-cover-dims");
+    expect(upload).not.toContain("1784");
+    expect(upload).not.toContain("×");
   });
 
   it("routes cover saves through the posts stills lane", () => {

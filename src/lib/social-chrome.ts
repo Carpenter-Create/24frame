@@ -360,25 +360,25 @@ export const SOCIAL_PROFILE_AVATAR_ON_COVER_CLASS =
 export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
   "absolute bottom-0 right-0 z-10 flex size-8 items-center justify-center rounded-full border border-hairline bg-surface text-ink";
 
-// Public profile head — IG geometry, house chrome. One SoT for own
-// /social/profile and public /social/u/[handle]. Head row is avatar |
-// (display name → posts/followers/following stacked). Name is never
-// full-width above the avatar (that read as randomly floating). Stats
-// left-pack under the name in the right column — content-sized 3-up,
-// not a w-full stretch across the meta column. Each cell stays
-// number-above-label; the group shares the name's left edge. Bio ·
-// Role pills · muted text links · actions stay full-width below the
-// head row (Adam lock A 2026-09-20 — not a glyph row).
-// Dedicated house-token air before Edit / Share (or Follow / Share).
-// Handle stays in chrome. Name wraps; never truncate.
-export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
+// Public profile head — IG row, house chrome. One SoT for own
+// /social/profile and public /social/u/[handle].
+// Head row is avatar LEFT + posts | followers | following RIGHT.
+// Stats left-pack and vertically center in the avatar height.
+// They are not a full-width justify-between stretch.
+// Display name is never in this row. It is the first line of the
+// full-width stack below the hang, so it cannot sit under the avatar.
+// Stack order: name, bio, role pills, links, actions.
+// Topics stay gray chips after actions (not profile tabs).
+// Mutuals last, omitted when empty. Handle stays in chrome.
+// Name wraps; never truncate.
+export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col";
 
 export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
 
-// Right column beside the 72/88 face. min-w-0 so a long display name
-// wraps instead of overflowing the phone canvas.
+// Stats column beside the 72/88 face. w-fit left-packs. self-stretch
+// matches the avatar height; items-center centers the 3-up inside it.
 export const SOCIAL_PROFILE_META_CLASS =
-  "flex min-w-0 flex-1 flex-col justify-center gap-1";
+  "flex w-fit min-w-0 items-center self-stretch";
 
 export const SOCIAL_PROFILE_STATS_CLASS = "flex w-fit min-w-0 items-center";
 
@@ -392,16 +392,21 @@ export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-heading font-semibold tabular-
 
 export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
 
-export const SOCIAL_PROFILE_FACE_CLASS = "flex flex-col items-start gap-1";
+// Air under the hanging avatar before the name. gap is the calm
+// stack rhythm (name → bio → roles → links → actions).
+export const SOCIAL_PROFILE_FACE_CLASS =
+  "flex w-full min-w-0 flex-col items-stretch gap-[var(--space-3)] pt-[var(--space-4)]";
 
-export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-heading font-semibold text-ink";
+export const SOCIAL_PROFILE_NAME_CLASS =
+  "w-full min-w-0 break-words t-heading font-semibold text-ink";
 
-// Roles → Edit/Share was cramped (face gap-1). Extra --space-3 before
-// the action row; no magic pixels. Same class for own + public.
+// Extra house-token air before Edit / Share (or Follow / Share).
+// Same class for own + public. No magic pixels.
 export const SOCIAL_PROFILE_ACTIONS_CLASS =
   "mt-[var(--space-3)] flex w-full items-center gap-2";
 
-export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body text-ink whitespace-pre-wrap";
+export const SOCIAL_PROFILE_BIO_CLASS =
+  "w-full min-w-0 break-words t-body text-ink whitespace-pre-wrap";
 
 // Adam lock A 2026-09-20: calm muted type. Not chips, not
 // brand-colored glyphs. Phone stacks — never truncate. Same class for
@@ -410,12 +415,11 @@ export const SOCIAL_PROFILE_LINKS_CLASS = "flex min-w-0 flex-col items-start gap
 export const SOCIAL_PROFILE_LINK_CLASS = "min-w-0 break-words t-body-sm text-ink-2 hover:text-ink";
 export const SOCIAL_PROFILE_LINKS_MORE_CLASS = "t-body-sm text-ink-2 hover:text-ink";
 
-// Public Professions: one-row house chip rail (same primitive as Topics).
-// Phone: nowrap + overflow-x auto + no-scrollbar. Desktop: same one-row
-// scroll — every selected Role as its own chip; do not wrap, do not +N.
-// Each Role is its own muted HOUSE_PILL. Omit the rail when empty.
-export const SOCIAL_PROFILE_ROLES_RAIL_ROWS = 1;
-export const SOCIAL_PROFILE_ROLES_ROW_CLASS = HOUSE_CHIP_RAIL_CLASS;
+// Public Professions: individual gray pills, wrap (phone stacks — never
+// a clipping rail). Face cap lives in social-profile-roles (3 +N).
+// Omit the row when empty.
+export const SOCIAL_PROFILE_ROLES_ROW_CLASS =
+  "flex min-w-0 flex-wrap items-center gap-2";
 
 export const SOCIAL_PROFILE_ROLE_PILL_CLASS =
   `w-fit ${HOUSE_PILL_ITEM_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;

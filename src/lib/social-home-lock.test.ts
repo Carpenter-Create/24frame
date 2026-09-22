@@ -652,8 +652,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(card).toContain("data-social-profile-actions");
     expect(card).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
-    expect(card).toContain("socialProfileRolesRailItems");
-    expect(card).toContain("HouseChipRail");
+    expect(card).toContain("SocialProfileRolesRow");
+    expect(card).not.toContain("HouseChipRail");
+    expect(card).not.toContain("socialProfileRolesRailItems");
     expect(card).toContain("SocialProfilePostsEmpty");
     expect(card).not.toContain("emptySecondary");
     expect(card).not.toContain("emptyHint");
@@ -662,7 +663,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
-    expect(chrome).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
+    expect(chrome).toContain("flex min-w-0 flex-wrap items-center gap-2");
+    expect(chrome).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
     expect(chrome).toContain("HOUSE_CHIP_RAIL_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLE_PILL_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_CENTER_CLASS");
@@ -714,7 +716,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(publicProfile).not.toContain("SocialForYouRail");
     expect(publicProfile).not.toContain("loadSuggestedPeople");
     expect(home).toContain("SocialForYouRail");
-    expect(card).toContain("socialProfileRolesRailItems");
+    expect(card).toContain("SocialProfileRolesRow");
     expect(card).not.toContain("socialProfileRolesLine");
     expect(homeSkeleton).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     const profileCenterSkeleton = homeSkeleton.slice(
@@ -725,10 +727,13 @@ describe("Social Home miss list v1 P0 lock", () => {
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_META_CLASS"),
     );
     expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_META_CLASS")).toBeLessThan(
-      profileCenterSkeleton.indexOf("h-4 w-32"),
-    );
-    expect(profileCenterSkeleton.indexOf("h-4 w-32")).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_STATS_CLASS"),
+    );
+    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_STATS_CLASS")).toBeLessThan(
+      profileCenterSkeleton.indexOf("SOCIAL_PROFILE_FACE_CLASS"),
+    );
+    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_FACE_CLASS")).toBeLessThan(
+      profileCenterSkeleton.indexOf("h-5 w-40"),
     );
     expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_ACTIONS_CLASS"),
