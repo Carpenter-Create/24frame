@@ -66,9 +66,13 @@ describe("Social loading skeletons", () => {
     );
     expect(home).toContain("divide-y divide-hairline");
     expect(home).not.toContain("bg-surface-muted py-");
-    const topicsSkeleton = home.slice(home.indexOf("data-social-home-topics-skeleton"));
+    const topicsSkeleton = home.slice(
+      home.indexOf("data-social-home-topics-skeleton"),
+      home.indexOf("data-social-home-composer-skeleton"),
+    );
     expect(topicsSkeleton).toContain("overflow-x-auto");
-    expect(topicsSkeleton).toContain("flex-col");
+    expect(topicsSkeleton).not.toContain("h-4 w-16");
+    expect(topicsSkeleton).not.toContain("gap-2");
     expect(topicsSkeleton.match(/h-10 w-24 shrink-0 rounded-full/g)?.length).toBe(8);
     expect(topicsSkeleton).not.toContain("flex-wrap");
     expect(home).toContain("data-social-stories-skeleton");

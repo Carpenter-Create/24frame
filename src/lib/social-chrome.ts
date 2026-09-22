@@ -45,7 +45,8 @@ export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136
 // Desktop Social content row. The left dest rail is the house slot
 // (`--sidebar-width` via RAIL_WIDTH_CLASS). It stays left-pinned.
 // This row is only the tight pair to the right of that rail:
-// center 600 + gutter 16 + For You 300 = 916.
+// center 600 + gutter 32 + For You 300 = 932.
+// Adam 2026-09-22: the fixed gutter between center and For You is 32.
 // Adam 2026-09-22: at lg the pair is that fixed width and centered in
 // the canvas beside the rail. Leftover air is outside the pair, split
 // on both sides. Do not justify-between the row. Do not pack the pair
@@ -54,7 +55,7 @@ export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136
 // cap applies at lg, when the For You rail appears.
 // Complete class strings below — Tailwind does not see interpolations.
 export const SOCIAL_DESKTOP_MEASURE = {
-  gutter: 16,
+  gutter: 32,
   center: 600,
   right: 300,
   padR: 16,
@@ -93,12 +94,12 @@ export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-4)] pb-[var(--space-12)]";
 
-// One shell for every Social row. At lg the row is the 916 pair,
+// One shell for every Social row. At lg the row is the 932 pair,
 // centered in the canvas to the right of the fixed dest rail.
 // Below lg there is no max-width and no auto margin: For You is
 // display:none and the center stays full-bleed.
 export const SOCIAL_HOME_LAYOUT_CLASS =
-  "flex w-full items-start gap-[16px] lg:mx-auto lg:max-w-[916px]";
+  "flex w-full items-start gap-[32px] lg:mx-auto lg:max-w-[932px]";
 
 // Shared center column. Home, Explore, Messages, and Profile use this
 // string — no width fork. flex-1 shrinks the center when the lg canvas

@@ -612,7 +612,7 @@ export const SOCIAL = {
   forYou: {
     title: "For you",
     people: "Suggested people",
-    topics: "Topics",
+    // Adam 2026-09-22: Home chip rail has no section label.
     latestCourse: "Latest course",
   },
   profile: {

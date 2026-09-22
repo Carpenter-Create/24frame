@@ -51,8 +51,7 @@ export function SocialForYouSkeleton() {
 export function SocialHomeCenterSkeleton() {
   return (
     <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
-      <div data-social-home-topics-skeleton="" className="flex min-w-0 flex-col gap-2">
-        <Skeleton className="h-4 w-16" />
+      <div data-social-home-topics-skeleton="" className="min-w-0">
         <div className={SOCIAL_TOPIC_RAIL_CLASS}>
           <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
             {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (

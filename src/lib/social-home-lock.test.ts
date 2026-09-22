@@ -118,7 +118,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL.home.forYouTab).toBe("For you");
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
-    expect(SOCIAL.forYou.topics).toBe("Topics");
+    expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
     expect(SOCIAL.checklist.bio).toBe("Write a short bio");
@@ -250,7 +250,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topics).toContain("data-social-home-topics");
     expect(topics).toContain("data-social-home-topics-rail");
     expect(topics).toContain("HouseChipRail");
-    expect(topics).toContain("SOCIAL.forYou.topics");
+    expect(topics).not.toContain("SOCIAL.forYou.topics");
+    expect(topics).not.toMatch(/>Topics</);
     expect(topics).toContain("socialTopicRailChipClass");
     expect(topics).toContain("SOCIAL_CATEGORY_LABELS");
     expect(topics).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
@@ -316,7 +317,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("164:1360");
     expect(chrome).not.toContain("dest:");
     expect(chrome).not.toContain("chats: 200");
-    expect(chrome).toContain("gutter: 16");
+    expect(chrome).toContain("gutter: 32");
     expect(chrome).toContain("center: 600");
     expect(chrome).not.toContain("center: 892");
     expect(chrome).not.toContain("892");
@@ -349,7 +350,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("#d1e0fa");
     expect(chrome).not.toContain("shadow-");
     expect(chrome).toContain("px-[var(--chrome-gutter)]");
-    expect(chrome).toContain("gap-[16px]");
+    expect(chrome).toContain("gap-[32px]");
+    expect(chrome).not.toContain("gap-[16px]");
+    expect(chrome).not.toContain("lg:max-w-[916px]");
     expect(chrome).toContain("SOCIAL_COMPOSER_MEDIA_CLASS");
     expect(chrome).not.toContain("SOCIAL_COMPOSER_ACTION_CLASS");
     expect(home).not.toContain("SocialFirstWin");
@@ -576,7 +579,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(readFileSync("src/app/(app)/social/search/page.tsx", "utf8")).toContain("SocialSuggestedPeople");
     expect(messages).toContain("SOCIAL.dms.startCta");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
-      gutter: 16,
+      gutter: 32,
       center: 600,
       right: 300,
       padR: 16,
@@ -588,7 +591,7 @@ describe("Social Home miss list v1 P0 lock", () => {
         SOCIAL_DESKTOP_MEASURE.gutter +
         SOCIAL_DESKTOP_MEASURE.right,
     );
-    expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(916);
+    expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(932);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
@@ -805,10 +808,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_DESKTOP_MEASURE.right).toBe(300);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(SOCIAL_PROFILE_CENTER_CLASS);
     // Adam 2026-09-22: left rail stays the house slot. The row is the
-    // 600 + 16 + 300 pair, centered beside that rail at lg. No
+    // 600 + 32 + 300 pair, centered beside that rail at lg. No
     // justify-between stretch. No unprefixed cap (phone stays full-bleed).
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
-      "flex w-full items-start gap-[16px] lg:mx-auto lg:max-w-[916px]",
+      "flex w-full items-start gap-[32px] lg:mx-auto lg:max-w-[932px]",
     );
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
       `flex w-full items-start gap-[${SOCIAL_DESKTOP_MEASURE.gutter}px] lg:mx-auto lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`,
@@ -824,7 +827,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(railSlot).toBe(256);
     const pairOuter =
       (1440 - railSlot - SOCIAL_DESKTOP_MEASURE.padR * 2 - SOCIAL_CONTENT_PAIR_WIDTH) / 2;
-    expect(pairOuter).toBe(118);
+    expect(pairOuter).toBe(110);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(
       `flex min-w-0 w-full flex-1 flex-col gap-2 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );

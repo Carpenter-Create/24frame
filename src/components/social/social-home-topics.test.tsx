@@ -17,7 +17,6 @@ import {
   SOCIAL_TOPIC_RAIL_ROWS,
 } from "@/lib/social-chrome";
 import { HOUSE_PILL_SELECTED_CLASS } from "@/lib/house-shell";
-import { SOCIAL } from "@/lib/social";
 import { SocialHomeTopics } from "./social-home-topics";
 
 const src = readFileSync("src/components/social/social-home-topics.tsx", "utf8");
@@ -49,7 +48,9 @@ describe("SocialHomeTopics bank", () => {
     expect(src).toContain("rows={SOCIAL_TOPIC_RAIL_ROWS}");
     expect(src).not.toMatch(/Coinbase|Predict/i);
     expect(SOCIAL_TOPIC_RAIL_ROWS).toBe(1);
-    expect(SOCIAL.forYou.topics).toBe("Topics");
+    expect(html).not.toMatch(/>Topics</);
+    expect(src).not.toContain("SOCIAL.forYou.topics");
+    expect(src).not.toContain("font-semibold text-ink");
     expect(SOCIAL_CATEGORY_TOPICS.length).toBeGreaterThan(0);
   });
 
