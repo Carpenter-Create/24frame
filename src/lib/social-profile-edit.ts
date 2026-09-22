@@ -80,6 +80,27 @@ export type SocialProfileEditFace =
   | "imdb"
   | "links";
 
+const SOCIAL_PROFILE_EDIT_FACES: readonly SocialProfileEditFace[] = [
+  "edit",
+  "name",
+  "handle",
+  "bio",
+  "roles",
+  "topics",
+  "imdb",
+  "links",
+];
+
+export function parseSocialProfileEditFace(
+  raw: string | string[] | undefined | null,
+): SocialProfileEditFace {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value && (SOCIAL_PROFILE_EDIT_FACES as readonly string[]).includes(value)) {
+    return value as SocialProfileEditFace;
+  }
+  return "edit";
+}
+
 export function socialProfileEditFace(
   next: SocialProfileEditFace | boolean,
 ): SocialProfileEditFace {

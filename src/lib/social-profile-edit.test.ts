@@ -35,6 +35,7 @@ import {
   readSocialProfileSaveHop,
   releaseSocialProfileSaveHop,
   socialProfileBioRowSummary,
+  parseSocialProfileEditFace,
   socialProfileEditFace,
   socialProfileHandleRowSummary,
   socialProfileNameRowSummary,
@@ -89,6 +90,9 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(socialProfileEditFace("links")).toBe("links");
     expect(socialProfileEditFace("name")).toBe("name");
     expect(socialProfileEditFace("handle")).toBe("handle");
+    expect(parseSocialProfileEditFace("topics")).toBe("topics");
+    expect(parseSocialProfileEditFace("nope")).toBe("edit");
+    expect(parseSocialProfileEditFace(undefined)).toBe("edit");
     expect(SOCIAL_PROFILE_EDIT_LOCK.profileUrlOnEditFace).toBe(false);
     expect(SOCIAL_PROFILE_EDIT_LOCK.handleBareField).toBe(true);
     expect(SOCIAL_PROFILE_EDIT_LOCK.indexDrillOnly).toBe(true);

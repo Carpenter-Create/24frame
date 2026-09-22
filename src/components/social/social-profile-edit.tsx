@@ -127,6 +127,7 @@ export function SocialProfileEditForm({
   topics = [],
   imdbUrl = "",
   websiteUrl = "",
+  initialFace = "edit",
 }: {
   profileId?: string;
   handle: string;
@@ -138,6 +139,7 @@ export function SocialProfileEditForm({
   topics?: readonly string[];
   imdbUrl?: string | null;
   websiteUrl?: string | null;
+  initialFace?: SocialProfileEditFace;
 }) {
   const router = useRouter();
   const queryClient = useAppQueryClient();
@@ -168,7 +170,7 @@ export function SocialProfileEditForm({
   const [cropPreview, setCropPreview] = useState<string | null>(null);
   const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
   const [avatarSheet, setAvatarSheet] = useState(false);
-  const [face, setFace] = useState<SocialProfileEditFace>("edit");
+  const [face, setFace] = useState<SocialProfileEditFace>(initialFace);
   const [bioText, setBioText] = useState(seed.bio);
   const [roles, setRoles] = useState(() => parseSocialProfileRoles(seed.crafts));
   const [interestTopics, setInterestTopics] = useState(() => parseSocialProfileTopics(seed.topics));

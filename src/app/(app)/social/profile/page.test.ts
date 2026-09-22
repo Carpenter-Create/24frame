@@ -172,8 +172,11 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.activityPosts);
     expect(html).toContain(SOCIAL.profile.highlightsTab);
     expect(html).toContain(SOCIAL.profile.creditsTab);
+    expect(html).toContain(SOCIAL.profile.interestsTab);
     expect(html).toContain('data-social-profile-tab="activity"');
     expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).toContain('data-social-profile-tab="interests"');
+    expect(html).toContain('href="/social/profile?tab=interests"');
     expect(html).not.toContain('data-social-profile-tab="posts"');
     expect(html).toContain("data-social-activity");
     expect(html).toContain('data-social-activity-pill="posts"');
@@ -361,22 +364,72 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-profile-imdb");
   });
 
-  it("prints selected Topics chips under identity and omits a Topics prefix", async () => {
+  it("keeps Roles on the face and lists Topics on the Interests tab", async () => {
     stubClient({
-      profile: { ...ensured, topics: ["Acting", "Financing"] },
+      profile: {
+        ...ensured,
+        crafts: ["actor"],
+        topics: ["Acting", "Financing"],
+      },
     });
     vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
-      profile: { ...ensured, topics: ["Acting", "Financing"] },
+      profile: {
+        ...ensured,
+        crafts: ["actor"],
+        topics: ["Acting", "Financing"],
+      },
       error: null,
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = await renderServerMarkup(await SocialProfilePage());
-    expect(html).toContain("data-social-profile-topics");
-    expect(html).toContain('data-social-profile-topic="Acting"');
-    expect(html).toContain("Acting");
+    const html = await renderServerMarkup(
+      await SocialProfilePage({ searchParams: Promise.resolve({ tab: "interests" }) }),
+    );
+    const face = html.slice(
+      html.indexOf("data-social-profile-face"),
+      html.indexOf("data-social-profile-tabs"),
+    );
+    expect(face).toContain("data-social-profile-roles");
+    expect(face).toContain('data-social-profile-role="actor"');
+    expect(face).not.toContain("data-social-profile-topics");
+    expect(face).not.toContain("data-social-profile-topic");
+    expect(html).toContain('data-social-profile-tab="interests"');
+    expect(html).toContain("data-social-profile-interests");
+    expect(html).not.toContain("data-social-profile-interests-empty");
+    const panelStart = html.indexOf("data-social-profile-interests");
+    const panelEnd = html.indexOf("data-social-for-you", panelStart);
+    const panel = html.slice(panelStart, panelEnd === -1 ? undefined : panelEnd);
+    expect(panel).toContain('data-social-profile-topic="Acting"');
+    expect(panel).toContain('data-social-profile-topic="Financing"');
+    expect(panel).toContain("flex-wrap");
+    expect(panel).not.toContain("truncate");
+    expect(panel).not.toContain("text-ellipsis");
     expect(html).not.toContain("Topics:");
-    expect(html).not.toContain("Actor");
+    expect(html).not.toContain("data-social-activity");
+  });
+
+  it("keeps an empty Interests tab on the own profile and links to the Topics drill", async () => {
+    stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(
+      await SocialProfilePage({ searchParams: Promise.resolve({ tab: "interests" }) }),
+    );
+    const face = html.slice(
+      html.indexOf("data-social-profile-face"),
+      html.indexOf("data-social-profile-tabs"),
+    );
+    expect(face).not.toContain("data-social-profile-topic");
+    expect(html).toContain('data-social-profile-tab="interests"');
+    expect(html).toContain("data-social-profile-interests-empty");
+    const emptyStart = html.indexOf("data-social-profile-interests-empty");
+    const emptyEnd = html.indexOf("data-social-for-you", emptyStart);
+    const empty = html.slice(emptyStart, emptyEnd === -1 ? undefined : emptyEnd);
+    expect(empty).toContain(SOCIAL.profile.interestsEmpty);
+    expect(empty).toContain(SOCIAL.profile.interestsEmptyOwnHint);
+    expect(empty).toContain('href="/social/profile/edit?face=topics"');
+    expect(empty).toContain(`>${SOCIAL.profile.topics}<`);
+    expect(empty).not.toContain("data-social-profile-topic=");
   });
 
   it("prints a quiet IMDb name link when the claim is set", async () => {

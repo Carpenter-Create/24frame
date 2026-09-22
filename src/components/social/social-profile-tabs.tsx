@@ -12,27 +12,31 @@ import {
 export function SocialProfileTabs({
   baseHref,
   active,
+  tabs = SOCIAL_PROFILE_TABS,
 }: {
   baseHref: string;
   active: SocialProfileTab;
+  /** Visible slice of SOCIAL_PROFILE_TABS. Defaults to the full shared list. */
+  tabs?: readonly SocialProfileTab[];
 }) {
+  const current = tabs.includes(active) ? active : (tabs[0] ?? active);
   return (
     <div data-social-profile-tabs="" className="flex flex-col bg-surface">
       <div className="overflow-x-auto">
         <div className="flex w-max items-start">
-          {SOCIAL_PROFILE_TABS.map((tab) => (
+          {tabs.map((tab) => (
             <HouseLink
               key={tab}
               href={socialProfileTabHref(baseHref, tab)}
               data-social-profile-tab={tab}
-              data-social-profile-tab-active={active === tab ? "" : undefined}
+              data-social-profile-tab-active={current === tab ? "" : undefined}
               className={cn(
                 SOCIAL_PROFILE_TAB_CLASS,
-                active === tab ? "font-semibold text-ink" : "font-medium text-ink-2",
+                current === tab ? "font-semibold text-ink" : "font-medium text-ink-2",
               )}
             >
               {socialProfileTabLabel(tab)}
-              <span className={cn("h-0.5 w-full", active === tab ? "bg-accent" : "bg-transparent")} />
+              <span className={cn("h-0.5 w-full", current === tab ? "bg-accent" : "bg-transparent")} />
             </HouseLink>
           ))}
         </div>

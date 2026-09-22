@@ -52,7 +52,6 @@ function SocialProfileOptimisticIdentity({
           coverUrl={view.coverUrl}
           bio={view.bio.trim() ? view.bio : undefined}
           roles={view.crafts}
-          topics={view.topics}
           websiteUrl={view.websiteUrl}
           imdbUrl={view.imdbUrl}
         />
@@ -162,7 +161,6 @@ function SocialOwnProfileFaceView({
         photoAction={<SocialProfileAvatarEdit />}
         bio={shownBio}
         roles={merged.crafts}
-        topics={merged.topics}
         websiteUrl={merged.websiteUrl}
         imdbUrl={merged.imdbUrl}
         ring={ring}

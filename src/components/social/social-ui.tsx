@@ -28,7 +28,6 @@ import {
   SOCIAL_PROFILE_NAME_STACK_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
-  SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -48,7 +47,6 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { socialProfileRendersCoverBand } from "@/lib/social-profile-cover";
-import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
   SOCIAL_POST_IMAGE_SIZES,
   socialMediaFrameClass,
@@ -218,7 +216,6 @@ export function SocialProfileIdentity({
   coverEdit,
   bio,
   roles,
-  topics,
   websiteUrl,
   imdbUrl,
   ring = null,
@@ -236,7 +233,6 @@ export function SocialProfileIdentity({
   coverEdit?: ReactNode;
   bio?: string | null;
   roles?: readonly string[] | null;
-  topics?: readonly string[] | null;
   websiteUrl?: string | null;
   imdbUrl?: string | null;
   ring?: "unseen" | "live" | null;
@@ -249,7 +245,6 @@ export function SocialProfileIdentity({
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
   const roleRailItems = socialProfileRolesRailItems(roles ?? []);
-  const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
   const followedBy = mutuals
     ? socialFollowedByLine(
@@ -335,19 +330,6 @@ export function SocialProfileIdentity({
         ) : null}
         <SocialProfileLinkRow links={links} />
         {actionRow}
-        {interestTopics.length > 0 ? (
-          <div data-social-profile-topics="" className="flex min-w-0 flex-wrap gap-2">
-            {interestTopics.map((topic) => (
-              <span
-                key={topic}
-                data-social-profile-topic={topic}
-                className={SOCIAL_TOPIC_CHIP_CLASS}
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-        ) : null}
         {followedBy ? (
           <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
             <div data-social-profile-mutuals-faces="" className="flex shrink-0">

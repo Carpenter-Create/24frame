@@ -236,6 +236,24 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("data-social-profile-edit-link-remove");
   });
 
+  it("opens the existing Topics drill when Edit is linked with face=topics", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="ada"
+        displayName="Ada Lovelace"
+        bio=""
+        photoUrl={null}
+        topics={["Acting"]}
+        initialFace="topics"
+      />,
+    );
+    expect(html).toContain("data-social-profile-topics");
+    expect(html).toContain("data-social-profile-topics-back");
+    expect(html).toContain('id="social-edit-topics-search"');
+    expect(html).toContain(SOCIAL.profile.topics);
+    expect(html).not.toContain("data-social-profile-edit-topics-open");
+  });
+
   it("keeps Username as a drill row and omits a derived Profile URL on the index", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm handle="" displayName="" bio="" photoUrl={null} />,

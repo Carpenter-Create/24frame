@@ -9,6 +9,7 @@ import { SocialActivityHistory } from "@/components/social/social-activity-histo
 import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialEmpty } from "@/components/social/social-empty";
+import { SocialProfileInterests } from "@/components/social/social-profile-interests";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import {
@@ -28,14 +29,18 @@ import {
   isLegacySocialProfilePostsTab,
   parseProfileHandleParam,
   parseSocialProfileTab,
+  resolveSocialProfileTab,
   SOCIAL,
   SOCIAL_PROFILE_TAB_PARAM,
+  SOCIAL_PROFILE_TABS,
   SOCIAL_ROUTES,
   socialMemberHref,
   socialPersonLabel,
   socialProfileCanonicalUrl,
   socialProfileCasingRedirect,
   socialProfileLegacyPostsTabHref,
+  socialProfileTabHref,
+  socialProfileVisibleTabs,
   socialRelativeTime,
   socialStoryHref,
 } from "@/lib/social";
@@ -54,6 +59,7 @@ import {
 } from "@/lib/social-feed";
 import { loadCachedIsFollowing, loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { requireSocialSession } from "@/lib/social-session";
 
 export const runtime = "edge";
@@ -84,12 +90,18 @@ export default async function SocialPublicProfilePage({
   const { ctx, supabase } = session;
   const handle = parseProfileHandleParam(raw);
   const rawTab = sp[SOCIAL_PROFILE_TAB_PARAM];
-  const tab = parseSocialProfileTab(rawTab);
   const activity = parseSocialActivityPill(sp[SOCIAL_ACTIVITY_PILL_PARAM]);
   const own = await ensureOwnSocialProfile(supabase, ctx.user);
   // Null is a missing handle or an RLS-hidden row — same empty state.
   const member = handle ? await loadCachedSocialProfileByHandle(supabase, handle) : null;
   const legacyPosts = isLegacySocialProfilePostsTab(rawTab);
+  const visibleTabs = member
+    ? socialProfileVisibleTabs({
+        owner: member.id === ctx.user.id,
+        topicCount: parseSocialProfileTopics(member.topics ?? []).length,
+      })
+    : SOCIAL_PROFILE_TABS;
+  const tab = resolveSocialProfileTab(rawTab, visibleTabs);
 
   if (member) {
     const canonical = socialProfileCasingRedirect(handle, member.handle);
@@ -100,6 +112,9 @@ export default async function SocialPublicProfilePage({
           ? socialProfileLegacyPostsTabHref(destBase)
           : socialProfileViewHref(destBase, tab, activity),
       );
+    }
+    if (parseSocialProfileTab(rawTab) !== tab) {
+      redirect(socialProfileTabHref(socialMemberHref(member.handle), tab));
     }
   } else if (legacyPosts && handle) {
     redirect(socialProfileLegacyPostsTabHref(socialMemberHref(handle)));
@@ -193,7 +208,6 @@ export default async function SocialPublicProfilePage({
           coverUrl={coverUrl}
           bio={member.bio}
           roles={member.crafts}
-          topics={member.topics}
           websiteUrl={member.website_url}
           imdbUrl={member.imdb_url}
           ring={liveStories.length > 0 ? "live" : null}
@@ -228,7 +242,7 @@ export default async function SocialPublicProfilePage({
           }
         />
         {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
-        <SocialProfileTabs baseHref={profileHref} active={tab} />
+        <SocialProfileTabs baseHref={profileHref} active={tab} tabs={visibleTabs} />
         {tab === "credits" ? (
           <SocialEmpty
             icon="film-slate"
@@ -241,6 +255,8 @@ export default async function SocialPublicProfilePage({
           ) : (
             <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
           )
+        ) : tab === "interests" ? (
+          <SocialProfileInterests topics={member.topics} owner={isSelf} />
         ) : (
           <SocialActivityHistory
             baseHref={profileHref}

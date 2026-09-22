@@ -19,6 +19,7 @@ import {
   parseSocialCreateKind,
   parseSocialHomeLane,
   parseSocialProfileTab,
+  resolveSocialProfileTab,
   postInsertRow,
   profileInsertRow,
   quietDmAddError,
@@ -60,8 +61,10 @@ import {
   socialProfileRewriteTarget,
   isLegacySocialProfilePostsTab,
   socialProfileLegacyPostsTabHref,
+  socialProfileEditTopicsHref,
   socialProfileTabHref,
   socialProfileTabLabel,
+  socialProfileVisibleTabs,
   SOCIAL_PROFILE_DEFAULT_TAB,
   SOCIAL_PROFILE_TABS,
   socialVanityInternalPath,
@@ -394,14 +397,27 @@ describe("profile opt-in", () => {
     expect(SOCIAL.home.videoPreparing).toBe("That video is still preparing.");
     expect(parseSocialHomeLane("for-you")).toBe("for-you");
     expect(socialHomeLaneHref("following")).toBe("/social");
-    expect(SOCIAL_PROFILE_TABS).toEqual(["activity", "highlights", "credits"]);
+    expect(SOCIAL_PROFILE_TABS).toEqual(["activity", "highlights", "credits", "interests"]);
     expect(SOCIAL_PROFILE_DEFAULT_TAB).toBe("activity");
     expect(parseSocialProfileTab("highlights")).toBe("highlights");
     expect(parseSocialProfileTab("credits")).toBe("credits");
+    expect(parseSocialProfileTab("interests")).toBe("interests");
     expect(parseSocialProfileTab("activity")).toBe("activity");
     expect(parseSocialProfileTab("posts")).toBe("activity");
     expect(parseSocialProfileTab("reels")).toBe("activity");
     expect(parseSocialProfileTab(undefined)).toBe("activity");
+    expect(socialProfileVisibleTabs({ owner: true, topicCount: 0 }).map((tab) => tab)).toEqual([
+      ...SOCIAL_PROFILE_TABS,
+    ]);
+    expect(socialProfileVisibleTabs({ owner: false, topicCount: 2 }).map((tab) => tab)).toEqual([
+      ...SOCIAL_PROFILE_TABS,
+    ]);
+    const visitorEmpty = socialProfileVisibleTabs({ owner: false, topicCount: 0 });
+    expect(visitorEmpty).not.toContain("interests");
+    expect(resolveSocialProfileTab("interests", visitorEmpty)).toBe("activity");
+    expect(resolveSocialProfileTab("interests")).toBe("interests");
+    expect(resolveSocialProfileTab("nope", visitorEmpty)).toBe("activity");
+    expect(socialProfileEditTopicsHref()).toBe("/social/profile/edit?face=topics");
     expect(isLegacySocialProfilePostsTab("posts")).toBe(true);
     expect(isLegacySocialProfilePostsTab("activity")).toBe(false);
     expect(socialProfileLegacyPostsTabHref("/social/profile")).toBe("/social/profile");
@@ -412,6 +428,11 @@ describe("profile opt-in", () => {
     expect(socialProfileTabHref("/social/profile", "activity")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
     expect(socialProfileTabLabel("activity")).toBe("Activity");
+    expect(socialProfileTabLabel("interests")).toBe("Interests");
+    expect(SOCIAL.profile.interestsTab).toBe("Interests");
+    expect(SOCIAL.profile.interestsEmpty).toBe("No interests yet.");
+    expect(SOCIAL.profile.interestsEmptyOwnHint).toBe("Choose topics on Edit profile.");
+    expect(socialProfileTabHref("/social/u/ada", "interests")).toBe("/social/u/ada?tab=interests");
     expect(parseSocialFollowsTab("following")).toBe("following");
     expect(parseSocialFollowsTab("reels")).toBe("followers");
     expect(parseSocialFollowsQuery("  Ada  ")).toBe("Ada");
