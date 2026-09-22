@@ -212,7 +212,7 @@ export default async function SocialPublicProfilePage({
           }
           actions={
             isSelf ? (
-              <SocialShareButton handle={member.handle} stretch />
+              <SocialShareButton handle={member.handle} />
             ) : own ? (
               <>
                 <SocialFollowButton
@@ -222,7 +222,7 @@ export default async function SocialPublicProfilePage({
                   viewerId={ctx.user.id}
                   stretch
                 />
-                <SocialShareButton handle={member.handle} stretch />
+                <SocialShareButton handle={member.handle} />
               </>
             ) : undefined
           }

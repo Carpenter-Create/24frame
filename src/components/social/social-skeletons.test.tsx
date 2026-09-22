@@ -52,15 +52,20 @@ describe("Social loading skeletons", () => {
     const follows = renderToStaticMarkup(<SocialFollowsSkeleton />);
 
     expect(home).toContain("data-social-home-skeleton");
-    expect(home).toContain('data-social-home-stack="lock_airy_topics_under_cut_phone_composer"');
+    expect(home).toContain('data-social-home-stack="lock_topics_composer_stories_wall"');
     expect(home).toContain("data-social-home-composer-skeleton");
     expect(home).toContain("data-social-home-topics-skeleton");
+    expect(home.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
+      home.indexOf("data-social-home-composer-skeleton"),
+    );
     expect(home.indexOf("data-social-home-composer-skeleton")).toBeLessThan(
       home.indexOf("data-social-stories-skeleton"),
     );
     expect(home.indexOf("data-social-stories-skeleton")).toBeLessThan(
-      home.indexOf("data-social-home-topics-skeleton"),
+      home.indexOf("data-social-feed-skeleton"),
     );
+    expect(home).toContain("divide-y divide-hairline");
+    expect(home).not.toContain("bg-surface-muted py-");
     const topicsSkeleton = home.slice(home.indexOf("data-social-home-topics-skeleton"));
     expect(topicsSkeleton).toContain("overflow-x-auto");
     expect(topicsSkeleton).toContain("flex-col");
@@ -86,7 +91,9 @@ describe("Social loading skeletons", () => {
     expect(profile).not.toContain("md:max-w-[892px]");
     expect(profile).not.toContain("892");
     expect(profile).toContain("bg-surface-muted");
-    expect(profile).toContain("py-[var(--space-2)]");
+    expect(profile).toContain("divide-y divide-hairline");
+    expect(profile).not.toContain("py-[var(--space-2)]");
+    expect(profile).not.toContain("bg-surface-muted py-");
     expect(profile).not.toContain("aspect-square");
     expect(profile).not.toContain("data-social-profile-grid");
     expect(profile).toContain("data-social-for-you-skeleton");

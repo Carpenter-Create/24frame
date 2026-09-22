@@ -188,6 +188,16 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-author-history");
     expect(html).toContain("data-social-follow");
     expect(html).toContain("data-social-share");
+    const actionsAt = html.indexOf("data-social-profile-actions");
+    const shareAt = html.indexOf("data-social-share", actionsAt);
+    const share = html.slice(shareAt, html.indexOf("</button>", shareAt));
+    expect(html.indexOf("data-social-follow", actionsAt)).toBeLessThan(shareAt);
+    expect(share).toContain(`aria-label="${SOCIAL.profile.shareProfile}"`);
+    expect(share).toContain("size-[44px]");
+    expect(share).toContain("min-h-[44px]");
+    expect(share).toContain("min-w-[44px]");
+    expect(share).not.toContain("flex-1");
+    expect(share).not.toContain(`>${SOCIAL.profile.share}<`);
     expect(html).toContain("data-social-profile-tabs");
     expect(html).toContain('data-social-profile-stat="followers"');
     expect(html).toContain('href="/social/u/ada/follows"');
@@ -300,16 +310,17 @@ describe("Social public profile", () => {
     expect(html).not.toContain("Actor");
   });
 
-  it("renders Instagram as muted host text, not an icon, and omits the links row when empty", async () => {
+  it("renders Instagram as a quiet icon and omits the links row when empty", async () => {
     stubClient({
       member: { ...ada, website_url: "https://instagram.com/ada" },
     });
     const html = await renderPublic();
     expect(html).toContain("data-social-profile-links");
     expect(html).toContain('data-social-profile-link="instagram"');
+    expect(html).toContain('data-social-profile-link-glyph="instagram-logo"');
     expect(html).toContain('href="https://instagram.com/ada"');
-    expect(html).toContain(">instagram.com/ada<");
-    expect(html).not.toContain('aria-label="Instagram"');
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).not.toContain(">instagram.com/ada<");
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).not.toContain(">https://instagram.com/ada<");
 
@@ -325,8 +336,10 @@ describe("Social public profile", () => {
     });
     const html = await renderPublic();
     expect(html).toContain("data-social-profile-imdb");
+    expect(html).toContain('data-social-profile-link-glyph="film-slate"');
     expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
-    expect(html).toContain("imdb.com/name/nm0000158");
+    expect(html).toContain(`aria-label="${SOCIAL.profile.imdb}"`);
+    expect(html).not.toContain(">imdb.com/name/nm0000158<");
     expect(html).not.toContain("Connect to scrape");
   });
 

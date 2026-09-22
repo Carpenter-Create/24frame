@@ -227,14 +227,14 @@ export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-[3px] flex-1 rounded-full";
 export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
-// Home composer — airy FB register. Adam 2026-09-20
-// lock_airy_topics_under_cut_phone_composer. Avatar + prompt on the
-// canvas, no gray liner / boxed form. Desktop only (`hidden md:flex`).
-// The row opens the Create sheet SoT. Phone Create is the dock dest.
-// Photo · Video · Write · Go live stay on that sheet — never a second
-// chooser strip on Home.
+// Home composer — airy canvas register. Adam 2026-09-22
+// lock_topics_composer_stories_wall. Supersedes the 2026-09-20 phone
+// cut (`hidden md:flex`). Avatar + prompt on the canvas, no gray liner
+// / boxed form, on phone and desktop. The row opens the Create sheet
+// SoT. Create dock stays. Photo · Video · Write · Go live stay on that
+// sheet — never a second chooser strip on Home.
 export const SOCIAL_COMPOSER_CLASS =
-  "hidden md:flex h-20 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
+  "flex h-20 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
   "flex h-11 min-w-0 flex-1 items-center t-body text-ink-2";
@@ -251,21 +251,22 @@ export const SOCIAL_FOLLOW_COMPACT_IDLE_CLASS =
 export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
+// Post sits on the page canvas. The list draws the between-post
+// hairline (SOCIAL_FEED_GUTTER_CLASS). No card box.
 export const SOCIAL_FEED_ROW_CLASS =
-  `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)]`;
+  "flex flex-col gap-2 bg-surface p-[var(--space-4)]";
 
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).
 export const SOCIAL_POST_TIME_CLASS =
   "text-[length:var(--text-xs)] font-normal leading-none tracking-normal text-ink-2";
 
-// Facebook gray gutter — muted canvas frames every surface post.
-// Light --bg and --surface are both white; surface-muted (#f4f4f6)
-// is the visible band. ~8px house space-2. Stack gap between cards
-// plus py so the first and last cards are framed — never per-card
-// margin that doubles the band.
+// Adam 2026-09-22 feed chrome. Supersedes #599 Facebook gray gutter
+// (muted band + py slabs above and below every post). Posts sit on
+// the page canvas. One house hairline between rows — Home, Profile
+// Activity, and author history share this list. No grey slab.
 export const SOCIAL_FEED_GUTTER_CLASS =
-  "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]";
+  "flex flex-col divide-y divide-hairline";
 
 // Comment thread — house app-sheet rise. Same host/scrim as Create.
 // Composer stays at the bottom. Do not fork a second sheet grammar.
@@ -422,19 +423,29 @@ export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-title text-ink";
 
 export const SOCIAL_PROFILE_HANDLE_CLASS = "min-w-0 break-words t-body-sm text-ink-2";
 
-// Pause before Edit / Share (or Follow / Share). House token, same
-// class for own + public.
+// Pause before the primary CTA (Edit or Follow) and the quiet
+// icon-only Share. Same class for own + public. Share does not
+// stretch. Labels wrap; the icon hit stays ≥44px.
 export const SOCIAL_PROFILE_ACTIONS_CLASS =
-  "mt-[var(--space-3)] flex w-full items-center gap-2";
+  "mt-[var(--space-3)] flex w-full min-w-0 items-center gap-2";
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body text-ink whitespace-pre-wrap";
 
-// Adam lock A 2026-09-20: calm muted type. Not chips, not
-// brand-colored glyphs. Phone stacks — never truncate. Same class for
+// Adam 2026-09-22: quiet icon rail. Not chips, not brand color.
+// Horizontal, wraps on a narrow phone — never truncate. Same class for
 // own + public. Max 2 face links; +N is the overflow control.
-export const SOCIAL_PROFILE_LINKS_CLASS = "flex min-w-0 flex-col items-start gap-1";
-export const SOCIAL_PROFILE_LINK_CLASS = "min-w-0 break-words t-body-sm text-ink-2 hover:text-ink";
-export const SOCIAL_PROFILE_LINKS_MORE_CLASS = "t-body-sm text-ink-2 hover:text-ink";
+export const SOCIAL_PROFILE_LINKS_CLASS =
+  "flex min-w-0 flex-wrap items-center gap-x-[var(--space-2)] gap-y-[var(--space-2)]";
+export const SOCIAL_PROFILE_LINK_CLASS =
+  "inline-flex size-9 shrink-0 items-center justify-center text-ink-2 hover:text-ink";
+export const SOCIAL_PROFILE_LINKS_MORE_CLASS =
+  "inline-flex h-9 shrink-0 items-center t-body-sm text-ink-2 hover:text-ink";
+
+// Links sheet keeps readable host labels in a column. Not the face rail.
+export const SOCIAL_PROFILE_LINKS_SHEET_CLASS =
+  "flex min-w-0 flex-col items-start gap-[var(--space-3)]";
+export const SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS =
+  "min-w-0 break-words t-body-sm text-ink-2 hover:text-ink";
 
 // Public Professions: one-row house chip rail (same primitive as Topics).
 // Phone: nowrap + overflow-x auto + no-scrollbar. Desktop: same one-row
@@ -500,8 +511,10 @@ export const SOCIAL_PROFILE_PLAY_CLASS =
 export const SOCIAL_HIGHLIGHT_RING_CLASS =
   "rounded-full border-2 border-accent p-[2px]";
 
+// Quiet icon-only Share beside the primary profile CTA.
+// House icon hits are circles. 44px floor. No label, no twin fill.
 export const SOCIAL_SHARE_CLASS =
-  "inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-hairline bg-surface px-[14px] py-[var(--space-2)] t-body-sm font-medium text-ink";
+  "inline-flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-ink-2 hover:bg-surface-muted";
 
 // 180:206 / 180:1946 / 181:2184 — Edit profile. Mobile full page; desktop
 // 480 sheet on wash. 180:2004 / 180:2026 — Bio editor. Tokens only.

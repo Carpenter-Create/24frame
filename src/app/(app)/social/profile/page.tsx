@@ -204,7 +204,7 @@ async function SocialProfileMain({
             <HouseLink href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
               {SOCIAL.profile.edit}
             </HouseLink>
-            <SocialShareButton handle={identity.handle} stretch />
+            <SocialShareButton handle={identity.handle} />
           </>
         }
       />

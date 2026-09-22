@@ -6,6 +6,8 @@
    Per product you set ONE thing: --accent.
 
    Global Content: Sporty Blue is the confirmed accent (2026-07-18).
+   Light (:root) keeps it. Dark (.dark) flips the same token to
+   LinkedIn soft #70b5f9 (Adam lock 2026-09-22). Not a second family.
    Logo/wordmark remains a founder checkpoint — do not pick a new hex.
 
    Base mode: LIGHT is the default (:root); DARK is secondary (.dark class),
@@ -25,7 +27,7 @@
      data/chart accents. White on this blue is ~3.9:1 (AA for large/UI text only) —
      keep it OFF small body copy. (The logo/wordmark is a separate founder
      checkpoint and is still pending; that does not block the accent.) */
-  --accent: #1769ff;            /* Global Content — Sporty Blue */
+  --accent: #1769ff;            /* Global Content — Sporty Blue. .dark overrides. */
   --accent-contrast: #ffffff;   /* white on the blue */
   /* Light-blue pill wash for the active rail — Sporty Blue tint on white.
      Type/icon stay #1769FF. Not a filled brand-blue chip. */
@@ -152,8 +154,19 @@
 
 /* --- Neutral ramp — DARK (secondary; add class="dark") --- */
 .dark {
-  /* Adam trial 2026-09-19 brand canvas; surfaces unchanged pending glance. */
-  --bg:            #050835;
+  /* Adam lock 2026-09-22. Same --accent; light Sporty stays on :root.
+     LinkedIn soft. Not YouTube punch #3ea6ff.
+     White on this blue is 2.17:1 and fails AA for UI text and icons.
+     House ink #0A0B0D on the fill is 9.06:1. #70b5f9 on the #0f0f0f
+     canvas is 8.82:1. Wash inherits the :root 10% mix of --accent
+     into --surface. */
+  --accent: #70b5f9;
+  --accent-contrast: #0A0B0D;
+
+  /* Adam lock 2026-09-22. YouTube near-black canvas. Retires the navy
+     #050835 trial. Surfaces stay: #1e2126 on #0f0f0f is 1.19:1, the
+     same lift as YouTube #212121. Not a second accent. */
+  --bg:            #0f0f0f;
   --surface:       #1e2126;
   --surface-muted: #25292f;
   --border:        #2a2f34;

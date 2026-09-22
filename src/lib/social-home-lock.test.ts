@@ -75,16 +75,19 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialHomeTopics");
     expect(home).toContain("data-social-home-stack={SOCIAL_HOME_STACK_LOCK}");
     expect(homeSkeleton).toContain("data-social-home-stack={SOCIAL_HOME_STACK_LOCK}");
-    expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_airy_topics_under_cut_phone_composer");
-    expect(SOCIAL_HOME_STACK_ORDER).toEqual(["composer", "stories", "topics", "wall"]);
+    expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_topics_composer_stories_wall");
+    expect(SOCIAL_HOME_STACK_ORDER).toEqual(["topics", "composer", "stories", "wall"]);
+    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialHomeComposer"));
     expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
-    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTopics"));
-    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
+    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
+    expect(homeSkeleton.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
+      homeSkeleton.indexOf("data-social-home-composer-skeleton"),
+    );
     expect(homeSkeleton.indexOf("data-social-home-composer-skeleton")).toBeLessThan(
       homeSkeleton.indexOf("SocialStoriesRailSkeleton"),
     );
     expect(homeSkeleton.indexOf("SocialStoriesRailSkeleton")).toBeLessThan(
-      homeSkeleton.indexOf("data-social-home-topics-skeleton"),
+      homeSkeleton.indexOf("data-social-feed-skeleton"),
     );
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
@@ -222,7 +225,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("ACTIONS");
     expect(composer).not.toContain("SocialIcon");
     expect(composer).not.toContain("plus");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
+    expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-20");
     expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
     expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
@@ -270,13 +274,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_EMPTY_PANEL_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_ROW_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_GUTTER_CLASS");
-    expect(SOCIAL_FEED_GUTTER_CLASS).toBe(
-      "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]",
-    );
-    expect(SOCIAL_FEED_GUTTER_CLASS).toContain("py-[var(--space-2)]");
-    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col divide-y divide-hairline");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toContain("divide-y divide-hairline");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-surface-muted");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("py-");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("gap-");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("border");
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("rounded");
     expect(SOCIAL_FEED_ROW_CLASS).not.toMatch(/(?:^|\s)(?:m[ytb]|my)-/);
     expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
