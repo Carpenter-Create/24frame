@@ -163,6 +163,7 @@ async function SocialHomeCenter({
         <h1>{SOCIAL.home.title}</h1>
         <p>{SOCIAL.home.subtitle}</p>
       </div>
+      <SocialHomeTopics active={topic} />
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
@@ -179,7 +180,6 @@ async function SocialHomeCenter({
           {SOCIAL.home.truncatedStories}
         </InlineNotice>
       ) : null}
-      <SocialHomeTopics active={topic} />
       {followees.truncated ? (
         <InlineNotice tone="info" data-social-followees-truncated="">
           {SOCIAL.home.truncatedFollowees}

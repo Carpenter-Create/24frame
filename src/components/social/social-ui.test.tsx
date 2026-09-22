@@ -693,13 +693,13 @@ describe("Social profile public face", () => {
     expect(history).toContain("data-social-author-history");
     expect(history).toContain("data-social-author-posts");
     expect(history).toContain(SOCIAL_FEED_GUTTER_CLASS);
-    expect(SOCIAL_FEED_GUTTER_CLASS).toBe(
-      "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]",
-    );
-    expect(SOCIAL_FEED_GUTTER_CLASS).toContain("py-[var(--space-2)]");
-    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col divide-y divide-hairline");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toContain("divide-y divide-hairline");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-surface-muted");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("py-");
     expect(history).toContain(SOCIAL_FEED_ROW_CLASS);
-    expect(history).toContain("border border-hairline bg-surface");
+    expect(history).toContain("divide-y divide-hairline");
+    expect(history).not.toContain("border border-hairline bg-surface");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
     expect(uiSrc).not.toContain('className="flex flex-col bg-surface md:hidden"');

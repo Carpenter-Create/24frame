@@ -218,14 +218,14 @@ export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-[3px] flex-1 rounded-full";
 export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
-// Home composer — airy FB register. Adam 2026-09-20
-// lock_airy_topics_under_cut_phone_composer. Avatar + prompt on the
-// canvas, no gray liner / boxed form. Desktop only (`hidden md:flex`).
-// The row opens the Create sheet SoT. Phone Create is the dock dest.
-// Photo · Video · Write · Go live stay on that sheet — never a second
-// chooser strip on Home.
+// Home composer — airy canvas register. Adam 2026-09-22
+// lock_topics_composer_stories_wall. Supersedes the 2026-09-20 phone
+// cut (`hidden md:flex`). Avatar + prompt on the canvas, no gray liner
+// / boxed form, on phone and desktop. The row opens the Create sheet
+// SoT. Create dock stays. Photo · Video · Write · Go live stay on that
+// sheet — never a second chooser strip on Home.
 export const SOCIAL_COMPOSER_CLASS =
-  "hidden md:flex h-20 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
+  "flex h-20 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
   "flex h-11 min-w-0 flex-1 items-center t-body text-ink-2";
@@ -242,21 +242,22 @@ export const SOCIAL_FOLLOW_COMPACT_IDLE_CLASS =
 export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
+// Post sits on the page canvas. The list draws the between-post
+// hairline (SOCIAL_FEED_GUTTER_CLASS). No card box.
 export const SOCIAL_FEED_ROW_CLASS =
-  `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)]`;
+  "flex flex-col gap-2 bg-surface p-[var(--space-4)]";
 
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).
 export const SOCIAL_POST_TIME_CLASS =
   "text-[length:var(--text-xs)] font-normal leading-none tracking-normal text-ink-2";
 
-// Facebook gray gutter — muted canvas frames every surface post.
-// Light --bg and --surface are both white; surface-muted (#f4f4f6)
-// is the visible band. ~8px house space-2. Stack gap between cards
-// plus py so the first and last cards are framed — never per-card
-// margin that doubles the band.
+// Adam 2026-09-22 feed chrome. Supersedes #599 Facebook gray gutter
+// (muted band + py slabs above and below every post). Posts sit on
+// the page canvas. One house hairline between rows — Home, Profile
+// Activity, and author history share this list. No grey slab.
 export const SOCIAL_FEED_GUTTER_CLASS =
-  "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]";
+  "flex flex-col divide-y divide-hairline";
 
 // Comment thread — house app-sheet rise. Same host/scrim as Create.
 // Composer stays at the bottom. Do not fork a second sheet grammar.

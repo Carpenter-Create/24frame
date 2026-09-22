@@ -178,14 +178,14 @@ describe("Social home", () => {
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
     expect(html).toContain("data-social-home-composer");
-    expect(html).toContain('data-social-home-stack="lock_airy_topics_under_cut_phone_composer"');
+    expect(html).toContain('data-social-home-stack="lock_topics_composer_stories_wall"');
     expect(html).toContain("data-social-create-sheet");
     expect(html).not.toContain("/social/create?kind=text");
     expect(html).toContain(SOCIAL.create.title);
     expect(html).not.toContain("data-social-composer-action");
+    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-home-composer"));
     expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
-    expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-topics"));
-    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-home-tabs"));
+    expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-tabs"));
     expect(html).toContain(SOCIAL.forYou.topics);
     expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
     expect(html).toContain("Write something");
