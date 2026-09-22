@@ -73,6 +73,11 @@ function mediaClient(): { bucket: string; s3: S3Client } {
     s3: new S3Client({
       region: mediaRegion(),
       credentials: mediaAwsCredentials(),
+      // Default WHEN_SUPPORTED presigns PutObject with x-amz-checksum-crc32
+      // of the empty sign-time body (AAAAAA==). The browser then PUTs the
+      // real JPEG and S3 returns 400 BadDigest, which cover Save shows as
+      // SOCIAL.home.uploadFailed. WHEN_REQUIRED omits that checksum.
+      requestChecksumCalculation: "WHEN_REQUIRED",
     }),
   };
 }
