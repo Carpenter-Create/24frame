@@ -8,9 +8,13 @@ import {
   parseSocialExternalUrl,
   parseSocialProfileLinksWrite,
   parseSocialWebsiteUrlField,
+  SOCIAL_LINK_PLATFORMS,
+  SOCIAL_PROFILE_LINK_GLYPHS,
   socialLinkPlatform,
+  socialProfileLinkAccessibleName,
   socialProfileLinkError,
-  socialProfileLinkFaceLabel,
+  socialProfileLinkGlyph,
+  socialProfileLinkReadableLabel,
   socialProfileLinksFace,
   socialProfileLinksMoreLabel,
   socialProfileLinksRowSummary,
@@ -110,15 +114,45 @@ describe("social profile links", () => {
     ]);
   });
 
-  it("derives face labels from host and path, never a scheme URL", () => {
-    expect(socialProfileLinkFaceLabel("https://instagram.com/ada")).toBe("instagram.com/ada");
-    expect(socialProfileLinkFaceLabel("https://www.youtube.com/@ada")).toBe("youtube.com/@ada");
-    expect(socialProfileLinkFaceLabel("https://x.com/ada")).toBe("x.com/ada");
-    expect(socialProfileLinkFaceLabel("https://www.imdb.com/name/nm0000158/")).toBe(
+  it("keeps readable host labels for the sheet and Edit drill, never a scheme URL", () => {
+    expect(socialProfileLinkReadableLabel("https://instagram.com/ada")).toBe("instagram.com/ada");
+    expect(socialProfileLinkReadableLabel("https://www.youtube.com/@ada")).toBe("youtube.com/@ada");
+    expect(socialProfileLinkReadableLabel("https://x.com/ada")).toBe("x.com/ada");
+    expect(socialProfileLinkReadableLabel("https://www.imdb.com/name/nm0000158/")).toBe(
       "imdb.com/name/nm0000158",
     );
-    expect(socialProfileLinkFaceLabel("https://ada.example/press")).toBe("website");
-    expect(socialProfileLinkFaceLabel("https://ada.example")).toBe("website");
+    expect(socialProfileLinkReadableLabel("https://ada.example/press")).toBe("website");
+    expect(socialProfileLinkReadableLabel("https://ada.example")).toBe("website");
+  });
+
+  it("names the face icon by platform label or host", () => {
+    expect(socialProfileLinkAccessibleName("https://instagram.com/ada")).toBe("Instagram");
+    expect(socialProfileLinkAccessibleName("https://www.youtube.com/@ada")).toBe("YouTube");
+    expect(socialProfileLinkAccessibleName("https://x.com/ada")).toBe("X");
+    expect(socialProfileLinkAccessibleName("https://www.imdb.com/name/nm0000158/")).toBe(
+      SOCIAL.profile.imdb,
+    );
+    expect(socialProfileLinkAccessibleName("https://vimeo.com/123")).toBe("Vimeo");
+    expect(socialProfileLinkAccessibleName("https://ada.example/press")).toBe("ada.example");
+    expect(socialProfileLinkAccessibleName("https://www.ada.example")).toBe("ada.example");
+    expect(socialProfileLinkAccessibleName("https://ada.example/press")).not.toBe("website");
+    expect(socialProfileLinkAccessibleName("https://ada.example")).not.toContain("https://");
+  });
+
+  it("maps classified hosts to quiet glyphs and unknown hosts to a globe", () => {
+    expect(Object.keys(SOCIAL_PROFILE_LINK_GLYPHS).sort()).toEqual(
+      [...SOCIAL_LINK_PLATFORMS].sort(),
+    );
+    expect(socialProfileLinkGlyph("instagram")).toBe("instagram-logo");
+    expect(socialProfileLinkGlyph("youtube")).toBe("youtube-logo");
+    expect(socialProfileLinkGlyph("facebook")).toBe("facebook-logo");
+    expect(socialProfileLinkGlyph("x")).toBe("x-logo");
+    expect(socialProfileLinkGlyph("linkedin")).toBe("linkedin-logo");
+    expect(socialProfileLinkGlyph("tiktok")).toBe("tiktok-logo");
+    expect(socialProfileLinkGlyph("threads")).toBe("threads-logo");
+    expect(socialProfileLinkGlyph("imdb")).toBe("film-slate");
+    expect(socialProfileLinkGlyph("vimeo")).toBe("play");
+    expect(socialProfileLinkGlyph("website")).toBe("globe");
   });
 
   it("caps the face at two links and labels overflow as +N", () => {

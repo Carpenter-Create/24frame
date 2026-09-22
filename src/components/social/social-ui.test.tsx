@@ -596,9 +596,10 @@ describe("Social profile public face", () => {
     );
     expect(withImdb).toContain("data-social-profile-imdb");
     expect(withImdb).toContain('data-social-profile-link="imdb"');
+    expect(withImdb).toContain('data-social-profile-link-glyph="film-slate"');
     expect(withImdb).toContain('href="https://www.imdb.com/name/nm0000158/"');
-    expect(withImdb).toContain("imdb.com/name/nm0000158");
-    expect(withImdb).not.toContain(SOCIAL.profile.imdb);
+    expect(withImdb).toContain(`aria-label="${SOCIAL.profile.imdb}"`);
+    expect(withImdb).not.toContain(">imdb.com/name/nm0000158<");
     expect(withImdb).not.toContain(">https://www.imdb.com/name/nm0000158/<");
 
     const withLinks = renderToStaticMarkup(
@@ -611,10 +612,11 @@ describe("Social profile public face", () => {
     );
     expect(withLinks).toContain("data-social-profile-links");
     expect(withLinks).toContain('data-social-profile-link="instagram"');
+    expect(withLinks).toContain('data-social-profile-link-glyph="instagram-logo"');
     expect(withLinks).toContain('href="https://instagram.com/ada"');
-    expect(withLinks).toContain(">instagram.com/ada<");
+    expect(withLinks).toContain('aria-label="Instagram"');
+    expect(withLinks).not.toContain(">instagram.com/ada<");
     expect(withLinks).not.toContain(">https://instagram.com/ada<");
-    expect(withLinks).not.toContain('aria-label="Instagram"');
     expect(withLinks).toContain('rel="noopener noreferrer"');
     expect(withLinks).not.toContain("data-social-profile-links-more");
 
@@ -627,9 +629,10 @@ describe("Social profile public face", () => {
       />,
     );
     expect(unknownHost).toContain('data-social-profile-link="website"');
+    expect(unknownHost).toContain('data-social-profile-link-glyph="globe"');
     expect(unknownHost).toContain('href="https://ada.example/press"');
-    expect(unknownHost).toContain(">website<");
-    expect(unknownHost).not.toContain('aria-label="Website"');
+    expect(unknownHost).toContain('aria-label="ada.example"');
+    expect(unknownHost).not.toContain(">website<");
     expect(unknownHost).not.toContain(">https://ada.example/press<");
 
     const overflow = renderToStaticMarkup(
@@ -644,10 +647,12 @@ describe("Social profile public face", () => {
         ])}
       />,
     );
-    expect(overflow).toContain(">instagram.com/ada<");
-    expect(overflow).toContain(">youtube.com/@ada<");
+    expect(overflow).toContain('data-social-profile-link-glyph="instagram-logo"');
+    expect(overflow).toContain('data-social-profile-link-glyph="youtube-logo"');
     expect(overflow).toContain("data-social-profile-links-more");
     expect(overflow).toContain(">+1<");
+    expect(overflow).not.toContain('data-social-profile-link-glyph="x-logo"');
+    expect(overflow).not.toContain(">instagram.com/ada<");
     expect(overflow).not.toContain(">x.com/ada<");
     expect(overflow).not.toContain("data-social-profile-links-sheet");
     expect(uiSrc).not.toContain("socialProfileRolesLine");

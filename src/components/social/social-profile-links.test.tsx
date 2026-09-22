@@ -10,7 +10,10 @@ import {
   SOCIAL_PROFILE_LINK_CLASS,
   SOCIAL_PROFILE_LINKS_CLASS,
   SOCIAL_PROFILE_LINKS_MORE_CLASS,
+  SOCIAL_PROFILE_LINKS_SHEET_CLASS,
+  SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_ICON_SIZE_PROFILE_LINK } from "@/lib/social-icons";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { SocialProfileLinkRow, SocialProfileLinksSheet } from "./social-profile-links";
 
@@ -18,7 +21,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "social-profile-links.tsx"), "utf8");
 
 describe("SocialProfileLinkRow", () => {
-  it("omits the block when empty and prints muted host text for two or fewer", () => {
+  it("omits the block when empty and renders a quiet icon rail for two or fewer", () => {
     expect(renderToStaticMarkup(<SocialProfileLinkRow links={[]} />)).toBe("");
 
     const html = renderToStaticMarkup(
@@ -32,16 +35,27 @@ describe("SocialProfileLinkRow", () => {
     expect(html).toContain("data-social-profile-links");
     expect(html).toContain(SOCIAL_PROFILE_LINKS_CLASS);
     expect(html).toContain(SOCIAL_PROFILE_LINK_CLASS);
-    expect(html).toContain(">instagram.com/ada<");
-    expect(html).toContain(">imdb.com/name/nm0000158<");
+    expect(SOCIAL_PROFILE_LINKS_CLASS).toContain("flex-wrap");
+    expect(SOCIAL_PROFILE_LINKS_CLASS).not.toContain("truncate");
+    expect(SOCIAL_PROFILE_LINKS_CLASS).not.toContain("flex-nowrap");
+    expect(html).toContain('data-social-profile-link="instagram"');
+    expect(html).toContain('data-social-profile-link-glyph="instagram-logo"');
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain('data-social-profile-link="imdb"');
+    expect(html).toContain('data-social-profile-link-glyph="film-slate"');
+    expect(html).toContain(`aria-label="${SOCIAL.profile.imdb}"`);
+    expect(html).toContain(`width="${SOCIAL_ICON_SIZE_PROFILE_LINK}"`);
+    expect(html).toContain(`height="${SOCIAL_ICON_SIZE_PROFILE_LINK}"`);
+    expect(html).toContain('aria-hidden="true"');
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).toContain('target="_blank"');
+    expect(html).not.toContain(">instagram.com/ada<");
+    expect(html).not.toContain(">imdb.com/name/nm0000158<");
+    expect(html).not.toContain(">website<");
     expect(html).not.toContain("data-social-profile-links-more");
-    expect(html).not.toContain("data-social-icon");
-    expect(html).not.toContain('aria-label="Instagram"');
   });
 
-  it("shows two face links plus a quiet +N when more than two exist", () => {
+  it("shows two face icons plus a quiet +N when more than two exist", () => {
     const html = renderToStaticMarkup(
       <SocialProfileLinkRow
         links={socialProfilePublicLinks({
@@ -54,8 +68,14 @@ describe("SocialProfileLinkRow", () => {
         })}
       />,
     );
-    expect(html).toContain(">instagram.com/ada<");
-    expect(html).toContain(">youtube.com/@ada<");
+    expect(html).toContain('data-social-profile-link-glyph="instagram-logo"');
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain('data-social-profile-link-glyph="youtube-logo"');
+    expect(html).toContain('aria-label="YouTube"');
+    expect(html).not.toContain('data-social-profile-link-glyph="x-logo"');
+    expect(html).not.toContain('data-social-profile-link-glyph="tiktok-logo"');
+    expect(html).not.toContain(">instagram.com/ada<");
+    expect(html).not.toContain(">youtube.com/@ada<");
     expect(html).not.toContain(">x.com/ada<");
     expect(html).not.toContain(">tiktok.com/@ada<");
     expect(html).toContain("data-social-profile-links-more");
@@ -65,7 +85,22 @@ describe("SocialProfileLinkRow", () => {
     expect(html).not.toContain("data-social-profile-links-sheet");
   });
 
-  it("lists every link in the Links sheet and drops the icon row SoT", () => {
+  it("uses a globe and the host name for an unknown link", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileLinkRow
+        links={socialProfilePublicLinks({
+          websiteUrl: "https://ada.example/press",
+        })}
+      />,
+    );
+    expect(html).toContain('data-social-profile-link="website"');
+    expect(html).toContain('data-social-profile-link-glyph="globe"');
+    expect(html).toContain('aria-label="ada.example"');
+    expect(html).not.toContain(">website<");
+    expect(html).not.toContain(">https://ada.example/press<");
+  });
+
+  it("lists every link as readable host text in the Links sheet", () => {
     const links = socialProfilePublicLinks({
       urls: [
         "https://instagram.com/ada",
@@ -83,6 +118,8 @@ describe("SocialProfileLinkRow", () => {
     );
     expect(html).toContain("data-social-profile-links-sheet");
     expect(html).toContain(APP_SHEET_HOST_CLASS);
+    expect(html).toContain(SOCIAL_PROFILE_LINKS_SHEET_CLASS);
+    expect(html).toContain(SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS);
     expect(html).toContain(SOCIAL.profile.links);
     expect(html).toContain(SOCIAL.profile.shareClose);
     expect(html).toContain(">instagram.com/ada<");
@@ -90,6 +127,7 @@ describe("SocialProfileLinkRow", () => {
     expect(html).toContain(">x.com/ada<");
     expect(html).toContain("data-social-profile-links-sheet-link");
     expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).not.toContain("data-social-profile-link-glyph");
     expect(
       renderToStaticMarkup(
         <SocialProfileLinksSheet
@@ -104,10 +142,10 @@ describe("SocialProfileLinkRow", () => {
     expect(src).toContain("createPortal");
     expect(src).toContain("Escape");
     expect(src).toContain("SOCIAL_PROFILE_LINKS_CLASS");
-    expect(src).not.toContain("@phosphor-icons/react");
-    expect(src).not.toContain("InstagramLogo");
-    expect(src).not.toContain("GlobeSimple");
-    expect(src).not.toContain("socialProfileLinkIconNames");
+    expect(src).toContain("socialProfileLinkGlyph");
+    expect(src).toContain("InstagramLogo");
+    expect(src).toContain("GlobeSimple");
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(src).not.toContain("inline-flex size-6");
   });
 });

@@ -3,10 +3,14 @@ import { SOCIAL } from "@/lib/social";
 
 // External profile links. Persist the ordered list on profiles.website_url
 // (identity-spine text): one URL stays a URL; two or more is a JSON array.
-// Public chrome is muted host-derived text (Adam lock A 2026-09-20):
-// `website`, `instagram.com/handle`, or a clean host. Max 2 on the face;
-// overflow is a quiet +N that opens a Links sheet. Omit when empty.
+// Face chrome is a quiet icon rail (Adam 2026-09-22): known hosts map to
+// a Phosphor glyph; unknown hosts use a globe. Accessible name is the
+// platform label, or the host when the platform is website. Max 2 on the
+// face; overflow is a quiet +N that opens a Links sheet. The sheet and
+// the Edit Profile drill keep readable host labels. Omit when empty.
 // IMDb Phase 1 claim merges into this list so the name page is not shown twice.
+// Phosphor has no IMDb or Vimeo mark — film-slate and play stand in.
+// Do not add platforms that this module does not already classify.
 
 export const SOCIAL_PROFILE_LINKS_MAX = 8;
 export const SOCIAL_PROFILE_LINKS_FACE_MAX = 2;
@@ -56,6 +60,27 @@ export const SOCIAL_LINK_PLATFORM_LABEL: Record<SocialLinkPlatform, string> = {
   threads: "Threads",
   website: "Website",
 };
+
+// Quiet glyphs only. Names match the face renderer. Not brand color.
+export const SOCIAL_PROFILE_LINK_GLYPHS = {
+  instagram: "instagram-logo",
+  youtube: "youtube-logo",
+  facebook: "facebook-logo",
+  x: "x-logo",
+  linkedin: "linkedin-logo",
+  tiktok: "tiktok-logo",
+  vimeo: "play",
+  imdb: "film-slate",
+  threads: "threads-logo",
+  website: "globe",
+} as const satisfies Record<SocialLinkPlatform, string>;
+
+export type SocialProfileLinkGlyphName =
+  (typeof SOCIAL_PROFILE_LINK_GLYPHS)[SocialLinkPlatform];
+
+export function socialProfileLinkGlyph(platform: SocialLinkPlatform): SocialProfileLinkGlyphName {
+  return SOCIAL_PROFILE_LINK_GLYPHS[platform];
+}
 
 function hostnameOf(url: string): string {
   try {
@@ -149,12 +174,13 @@ export function socialProfilePublicLinks(input: {
     const key = linkDedupeKey(url, platform);
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push({ url, platform, label: socialProfileLinkFaceLabel(url, platform) });
+    out.push({ url, platform, label: socialProfileLinkReadableLabel(url, platform) });
   }
   return out;
 }
 
-export function socialProfileLinkFaceLabel(
+// Sheet and Edit Profile Links row. Not the face glyph.
+export function socialProfileLinkReadableLabel(
   url: string,
   platform: SocialLinkPlatform = socialLinkPlatform(url),
 ): string {
@@ -167,6 +193,16 @@ export function socialProfileLinkFaceLabel(
   } catch {
     return "website";
   }
+}
+
+// Face icon accessible name. Known hosts use the platform label.
+// Unknown hosts use the hostname so two websites stay distinct.
+export function socialProfileLinkAccessibleName(
+  url: string,
+  platform: SocialLinkPlatform = socialLinkPlatform(url),
+): string {
+  if (platform !== "website") return SOCIAL_LINK_PLATFORM_LABEL[platform];
+  return hostnameOf(url) || SOCIAL_LINK_PLATFORM_LABEL.website;
 }
 
 export function socialProfileLinksFace(links: readonly SocialProfileLink[]): {
@@ -230,7 +266,7 @@ export function socialProfileLinksRowSummary(raw: readonly string[]): string {
     const draft = raw.map((item) => item.trim()).find(Boolean);
     return draft || SOCIAL.profile.linksAdd;
   }
-  const first = socialProfileLinkFaceLabel(urls[0] ?? "");
+  const first = socialProfileLinkReadableLabel(urls[0] ?? "");
   if (urls.length === 1) return first;
   return SOCIAL.profile.linksMore
     .replace("{first}", first)
