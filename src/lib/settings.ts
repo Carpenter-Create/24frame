@@ -16,11 +16,13 @@
 // Organization holds the company profile and Team invite (same
 // account, existing org_role). House grant/comp is staff-only on
 // /gc/clients — never a customer Settings directory.
-// Preferences holds the speech-learning opt-out and the
-// notification matrix. Theme is not a Preferences block. Adam
-// lock 2026-09-22: Theme is an avatar-menu row at /settings/theme
-// (peer of Preferences, same gc-theme SoT). Mobile Preferences
-// drills to Notifications. Desktop keeps the matrix inside
+// Preferences holds the notification matrix. Theme is not a
+// Preferences block. Adam lock 2026-09-22: Theme is an avatar-menu
+// row at /settings/theme (peer of Preferences, same gc-theme SoT).
+// Speech-learning is not a Preferences subsection (Adam 2026-09-22
+// follow-up). The gc-speech-learning store stays; do not invent a
+// Settings home for it. Mobile Preferences drills to Notifications.
+// Desktop keeps the matrix inside
 // SETTINGS_CONTENT_MEASURE_CLASS — a constrained measure, not full-bleed rows
 // across the rail-to-edge span. Leftover
 // workspace prefs may appear as optional subsections only —

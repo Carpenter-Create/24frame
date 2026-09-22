@@ -33,7 +33,11 @@ describe("settings hub isolation", () => {
     expect(pane).not.toContain("isGcStaff");
     expect(pane).not.toContain("Manage courses");
     expect(pane).not.toContain("data-settings-manage-courses");
-    expect(pane).toContain("SpeechLearningPreference");
+    expect(pane).not.toContain("SpeechLearningPreference");
+    expect(pane).not.toContain("data-settings-speech-learning");
+    expect(pane).not.toContain("Learn from typed and dictated text");
+    expect(existsSync("src/lib/speech-learning.ts")).toBe(true);
+    expect(existsSync("src/components/settings/speech-learning-preference.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/settings/preferences/speech/page.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/settings/social/page.tsx")).toBe(false);
   });

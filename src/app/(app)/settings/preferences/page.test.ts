@@ -76,6 +76,8 @@ describe("SettingsPreferencesPage", () => {
     expect(html).not.toContain('data-settings-appearance=""');
     expect(html).not.toContain("System default");
     expect(html).not.toContain(">Appearance<");
+    expect(html).not.toContain("data-settings-speech-learning");
+    expect(html).not.toContain("Learn from typed and dictated text");
     expect(html).toContain('data-settings-drill-row="notifications"');
     expect(html).toContain(`href="${SETTINGS.notificationsHref}"`);
     expect(html).toContain("md:hidden");
@@ -142,6 +144,7 @@ describe("SettingsPreferencesPage", () => {
     expect(paneSrc).not.toContain("AppearancePreferences");
     expect(paneSrc).not.toContain("AppearanceThemeRow");
     expect(paneSrc).not.toContain("AppearanceThemePicker");
+    expect(paneSrc).not.toContain("SpeechLearningPreference");
     expect(paneSrc).toContain("NotificationPreferences");
     expect(paneSrc).toContain("SettingsDrillRow");
   });

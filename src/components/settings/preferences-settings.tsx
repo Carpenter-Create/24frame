@@ -1,5 +1,4 @@
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
-import { SpeechLearningPreference } from "@/components/settings/speech-learning-preference";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import type { NotificationPrefs } from "@/lib/notification-prefs";
@@ -13,8 +12,10 @@ import {
   settingsPaneTitle,
 } from "@/lib/settings";
 
-// Preferences pane — speech-learning opt-out + notification matrix.
+// Preferences pane — notification matrix only.
 // Theme is the avatar-menu door at /settings/theme, not this pane.
+// Speech-learning is parked off Preferences (Adam 2026-09-22).
+// The gc-speech-learning store stays; this pane does not surface it.
 // Never a You / Social / Education / Aggregation spine.
 // Course management lives on the Education operator workspace,
 // not a Preferences row. Not a CMS. Not GC Staff admin.
@@ -42,13 +43,11 @@ export function PreferencesSettings({
             label={NOTIFICATION_PREFS.title}
             href={SETTINGS.notificationsHref}
           />
-          <SpeechLearningPreference />
         </div>
         <div
           data-settings-pref-desktop=""
           className={`hidden md:block ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
         >
-          <SpeechLearningPreference />
           <NotificationPreferences initialPrefs={prefs} />
         </div>
       </section>

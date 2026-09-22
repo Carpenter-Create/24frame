@@ -15,6 +15,9 @@ import {
   writeSpeechLearningEnabled,
 } from "@/lib/speech-learning";
 
+// Parked off Preferences (Adam 2026-09-22). Do not mount this on
+// Settings. The gc-speech-learning store stays in lib/speech-learning.ts.
+
 export function SpeechLearningPreference() {
   const enabled = useSyncExternalStore(
     subscribeSpeechLearning,
