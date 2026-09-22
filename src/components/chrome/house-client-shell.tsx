@@ -17,7 +17,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   HOUSE_CLIENT_SHELL,
   houseCanIngest,
+  houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
+  type HouseChildSeen,
   houseForgetUnlisted,
   houseHrefKey,
   houseNavHop,
@@ -29,6 +31,7 @@ import {
   houseRememberScroll,
   houseResolveDisplay,
   houseScreenKey,
+  houseSyncChildSeen,
   houseShouldClientNavigate,
   houseTouchOrder,
   parseHouseHref,
@@ -175,7 +178,7 @@ function HousePathProviderCore({
           return true;
         }
         captureLeadScroll(screenKey);
-        window.history.pushState({ houseClient: true }, "", next);
+        window.history.pushState(houseClientHistoryState(window.history.state), "", next);
         setOwnedHref(next);
         return true;
       },
@@ -232,26 +235,12 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
 
-  // --- Stale-children guard (state-only, no refs during render) ---
-  // On a cold soft-nav, pathname flips before the RSC slot swaps.
-  // `staleGuard` snapshots children at the moment nextKey changes so
-  // we can detect when children still belongs to the *previous* screen.
-  const [staleGuard, setStaleGuard] = useState<{
-    key: string;
-    snapshot: ReactNode;
-  } | null>(null);
-
-  if (staleGuard === null) {
-    setStaleGuard({ key: nextKey, snapshot: null });
-  } else if (staleGuard.key !== nextKey) {
-    setStaleGuard({ key: nextKey, snapshot: children });
-  }
-
-  const childrenStale =
-    staleGuard !== null &&
-    staleGuard.key === nextKey &&
-    staleGuard.snapshot !== null &&
-    children === staleGuard.snapshot;
+  // State only — no refs during render. `houseSyncChildSeen` stays
+  // stale across the setState restart, so the key-flip pass cannot
+  // store the previous tree under the new key.
+  const [childSeen, setChildSeen] = useState<HouseChildSeen | null>(null);
+  const advanced = houseSyncChildSeen(childSeen, nextKey, children);
+  if (advanced.seen !== childSeen) setChildSeen(advanced.seen);
 
   let nextStore = store;
   const canIngest = houseCanIngest(
@@ -260,7 +249,7 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
     nextPath,
     fallback,
     nextKey in store.nodes,
-    childrenStale,
+    advanced.childrenStale,
   );
   if (canIngest) {
     nextStore = nextScreenStore(store, nextKey, children);
@@ -275,13 +264,7 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   }
 
   const known = activeKey in nextStore.nodes;
-  const { displayKey, showIngress } = houseResolveDisplay(
-    activeKey,
-    known,
-    fallback,
-    nextStore.order[0] ?? null,
-    (k) => k in nextStore.nodes,
-  );
+  const { displayKey, showIngress } = houseResolveDisplay(activeKey, known, fallback);
 
   const ingress = showIngress ? children : null;
 

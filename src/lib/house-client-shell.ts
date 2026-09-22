@@ -204,6 +204,67 @@ export function resetHousePaintedForTests(): void {
 }
 
 /**
+ * What the shell last committed for the live RSC slot.
+ * `stale` means `child` was still the previous screen's tree when the
+ * URL key moved — do not store it under the new key, and keep treating
+ * that same reference as stale after the render-phase state restart.
+ */
+export type HouseChildSeen = {
+  key: string;
+  child: unknown;
+  stale: boolean;
+};
+
+/**
+ * Advance the child-seen record and say whether `child` still belongs
+ * to the previous URL key.
+ *
+ * A cold soft-nav flips the key before the RSC slot swaps. The first
+ * render (and React's restart after setState during render) must both
+ * report stale, or the previous tree is stored under the new key and
+ * never replaced. A same-render key+child change is a real landing.
+ */
+export function houseSyncChildSeen(
+  seen: HouseChildSeen | null,
+  nextKey: string,
+  child: unknown,
+): { seen: HouseChildSeen; childrenStale: boolean } {
+  if (seen !== null && seen.key === nextKey && seen.child === child) {
+    return { seen, childrenStale: seen.stale };
+  }
+  if (seen !== null && seen.key !== nextKey && seen.child === child) {
+    return {
+      seen: { key: nextKey, child, stale: true },
+      childrenStale: true,
+    };
+  }
+  return {
+    seen: { key: nextKey, child, stale: false },
+    childrenStale: false,
+  };
+}
+
+/**
+ * History entry for a warm client hop.
+ *
+ * Next 16 patches `history.pushState` and, unless the state is marked
+ * `__NA`, dispatches ACTION_RESTORE with the *previous* FlightRouterState
+ * and the new URL. That restore keeps the previous screen (and its rail
+ * selection) mounted while the address bar already shows the dest.
+ * `__NA` is the same flag Next sets on its own history writes to skip
+ * that restore. The previous flight tree is copied so Back is not a
+ * full reload.
+ */
+export function houseClientHistoryState(prior: unknown): Record<string, unknown> & {
+  __NA: true;
+  houseClient: true;
+} {
+  const base =
+    prior !== null && typeof prior === "object" ? { ...(prior as Record<string, unknown>) } : {};
+  return { ...base, __NA: true, houseClient: true };
+}
+
+/**
  * Stable-ingest guard. Returns true only when it is safe to capture
  * live `children` into the keep-alive store under `nextKey`.
  *
@@ -211,9 +272,7 @@ export function resetHousePaintedForTests(): void {
  * swaps, so `children` is still the *previous* screen's tree.
  * Ingesting that stale tree under the new key poisons the cache.
  *
- * `childrenStale` is true when the current children reference matches
- * a snapshot taken at the moment nextKey last changed — i.e. children
- * has not been refreshed since the key flip.
+ * `childrenStale` comes from `houseSyncChildSeen`.
  */
 export function houseCanIngest(
   nextKey: string,
@@ -235,20 +294,17 @@ export function houseCanIngest(
  * Resolves which cached screen to display and whether to paint
  * ingress (live RSC / loading skeleton).
  *
- * When activeKey is not in the store:
- *  - Fallback children (RSC skeleton) → show as ingress.
- *  - Non-fallback children (may be stale) → keep the most recent
- *    cached screen (`storeLeadKey`) visible; never paint stale content.
+ * When activeKey is not in the store, the live children are either a
+ * skeleton or still the previous screen. Paint the skeleton. Do not
+ * keep the previous screen visible — the URL and rail have already
+ * moved, and a stuck slot would leave that screen up forever.
  */
 export function houseResolveDisplay(
   activeKey: string,
   known: boolean,
   fallback: boolean,
-  storeLeadKey: string | null,
-  storeHasKey: (key: string) => boolean,
 ): { displayKey: string | null; showIngress: boolean } {
   if (known) return { displayKey: activeKey, showIngress: false };
   if (fallback) return { displayKey: null, showIngress: true };
-  const prev = storeLeadKey && storeHasKey(storeLeadKey) ? storeLeadKey : null;
-  return { displayKey: prev, showIngress: false };
+  return { displayKey: null, showIngress: false };
 }
