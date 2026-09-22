@@ -56,6 +56,7 @@ describe("Adam Mercury register lock", () => {
       "Profile",
       "Rights Holder",
       "Preferences",
+      "Security",
     ]);
     expect(src("src/components/chrome/house-lead-chrome.tsx")).toContain("WorkspaceSwitcher");
     expect(src("src/components/chrome/app-shell.tsx")).toContain("HouseLeadChrome");

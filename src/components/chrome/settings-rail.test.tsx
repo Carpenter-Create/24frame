@@ -27,7 +27,7 @@ import { SettingsRail } from "./settings-rail";
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "settings-rail.tsx"), "utf8");
 
 describe("SettingsRail", () => {
-  it("is Settings title + Profile / Organization / Preferences", () => {
+  it("is Settings title + Profile / Organization / Preferences / Security", () => {
     navigation.pathname = "/settings/profile";
     const html = renderToStaticMarkup(<SettingsRail />);
     expect(html).toContain('data-settings-rail-nav=""');
@@ -74,6 +74,15 @@ describe("SettingsRail", () => {
     navigation.pathname = "/settings/agreements";
     const agreements = renderToStaticMarkup(<SettingsRail />);
     expect(agreements).toMatch(/data-settings-rail-item="profile"[^>]*aria-current="page"/);
+
+    navigation.pathname = "/settings/security";
+    const security = renderToStaticMarkup(<SettingsRail />);
+    expect(security).toMatch(
+      /data-settings-rail-item="security"[^>]*aria-current="page"/,
+    );
+    expect(security).not.toMatch(
+      /data-settings-rail-item="profile"[^>]*aria-current="page"/,
+    );
   });
 
   it("does not invent Account / Users / API or the Access destinations", () => {

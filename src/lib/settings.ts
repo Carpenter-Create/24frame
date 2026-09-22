@@ -7,7 +7,7 @@
 // Not a GC Staff admin surface.
 //
 // Hub sections:
-//   Profile · Organization · Preferences
+//   Profile · Organization · Preferences · Security
 // Same URLs regardless of active workspace. Do not keep You / Social /
 // Education / Aggregation as the IA spine.
 // Profile is account identity only (name / photo / sign-in email +
@@ -38,6 +38,7 @@
 //   /settings/preferences
 //   /settings/preferences/theme
 //   /settings/preferences/notifications
+//   /settings/security
 // Retired /settings/you|social|education|aggregation and ?section=
 // aliases are gone. Dead paths 404. Do not add a redirect table.
 //
@@ -53,9 +54,9 @@
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
-// Rail keeps house Settings title + Profile · Organization · Preferences.
+// Rail keeps house Settings title + Profile · Organization · Preferences · Security.
 // Body H1 is the hub section only — never repeat Settings in the pane.
-// House muted wash. Sporty Blue only (no new brand colors).
+// Selected wash uses house workspace-rail SoT (accent-wash + accent text).
 // Desktop: section rail + pane. Mobile: list → push.
 // Spacing 8 / 16 / 24 / 48 (Mercury density). Design polish may follow.
 
@@ -74,6 +75,8 @@ export const SETTINGS = {
   organizationHref: "/settings/organization",
   preferences: "Preferences",
   preferencesHref: "/settings/preferences",
+  security: "Security",
+  securityHref: "/settings/security",
   theme: "Theme",
   themeHref: "/settings/preferences/theme",
   themeHelper: "Choose Light, Dark, or System default.",
@@ -105,7 +108,7 @@ export const SETTINGS_ABSENT = [
   "Give feedback",
 ] as const;
 
-export type SettingsHubSection = "profile" | "organization" | "preferences";
+export type SettingsHubSection = "profile" | "organization" | "preferences" | "security";
 
 export type SettingsRailKind = SettingsHubSection;
 
@@ -113,18 +116,21 @@ export const SETTINGS_HUB_ORDER = [
   "profile",
   "organization",
   "preferences",
+  "security",
 ] as const satisfies readonly SettingsHubSection[];
 
 export const SETTINGS_HUB_HREFS = {
   profile: SETTINGS.profileHref,
   organization: SETTINGS.organizationHref,
   preferences: SETTINGS.preferencesHref,
+  security: SETTINGS.securityHref,
 } as const;
 
 export const SETTINGS_HUB_LABELS = {
   profile: SETTINGS.profile,
   organization: SETTINGS.organization,
   preferences: SETTINGS.preferences,
+  security: SETTINGS.security,
 } as const;
 
 export type SettingsHubNavItem = {
@@ -139,12 +145,12 @@ const SETTINGS_HUB_ALL: readonly SettingsHubNavItem[] = SETTINGS_HUB_ORDER.map((
   href: SETTINGS_HUB_HREFS[kind],
 }));
 
-/** Universal hub. Same three sections from every workspace. */
+/** Universal hub. Same four sections from every workspace. */
 export function settingsHubNav(): readonly SettingsHubNavItem[] {
   return SETTINGS_HUB_ALL;
 }
 
-/** Desktop rail + mobile list. Profile · Organization · Preferences. */
+/** Desktop rail + mobile list. Profile · Organization · Preferences · Security. */
 export const SETTINGS_HUB_NAV = settingsHubNav();
 
 // Rail chrome — 220 slot, pad 16, 8 between rows. Do not put Titles,
@@ -325,6 +331,12 @@ function pathSection(pathname: string): SettingsHubSection {
     || pathname.startsWith(`${SETTINGS.preferencesHref}/`)
   ) {
     return "preferences";
+  }
+  if (
+    pathname === SETTINGS.securityHref
+    || pathname.startsWith(`${SETTINGS.securityHref}/`)
+  ) {
+    return "security";
   }
   return "profile";
 }

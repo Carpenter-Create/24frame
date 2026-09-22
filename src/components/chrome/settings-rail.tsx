@@ -19,7 +19,7 @@ import {
 } from "@/lib/settings";
 
 // Settings hub rail — occupies the 220 Access slot. Title Settings.
-// Profile · Organization · Preferences. Accent wash SoT from
+// Profile · Organization · Preferences · Security. Accent wash SoT from
 // house-shell — same selected pill as every workspace rail. Not a
 // workspace switch. Same URLs from every workspace.
 // 75:132 — 16 Phosphor caret lives on the phone back, not these rows.
