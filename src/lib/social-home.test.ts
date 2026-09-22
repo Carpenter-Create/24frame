@@ -13,10 +13,11 @@ import { SOCIAL_COMPOSER_CLASS } from "./social-chrome";
 import { isStoryLive, storyExpiresAt, storyInsertRow, storyRailUnseen } from "./social-stories";
 
 describe("Social Home stack lock", () => {
-  it("locks desktop composer → Stories → Topics → wall, and hides the composer on phone", () => {
-    expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_airy_topics_under_cut_phone_composer");
-    expect(SOCIAL_HOME_STACK_ORDER).toEqual(["composer", "stories", "topics", "wall"]);
-    expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
+  it("locks Topics → composer → Stories → wall on phone and desktop", () => {
+    expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_topics_composer_stories_wall");
+    expect(SOCIAL_HOME_STACK_ORDER).toEqual(["topics", "composer", "stories", "wall"]);
+    expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
   });

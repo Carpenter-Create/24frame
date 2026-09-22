@@ -5,9 +5,9 @@ import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { SOCIAL_COMPOSER_CLASS, SOCIAL_COMPOSER_FIELD_CLASS } from "@/lib/social-chrome";
 import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
-// Desktop-only airy create entry. Avatar + prompt sit on the canvas —
-// no boxed liner. The row opens the Create sheet SoT (Photo · Video ·
-// Write · Go live). Phone Create is the dock dest + sheet only.
+// Airy create entry on phone and desktop. Avatar + prompt sit on the
+// canvas — no boxed liner. The row opens the Create sheet SoT
+// (Photo · Video · Write · Go live). Create dock stays.
 export function SocialHomeComposer({
   authorName,
   authorPhotoUrl,

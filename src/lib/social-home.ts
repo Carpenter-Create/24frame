@@ -4,13 +4,15 @@ import { SOCIAL, SOCIAL_ROUTES, socialCreateHref } from "@/lib/social";
 // Home following wall + Skool-style onboarding. Photo reuses the
 // account face at /settings/profile. Do not add a second upload.
 
-// Adam 2026-09-20 lock_airy_topics_under_cut_phone_composer
-// One Home column on both devices: desktop create entry → Stories →
-// Topics → wall. Topics filter the following wall, not Stories.
-// Phone hides the composer via SOCIAL_COMPOSER_CLASS — same JSX, no
-// second layout, no second Photo · Video · Write · Go live strip.
-export const SOCIAL_HOME_STACK_LOCK = "lock_airy_topics_under_cut_phone_composer" as const;
-export const SOCIAL_HOME_STACK_ORDER = ["composer", "stories", "topics", "wall"] as const;
+// Adam 2026-09-22 lock_topics_composer_stories_wall.
+// Supersedes 2026-09-20 lock_airy_topics_under_cut_phone_composer
+// (Stories above Topics, phone composer cut). That phone cut is revoked.
+// One Home column on both devices: Topics → composer → Stories → wall.
+// The airy composer (avatar + "Write something") returns on phone.
+// Create dock and Create sheet stay. Same JSX, no second layout, no
+// gray liner, no Photo · Video · Write · Go live strip on Home.
+export const SOCIAL_HOME_STACK_LOCK = "lock_topics_composer_stories_wall" as const;
+export const SOCIAL_HOME_STACK_ORDER = ["topics", "composer", "stories", "wall"] as const;
 
 export const SOCIAL_CHECKLIST_IDS = [
   "photo",

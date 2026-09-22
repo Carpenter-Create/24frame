@@ -51,7 +51,7 @@ const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]])
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
 describe("Social Home craft (Figma 160:482 / 160:964)", () => {
-  it("renders the airy desktop composer as avatar + prompt that opens Create", () => {
+  it("renders the airy composer on phone and desktop as avatar + prompt that opens Create", () => {
     const html = renderToStaticMarkup(
       <SocialHomeComposer authorName="Adam Carpenter" />,
     );
@@ -75,7 +75,8 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AC");
     expect(html).not.toContain("<img");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
+    expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-20");
     expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
     expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");

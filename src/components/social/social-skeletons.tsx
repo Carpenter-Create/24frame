@@ -51,11 +51,6 @@ export function SocialForYouSkeleton() {
 export function SocialHomeCenterSkeleton() {
   return (
     <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
-      <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
-        <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-        <Skeleton className="h-9 min-w-0 flex-1" />
-      </div>
-      <SocialStoriesRailSkeleton tall />
       <div data-social-home-topics-skeleton="" className="flex min-w-0 flex-col gap-2">
         <Skeleton className="h-4 w-16" />
         <div className={SOCIAL_TOPIC_RAIL_CLASS}>
@@ -70,18 +65,25 @@ export function SocialHomeCenterSkeleton() {
           </div>
         </div>
       </div>
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
-          <div className="flex gap-2">
-            <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-            <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <Skeleton className="h-3.5 w-1/3" />
-              <Skeleton className="h-3 w-2/3" />
+      <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
+        <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+        <Skeleton className="h-9 min-w-0 flex-1" />
+      </div>
+      <SocialStoriesRailSkeleton tall />
+      <div data-social-feed-skeleton="" className={SOCIAL_FEED_GUTTER_CLASS}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
+            <div className="flex gap-2">
+              <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-3.5 w-1/3" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
             </div>
+            <Skeleton className="h-40 w-full rounded-[8px]" />
           </div>
-          <Skeleton className="h-40 w-full rounded-[8px]" />
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
