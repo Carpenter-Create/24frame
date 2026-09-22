@@ -29,6 +29,7 @@ import {
   SOCIAL_PROFILE_LINKS_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_INSET_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_STORY_CARD_CLASS,
@@ -123,7 +124,7 @@ export function SocialProfileCenterSkeleton() {
               <Skeleton
                 className={`${SOCIAL_AVATAR_PROFILE_CLASS} ${SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}`}
               />
-              <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-1)]">
+              <div className={SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS}>
                 <Skeleton className="h-7 w-40" />
                 <Skeleton className="h-3 w-24" />
               </div>

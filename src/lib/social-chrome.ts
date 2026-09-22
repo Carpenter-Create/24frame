@@ -379,10 +379,11 @@ export const SOCIAL_PROFILE_COVER_STACK_CLASS = "flex flex-col";
 
 // Avatar lip only. Phone 29px / desktop 35px (~40% of 72 / 88).
 // Adam lock 2026-09-22: hang the face, never the name stack.
-// One line of t-heading (20 × 1.2) + --space-1 + t-body-sm (15 × 1.6)
-// is ~52px. The face below the lip is 43px phone (72 − 29) and
-// 53px desktop (88 − 35). A negative margin on the head row paints
-// the name into the cover; on a dark photo that ink disappears.
+// On a cover the name stack also takes --space-3 before the type.
+// One line of t-heading (20 × 1.2) + --space-2 + t-body-sm (15 × 1.6)
+// is ~56px, ~68px with that pad. The face below the lip is 43px phone
+// (72 − 29) and 53px desktop (88 − 35). A negative margin on the head
+// row paints the name into the cover; on a dark photo that ink disappears.
 // Apply on the avatar column only.
 export const SOCIAL_PROFILE_HEAD_OVERLAP_CLASS =
   "relative z-10 -mt-[29px] md:-mt-[35px]";
@@ -397,13 +398,18 @@ export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
 // /social/u/[handle]. Cover is a quiet media band. The avatar may lip
 // under it. Display name and @handle sit fully below the cover
 // (Adam lock 2026-09-22), beside the avatar, never painted on the
-// band. @handle is muted directly under the name — not beside the
-// name, not in the face stack. Counts, bio, role pills, links, and
+// band, with --space-3 of canvas before the type so the name is not
+// flush with the media. @handle is muted directly under the name —
+// --space-2, not --space-1 — not beside the name, not in the face
+// stack. --space-6 then separates that pair from the stats row.
+// Counts, bio, role pills, links, and
 // actions stack in the column. Counts are a metric row — strong tabular numbers,
 // quiet labels — not a side column beside the avatar. Topic chips
 // follow the actions. Mutuals are last and omit when empty. Name,
 // handle, and labels wrap; never truncate.
-export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-3)]";
+// --space-6 is the pause under the handle before stats. Own and public,
+// phone and desktop. Adam lock 2026-09-22 follow-up.
+export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-6)]";
 
 // Shared inset. Cover stays full bleed of the column; the avatar and
 // the type stack share one left edge.
@@ -413,8 +419,9 @@ export const SOCIAL_PROFILE_INSET_CLASS = "px-[var(--space-4)] md:px-[var(--spac
 export const SOCIAL_PROFILE_HEAD_CLASS =
   "flex min-w-0 items-end gap-[var(--space-4)]";
 
-// Cover band: name and @handle start on the canvas at the cover's
-// bottom edge. items-end would straddle (see the hang note above).
+// Cover band: the row starts at the cover's bottom edge so the avatar
+// can lip. The name stack pads down inside the row (see the on-cover
+// stack). items-end would straddle (see the hang note above).
 // Phone and desktop share this. Adam lock 2026-09-22.
 export const SOCIAL_PROFILE_HEAD_ON_COVER_CLASS =
   "flex min-w-0 items-start gap-[var(--space-4)]";
@@ -440,12 +447,17 @@ export const SOCIAL_PROFILE_FACE_CLASS =
 
 // Phone and desktop share this stack (Adam 2026-09-22 profile phone).
 // Name is house t-heading (Adam lock 2026-09-22 follow-up). @handle is
-// muted t-body-sm on the next line, beside the avatar. No breakpoint
-// hides the handle or steps the name. The 720 cap and For You rail
-// stay lg+ only. On a cover the avatar lips; the name stack stays
-// below the band.
+// muted t-body-sm on the next line, beside the avatar. --space-2 between
+// name and handle — --space-1 crams the pair. No breakpoint hides the
+// handle or steps the name. The 720 cap and For You rail stay lg+ only.
+// On a cover the avatar lips; the name stack stays below the band.
 export const SOCIAL_PROFILE_NAME_STACK_CLASS =
-  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-1)]";
+  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)]";
+
+// Cover only. Drops the name off the media edge. Avatar hang is separate.
+// Phone and desktop share this. Adam lock 2026-09-22 follow-up.
+export const SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS =
+  `${SOCIAL_PROFILE_NAME_STACK_CLASS} pt-[var(--space-3)]`;
 
 export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-heading text-ink";
 

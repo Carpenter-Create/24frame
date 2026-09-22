@@ -41,6 +41,15 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(chrome).toContain("53px desktop");
     expect(chrome).toContain("hang the face, never the name stack");
     expect(chrome).toContain("Name is house t-heading");
+    expect(chrome).toContain(
+      'export const SOCIAL_PROFILE_NAME_STACK_CLASS =\n  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)]";',
+    );
+    expect(chrome).toContain(
+      'export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-6)]";',
+    );
+    expect(chrome).toContain(
+      "${SOCIAL_PROFILE_NAME_STACK_CLASS} pt-[var(--space-3)]",
+    );
     expect(chrome).toMatch(
       /export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-heading text-ink";/,
     );

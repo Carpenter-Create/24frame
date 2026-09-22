@@ -27,6 +27,7 @@ import {
   SOCIAL_PROFILE_HANDLE_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_NAME_STACK_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
 } from "@/lib/social-chrome";
@@ -298,7 +299,13 @@ export function SocialProfileIdentity({
               {photoAction}
             </div>
             {person.name || person.handleLabel ? (
-              <div className={SOCIAL_PROFILE_NAME_STACK_CLASS}>
+              <div
+                className={
+                  showCoverBand
+                    ? SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS
+                    : SOCIAL_PROFILE_NAME_STACK_CLASS
+                }
+              >
                 {person.name ? (
                   <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
                     {person.name}

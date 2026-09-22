@@ -44,8 +44,10 @@ import {
   SOCIAL_PROFILE_HANDLE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_HEAD_ON_COVER_CLASS,
+  SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_NAME_STACK_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
@@ -587,6 +589,15 @@ describe("Social profile public face", () => {
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toMatch(/md:|max-md:|text-\[/);
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("truncate");
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-semibold");
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toBe(
+      "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)]",
+    );
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).not.toContain("--space-1");
+    expect(SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS).toBe(
+      `${SOCIAL_PROFILE_NAME_STACK_CLASS} pt-[var(--space-3)]`,
+    );
+    expect(SOCIAL_PROFILE_IDENTITY_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
+    expect(SOCIAL_PROFILE_IDENTITY_CLASS).not.toContain("--space-3");
     expect(withStats).not.toContain("truncate");
     expect(withStats).not.toContain("1784");
     expect(withStats).not.toContain("data-social-profile-cover-dims");
@@ -1123,6 +1134,8 @@ function expectNameBelowCover(html: string) {
   expect(headOpen).not.toContain("md:-mt-[35px]");
   expect(head).toContain(SOCIAL_PROFILE_HEAD_ON_COVER_CLASS);
   expect(head).not.toContain(SOCIAL_PROFILE_HEAD_CLASS);
+  expect(head).toContain(SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS);
+  expect(head).toContain("pt-[var(--space-3)]");
   expect(head).not.toContain("items-end");
   const hangAt = head.indexOf("data-social-profile-avatar-hang");
   expect(hangAt).toBeGreaterThan(-1);
@@ -1184,6 +1197,9 @@ describe("Social profile cover band", () => {
     expect(html).toContain("data-social-profile-head");
     expect(html).toContain(SOCIAL_PROFILE_HEAD_CLASS);
     expect(html).not.toContain(SOCIAL_PROFILE_HEAD_ON_COVER_CLASS);
+    expect(html).toContain(SOCIAL_PROFILE_NAME_STACK_CLASS);
+    expect(html).not.toContain(SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS);
+    expect(html).not.toContain("pt-[var(--space-3)]");
     expect(html).toContain("data-social-profile-name");
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain("data-social-avatar");
