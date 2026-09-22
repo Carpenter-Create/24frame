@@ -89,11 +89,10 @@ export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 export const SOCIAL_HOME_CENTER_CLASS =
   "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[892px]";
 
-// Profile desktop column — FB/IG refs (Adam 2026-09-20).
-// Instagram: one centered profile stack. Facebook: side air / gutters,
-// contained — not edge-to-edge across the Social canvas.
-// Reuses Home center 892 (SOCIAL_DESKTOP_MEASURE.center). Not a 935 fork.
-// mx-auto is the gutter. No flex-1 (that stretch is Home + For You only).
+// Profile desktop column. One centered stack on the Home 892 measure
+// (SOCIAL_DESKTOP_MEASURE.center). Side air is the mx-auto gutter —
+// the column does not run edge to edge across the Social canvas.
+// Not a 935 fork. No flex-1 (that stretch is Home + For You only).
 // md+ focuses; phone stays full width of the phone canvas.
 // Own + public profile only. No For You rail on these pages.
 export const SOCIAL_PROFILE_CENTER_CLASS =
@@ -289,7 +288,8 @@ export const SOCIAL_HOME_TAB_CLASS =
 // Edit select composes idle outline + HOUSE_PILL_SELECTED_CLASS.
 export const SOCIAL_TOPIC_CHIP_MEASURE_CLASS = `w-fit ${HOUSE_PILL_ITEM_CLASS}`;
 
-export const SOCIAL_TOPIC_CHIP_CLASS = `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} bg-surface text-ink`;
+export const SOCIAL_TOPIC_CHIP_CLASS =
+  `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
 
 export const SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS =
   `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} max-w-full border border-hairline bg-surface text-ink`;
@@ -316,11 +316,12 @@ export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
 
-// Profile cover — Lock A. Full 892 column width; 4:1 band. Mobile 112px,
+// Profile cover — quiet media band on the 892 column. 4:1. Phone 112px,
 // desktop 224px. Owner with no photo keeps the accent wash so Add cover
 // stays on the band. Visitors omit the band when no photo exists
-// (socialProfileRendersCoverBand). Avatar hangs ~40% below the banner
-// bottom only while that band is present (see social-profile-cover.ts).
+// (socialProfileRendersCoverBand). Avatar may lip under the band while
+// it is present. The lip is the face only — name and counts stay on
+// the page. Upload master 1784×446 is crop math and is never painted.
 export const SOCIAL_PROFILE_COVER_CLASS =
   "relative w-full h-[112px] shrink-0 overflow-hidden md:h-[224px]";
 
@@ -333,6 +334,10 @@ export const SOCIAL_PROFILE_COVER_EDIT_CLASS =
 
 export const SOCIAL_PROFILE_COVER_PILL_CLASS =
   "flex items-center gap-1.5 rounded-[8px] border border-hairline bg-surface/90 px-3 py-[6px] t-body-sm font-medium text-ink";
+
+// Add / Edit cover sits in the top corner of the band so it does not
+// meet the avatar lip.
+export const SOCIAL_PROFILE_COVER_PILL_ANCHOR_CLASS = "absolute right-3 top-3 z-20";
 
 export const SOCIAL_PROFILE_COVER_MENU_CLASS =
   "absolute right-0 top-[calc(100%+4px)] z-20 flex min-w-[200px] flex-col rounded-[8px] border border-hairline bg-surface py-1";
@@ -360,44 +365,45 @@ export const SOCIAL_PROFILE_AVATAR_ON_COVER_CLASS =
 export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
   "absolute bottom-0 right-0 z-10 flex size-8 items-center justify-center rounded-full border border-hairline bg-surface text-ink";
 
-// Public profile head — IG geometry, house chrome. One SoT for own
-// /social/profile and public /social/u/[handle]. Head row is avatar |
-// (display name → posts/followers/following stacked). Name is never
-// full-width above the avatar (that read as randomly floating). Stats
-// left-pack under the name in the right column — content-sized 3-up,
-// not a w-full stretch across the meta column. Each cell stays
-// number-above-label; the group shares the name's left edge. Bio ·
-// Role pills · muted text links · actions stay full-width below the
-// head row (Adam lock A 2026-09-20 — not a glyph row).
-// Dedicated house-token air before Edit / Share (or Follow / Share).
-// Handle stays in chrome. Name wraps; never truncate.
-export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
+// Public profile head. One SoT for own /social/profile and public
+// /social/u/[handle]. Cover is a quiet media band. The avatar may lip
+// under it. Name, counts, bio, role pills, links, and actions stack
+// in the column. Counts are a metric row — strong tabular numbers,
+// quiet labels — not a side column beside the avatar. Topic chips
+// follow the actions. Mutuals are last and omit when empty. Handle
+// stays in chrome. Name and labels wrap; never truncate.
+export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-3)]";
 
-export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
+// Shared inset. Cover stays full bleed of the column; the avatar and
+// the type stack share one left edge.
+export const SOCIAL_PROFILE_INSET_CLASS = "px-[var(--space-4)] md:px-[var(--space-6)]";
 
-// Right column beside the 72/88 face. min-w-0 so a long display name
-// wraps instead of overflowing the phone canvas.
-export const SOCIAL_PROFILE_META_CLASS =
-  "flex min-w-0 flex-1 flex-col justify-center gap-1";
+export const SOCIAL_PROFILE_HEAD_CLASS =
+  "flex min-w-0 items-end gap-[var(--space-4)]";
 
-export const SOCIAL_PROFILE_STATS_CLASS = "flex w-fit min-w-0 items-center";
+// House metric row. Three counts, left clustered, hairline under
+// the row. flex-wrap so a narrow phone stacks a cell instead of
+// truncating the label. Not a stretched 3-column dashboard grid.
+export const SOCIAL_PROFILE_STATS_CLASS = "w-full min-w-0";
 
 export const SOCIAL_PROFILE_STATS_GRID_CLASS =
-  "inline-flex items-start gap-x-[var(--space-4)]";
+  "flex w-full min-w-0 flex-wrap items-start gap-x-[var(--space-8)] gap-y-[var(--space-3)] border-b border-hairline pb-[var(--space-3)]";
 
 export const SOCIAL_PROFILE_STAT_CLASS =
-  "flex min-w-0 flex-col items-center justify-center py-[var(--space-1)] text-center";
+  "flex min-w-0 max-w-full flex-col items-start gap-[var(--space-1)] text-left";
 
-export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-heading font-semibold tabular-nums text-ink";
+export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-heading t-data text-ink";
 
-export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
+export const SOCIAL_PROFILE_STAT_LABEL_CLASS =
+  "break-words text-[length:var(--text-xs)] font-normal leading-snug tracking-normal text-ink-3";
 
-export const SOCIAL_PROFILE_FACE_CLASS = "flex flex-col items-start gap-1";
+export const SOCIAL_PROFILE_FACE_CLASS =
+  `flex w-full min-w-0 flex-col gap-[var(--space-4)] pb-[var(--space-2)] ${SOCIAL_PROFILE_INSET_CLASS}`;
 
-export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-heading font-semibold text-ink";
+export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 flex-1 break-words t-title text-ink";
 
-// Roles → Edit/Share was cramped (face gap-1). Extra --space-3 before
-// the action row; no magic pixels. Same class for own + public.
+// Pause before Edit / Share (or Follow / Share). House token, same
+// class for own + public.
 export const SOCIAL_PROFILE_ACTIONS_CLASS =
   "mt-[var(--space-3)] flex w-full items-center gap-2";
 

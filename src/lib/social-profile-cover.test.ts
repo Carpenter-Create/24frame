@@ -76,14 +76,19 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(src).toContain("446");
   });
 
-  it("exposes master dims in copy and upload UI", () => {
+  it("keeps master dims in crop math and out of the profile UI", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
-    expect(social).toContain("1784");
-    expect(social).toContain("446");
+    expect(social).not.toContain("coverDims");
+    expect(social).not.toContain("1784");
+    expect(social).not.toContain("446 px");
     const upload = readFileSync("src/components/social/social-profile-cover-upload.tsx", "utf8");
-    expect(upload).toContain("masterWidth");
-    expect(upload).toContain("masterHeight");
-    expect(upload).toContain("data-social-profile-cover-dims");
+    expect(upload).not.toContain("data-social-profile-cover-dims");
+    expect(upload).not.toContain("masterWidth");
+    expect(upload).not.toContain("masterHeight");
+    expect(upload).toContain("COVER_CROP_OUTPUT_WIDTH");
+    expect(upload).toContain("COVER_CROP_OUTPUT_HEIGHT");
+    expect(upload).toContain("SOCIAL_PROFILE_COVER_PILL_ANCHOR_CLASS");
+    expect(upload).not.toContain("bottom-3 right-3");
   });
 
   it("routes cover saves through the posts stills lane", () => {

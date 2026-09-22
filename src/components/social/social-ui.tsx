@@ -20,7 +20,7 @@ import {
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_HEAD_OVERLAP_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
-  SOCIAL_PROFILE_META_CLASS,
+  SOCIAL_PROFILE_INSET_CLASS,
   SOCIAL_PERSON_PRIMARY_CLASS,
   SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
@@ -273,7 +273,10 @@ export function SocialProfileIdentity({
         )}
         <div
           data-social-profile-head=""
-          className={showCoverBand ? SOCIAL_PROFILE_HEAD_OVERLAP_CLASS : undefined}
+          className={cn(
+            SOCIAL_PROFILE_INSET_CLASS,
+            showCoverBand ? SOCIAL_PROFILE_HEAD_OVERLAP_CLASS : "pt-[var(--space-4)]",
+          )}
         >
           <div className={SOCIAL_PROFILE_HEAD_CLASS}>
             <div className="relative shrink-0">
@@ -286,22 +289,18 @@ export function SocialProfileIdentity({
               />
               {photoAction}
             </div>
-            {person.name || stats ? (
-              <div data-social-profile-meta="" className={SOCIAL_PROFILE_META_CLASS}>
-                {person.name ? (
-                  <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
-                    {person.name}
-                  </p>
-                ) : null}
-                {stats ? (
-                  <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
-                ) : null}
-              </div>
+            {person.name ? (
+              <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
+                {person.name}
+              </p>
             ) : null}
           </div>
         </div>
       </div>
       <div data-social-profile-face="" className={SOCIAL_PROFILE_FACE_CLASS}>
+        {stats ? (
+          <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
+        ) : null}
         {bio?.trim() ? (
           <p data-social-profile-bio="" className={SOCIAL_PROFILE_BIO_CLASS}>
             {bio}
@@ -324,8 +323,9 @@ export function SocialProfileIdentity({
           />
         ) : null}
         <SocialProfileLinkRow links={links} />
+        {actionRow}
         {interestTopics.length > 0 ? (
-          <div data-social-profile-topics="" className="flex flex-wrap gap-2">
+          <div data-social-profile-topics="" className="flex min-w-0 flex-wrap gap-2">
             {interestTopics.map((topic) => (
               <span
                 key={topic}
@@ -337,7 +337,6 @@ export function SocialProfileIdentity({
             ))}
           </div>
         ) : null}
-        {actionRow}
         {followedBy ? (
           <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
             <div data-social-profile-mutuals-faces="" className="flex shrink-0">

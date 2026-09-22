@@ -28,7 +28,7 @@ import {
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_LINKS_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
-  SOCIAL_PROFILE_META_CLASS,
+  SOCIAL_PROFILE_INSET_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_STORY_CARD_CLASS,
@@ -117,23 +117,21 @@ export function SocialProfileCenterSkeleton() {
       <div className={SOCIAL_PROFILE_IDENTITY_CLASS}>
         <div className={SOCIAL_PROFILE_COVER_STACK_CLASS}>
           <Skeleton className={`${SOCIAL_PROFILE_COVER_CLASS} ${SOCIAL_PROFILE_COVER_EMPTY_CLASS}`} />
-          <div className={SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}>
+          <div className={`${SOCIAL_PROFILE_INSET_CLASS} ${SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}`}>
             <div className={SOCIAL_PROFILE_HEAD_CLASS}>
-          <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
-          <div className={SOCIAL_PROFILE_META_CLASS}>
-            <Skeleton className="h-4 w-32" />
-            <div className={SOCIAL_PROFILE_STATS_CLASS}>
-              <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
-                <Skeleton className="h-8 w-10" />
-                <Skeleton className="h-8 w-10" />
-                <Skeleton className="h-8 w-10" />
-              </div>
-            </div>
-          </div>
+              <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
+              <Skeleton className="h-7 w-40" />
             </div>
           </div>
         </div>
         <div className={SOCIAL_PROFILE_FACE_CLASS}>
+          <div className={SOCIAL_PROFILE_STATS_CLASS}>
+            <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
+              <Skeleton className="h-8 w-10" />
+              <Skeleton className="h-8 w-10" />
+              <Skeleton className="h-8 w-10" />
+            </div>
+          </div>
           <Skeleton className="h-3 w-2/3" />
           <Skeleton className="h-7 w-24 rounded-full" />
           <div data-social-profile-links-skeleton="" className={SOCIAL_PROFILE_LINKS_CLASS}>
