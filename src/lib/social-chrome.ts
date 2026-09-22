@@ -402,10 +402,11 @@ export const SOCIAL_PROFILE_FACE_CLASS =
 
 export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 flex-1 break-words t-title text-ink";
 
-// Pause before Edit / Share (or Follow / Share). House token, same
-// class for own + public.
+// Pause before the primary CTA (Edit or Follow) and the quiet
+// icon-only Share. Same class for own + public. Share does not
+// stretch. Labels wrap; the icon hit stays ≥44px.
 export const SOCIAL_PROFILE_ACTIONS_CLASS =
-  "mt-[var(--space-3)] flex w-full items-center gap-2";
+  "mt-[var(--space-3)] flex w-full min-w-0 items-center gap-2";
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body text-ink whitespace-pre-wrap";
 
@@ -489,8 +490,10 @@ export const SOCIAL_PROFILE_PLAY_CLASS =
 export const SOCIAL_HIGHLIGHT_RING_CLASS =
   "rounded-full border-2 border-accent p-[2px]";
 
+// Quiet icon-only Share beside the primary profile CTA.
+// House icon hits are circles. 44px floor. No label, no twin fill.
 export const SOCIAL_SHARE_CLASS =
-  "inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-hairline bg-surface px-[14px] py-[var(--space-2)] t-body-sm font-medium text-ink";
+  "inline-flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-ink-2 hover:bg-surface-muted";
 
 // 180:206 / 180:1946 / 181:2184 — Edit profile. Mobile full page; desktop
 // 480 sheet on wash. 180:2004 / 180:2026 — Bio editor. Tokens only.
