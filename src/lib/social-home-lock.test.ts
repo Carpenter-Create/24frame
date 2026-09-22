@@ -15,6 +15,7 @@ import {
   SOCIAL_FIGMA_PROFILE_OWN,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
+  SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_HANDLE_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
@@ -799,6 +800,13 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_DESKTOP_MEASURE.center).toBe(600);
     expect(SOCIAL_DESKTOP_MEASURE.right).toBe(300);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(SOCIAL_PROFILE_CENTER_CLASS);
+    // Adam 2026-09-22: one shell spans the canvas. Leftover air sits
+    // between the X-narrow center and For You — not in a gutter after
+    // the rail. No max-width on the cluster.
+    expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
+      "flex w-full items-start justify-between gap-[16px]",
+    );
+    expect(SOCIAL_HOME_LAYOUT_CLASS).not.toMatch(/max-w-/);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(
       `flex min-w-0 w-full flex-1 flex-col gap-2 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );
