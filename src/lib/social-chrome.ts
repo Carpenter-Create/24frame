@@ -83,7 +83,9 @@ export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-var(--chrome-gutter))]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
 export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
-const socialCenterMaxClass = `lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`;
+// Complete literal. Tailwind's scanner skips interpolated utilities,
+// so the center cap has to be written out. Stay locked to center: 600.
+const socialCenterMaxClass = "lg:max-w-[600px]";
 export const SOCIAL_CENTER_WIDTH_CLASS = `w-full min-w-0 ${socialCenterMaxClass}`;
 export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] py-4";
 

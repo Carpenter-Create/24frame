@@ -79,6 +79,7 @@ export function SocialForYouRail({
               course={latestCourse}
               coverUrl={latestCourseCoverUrl}
               density="discover"
+              plateWhenEmpty
             />
           </ul>
         </div>

@@ -17,7 +17,8 @@ import { educationCourseHref } from "@/lib/education";
 
 // Discover: 16:9 cover + title + quiet lesson meta.
 // Home glance: signed photo + below-cover title + progress.
-// Plate/orb + in-plate title only when no signed cover.
+// Plate/orb when no signed cover. In-plate title is the home glance.
+// plateWhenEmpty paints that plate on discover and keeps the title below.
 // One primitive — density, not a twin. No Social engagement chrome.
 
 export function CourseCard({
@@ -26,15 +27,17 @@ export function CourseCard({
   metaLabel,
   density = "discover",
   progressPercent,
+  plateWhenEmpty = false,
 }: {
   course: CourseRow;
   coverUrl?: string | null;
   metaLabel?: string | null;
   density?: CourseCardDensity;
   progressPercent?: number | null;
+  plateWhenEmpty?: boolean;
 }) {
   const home = density === "home";
-  const tone = home ? courseHomeCoverTone(coverUrl) : "photo";
+  const tone = home || plateWhenEmpty ? courseHomeCoverTone(coverUrl) : "photo";
   const plate = tone === "plate";
   const percent = courseGlanceProgressPercent(progressPercent);
   const progressLabel = courseGlanceProgressLabel(percent);
@@ -51,7 +54,7 @@ export function CourseCard({
           tone={tone}
           plateClass={plate ? courseGlancePlateClass(course.id) : undefined}
         >
-          {plate ? (
+          {plate && home ? (
             <span data-course-cover-title="" className={COURSE_GLANCE_TITLE_CLASS}>
               {course.title}
             </span>
