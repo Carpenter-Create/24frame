@@ -75,6 +75,7 @@ function expectedMediaClientConfig() {
       accessKeyId: MEDIA_AWS.MEDIA_AWS_ACCESS_KEY_ID,
       secretAccessKey: MEDIA_AWS.MEDIA_AWS_SECRET_ACCESS_KEY,
     },
+    requestChecksumCalculation: "WHEN_REQUIRED" as const,
   };
 }
 
