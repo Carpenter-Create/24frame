@@ -157,14 +157,16 @@
   /* Adam lock 2026-09-22. Same --accent; light Sporty stays on :root.
      LinkedIn soft. Not YouTube punch #3ea6ff.
      White on this blue is 2.17:1 and fails AA for UI text and icons.
-     House ink #0A0B0D on the fill is 9.06:1. #70b5f9 on the #050835
-     canvas is 8.85:1, so the canvas trial stays. Wash inherits the
-     :root 10% mix of --accent into --surface. */
+     House ink #0A0B0D on the fill is 9.06:1. #70b5f9 on the #0f0f0f
+     canvas is 8.82:1. Wash inherits the :root 10% mix of --accent
+     into --surface. */
   --accent: #70b5f9;
   --accent-contrast: #0A0B0D;
 
-  /* Adam trial 2026-09-19 brand canvas; surfaces unchanged pending glance. */
-  --bg:            #050835;
+  /* Adam lock 2026-09-22. YouTube near-black canvas. Retires the navy
+     #050835 trial. Surfaces stay: #1e2126 on #0f0f0f is 1.19:1, the
+     same lift as YouTube #212121. Not a second accent. */
+  --bg:            #0f0f0f;
   --surface:       #1e2126;
   --surface-muted: #25292f;
   --border:        #2a2f34;

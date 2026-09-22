@@ -32,10 +32,11 @@ describe("house accent — one token, mode flip", () => {
 
   it("flips dark --accent to LinkedIn soft and ink contrast", () => {
     // Adam lock 2026-09-22. White on #70b5f9 is 2.17:1 (fails AA).
-    // #0A0B0D on the fill is 9.06:1. Canvas #050835 stays.
+    // #0A0B0D on the fill is 9.06:1. Canvas is YouTube near-black.
     expect(dark).toMatch(/--accent:\s*#70b5f9;/);
     expect(dark).toMatch(/--accent-contrast:\s*#0A0B0D;/);
-    expect(dark).toMatch(/--bg:\s*#050835;/);
+    expect(dark).toMatch(/--bg:\s*#0f0f0f;/);
+    expect(dark).not.toMatch(/--bg:\s*#050835;/);
     expect(dark).toMatch(/--surface:\s*#1e2126;/);
     expect(dark).not.toMatch(/--accent:\s*#1769ff;/);
     expect(dark).not.toMatch(/--accent:\s*#3ea6ff;/i);
