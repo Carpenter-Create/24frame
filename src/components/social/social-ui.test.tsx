@@ -40,7 +40,9 @@ import {
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
+  SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_META_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
@@ -508,6 +510,13 @@ describe("Social profile public face", () => {
       withStats.indexOf("Edit profile"),
     );
     expect(withStats).toContain(SOCIAL_PROFILE_ACTIONS_CLASS);
+    expect(SOCIAL_PROFILE_IDENTITY_CLASS).toBe("flex flex-col gap-2");
+    expect(SOCIAL_PROFILE_FACE_CLASS).toBe(
+      "flex w-full min-w-0 flex-col items-stretch gap-1",
+    );
+    expect(SOCIAL_PROFILE_FACE_CLASS).not.toContain("space-3");
+    expect(SOCIAL_PROFILE_FACE_CLASS).not.toContain("space-4");
+    expect(SOCIAL_PROFILE_FACE_CLASS).not.toContain("pt-");
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).toContain("mt-[var(--space-3)]");
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[12px]");
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[16px]");

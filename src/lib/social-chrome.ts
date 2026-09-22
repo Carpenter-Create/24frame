@@ -360,18 +360,17 @@ export const SOCIAL_PROFILE_AVATAR_ON_COVER_CLASS =
 export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
   "absolute bottom-0 right-0 z-10 flex size-8 items-center justify-center rounded-full border border-hairline bg-surface text-ink";
 
-// Public profile head — IG row, house chrome. One SoT for own
-// /social/profile and public /social/u/[handle].
-// Head row is avatar LEFT + posts | followers | following RIGHT.
-// Stats left-pack and vertically center in the avatar height.
-// They are not a full-width justify-between stretch.
-// Display name is never in this row. It is the first line of the
-// full-width stack below the hang, so it cannot sit under the avatar.
-// Stack order: name, bio, role pills, links, actions.
-// Topics stay gray chips after actions (not profile tabs).
-// Mutuals last, omitted when empty. Handle stays in chrome.
-// Name wraps; never truncate.
-export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col";
+// Public profile head — Lock A + IG geometry (Adam 2026-09-22).
+// One SoT for own /social/profile and public /social/u/[handle].
+// Cover: 112 phone / 224 desk. Hang ~40% (HEAD_OVERLAP).
+// Head row: avatar LEFT + posts | followers | following RIGHT.
+// Stats left-pack and center in the avatar height.
+// Name is the first full-width line below that row.
+// Stack: name → bio → roles → links → Edit/Share.
+// Topics are chips after actions. Tabs are the page sibling.
+// Mutuals last, omitted when empty. Name wraps.
+// Spacing stays the existing identity gap-2 and face gap-1.
+export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
 export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
 
@@ -392,16 +391,15 @@ export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-heading font-semibold tabular-
 
 export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
 
-// Air under the hanging avatar before the name. gap is the calm
-// stack rhythm (name → bio → roles → links → actions).
+// Full-width stack under the IG row. gap-1 is the existing rhythm.
 export const SOCIAL_PROFILE_FACE_CLASS =
-  "flex w-full min-w-0 flex-col items-stretch gap-[var(--space-3)] pt-[var(--space-4)]";
+  "flex w-full min-w-0 flex-col items-stretch gap-1";
 
 export const SOCIAL_PROFILE_NAME_CLASS =
   "w-full min-w-0 break-words t-heading font-semibold text-ink";
 
-// Extra house-token air before Edit / Share (or Follow / Share).
-// Same class for own + public. No magic pixels.
+// Roles → Edit/Share was cramped (face gap-1). Extra --space-3 before
+// the action row; no magic pixels. Same class for own + public.
 export const SOCIAL_PROFILE_ACTIONS_CLASS =
   "mt-[var(--space-3)] flex w-full items-center gap-2";
 
