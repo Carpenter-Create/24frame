@@ -4,8 +4,11 @@ import Link from "next/link";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialDmsRowsSkeleton } from "@/components/social/social-skeletons";
+import { signSocialForYouCourseCovers } from "@/components/social/social-for-you-covers";
+import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
+import { SocialDmsRowsSkeleton, SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SocialConversationFaces } from "@/components/social/social-ui";
+import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { conversationRoomLabel, inboxPeerIds, SOCIAL, SOCIAL_ROUTES, socialDmHref, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
@@ -16,10 +19,15 @@ import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 export default async function SocialDmsPage() {
   const session = await requireSocialSession();
   return (
-    <div data-social-dms="">
-      <PageHeader title={SOCIAL.dms.title} subtitle={SOCIAL.dms.subtitle} />
-      <Suspense fallback={<SocialDmsRowsSkeleton />}>
-        <SocialDmsInbox session={session} />
+    <div data-social-dms="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <div className={SOCIAL_HOME_CENTER_CLASS}>
+        <PageHeader title={SOCIAL.dms.title} subtitle={SOCIAL.dms.subtitle} />
+        <Suspense fallback={<SocialDmsRowsSkeleton />}>
+          <SocialDmsInbox session={session} />
+        </Suspense>
+      </div>
+      <Suspense fallback={<SocialForYouSkeleton />}>
+        <SocialDesktopForYouSlot session={session} signCourseCovers={signSocialForYouCourseCovers} />
       </Suspense>
     </div>
   );

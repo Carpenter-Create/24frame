@@ -102,7 +102,8 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(socialHome).toContain("requireSocialSession");
     expect(socialHome).toContain("<Suspense");
     expect(socialHome).not.toContain("SocialHomeRecentChatsSlot");
-    expect(socialHome).toContain("SocialHomeForYouSlot");
+    expect(socialHome).toContain("SocialDesktopForYouSlot");
+    expect(socialProfile).toContain("SocialDesktopForYouSlot");
     expect(socialExplore).toContain("requireSocialSession");
     expect(socialExplore).toContain("<Suspense");
     expect(socialExplore).toContain("SocialExploreResultsSkeleton");

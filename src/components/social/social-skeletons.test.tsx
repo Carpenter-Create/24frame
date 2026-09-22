@@ -82,19 +82,26 @@ describe("Social loading skeletons", () => {
     );
     expect(profile).not.toContain("size-6");
     expect(profile).toContain("mt-[var(--space-3)]");
-    expect(profile).toContain("mx-auto");
-    expect(profile).toContain("md:max-w-[892px]");
+    expect(profile).toContain("lg:max-w-[600px]");
+    expect(profile).not.toContain("md:max-w-[892px]");
+    expect(profile).not.toContain("892");
     expect(profile).toContain("bg-surface-muted");
     expect(profile).toContain("py-[var(--space-2)]");
     expect(profile).not.toContain("aspect-square");
     expect(profile).not.toContain("data-social-profile-grid");
-    expect(profile).not.toContain("data-social-for-you-skeleton");
+    expect(profile).toContain("data-social-for-you-skeleton");
     expect(create).toContain("data-social-create-skeleton");
     expect(stories).toContain("data-social-stories-index-skeleton");
     expect(viewer).toContain("data-social-story-viewer-skeleton");
     expect(explore).toContain("data-social-explore-skeleton");
     expect(explore).toContain("data-social-explore-results-skeleton");
+    expect(explore).toContain("data-social-for-you-skeleton");
+    expect(explore).toContain("lg:max-w-[600px]");
+    expect(explore).not.toContain("892");
     expect(dms).toContain("data-social-dms-skeleton");
+    expect(dms).toContain("data-social-for-you-skeleton");
+    expect(dms).toContain("lg:max-w-[600px]");
+    expect(dms).not.toContain("892");
     expect(follows).toContain("data-social-follows-skeleton");
 
     for (const html of [home, profile, create, stories, viewer, explore, dms, follows]) {

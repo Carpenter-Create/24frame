@@ -120,7 +120,10 @@ export function SocialProfileCenterSkeleton() {
           <div className={`${SOCIAL_PROFILE_INSET_CLASS} ${SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}`}>
             <div className={SOCIAL_PROFILE_HEAD_CLASS}>
               <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
-              <Skeleton className="h-7 w-40" />
+              <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-1)]">
+                <Skeleton className="h-7 w-40" />
+                <Skeleton className="h-3 w-24" />
+              </div>
             </div>
           </div>
         </div>
@@ -163,8 +166,9 @@ export function SocialProfileCenterSkeleton() {
 
 export function SocialProfileSkeleton() {
   return (
-    <div data-social-profile-skeleton="">
+    <div data-social-profile-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
       <SocialProfileCenterSkeleton />
+      <SocialForYouSkeleton />
     </div>
   );
 }
@@ -264,15 +268,34 @@ export function SocialExploreResultsSkeleton() {
   );
 }
 
-export function SocialExploreSkeleton() {
+function SocialDiscoveryColumnSkeleton() {
   return (
-    <div data-social-explore-skeleton="" className="flex flex-col gap-[var(--space-6)]">
+    <div className="flex flex-col gap-[var(--space-6)]">
       <div className="flex flex-col gap-2 pb-6">
         <Skeleton className="h-7 w-36" />
         <Skeleton className="h-3.5 w-56" />
       </div>
       <Skeleton className="h-10 w-full rounded-[var(--radius)]" />
       <SocialExploreResultsSkeleton />
+    </div>
+  );
+}
+
+export function SocialSearchSkeleton() {
+  return (
+    <div data-social-search-skeleton="">
+      <SocialDiscoveryColumnSkeleton />
+    </div>
+  );
+}
+
+export function SocialExploreSkeleton() {
+  return (
+    <div data-social-explore-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <div className={SOCIAL_HOME_CENTER_CLASS}>
+        <SocialDiscoveryColumnSkeleton />
+      </div>
+      <SocialForYouSkeleton />
     </div>
   );
 }
@@ -298,12 +321,17 @@ export function SocialDmsRowsSkeleton() {
 
 export function SocialDmsSkeleton() {
   return (
-    <div data-social-dms-skeleton="" className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex flex-col gap-2 pb-6">
-        <Skeleton className="h-7 w-36" />
-        <Skeleton className="h-3.5 w-56" />
+    <div data-social-dms-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <div className={SOCIAL_HOME_CENTER_CLASS}>
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <div className="flex flex-col gap-2 pb-6">
+            <Skeleton className="h-7 w-36" />
+            <Skeleton className="h-3.5 w-56" />
+          </div>
+          <SocialDmsRowsSkeleton />
+        </div>
       </div>
-      <SocialDmsRowsSkeleton />
+      <SocialForYouSkeleton />
     </div>
   );
 }

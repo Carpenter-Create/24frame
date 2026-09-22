@@ -5,6 +5,7 @@ import { SOCIAL_DESKTOP_NAV, SOCIAL_NAV } from "./nav";
 import { SOCIAL_PHONE_DESTS } from "./house-phone-shell";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
+  SOCIAL_CENTER_WIDTH_CLASS,
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FEED_GUTTER_CLASS,
@@ -14,11 +15,14 @@ import {
   SOCIAL_FIGMA_PROFILE_OWN,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
+  SOCIAL_PROFILE_HANDLE_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_CLASS,
 } from "./social-chrome";
 import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
 
 const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
+const forYouSlot = readFileSync("src/components/social/social-for-you-slot.tsx", "utf8");
 const homeSkeleton = readFileSync("src/components/social/social-skeletons.tsx", "utf8");
 const explore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
 const create = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
@@ -85,9 +89,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("creditsEmpty");
     expect(home).not.toContain("SocialWelcomeVideo");
     expect(home).toContain("SocialForYouRail");
-    expect(home).toContain("loadDiscoverableCourses");
-    expect(home).toContain("latestDiscoverableCourse");
+    expect(home).toContain("SocialDesktopForYouSlot");
     expect(home).toContain("signedEducationCoverUrls");
+    expect(forYouSlot).toContain("SocialForYouRail");
+    expect(forYouSlot).toContain("loadDiscoverableCourses");
+    expect(forYouSlot).toContain("latestDiscoverableCourse");
+    expect(forYouSlot).toContain("loadSuggestedPeople");
     expect(home).not.toContain("SocialRecentChats");
     expect(home).not.toContain("SocialHomeRecentChatsSlot");
     expect(home).not.toContain("loadDmInbox");
@@ -300,12 +307,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("dest: 200");
     expect(chrome).not.toContain("chats: 200");
     expect(chrome).toContain("gutter: 16");
-    expect(chrome).toContain("center: 892");
+    expect(chrome).toContain("center: 600");
+    expect(chrome).not.toContain("center: 892");
+    expect(chrome).not.toContain("892");
     expect(chrome).toContain("right: 300");
     expect(chrome).toContain("padR: 16");
     expect(chrome).toContain("w-[calc(200px-var(--chrome-gutter))]");
     expect(chrome).toContain("md:ml-[200px]");
-    expect(chrome).toContain("lg:max-w-[892px]");
+    expect(chrome).toContain("lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]");
+    expect(chrome).not.toContain("lg:max-w-[892px]");
     expect(chrome).not.toContain("lg:max-w-[676px]");
     expect(chrome).toContain("SOCIAL_RAIL_PANEL_CLASS");
     expect(chrome).toContain("rounded-[16px]");
@@ -552,12 +562,20 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       dest: 200,
       gutter: 16,
-      center: 892,
+      center: 600,
       right: 300,
       padR: 16,
     });
     expect(SOCIAL_DESKTOP_MEASURE).not.toHaveProperty("chats");
-    expect(SOCIAL_DESKTOP_MEASURE.dest + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.center + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.right + SOCIAL_DESKTOP_MEASURE.padR).toBe(1440);
+    const shellSum =
+      SOCIAL_DESKTOP_MEASURE.dest +
+      SOCIAL_DESKTOP_MEASURE.gutter +
+      SOCIAL_DESKTOP_MEASURE.center +
+      SOCIAL_DESKTOP_MEASURE.gutter +
+      SOCIAL_DESKTOP_MEASURE.right +
+      SOCIAL_DESKTOP_MEASURE.padR;
+    expect(shellSum).toBe(1148);
+    expect(1440 - shellSum).toBe(292);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
@@ -658,7 +676,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).toContain("SocialProfilePostsEmpty");
     expect(card).not.toContain("emptySecondary");
     expect(card).not.toContain("emptyHint");
-    expect(card).not.toContain("data-social-profile-handle");
+    expect(card).toContain("data-social-profile-handle");
+    expect(card).toContain("SOCIAL_PROFILE_NAME_STACK_CLASS");
+    expect(card).toContain("SOCIAL_PROFILE_HANDLE_CLASS");
+    expect(card.indexOf("data-social-profile-name")).toBeLessThan(
+      card.indexOf("data-social-profile-handle"),
+    );
     expect(chrome).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(chrome).not.toContain("SOCIAL_PROFILE_META_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_INSET_CLASS");
@@ -706,17 +729,25 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(publicProfile).not.toContain("emptyHint");
     expect(publicProfile).not.toContain("emptySecondary");
     expect(publicProfile).not.toContain("SOCIAL.profile.completeIdentity");
-    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain(`md:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
-    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("mx-auto");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toBe(SOCIAL_HOME_CENTER_CLASS);
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain(`lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
+    expect(SOCIAL_CENTER_WIDTH_CLASS).toContain(`lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
     expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("w-full");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("md:max-w");
     expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(publicProfile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
-    expect(profile).not.toContain("SocialForYouRail");
-    expect(profile).not.toContain("SocialProfileForYouSlot");
-    expect(profile).not.toContain("SocialForYouSkeleton");
+    expect(profile).toContain("SocialDesktopForYouSlot");
+    expect(profile).toContain("SocialForYouSkeleton");
+    expect(profile).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(profile).toContain("signSocialForYouCourseCovers");
+    expect(profile).not.toContain("Education");
     expect(profile).not.toContain("loadSuggestedPeople");
-    expect(publicProfile).not.toContain("SocialForYouRail");
+    expect(publicProfile).toContain("SocialDesktopForYouSlot");
+    expect(publicProfile).toContain("SocialForYouSkeleton");
+    expect(publicProfile).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(publicProfile).not.toContain("loadSuggestedPeople");
+    expect(publicProfile).not.toContain("signedEducationCoverUrls");
+    expect(forYouSlot).toContain("loadSuggestedPeople");
     expect(home).toContain("SocialForYouRail");
     expect(card).toContain("socialProfileRolesRailItems");
     expect(card).not.toContain("socialProfileRolesLine");
@@ -740,7 +771,7 @@ describe("Social Home miss list v1 P0 lock", () => {
         homeSkeleton.indexOf("export function SocialProfileSkeleton"),
         homeSkeleton.indexOf("export function SocialFollowsSkeleton"),
       ),
-    ).not.toContain("SocialForYouSkeleton");
+    ).toContain("SocialForYouSkeleton");
     expect(readFileSync("src/components/social/social-profile-stats.tsx", "utf8")).toContain(
       "socialProfileFollowsHref",
     );
@@ -754,31 +785,70 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("Education");
   });
 
-  it("locks the desktop profile column to the Home 892 measure", () => {
+  it("locks Home and Profile to one X-narrow center and puts the handle under the name", () => {
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const ownFace = readFileSync("src/components/social/social-own-profile.tsx", "utf8");
-    expect(SOCIAL_DESKTOP_MEASURE.center).toBe(892);
-    expect(SOCIAL_PROFILE_CENTER_CLASS).toBe(
-      "mx-auto flex w-full min-w-0 flex-col gap-2 md:max-w-[892px]",
+    expect(SOCIAL_DESKTOP_MEASURE.center).toBe(600);
+    expect(SOCIAL_DESKTOP_MEASURE.right).toBe(300);
+    expect(SOCIAL_HOME_CENTER_CLASS).toBe(SOCIAL_PROFILE_CENTER_CLASS);
+    expect(SOCIAL_HOME_CENTER_CLASS).toBe(
+      `flex min-w-0 w-full flex-1 flex-col gap-2 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );
-    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain(`md:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
-    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("mx-auto");
-    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("flex-1");
-    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("lg:max-w");
+    expect(SOCIAL_CENTER_WIDTH_CLASS).toBe(
+      `w-full min-w-0 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
+    );
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("flex-1");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("lg:max-w-[600px]");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("md:max-w");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("mx-auto");
     expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("935");
-    expect(SOCIAL_HOME_CENTER_CLASS).toContain("flex-1");
-    expect(SOCIAL_HOME_CENTER_CLASS).toContain("lg:max-w-[892px]");
-    expect(chrome).toContain("One centered stack");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("892");
+    expect(chrome).toContain("Profile desktop row matches Home");
+    expect(chrome).toContain("SocialForYouRail");
+    expect(chrome).not.toContain("No For You rail");
     expect(chrome).not.toContain("Instagram: one centered profile stack");
     expect(chrome).not.toContain("Facebook: side air / gutters");
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("flex-col");
+    expect(SOCIAL_PROFILE_HANDLE_CLASS).toContain("text-ink-2");
+    expect(SOCIAL_PROFILE_HANDLE_CLASS).not.toContain("truncate");
     expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
-    expect(profile).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(profile).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(profile).toContain("SocialDesktopForYouSlot");
     expect(profile).not.toContain("SOCIAL_HOME_CENTER_CLASS");
     expect(publicProfile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
-    expect(publicProfile).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(publicProfile).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(publicProfile).toContain("SocialDesktopForYouSlot");
     expect(publicProfile).not.toContain("SOCIAL_HOME_CENTER_CLASS");
     expect(ownFace).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(home).toContain("SOCIAL_HOME_CENTER_CLASS");
+    expect(home).toContain("SocialDesktopForYouSlot");
     expect(home).not.toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(explore).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(explore).toContain("SOCIAL_HOME_CENTER_CLASS");
+    expect(explore).toContain("SocialDesktopForYouSlot");
+    expect(explore).toContain("SocialForYouSkeleton");
+    expect(explore).not.toContain("SocialForYouRail");
+    expect(explore).not.toContain("loadSuggestedPeople");
+    expect(explore).not.toContain("signSocialForYouCourseCovers");
+    expect(explore).not.toContain("signedEducationCoverUrls");
+    expect(messages).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(messages).toContain("SOCIAL_HOME_CENTER_CLASS");
+    expect(messages).toContain("SocialDesktopForYouSlot");
+    expect(messages).toContain("SocialForYouSkeleton");
+    expect(messages).toContain("signSocialForYouCourseCovers");
+    expect(messages).not.toContain("SocialForYouRail");
+    expect(messages).not.toContain("Education");
+    const thread = readFileSync("src/app/(app)/social/dms/[id]/page.tsx", "utf8");
+    expect(thread).not.toContain("SocialDesktopForYouSlot");
+    expect(thread).not.toContain("SocialForYouRail");
+    const exploreSkeleton = homeSkeleton.slice(
+      homeSkeleton.indexOf("export function SocialExploreSkeleton"),
+      homeSkeleton.indexOf("export function SocialDmsRowsSkeleton"),
+    );
+    expect(exploreSkeleton).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(exploreSkeleton).toContain("SocialForYouSkeleton");
+    const dmsSkeleton = homeSkeleton.slice(homeSkeleton.indexOf("export function SocialDmsSkeleton"));
+    expect(dmsSkeleton).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(dmsSkeleton).toContain("SocialForYouSkeleton");
   });
 });

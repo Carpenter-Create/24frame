@@ -12,7 +12,7 @@ import {
   socialMediaHref,
 } from "@/lib/social-edge";
 import { SOCIAL, SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
-import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
+import { ensureOwnSocialProfile, ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { SOCIAL_PROFILE_OPTIMISTIC_COOKIE } from "@/lib/social-profile-edit";
 import SocialProfilePage from "./page";
 
@@ -37,8 +37,12 @@ vi.mock("@/lib/social-edge", async (importOriginal) => {
     socialMediaHref: vi.fn((key: string) => actual.socialMediaHref(key)),
   };
 });
+vi.mock("@/lib/s3-education", () => ({
+  signedEducationCoverUrls: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
+  ensureOwnSocialProfile: vi.fn(),
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
@@ -118,6 +122,7 @@ function stubClient({
     if (table === "follows") return chain([]);
     if (table === "stories") return chain([]);
     if (table === "comments") return chain([]);
+    if (table === "courses") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
@@ -145,6 +150,7 @@ describe("Social profile public face", () => {
       profile: ensured,
       error: null,
     });
+    vi.mocked(ensureOwnSocialProfile).mockResolvedValue(ensured);
   });
 
   it("shows the public face after ensure and does not insert on render", async () => {
@@ -172,11 +178,12 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-activity");
     expect(html).toContain('data-social-activity-pill="posts"');
     expect(html).toContain("overflow-x-auto");
-    expect(html).not.toContain("data-social-for-you");
-    expect(html).not.toContain("data-social-for-you-skeleton");
-    expect(html).toContain("mx-auto");
-    expect(html).toContain("md:max-w-[892px]");
+    expect(html).toContain("data-social-for-you");
+    expect(html).toContain("lg:max-w-[600px]");
+    expect(html).toContain("w-[300px]");
+    expect(html).toContain("lg:flex");
     expect(html).not.toContain("max-w-[935px]");
+    expect(html).not.toContain("md:max-w-[892px]");
     expect(html).not.toContain("lg:max-w-[892px]");
     expect(html).toContain("data-social-share");
     expect(html).not.toContain("Education");
@@ -319,16 +326,18 @@ describe("Social profile public face", () => {
     expect(html).toContain("w-fit");
     expect(html).toContain("inline-flex");
     expect(html).not.toContain("grid w-full grid-cols-3");
-    expect(html).not.toContain("data-social-profile-handle");
+    expect(html).toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-face"));
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-name");
+    expect(head).toContain("data-social-profile-handle");
+    expect(head).toContain("@ada");
+    expect(head.indexOf("data-social-profile-name")).toBeLessThan(head.indexOf("data-social-profile-handle"));
     expect(head).not.toContain("data-social-profile-meta");
     expect(head).not.toContain("data-social-profile-stats");
     expect(head).not.toContain("max-w-xs");
     expect(head).not.toContain("grid w-full grid-cols-3");
     expect(head).not.toContain("flex min-w-0 max-w-xs flex-1 items-center");
-    expect(head).not.toContain("@ada");
     expect(html).not.toContain("data-social-profile-cover-dims");
     expect(html).not.toContain("1784");
     expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-face"));

@@ -1,9 +1,9 @@
-import { SocialExploreSkeleton } from "@/components/social/social-skeletons";
+import { SocialSearchSkeleton } from "@/components/social/social-skeletons";
 
 export default function Loading() {
   return (
     <div data-house-rsc-fallback="">
-      <SocialExploreSkeleton />
+      <SocialSearchSkeleton />
     </div>
   );
 }

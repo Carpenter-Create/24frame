@@ -42,13 +42,18 @@ export const SOCIAL_FIGMA_HOME_MOBILE = "169:1519";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136", "164:1360"] as const;
 
-// Desktop Social Home measure. Recent chats column is retired; its 200 +
-// gutter 16 is reclaimed by the middle column (composer / stories / Topics / wall).
-// dest 200 | gutter 16 | center 892 | gutter 16 | For you 300 | padR 16 = 1440.
+// Desktop Social shell. One center measure for Home, Explore,
+// Messages, and Profile.
+// Adam + Joshua 2026-09-22: X-narrow center. FB familiarity and
+// house type stay. Geometry only.
+// dest 200 | gutter 16 | center 600 | gutter 16 | For you 300 | padR 16 = 1148.
+// A 1440 canvas keeps 292px of side air. Do not stretch the center
+// to fill it. For you stays 300. Phone is full-bleed of the phone
+// canvas: the cap applies at lg, when the For You rail appears.
 export const SOCIAL_DESKTOP_MEASURE = {
   dest: 200,
   gutter: 16,
-  center: 892,
+  center: 600,
   right: 300,
   padR: 16,
 } as const;
@@ -78,7 +83,8 @@ export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-var(--chrome-gutter))]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
 export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
-export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[892px]";
+const socialCenterMaxClass = `lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`;
+export const SOCIAL_CENTER_WIDTH_CLASS = `w-full min-w-0 ${socialCenterMaxClass}`;
 export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] py-4";
 
 export const SOCIAL_PAGE_CLASS =
@@ -86,17 +92,20 @@ export const SOCIAL_PAGE_CLASS =
 
 export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 
-export const SOCIAL_HOME_CENTER_CLASS =
-  "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[892px]";
+// Shared center column. Home, Explore, Messages, and Profile use this
+// string — no width fork. flex-1 fills the desktop row until the lg
+// cap. w-full keeps phone, and the save-hop overlay, full-bleed of
+// their parent.
+const socialShellCenterClass =
+  `flex min-w-0 w-full flex-1 flex-col gap-2 ${socialCenterMaxClass}`;
 
-// Profile desktop column. One centered stack on the Home 892 measure
-// (SOCIAL_DESKTOP_MEASURE.center). Side air is the mx-auto gutter —
-// the column does not run edge to edge across the Social canvas.
-// Not a 935 fork. No flex-1 (that stretch is Home + For You only).
-// md+ focuses; phone stays full width of the phone canvas.
-// Own + public profile only. No For You rail on these pages.
-export const SOCIAL_PROFILE_CENTER_CLASS =
-  "mx-auto flex w-full min-w-0 flex-col gap-2 md:max-w-[892px]";
+export const SOCIAL_HOME_CENTER_CLASS = socialShellCenterClass;
+
+// Profile desktop row matches Home: this column plus SocialForYouRail
+// at lg+. Explore and Messages use that same row. Side air is the
+// leftover gutter. The column does not run edge to edge. Phone stays
+// the full phone canvas.
+export const SOCIAL_PROFILE_CENTER_CLASS = socialShellCenterClass;
 
 // 40px face. Export name stays so search, home, and overview share one SoT.
 export const SOCIAL_AVATAR_32_CLASS =
@@ -316,7 +325,7 @@ export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
 
-// Profile cover — quiet media band on the 892 column. 4:1. Phone 112px,
+// Profile cover — quiet media band on the shared center column. 4:1. Phone 112px,
 // desktop 224px. Owner with no photo keeps the accent wash so Add cover
 // stays on the band. Visitors omit the band when no photo exists
 // (socialProfileRendersCoverBand). Avatar may lip under the band while
@@ -367,11 +376,13 @@ export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
 
 // Public profile head. One SoT for own /social/profile and public
 // /social/u/[handle]. Cover is a quiet media band. The avatar may lip
-// under it. Name, counts, bio, role pills, links, and actions stack
-// in the column. Counts are a metric row — strong tabular numbers,
+// under it. Display name is primary, beside the avatar. @handle is
+// muted directly under the name — not beside the name, not in the
+// face stack. Counts, bio, role pills, links, and actions stack in
+// the column. Counts are a metric row — strong tabular numbers,
 // quiet labels — not a side column beside the avatar. Topic chips
-// follow the actions. Mutuals are last and omit when empty. Handle
-// stays in chrome. Name and labels wrap; never truncate.
+// follow the actions. Mutuals are last and omit when empty. Name,
+// handle, and labels wrap; never truncate.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-3)]";
 
 // Shared inset. Cover stays full bleed of the column; the avatar and
@@ -400,7 +411,14 @@ export const SOCIAL_PROFILE_STAT_LABEL_CLASS =
 export const SOCIAL_PROFILE_FACE_CLASS =
   `flex w-full min-w-0 flex-col gap-[var(--space-4)] pb-[var(--space-2)] ${SOCIAL_PROFILE_INSET_CLASS}`;
 
-export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 flex-1 break-words t-title text-ink";
+// X pattern (Adam + Joshua 2026-09-22). Name is t-title. @handle is
+// muted body-sm on the next line. The stack sits beside the avatar.
+export const SOCIAL_PROFILE_NAME_STACK_CLASS =
+  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-1)]";
+
+export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-title text-ink";
+
+export const SOCIAL_PROFILE_HANDLE_CLASS = "min-w-0 break-words t-body-sm text-ink-2";
 
 // Pause before Edit / Share (or Follow / Share). House token, same
 // class for own + public.

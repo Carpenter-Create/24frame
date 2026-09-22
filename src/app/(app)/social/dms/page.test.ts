@@ -21,6 +21,9 @@ vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
   signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
 }));
+vi.mock("@/lib/s3-education", () => ({
+  signedEducationCoverUrls: vi.fn(async () => new Map()),
+}));
 vi.mock("../actions", () => ({
   addSocialDmPeople: vi.fn(),
   sendSocialDm: vi.fn(),
@@ -45,6 +48,14 @@ function ctx() {
     isGcStaff: false,
     unread: Promise.resolve(0),
   };
+}
+
+function inboxFrom(profiles: unknown) {
+  return vi.fn((table: string) => {
+    if (table === "profiles") return chain(profiles);
+    if (table === "follows" || table === "courses") return chain([]);
+    throw new Error(`unexpected from(${table})`);
+  });
 }
 
 function chain(result: unknown) {
@@ -74,16 +85,11 @@ describe("social DMs", () => {
   });
 
   it("lists a group room with initials when faces are missing", async () => {
-    const from = vi.fn((table: string) => {
-      if (table === "profiles") {
-        return chain([
-          { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
-          { id: "u2", handle: "bob", display_name: "Bob One", status: "active" },
-          { id: "u3", handle: "carol", display_name: "Carol One", status: "active" },
-        ]);
-      }
-      throw new Error(`unexpected from(${table})`);
-    });
+    const from = inboxFrom([
+      { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+      { id: "u2", handle: "bob", display_name: "Bob One", status: "active" },
+      { id: "u3", handle: "carol", display_name: "Carol One", status: "active" },
+    ]);
     const rpc = vi.fn(async () => ({
       data: [
         {
@@ -110,18 +116,20 @@ describe("social DMs", () => {
     expect(html).toContain("CO");
     expect(html).toContain("1 unread");
     expect(html).toContain(SOCIAL.dms.subtitle);
+    expect(html).toContain("data-social-for-you");
+    expect(html).toContain("lg:max-w-[600px]");
+    expect(html).toContain("w-[300px]");
+    expect(html).toContain("lg:flex");
+    expect(html).not.toContain("892");
     expect(html).toContain("24Frame");
     expect(rpc).toHaveBeenCalledWith("get_dm_inbox", { p_limit: 51 });
     expect(html).not.toContain("data-social-dms-truncated");
   });
 
   it("keeps a quiet Start a conversation CTA on an empty inbox", async () => {
-    const from = vi.fn((table: string) => {
-      if (table === "profiles") {
-        return chain([{ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" }]);
-      }
-      throw new Error(`unexpected from(${table})`);
-    });
+    const from = inboxFrom([
+      { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    ]);
     vi.mocked(createClient).mockResolvedValue({
       from,
       rpc: vi.fn(async () => ({ data: [], error: null })),
@@ -150,12 +158,7 @@ describe("social DMs", () => {
       error: null,
     }));
     vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn((table: string) => {
-        if (table === "profiles") {
-          return chain([{ id: "u2", handle: "bob", display_name: "Bob One", status: "active" }]);
-        }
-        throw new Error(`unexpected from(${table})`);
-      }),
+      from: inboxFrom([{ id: "u2", handle: "bob", display_name: "Bob One", status: "active" }]),
       rpc,
     } as never);
 
