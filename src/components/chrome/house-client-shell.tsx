@@ -17,20 +17,20 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   HOUSE_CLIENT_SHELL,
   houseApplyCachedChild,
+  houseBlankOutlet,
   houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
   type HouseChildSeen,
-  houseForgetUnlisted,
   houseHrefKey,
   houseNavHop,
   housePaintedKeys,
   housePathFromLocation,
   houseReadScroll,
   houseReconcileOwnedHref,
-  houseRememberPainted,
   houseRememberScroll,
   houseScreenKey,
   houseShouldClientNavigate,
+  houseSyncPainted,
   parseHouseHref,
 } from "@/lib/house-client-shell";
 import { houseNavIgnorePendingClick, type HouseNavClickLike } from "@/lib/house-nav-pending";
@@ -165,12 +165,20 @@ function HousePathProviderCore({
 
   useEffect(() => {
     const onPop = () => {
+      const href = `${window.location.pathname}${window.location.search}`;
       captureLeadScroll(screenKey);
-      setOwnedHref(`${window.location.pathname}${window.location.search}`);
+      if (houseShouldClientNavigate(href, housePaintedKeys())) {
+        setOwnedHref(href);
+        return;
+      }
+      // History landed on a screen this instance never stored. Owning it
+      // paints the rail and leaves the slot empty.
+      setOwnedHref(null);
+      router.replace(href);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [screenKey]);
+  }, [router, screenKey]);
 
   useEffect(() => {
     const onClick = (event: globalThis.MouseEvent) => {
@@ -202,19 +210,28 @@ function HousePathProviderCore({
   return <HouseClientContext.Provider value={api}>{children}</HouseClientContext.Provider>;
 }
 
+function paintedSlots(store: ScreenStore): string[] {
+  return store.order.filter((key) => store.nodes[key] != null);
+}
+
 export function HouseScreenCache({ children }: { children: ReactNode }) {
   const fallbackPath = usePathname();
   const house = useHouseClient();
+  const router = useRouter();
   const nextPath = house?.nextPathname ?? fallbackPath;
   const nextKey = house?.nextKey ?? houseScreenKey(nextPath, house?.nextSearch ?? "");
   const [store, setStore] = useState<ScreenStore>(EMPTY_STORE);
   const scrollRef = useRef<string | null>(null);
+  const refreshSent = useRef<string | null>(null);
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
+  const [acceptKey, setAcceptKey] = useState<string | null>(null);
+  const [registryBound, setRegistryBound] = useState(false);
 
   // `houseApplyCachedChild` decides staleness from the committed guard
   // on this render. setState is only the record for the next pass.
   const [childSeen, setChildSeen] = useState<HouseChildSeen | null>(null);
+  const acceptStale = acceptKey === activeKey && activeKey === nextKey;
   const applied = houseApplyCachedChild({
     seen: childSeen,
     nextKey,
@@ -224,20 +241,53 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
     fallback,
     order: store.order,
     nodes: store.nodes,
+    acceptStale,
   });
   if (applied.seen !== childSeen) setChildSeen(applied.seen);
+  if (acceptKey !== null && (!acceptStale || applied.displayKey !== null || applied.showIngress)) {
+    setAcceptKey(null);
+  }
   const nextStore: ScreenStore =
     applied.nodes === store.nodes && applied.order === store.order
       ? store
       : { order: [...applied.order], nodes: applied.nodes };
+  if (!registryBound) {
+    setRegistryBound(true);
+    if (nextStore === store) houseSyncPainted(paintedSlots(store));
+  }
   if (nextStore !== store) {
     setStore(nextStore);
-    if (nextStore.order[0]) houseRememberPainted(nextStore.order[0]);
-    houseForgetUnlisted(nextStore.order);
+    houseSyncPainted(paintedSlots(nextStore));
   }
 
   const { displayKey, showIngress } = applied;
   const ingress = showIngress ? children : null;
+  const activeNode = displayKey != null ? nextStore.nodes[displayKey] : null;
+
+  useEffect(() => {
+    const action = houseBlankOutlet(displayKey, showIngress, activeKey, nextKey);
+    if (action === "none") return;
+    if (action === "load") {
+      const token = `load:${activeKey}`;
+      if (refreshSent.current === token) return;
+      refreshSent.current = token;
+      if (house?.href) router.push(house.href);
+      return;
+    }
+    const refreshTimer = window.setTimeout(() => {
+      if (refreshSent.current === activeKey) return;
+      refreshSent.current = activeKey;
+      router.refresh();
+    }, 100);
+    const acceptTimer = window.setTimeout(() => {
+      refreshSent.current = `accept:${activeKey}`;
+      setAcceptKey(activeKey);
+    }, 200);
+    return () => {
+      window.clearTimeout(refreshTimer);
+      window.clearTimeout(acceptTimer);
+    };
+  }, [activeKey, displayKey, house?.href, nextKey, router, showIngress]);
 
   useEffect(() => {
     const active = document.activeElement;
@@ -263,17 +313,24 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {nextStore.order.map((key) => (
-        <div
-          key={key}
-          hidden={key !== displayKey}
-          inert={key !== displayKey ? true : undefined}
-          {...{ [HOUSE_CLIENT_SHELL.screenAttr]: key }}
-          {...(key === displayKey ? { [HOUSE_CLIENT_SHELL.screenActiveAttr]: "" } : {})}
-        >
-          {nextStore.nodes[key]}
-        </div>
-      ))}
+      {nextStore.order.map((key) => {
+        const node = nextStore.nodes[key];
+        if (node == null) return null;
+        // The active outlet owns this element. A hidden twin stays display:none
+        // and React will not paint the same element in the visible slot.
+        if (key !== displayKey && (node === activeNode || node === children)) return null;
+        return (
+          <div
+            key={key}
+            hidden={key !== displayKey}
+            inert={key !== displayKey ? true : undefined}
+            {...{ [HOUSE_CLIENT_SHELL.screenAttr]: key }}
+            {...(key === displayKey ? { [HOUSE_CLIENT_SHELL.screenActiveAttr]: "" } : {})}
+          >
+            {node}
+          </div>
+        );
+      })}
       {ingress}
     </>
   );

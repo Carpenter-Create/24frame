@@ -194,6 +194,12 @@ export function houseForgetUnlisted(keys: readonly string[]): void {
   }
 }
 
+/** Painted keys are exactly the slots that hold a tree. An empty slot is not a warm hop. */
+export function houseSyncPainted(keys: readonly string[]): void {
+  paintedScreens.clear();
+  for (const key of keys) paintedScreens.add(key);
+}
+
 export function housePaintedKeys(): string[] {
   return [...paintedScreens];
 }
@@ -220,10 +226,12 @@ export type HouseChildSeen = {
 /**
  * Stale on the key-change render itself — do not wait for setState.
  *
- * `keyChanged || (guard.key === nextKey && child === snapshot)`.
+ * Stale only when the live tree is still the previous screen
+ * (`child === seen.child` on the flip, or still the flip snapshot).
+ * A tree that already differs has swapped. Marking every key change
+ * stale hid that screen: the slot stayed empty and the pane stayed white.
  * The committed guard still has the previous key on the flip render,
- * so a check that requires `guard.key === nextKey` misses that frame,
- * ingests the previous tree, and `storeHasKey` blocks the real screen.
+ * so sameness is `child === seen.child`, not `guard.key === nextKey`.
  */
 export function houseSyncChildSeen(
   seen: HouseChildSeen | null,
@@ -235,15 +243,16 @@ export function houseSyncChildSeen(
   }
 
   const keyChanged = seen.key !== nextKey;
+  const sameTree = child === seen.child;
   const childrenStale =
-    keyChanged ||
-    (seen.key === nextKey && seen.snapshot !== null && child === seen.snapshot);
+    (keyChanged && sameTree) ||
+    (!keyChanged && seen.snapshot !== null && child === seen.snapshot);
 
   if (keyChanged) {
     return {
       seen: {
         key: nextKey,
-        snapshot: child === seen.child ? child : null,
+        snapshot: sameTree ? child : null,
         child,
       },
       childrenStale,
@@ -314,6 +323,19 @@ export function houseCanIngest(
  * setState. A stale or fallback tree already stored under `nextKey`
  * is dropped. A proven-fresh tree replaces that slot.
  */
+export function houseBlankOutlet(
+  displayKey: string | null,
+  showIngress: boolean,
+  activeKey: string,
+  nextKey: string,
+): "none" | "refresh" | "load" {
+  if (displayKey !== null || showIngress) return "none";
+  // Owned URL with no slot. Next is still on the other screen — ask it to load this one.
+  if (activeKey !== nextKey) return "load";
+  // Next is already on this URL and the slot is empty. Revalidate, then accept the settled tree.
+  return "refresh";
+}
+
 export function houseApplyCachedChild<T>(input: {
   seen: HouseChildSeen | null;
   nextKey: string;
@@ -323,6 +345,8 @@ export function houseApplyCachedChild<T>(input: {
   fallback: boolean;
   order: readonly string[];
   nodes: Record<string, T>;
+  /** Next revalidated this URL and the tree did not change. It is the screen. */
+  acceptStale?: boolean;
 }): {
   seen: HouseChildSeen;
   childrenStale: boolean;
@@ -331,7 +355,18 @@ export function houseApplyCachedChild<T>(input: {
   displayKey: string | null;
   showIngress: boolean;
 } {
-  const advanced = houseSyncChildSeen(input.seen, input.nextKey, input.child);
+  let advanced = houseSyncChildSeen(input.seen, input.nextKey, input.child);
+  if (
+    input.acceptStale &&
+    input.activeKey === input.nextKey &&
+    advanced.childrenStale &&
+    !input.fallback
+  ) {
+    advanced = {
+      seen: { key: input.nextKey, snapshot: null, child: input.child },
+      childrenStale: false,
+    };
+  }
   let order = input.order;
   let nodes = input.nodes;
 
@@ -362,10 +397,14 @@ export function houseApplyCachedChild<T>(input: {
     const nextOrder = houseTouchOrder(order, input.nextKey);
     const nextNodes: Record<string, T> = { [input.nextKey]: input.child };
     for (const key of nextOrder) {
-      if (key !== input.nextKey && key in nodes) nextNodes[key] = nodes[key] as T;
+      // One element, one slot. A hidden copy of the same tree keeps it
+      // display:none and the visible outlet stays white.
+      if (key !== input.nextKey && key in nodes && nodes[key] !== input.child) {
+        nextNodes[key] = nodes[key] as T;
+      }
     }
     nodes = nextNodes;
-    order = nextOrder;
+    order = nextOrder.filter((key) => key in nextNodes);
   }
 
   if (input.activeKey in nodes && order[0] !== input.activeKey) {
@@ -378,7 +417,13 @@ export function houseApplyCachedChild<T>(input: {
     order = nextOrder;
   }
 
-  const display = houseResolveDisplay(input.activeKey, input.activeKey in nodes, input.fallback);
+  const hasSlot = input.activeKey in nodes && nodes[input.activeKey] != null;
+  const paintLive =
+    !advanced.childrenStale &&
+    input.activeKey === input.nextKey &&
+    !hasSlot &&
+    !input.fallback;
+  const display = houseResolveDisplay(input.activeKey, hasSlot, input.fallback, paintLive);
   const orderSame =
     order === input.order ||
     (order.length === input.order.length && order.every((key, index) => key === input.order[index]));
@@ -408,16 +453,18 @@ export function houseApplyCachedChild<T>(input: {
  * ingress (live RSC / loading skeleton).
  *
  * When activeKey is not in the store, the live children are either a
- * skeleton or still the previous screen. Paint the skeleton. Do not
- * keep the previous screen visible — the URL and rail have already
- * moved, and a stuck slot would leave that screen up forever.
+ * skeleton, the fresh screen, or still the previous screen. Paint the
+ * skeleton and any fresh tree. Do not paint the previous screen — the
+ * URL and rail have already moved. An empty slot must not stay empty
+ * once the live tree is the screen for this key (`paintLive`).
  */
 export function houseResolveDisplay(
   activeKey: string,
   known: boolean,
   fallback: boolean,
+  paintLive = false,
 ): { displayKey: string | null; showIngress: boolean } {
   if (known) return { displayKey: activeKey, showIngress: false };
-  if (fallback) return { displayKey: null, showIngress: true };
+  if (fallback || paintLive) return { displayKey: null, showIngress: true };
   return { displayKey: null, showIngress: false };
 }
