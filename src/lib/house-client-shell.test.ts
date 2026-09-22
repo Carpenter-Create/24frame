@@ -7,7 +7,9 @@ import FollowsLoading from "@/app/(app)/social/u/[handle]/follows/loading";
 
 import {
   HOUSE_CLIENT_SHELL,
+  houseApplyCachedChild,
   houseCanIngest,
+  houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
   houseHrefKey,
   houseNavHop,
@@ -18,6 +20,7 @@ import {
   houseRememberScroll,
   houseResolveDisplay,
   houseScreenKey,
+  houseSyncChildSeen,
   houseShouldClientNavigate,
   houseShouldKeepAlive,
   houseTouchOrder,
@@ -159,6 +162,18 @@ describe("houseCanIngest — stable-ingest guard", () => {
     ).toBe(false);
   });
 
+  it("replaces a stored tree when a proven-fresh child differs", () => {
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, true, false, true),
+    ).toBe(true);
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, true, true, true),
+    ).toBe(false);
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", true, true, false, true),
+    ).toBe(false);
+  });
+
   it("blocks ingest when activeKey differs from nextKey (warm hop while Next lags)", () => {
     expect(
       houseCanIngest("/social", "/social/profile", "/social", false, false, false),
@@ -173,31 +188,20 @@ describe("houseCanIngest — stable-ingest guard", () => {
 });
 
 describe("houseResolveDisplay — cold-nav display", () => {
-  const storeHas = (keys: string[]) => (k: string) => keys.includes(k);
-
   it("shows the cached screen when activeKey is known", () => {
-    const result = houseResolveDisplay("/social", true, false, null, storeHas(["/social"]));
+    const result = houseResolveDisplay("/social", true, false);
     expect(result).toEqual({ displayKey: "/social", showIngress: false });
   });
 
   it("shows ingress (skeleton) when children is an RSC fallback", () => {
-    const result = houseResolveDisplay("/social/profile", false, true, "/social", storeHas(["/social"]));
+    const result = houseResolveDisplay("/social/profile", false, true);
     expect(result).toEqual({ displayKey: null, showIngress: true });
   });
 
-  it("keeps the previous cached screen when children is stale (not fallback, not known)", () => {
-    const result = houseResolveDisplay("/social/profile", false, false, "/social", storeHas(["/social"]));
-    expect(result).toEqual({ displayKey: "/social", showIngress: false });
-  });
-
-  it("returns null displayKey when no previous screen is cached", () => {
-    const result = houseResolveDisplay("/social/profile", false, false, null, storeHas([]));
+  it("does not show the previous screen when the URL key is not stored", () => {
+    const result = houseResolveDisplay("/social/profile", false, false);
     expect(result).toEqual({ displayKey: null, showIngress: false });
-  });
-
-  it("returns null displayKey when previous screen has been evicted", () => {
-    const result = houseResolveDisplay("/social/profile", false, false, "/social", storeHas([]));
-    expect(result).toEqual({ displayKey: null, showIngress: false });
+    expect(result.displayKey).not.toBe("/social/dms");
   });
 });
 
@@ -276,17 +280,14 @@ function routeFromLoadingFile(file: string): string {
 function coldFollowsNav(loading: ReactNode, page: ReactNode) {
   const profile = createElement("div", { "data-social-profile": "" }, "profile");
   let nodes: Record<string, ReactNode> = { "/social/profile": profile };
-  let order = ["/social/profile"];
   const has = (key: string) => key in nodes;
-  const lead = () => order[0] ?? null;
 
   const apply = (children: ReactNode, stale: boolean) => {
     const fallback = isHouseRscFallback(children);
     if (houseCanIngest(FOLLOWS_KEY, FOLLOWS_KEY, FOLLOWS_PATH, fallback, has(FOLLOWS_KEY), stale)) {
       nodes = { ...nodes, [FOLLOWS_KEY]: children };
-      order = [FOLLOWS_KEY, ...order.filter((key) => key !== FOLLOWS_KEY)];
     }
-    return houseResolveDisplay(FOLLOWS_KEY, has(FOLLOWS_KEY), fallback, lead(), has);
+    return houseResolveDisplay(FOLLOWS_KEY, has(FOLLOWS_KEY), fallback);
   };
 
   return {
@@ -315,7 +316,7 @@ describe("follows cold nav leaves the skeleton", () => {
     const loading = FollowsLoading();
     expect(isHouseRscFallback(loading)).toBe(true);
     const nav = coldFollowsNav(loading, page);
-    expect(nav.flip).toEqual({ displayKey: "/social/profile", showIngress: false });
+    expect(nav.flip).toEqual({ displayKey: null, showIngress: false });
     expect(nav.loading).toEqual({ displayKey: null, showIngress: true });
     expect(nav.page).toEqual({ displayKey: FOLLOWS_KEY, showIngress: false });
     expect(nav.stored).toBe(page);
@@ -330,5 +331,139 @@ describe("follows cold nav leaves the skeleton", () => {
     expect(nav.page.showIngress).toBe(false);
     expect(nav.stored).toBe(unmarked);
     expect(nav.stored).not.toBe(page);
+  });
+});
+
+const SOCIAL_RAIL = [
+  SOCIAL_ROUTES.home,
+  SOCIAL_ROUTES.explore,
+  SOCIAL_ROUTES.create,
+  SOCIAL_ROUTES.dms,
+  SOCIAL_ROUTES.profile,
+] as const;
+
+function railTree(key: string): { screen: string } {
+  return { screen: key };
+}
+
+function cacheStep(
+  seen: Parameters<typeof houseApplyCachedChild>[0]["seen"],
+  key: string,
+  child: unknown,
+  nodes: Record<string, unknown>,
+  order: readonly string[],
+) {
+  return houseApplyCachedChild({
+    seen,
+    nextKey: key,
+    activeKey: key,
+    nextPath: key,
+    child,
+    fallback: false,
+    nodes,
+    order,
+  });
+}
+
+describe("Social rail cache flips", () => {
+  it("treats the flip render as stale while the committed guard still has the old key", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const committed = { key: SOCIAL_ROUTES.dms, snapshot: null, child: messages };
+    expect(committed.key).not.toBe(SOCIAL_ROUTES.profile);
+
+    const flip = houseSyncChildSeen(committed, SOCIAL_ROUTES.profile, messages);
+    expect(flip.childrenStale).toBe(true);
+
+    const applied = cacheStep(committed, SOCIAL_ROUTES.profile, messages, { [SOCIAL_ROUTES.dms]: messages }, [SOCIAL_ROUTES.dms]);
+    expect(applied.childrenStale).toBe(true);
+    expect(applied.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    expect(applied.displayKey).not.toBe(SOCIAL_ROUTES.profile);
+    expect(applied.displayKey).not.toBe(SOCIAL_ROUTES.dms);
+  });
+
+  it("drops a poisoned slot and stores the fresh tree when it arrives", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const poisoned = cacheStep(
+      { key: SOCIAL_ROUTES.profile, snapshot: messages, child: messages },
+      SOCIAL_ROUTES.profile,
+      messages,
+      { [SOCIAL_ROUTES.profile]: messages },
+      [SOCIAL_ROUTES.profile],
+    );
+    expect(poisoned.childrenStale).toBe(true);
+    expect(poisoned.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    expect(poisoned.displayKey).toBeNull();
+
+    const healed = cacheStep(poisoned.seen, SOCIAL_ROUTES.profile, profile, poisoned.nodes, poisoned.order);
+    expect(healed.childrenStale).toBe(false);
+    expect(healed.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(healed.displayKey).toBe(SOCIAL_ROUTES.profile);
+  });
+
+  it("replaces a poisoned slot when the fresh tree differs from the stored node", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const healed = cacheStep(
+      { key: SOCIAL_ROUTES.profile, snapshot: null, child: messages },
+      SOCIAL_ROUTES.profile,
+      profile,
+      { [SOCIAL_ROUTES.profile]: messages },
+      [SOCIAL_ROUTES.profile],
+    );
+    expect(healed.childrenStale).toBe(false);
+    expect(healed.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(healed.nodes[SOCIAL_ROUTES.profile]).not.toBe(messages);
+    expect(healed.displayKey).toBe(SOCIAL_ROUTES.profile);
+  });
+
+  it("keeps URL key, stored tree, and display aligned for every rail hop", () => {
+    for (const from of SOCIAL_RAIL) {
+      for (const to of SOCIAL_RAIL) {
+        if (from === to) continue;
+        const fromTree = railTree(from);
+        const toTree = railTree(to);
+        const booted = cacheStep(null, from, fromTree, {}, []);
+        const settled = cacheStep(booted.seen, from, fromTree, booted.nodes, booted.order);
+        expect(settled.nodes[from]).toBe(fromTree);
+        expect(settled.displayKey).toBe(from);
+
+        const flip = cacheStep(settled.seen, to, fromTree, settled.nodes, settled.order);
+        const flipRestart = cacheStep(flip.seen, to, fromTree, flip.nodes, flip.order);
+        expect(flip.childrenStale).toBe(true);
+        expect(flipRestart.childrenStale).toBe(true);
+        expect(flipRestart.nodes[to]).toBeUndefined();
+        expect(flipRestart.displayKey).toBeNull();
+
+        const landed = cacheStep(flipRestart.seen, to, toTree, flipRestart.nodes, flipRestart.order);
+        expect(landed.childrenStale).toBe(false);
+        expect(landed.nodes[to]).toBe(toTree);
+        expect(landed.displayKey).toBe(to);
+        expect(landed.nodes[from]).toBe(fromTree);
+      }
+    }
+  });
+
+  it("ingests a child that arrives in the same render as the key, on the restart", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const booted = cacheStep(null, SOCIAL_ROUTES.dms, messages, {}, []);
+    const settled = cacheStep(booted.seen, SOCIAL_ROUTES.dms, messages, booted.nodes, booted.order);
+    const flip = cacheStep(settled.seen, SOCIAL_ROUTES.profile, profile, settled.nodes, settled.order);
+    expect(flip.childrenStale).toBe(true);
+    expect(flip.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    const restart = cacheStep(flip.seen, SOCIAL_ROUTES.profile, profile, flip.nodes, flip.order);
+    expect(restart.childrenStale).toBe(false);
+    expect(restart.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(restart.displayKey).toBe(SOCIAL_ROUTES.profile);
+  });
+
+  it("marks warm history so Next does not restore the previous flight tree", () => {
+    const prior = { __PRIVATE_NEXTJS_INTERNALS_TREE: { tree: SOCIAL_ROUTES.dms } };
+    const state = houseClientHistoryState(prior);
+    expect(state.__NA).toBe(true);
+    expect(state.houseClient).toBe(true);
+    expect(state.__PRIVATE_NEXTJS_INTERNALS_TREE).toEqual({ tree: SOCIAL_ROUTES.dms });
+    expect(houseClientHistoryState(null).__NA).toBe(true);
   });
 });

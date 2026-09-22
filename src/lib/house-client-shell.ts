@@ -204,6 +204,85 @@ export function resetHousePaintedForTests(): void {
 }
 
 /**
+ * What the shell last committed for the live RSC slot.
+ * `snapshot` is the child tree captured when the URL key moved and that
+ * tree had not swapped yet. It stays set across the render-phase
+ * restart so the same reference is still stale after setState commits.
+ * `child` is the last tree rendered. A child that arrives already
+ * different from `child` on the key-change render is not snapshotted.
+ */
+export type HouseChildSeen = {
+  key: string;
+  snapshot: unknown;
+  child: unknown;
+};
+
+/**
+ * Stale on the key-change render itself — do not wait for setState.
+ *
+ * `keyChanged || (guard.key === nextKey && child === snapshot)`.
+ * The committed guard still has the previous key on the flip render,
+ * so a check that requires `guard.key === nextKey` misses that frame,
+ * ingests the previous tree, and `storeHasKey` blocks the real screen.
+ */
+export function houseSyncChildSeen(
+  seen: HouseChildSeen | null,
+  nextKey: string,
+  child: unknown,
+): { seen: HouseChildSeen; childrenStale: boolean } {
+  if (seen === null) {
+    return { seen: { key: nextKey, snapshot: null, child }, childrenStale: false };
+  }
+
+  const keyChanged = seen.key !== nextKey;
+  const childrenStale =
+    keyChanged ||
+    (seen.key === nextKey && seen.snapshot !== null && child === seen.snapshot);
+
+  if (keyChanged) {
+    return {
+      seen: {
+        key: nextKey,
+        snapshot: child === seen.child ? child : null,
+        child,
+      },
+      childrenStale,
+    };
+  }
+
+  if (seen.snapshot !== null && child === seen.snapshot) {
+    if (seen.child === child) return { seen, childrenStale };
+    return { seen: { ...seen, child }, childrenStale };
+  }
+
+  if (seen.snapshot === null && seen.child === child) {
+    return { seen, childrenStale };
+  }
+
+  return { seen: { key: nextKey, snapshot: null, child }, childrenStale };
+}
+
+/**
+ * History entry for a warm client hop.
+ *
+ * Next 16 patches `history.pushState` and, unless the state is marked
+ * `__NA`, dispatches ACTION_RESTORE with the *previous* FlightRouterState
+ * and the new URL. That restore keeps the previous screen (and its rail
+ * selection) mounted while the address bar already shows the dest.
+ * `__NA` is the same flag Next sets on its own history writes to skip
+ * that restore. The previous flight tree is copied so Back is not a
+ * full reload.
+ */
+export function houseClientHistoryState(prior: unknown): Record<string, unknown> & {
+  __NA: true;
+  houseClient: true;
+} {
+  const base =
+    prior !== null && typeof prior === "object" ? { ...(prior as Record<string, unknown>) } : {};
+  return { ...base, __NA: true, houseClient: true };
+}
+
+/**
  * Stable-ingest guard. Returns true only when it is safe to capture
  * live `children` into the keep-alive store under `nextKey`.
  *
@@ -211,9 +290,7 @@ export function resetHousePaintedForTests(): void {
  * swaps, so `children` is still the *previous* screen's tree.
  * Ingesting that stale tree under the new key poisons the cache.
  *
- * `childrenStale` is true when the current children reference matches
- * a snapshot taken at the moment nextKey last changed — i.e. children
- * has not been refreshed since the key flip.
+ * `childrenStale` comes from `houseSyncChildSeen`.
  */
 export function houseCanIngest(
   nextKey: string,
@@ -222,9 +299,10 @@ export function houseCanIngest(
   fallback: boolean,
   storeHasKey: boolean,
   childrenStale: boolean,
+  storedDiffers = false,
 ): boolean {
   if (fallback) return false;
-  if (storeHasKey) return false;
+  if (storeHasKey && !storedDiffers) return false;
   if (!houseShouldKeepAlive(nextPath)) return false;
   if (activeKey !== nextKey) return false;
   if (childrenStale) return false;
@@ -232,23 +310,114 @@ export function houseCanIngest(
 }
 
 /**
+ * One cache render. Stale is decided from the committed guard before
+ * setState. A stale or fallback tree already stored under `nextKey`
+ * is dropped. A proven-fresh tree replaces that slot.
+ */
+export function houseApplyCachedChild<T>(input: {
+  seen: HouseChildSeen | null;
+  nextKey: string;
+  activeKey: string;
+  nextPath: string;
+  child: T;
+  fallback: boolean;
+  order: readonly string[];
+  nodes: Record<string, T>;
+}): {
+  seen: HouseChildSeen;
+  childrenStale: boolean;
+  order: readonly string[];
+  nodes: Record<string, T>;
+  displayKey: string | null;
+  showIngress: boolean;
+} {
+  const advanced = houseSyncChildSeen(input.seen, input.nextKey, input.child);
+  let order = input.order;
+  let nodes = input.nodes;
+
+  const poisoned =
+    (advanced.childrenStale || input.fallback) &&
+    input.nextKey in nodes &&
+    nodes[input.nextKey] === input.child;
+  if (poisoned) {
+    const nextNodes = { ...nodes };
+    delete nextNodes[input.nextKey];
+    nodes = nextNodes;
+    order = order.filter((key) => key !== input.nextKey);
+  }
+
+  const has = input.nextKey in nodes;
+  const storedDiffers = has && nodes[input.nextKey] !== input.child;
+  if (
+    houseCanIngest(
+      input.nextKey,
+      input.activeKey,
+      input.nextPath,
+      input.fallback,
+      has,
+      advanced.childrenStale,
+      storedDiffers,
+    )
+  ) {
+    const nextOrder = houseTouchOrder(order, input.nextKey);
+    const nextNodes: Record<string, T> = { [input.nextKey]: input.child };
+    for (const key of nextOrder) {
+      if (key !== input.nextKey && key in nodes) nextNodes[key] = nodes[key] as T;
+    }
+    nodes = nextNodes;
+    order = nextOrder;
+  }
+
+  if (input.activeKey in nodes && order[0] !== input.activeKey) {
+    const nextOrder = houseTouchOrder(order, input.activeKey);
+    const nextNodes: Record<string, T> = {};
+    for (const key of nextOrder) {
+      if (key in nodes) nextNodes[key] = nodes[key] as T;
+    }
+    nodes = nextNodes;
+    order = nextOrder;
+  }
+
+  const display = houseResolveDisplay(input.activeKey, input.activeKey in nodes, input.fallback);
+  const orderSame =
+    order === input.order ||
+    (order.length === input.order.length && order.every((key, index) => key === input.order[index]));
+  if (advanced.seen === input.seen && nodes === input.nodes && orderSame) {
+    return {
+      seen: advanced.seen,
+      childrenStale: advanced.childrenStale,
+      order: input.order,
+      nodes: input.nodes,
+      displayKey: display.displayKey,
+      showIngress: display.showIngress,
+    };
+  }
+
+  return {
+    seen: advanced.seen,
+    childrenStale: advanced.childrenStale,
+    order,
+    nodes,
+    displayKey: display.displayKey,
+    showIngress: display.showIngress,
+  };
+}
+
+/**
  * Resolves which cached screen to display and whether to paint
  * ingress (live RSC / loading skeleton).
  *
- * When activeKey is not in the store:
- *  - Fallback children (RSC skeleton) → show as ingress.
- *  - Non-fallback children (may be stale) → keep the most recent
- *    cached screen (`storeLeadKey`) visible; never paint stale content.
+ * When activeKey is not in the store, the live children are either a
+ * skeleton or still the previous screen. Paint the skeleton. Do not
+ * keep the previous screen visible — the URL and rail have already
+ * moved, and a stuck slot would leave that screen up forever.
  */
 export function houseResolveDisplay(
   activeKey: string,
   known: boolean,
   fallback: boolean,
-  storeLeadKey: string | null,
-  storeHasKey: (key: string) => boolean,
 ): { displayKey: string | null; showIngress: boolean } {
   if (known) return { displayKey: activeKey, showIngress: false };
   if (fallback) return { displayKey: null, showIngress: true };
-  const prev = storeLeadKey && storeHasKey(storeLeadKey) ? storeLeadKey : null;
-  return { displayKey: prev, showIngress: false };
+  return { displayKey: null, showIngress: false };
 }
