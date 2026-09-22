@@ -14,7 +14,7 @@ import {
 describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
   it("locks column width, banner heights, master still, and avatar hang", () => {
     expect(SOCIAL_PROFILE_COVER_LOCK_A.columnWidth).toBe(SOCIAL_DESKTOP_MEASURE.center);
-    expect(SOCIAL_PROFILE_COVER_LOCK_A.columnWidth).toBe(600);
+    expect(SOCIAL_PROFILE_COVER_LOCK_A.columnWidth).toBe(720);
     expect(SOCIAL_POST_IMAGE_SIZES).toBe(`(max-width: 1023px) 100vw, ${SOCIAL_DESKTOP_MEASURE.center}px`);
     expect(SOCIAL_PROFILE_COVER_IMAGE_SIZES).toBe(SOCIAL_POST_IMAGE_SIZES);
     expect(SOCIAL_POST_IMAGE_SIZES).not.toContain("892");

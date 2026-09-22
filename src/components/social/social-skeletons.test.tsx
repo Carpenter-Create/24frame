@@ -91,7 +91,10 @@ describe("Social loading skeletons", () => {
     );
     expect(profile).not.toContain("size-6");
     expect(profile).toContain("mt-[var(--space-3)]");
-    expect(profile).toContain("lg:max-w-[600px]");
+    expect(profile).toContain("lg:max-w-[720px]");
+    expect(profile).toContain("lg:max-w-[1052px]");
+    expect(profile).not.toContain("lg:max-w-[600px]");
+    expect(profile).not.toContain("lg:max-w-[932px]");
     expect(profile).not.toContain("md:max-w-[892px]");
     expect(profile).not.toContain("892");
     expect(profile).toContain("bg-surface-muted");
@@ -107,11 +110,15 @@ describe("Social loading skeletons", () => {
     expect(explore).toContain("data-social-explore-skeleton");
     expect(explore).toContain("data-social-explore-results-skeleton");
     expect(explore).toContain("data-social-for-you-skeleton");
-    expect(explore).toContain("lg:max-w-[600px]");
+    expect(explore).toContain("lg:max-w-[720px]");
+    expect(explore).toContain("lg:max-w-[1052px]");
+    expect(explore).not.toContain("lg:max-w-[600px]");
     expect(explore).not.toContain("892");
     expect(dms).toContain("data-social-dms-skeleton");
     expect(dms).toContain("data-social-for-you-skeleton");
-    expect(dms).toContain("lg:max-w-[600px]");
+    expect(dms).toContain("lg:max-w-[720px]");
+    expect(dms).toContain("lg:max-w-[1052px]");
+    expect(dms).not.toContain("lg:max-w-[600px]");
     expect(dms).not.toContain("892");
     expect(follows).toContain("data-social-follows-skeleton");
 
