@@ -47,9 +47,11 @@ export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136
 // Adam + Joshua 2026-09-22: X-narrow center. FB familiarity and
 // house type stay. Geometry only.
 // dest 200 | gutter 16 | center 600 | gutter 16 | For you 300 | padR 16 = 1148.
-// A 1440 canvas keeps 292px of side air. Do not stretch the center
-// to fill it. For you stays 300. Phone is full-bleed of the phone
-// canvas: the cap applies at lg, when the For You rail appears.
+// Adam 2026-09-22: the row spans the content canvas. Leftover air
+// sits between the center and For You, so For You sits on the right
+// of the screen. Do not pack the cluster to the start. Do not stretch
+// the center past 600. For you stays 300. Phone is full-bleed of the
+// phone canvas: the cap applies at lg, when the For You rail appears.
 export const SOCIAL_DESKTOP_MEASURE = {
   dest: 200,
   gutter: 16,
@@ -90,7 +92,12 @@ export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-4)] pb-[var(--space-12)]";
 
-export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
+// One shell for every Social row. Full width of the content canvas.
+// justify-between parks For You on the right once the center hits its
+// cap. Below lg the rail is display:none, so the spread is a no-op
+// and the center stays full-bleed.
+export const SOCIAL_HOME_LAYOUT_CLASS =
+  "flex w-full items-start justify-between gap-[16px]";
 
 // Shared center column. Home, Explore, Messages, and Profile use this
 // string — no width fork. flex-1 fills the desktop row until the lg
@@ -102,9 +109,9 @@ const socialShellCenterClass =
 export const SOCIAL_HOME_CENTER_CLASS = socialShellCenterClass;
 
 // Profile desktop row matches Home: this column plus SocialForYouRail
-// at lg+. Explore and Messages use that same row. Side air is the
-// leftover gutter. The column does not run edge to edge. Phone stays
-// the full phone canvas.
+// at lg+. Explore and Messages use that same row. The center stays
+// X-narrow. Leftover canvas sits between this column and For You.
+// Phone stays the full phone canvas.
 export const SOCIAL_PROFILE_CENTER_CLASS = socialShellCenterClass;
 
 // 40px face. Export name stays so search, home, and overview share one SoT.
