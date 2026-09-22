@@ -99,8 +99,9 @@ export const SOCIAL_HOME_CENTER_CLASS =
 export const SOCIAL_PROFILE_CENTER_CLASS =
   "mx-auto flex w-full min-w-0 flex-col gap-2 md:max-w-[892px]";
 
+// 40px face. Export name stays so search, home, and overview share one SoT.
 export const SOCIAL_AVATAR_32_CLASS =
-  "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-label font-medium text-ink-2";
+  "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
 
 export const SOCIAL_SURFACE_RADIUS_CLASS = "rounded-[var(--radius-lg)]";
 
@@ -225,25 +226,25 @@ export const SOCIAL_STORY_CARET_CLASS =
 // Photo · Video · Write · Go live stay on that sheet — never a second
 // chooser strip on Home.
 export const SOCIAL_COMPOSER_CLASS =
-  "hidden md:flex h-16 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
+  "hidden md:flex h-20 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
-  "flex h-9 min-w-0 flex-1 items-center t-body text-ink-2";
+  "flex h-11 min-w-0 flex-1 items-center t-body text-ink-2";
 
 export const SOCIAL_COMPOSER_MEDIA_CLASS =
   "relative flex size-9 shrink-0 cursor-pointer items-center justify-center text-ink-2";
 
 export const SOCIAL_FOLLOW_COMPACT_CLASS =
-  "inline-flex items-center rounded-[8px] bg-accent px-[10px] py-[5px] text-[11px] font-semibold text-accent-contrast";
+  "inline-flex items-center rounded-[8px] bg-accent px-[var(--space-3)] py-[var(--space-2)] t-body-sm font-semibold text-accent-contrast";
 
 export const SOCIAL_FOLLOW_COMPACT_IDLE_CLASS =
-  "inline-flex items-center rounded-[8px] border border-hairline bg-surface px-[10px] py-[5px] text-[11px] font-semibold text-ink";
+  "inline-flex items-center rounded-[8px] border border-hairline bg-surface px-[var(--space-3)] py-[var(--space-2)] t-body-sm font-semibold text-ink";
 
 export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
 export const SOCIAL_FEED_ROW_CLASS =
-  `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
+  `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)]`;
 
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).
@@ -387,20 +388,20 @@ export const SOCIAL_PROFILE_STATS_GRID_CLASS =
 export const SOCIAL_PROFILE_STAT_CLASS =
   "flex min-w-0 flex-col items-center justify-center py-[var(--space-1)] text-center";
 
-export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-body font-semibold tabular-nums text-ink";
+export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-heading font-semibold tabular-nums text-ink";
 
 export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
 
 export const SOCIAL_PROFILE_FACE_CLASS = "flex flex-col items-start gap-1";
 
-export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-body font-semibold text-ink";
+export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-heading font-semibold text-ink";
 
 // Roles → Edit/Share was cramped (face gap-1). Extra --space-3 before
 // the action row; no magic pixels. Same class for own + public.
 export const SOCIAL_PROFILE_ACTIONS_CLASS =
   "mt-[var(--space-3)] flex w-full items-center gap-2";
 
-export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
+export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body text-ink whitespace-pre-wrap";
 
 // Adam lock A 2026-09-20: calm muted type. Not chips, not
 // brand-colored glyphs. Phone stacks — never truncate. Same class for
@@ -441,7 +442,13 @@ export const SOCIAL_FIRST_WIN_CLASS =
   "flex flex-col items-center justify-center gap-2.5 rounded-[8px] border border-hairline bg-surface px-5 pb-4 pt-5 text-center";
 
 export const SOCIAL_AVATAR_SM_CLASS =
-  "flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-label font-medium text-ink-2";
+  "flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
+
+// Person row and create-author stack. Primary is body; secondary is
+// body-sm. Wrap. Never an 11px crumb.
+export const SOCIAL_PERSON_PRIMARY_CLASS = "block break-words t-body font-semibold text-ink";
+
+export const SOCIAL_PERSON_SECONDARY_CLASS = "block break-words t-body-sm text-ink-2";
 
 export const SOCIAL_AVATAR_LG_CLASS =
   "flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[length:var(--text-title)] font-semibold text-ink-2";
@@ -479,7 +486,7 @@ export const SOCIAL_PROFILE_EDIT_SHEET_CLASS =
   "flex h-full w-full flex-col overflow-y-auto bg-bg md:h-auto md:max-h-[90dvh] md:w-[480px] md:rounded-[16px] md:border md:border-hairline md:bg-surface";
 
 export const SOCIAL_PROFILE_EDIT_HEADER_CLASS =
-  "flex h-14 shrink-0 items-center gap-2 border-b border-hairline bg-surface py-2 pl-2 pr-4";
+  "flex h-16 shrink-0 items-center gap-2 border-b border-hairline bg-surface py-2 pl-2 pr-4";
 
 export const SOCIAL_PROFILE_EDIT_BACK_CLASS =
   "flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink";
@@ -560,7 +567,7 @@ export const SOCIAL_SHARE_SHEET_WASH_CLASS =
   "pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-accent/18 to-transparent md:h-[520px] md:from-accent/12";
 
 export const SOCIAL_SHARE_SHEET_CHROME_CLASS =
-  "relative flex h-14 shrink-0 items-center px-[var(--space-4)]";
+  "relative flex h-16 shrink-0 items-center px-[var(--space-4)]";
 
 export const SOCIAL_SHARE_SHEET_CLOSE_CLASS =
   "flex size-10 shrink-0 items-center justify-center rounded-full bg-ink/8 text-ink";
@@ -593,7 +600,7 @@ export const SOCIAL_CREATE_WELL_CLASS =
   "flex h-[220px] w-full flex-col items-center justify-center gap-2 rounded-[8px] border border-dashed border-hairline bg-surface-muted px-4 py-7 text-center md:h-[320px] md:gap-2.5 md:px-6 md:py-10";
 
 export const SOCIAL_CREATE_AVATAR_CLASS =
-  "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[12px] font-semibold text-ink-2 md:size-10 md:text-[14px]";
+  "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body-sm font-semibold text-ink-2 md:size-12";
 
 export const SOCIAL_STORY_PICKER_CLASS =
   "flex w-full max-w-[420px] flex-col gap-4 rounded-[24px] border border-hairline bg-surface p-6";

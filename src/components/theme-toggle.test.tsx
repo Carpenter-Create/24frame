@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { THEME_TOGGLE, themeToggleLabel } from "@/lib/theme";
@@ -25,9 +26,9 @@ describe("header theme toggle", () => {
     expect(html).toContain('data-theme-glyph="moon"');
     expect(html).not.toContain('data-theme-glyph="sun"');
     expect(html).toContain(HOUSE_THEME_TOGGLE_CLASS);
-    expect(html).toContain("md:size-[var(--header-control-size)]");
-    expect(html).toContain("md:min-h-[var(--header-control-size)]");
-    expect(html).toContain("md:min-w-[var(--header-control-size)]");
+    expect(html).toContain("size-[var(--header-control-size)]");
+    expect(html).toContain("min-h-[var(--header-control-size)]");
+    expect(html).toContain("min-w-[var(--header-control-size)]");
     expect(html).not.toContain("size-[44px]");
     expect(html).toContain(HOUSE_ICON_BUTTON_CLASS);
     expect(html).not.toContain("purple");
@@ -37,7 +38,8 @@ describe("header theme toggle", () => {
     expect(html).not.toContain("strokeWidth");
     expect(html).toContain('fill="currentColor"');
     expect(html).toContain('viewBox="0 0 256 256"');
-    expect(html).toContain(PHOSPHOR_CHROME_ICON_CLASS);
+    expect(html).toContain(HOUSE_HEADER_TRAILING_ICON_CLASS);
+    expect(html).not.toContain(PHOSPHOR_CHROME_ICON_CLASS);
     expect(themeToggleLabel("light")).toBe(THEME_TOGGLE.toDark);
     expect(themeToggleLabel("dark")).toBe(THEME_TOGGLE.toLight);
   });

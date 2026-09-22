@@ -127,7 +127,7 @@ describe("MobileAccountMenu trigger", () => {
     expect(html).toContain('aria-expanded="false"');
     expect(html).toContain("md:hidden");
     expect(html).toContain(HOUSE_HEADER_TRAILING_AVATAR_CLASS);
-    expect(html).toContain("h-8 w-8");
+    expect(html).toContain("size-[var(--header-avatar-size)]");
     expect(html).toContain("rounded-full");
     expect(html).toContain("bg-surface-muted");
     expect(html).toContain(">N<");
@@ -315,7 +315,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(identity).toContain("ada@example.com");
     expect(identity).not.toContain("Ada Lovelace");
     expect(identity).not.toContain("Manage account");
-    expect(nameClass).toContain("t-body");
+    expect(nameClass).toContain("t-heading");
+    expect(nameClass).not.toContain("t-body");
     expect(nameClass).toContain("text-ink");
     expect(nameClass).not.toContain("text-accent");
     expect(emailClass).toContain("t-body-sm");
@@ -785,7 +786,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(nameClass).not.toContain("ellipsis");
     expect(emailClass).not.toContain("truncate");
     expect(emailClass).not.toContain("ellipsis");
-    expect(avatarClass).toContain("size-12");
+    expect(avatarClass).toContain("size-14");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("Adam Carpenter");
     expect(html).not.toContain("admin@ccbfg.com");

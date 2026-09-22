@@ -44,9 +44,9 @@ describe("SideNav Access rail", () => {
     const globals = readFileSync("src/app/globals.css", "utf8");
     expect(navSrc).toContain("HOUSE_RAIL_ITEM_CLASS");
     expect(navSrc).toContain("house --text-base / t-body labels");
-    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-base:\s*1\.0625rem;/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
-    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-6");
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("text-[0.875rem]");
     expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);

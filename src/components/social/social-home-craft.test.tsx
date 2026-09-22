@@ -76,7 +76,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("AC");
     expect(html).not.toContain("<img");
     expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("h-20");
     expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
     expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");

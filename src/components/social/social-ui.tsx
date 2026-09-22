@@ -21,6 +21,8 @@ import {
   SOCIAL_PROFILE_HEAD_OVERLAP_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_META_CLASS,
+  SOCIAL_PERSON_PRIMARY_CLASS,
+  SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
@@ -90,11 +92,11 @@ export function SocialPersonRow({
     <>
       <SocialAvatar name={person.avatarName} photoUrl={photoUrl} size={size} />
       <span className="min-w-0">
-        <span data-social-person-handle="" className="block break-words text-[12px] font-semibold text-ink">
+        <span data-social-person-handle="" className={SOCIAL_PERSON_PRIMARY_CLASS}>
           {person.handleLabel}
         </span>
         {person.name ? (
-          <span data-social-person-name="" className="block break-words text-[11px] text-ink-2">
+          <span data-social-person-name="" className={SOCIAL_PERSON_SECONDARY_CLASS}>
             {person.name}
           </span>
         ) : null}

@@ -77,12 +77,10 @@ describe("HouseAiMark", () => {
     expect(html).toContain('fill="none"');
     expect(html).toContain('stroke="currentColor"');
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
-    // Phone header trailing renders at 16px (Adam #451 authoritative
-    // lock — split from the Mercury bar's 24px). Mutation to size-6
-    // (Mercury hold) or size-5 (retired #448/#450 middle) fails here.
-    expect(html).toContain("size-4");
-    expect(html).not.toContain("size-6");
-    expect(html).not.toContain("size-5");
+    // Phone header trailing renders at 24px, split from the dock's 28px.
+    expect(html).toContain("size-6");
+    expect(html).not.toContain("size-7");
+    expect(html).not.toContain("size-4");
     expect(html).toContain("md:hidden");
     // Ink parity — phone AI stroke rides the bottom-bar idle ink so the
     // sparkles read at the same optical weight as the Mercury Regular
@@ -112,14 +110,13 @@ describe("HouseAiMark", () => {
     expect(header).toContain("data-house-ai-mark");
     expect(header).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
     expect(header).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
-    // Phone header trailing renders at 16px (Adam #451). Both phone
-    // stroke and desktop fill instances land on size-4; the Mercury
-    // bar 24px lives on a separate SoT, and the retired size-5 must
-    // not reappear on the header.
-    expect(header).toContain("size-4");
-    expect(header).not.toContain("size-6");
-    expect(header).not.toContain("size-5");
-    expect(header).toContain("md:size-4");
+    // Phone header trailing is 24px. Desktop header fill is 20px.
+    // Dock 28px stays off this control.
+    expect(header).toContain("size-6");
+    expect(header).toContain("size-5");
+    expect(header).not.toContain("size-7");
+    expect(header).not.toContain("size-4");
+    expect(header).toContain("md:size-5");
     expect(header).toContain('data-house-ai-mark-register="stroke"');
     expect(header).toContain('data-house-ai-mark-register="fill"');
     expect(header).not.toContain("lucide-");

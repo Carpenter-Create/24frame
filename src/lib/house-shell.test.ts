@@ -186,7 +186,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("inline-flex");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("w-full");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("text-left");
-    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-6");
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(HOUSE_RAIL_ICON_CLASS).toBe("flex size-5 shrink-0 items-center justify-center");
     expect(HOUSE_RAIL_LABEL_CLASS).toBe("min-w-0 flex-1 truncate text-left");
@@ -448,7 +448,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RAIL_IDLE_CLASS).toBe("text-ink hover:bg-surface-muted");
     expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
     expect(HOUSE_RAIL_TITLE_CLASS).toBe("px-2 pb-1 t-label text-ink-3");
-    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-6");
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
 

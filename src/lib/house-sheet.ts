@@ -9,7 +9,7 @@ export const CLOSE_44_CLASS =
 
 export const TEXT_ACTION_CLASS = "t-body-sm text-accent";
 
-// House empty line — same 15 Regular as catalog / titles empties.
+// House empty line — same 17 Regular as catalog / titles empties.
 // Do not invent product copy in the primitive.
 export const HOUSE_EMPTY_CLASS = "t-body text-ink-2";
 
@@ -19,9 +19,9 @@ export const SHEET_GROUP_CHEVRON_CLASS = "size-4 shrink-0 text-ink-3";
 export const IDENTITY_BLOCK_CLASS = "flex min-w-0 items-center gap-[var(--space-4)]";
 
 export const IDENTITY_AVATAR_CLASS =
-  "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body text-ink-2";
+  "flex size-14 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body text-ink-2";
 
-export const IDENTITY_NAME_CLASS = "t-body text-ink";
+export const IDENTITY_NAME_CLASS = "t-heading text-ink";
 
 export const IDENTITY_EMAIL_CLASS = "t-body-sm text-ink-3";
 
@@ -31,7 +31,7 @@ export const SHEET_GROUP_LABEL_CLASS =
   "text-[length:var(--text-xs)] font-normal uppercase tracking-[0.08em] text-ink-2";
 
 export const SHEET_GROUP_ITEM_CLASS =
-  "flex w-full items-center justify-between text-[length:var(--text-base)] font-normal leading-5 text-ink";
+  "flex w-full items-center justify-between text-[length:var(--text-base)] font-normal leading-6 text-ink";
 
 // App-sheet motion — one duration/easing for the account instance.
 // Rise from the bottom, ease-out, no bounce. Reduced
@@ -50,9 +50,9 @@ export const APP_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
 
 export const APP_SHEET_SURFACE_CLASS =
-  "flex w-full flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface px-[var(--space-4)] pb-[var(--space-12)] pt-[var(--space-6)] app-sheet-rise";
+  "flex w-full flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-12)] pt-[var(--space-6)] app-sheet-rise";
 
-export const APP_SHEET_HEAD_CLASS = "flex h-[44px] shrink-0 items-center";
+export const APP_SHEET_HEAD_CLASS = "flex h-14 shrink-0 items-center";
 
 export const APP_SHEET_HAIRLINE_CLASS = "h-px w-full bg-hairline";
 

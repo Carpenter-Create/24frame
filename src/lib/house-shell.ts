@@ -62,7 +62,7 @@ export const HOUSE_HEADER_SEARCH_GAP_CLASS = "gap-[var(--space-4)]";
 export const HOUSE_RAIL_TITLE_CLASS = "px-2 pb-1 t-label text-ink-3";
 
 export const HOUSE_RAIL_ITEM_CLASS =
-  "relative inline-flex w-full items-center rounded-full text-left t-body leading-4 t-rail transition-colors";
+  "relative inline-flex w-full items-center rounded-full text-left t-body leading-6 t-rail transition-colors";
 
 // Dest icon column + label start. Social glyphs are 20 (size-5);
 // Create Plus must share this box so "Create" lines up with Home ·

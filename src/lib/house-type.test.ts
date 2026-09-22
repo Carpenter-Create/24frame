@@ -52,16 +52,21 @@ const HOUSE_ROLE_PATHS = [
 ];
 
 describe("house type ladder", () => {
-  it("locks the shared rem ladder to 12 / 13 / 15 / 17 / 24 / 48", () => {
-    expect(tokens).toMatch(/--text-xs:\s*0\.75rem;/);
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
-    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
-    expect(tokens).toMatch(/--text-lg:\s*1\.0625rem;/);
-    expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
-    expect(tokens).toMatch(/--text-hero:\s*3rem;/);
+  it("locks the shared rem ladder to 13 / 15 / 17 / 20 / 28 / 56", () => {
+    expect(tokens).toMatch(/--text-xs:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-base:\s*1\.0625rem;/);
+    expect(tokens).toMatch(/--text-lg:\s*1\.25rem;/);
+    expect(tokens).toMatch(/--text-title:\s*1\.75rem;/);
+    expect(tokens).toMatch(/--text-hero:\s*3\.5rem;/);
+    expect(tokens).not.toMatch(/--text-xs:\s*0\.75rem;/);
     expect(tokens).not.toMatch(/--text-xs:\s*0\.6875rem;/);
+    expect(tokens).not.toMatch(/--text-base:\s*0\.9375rem;/);
+    expect(tokens).not.toMatch(/--text-title:\s*1\.5rem;/);
     expect(tokens).not.toMatch(/--text-title:\s*1\.25rem;/);
+    expect(tokens).not.toMatch(/--text-hero:\s*3rem;/);
     expect(tokens).not.toMatch(/--text-hero:\s*2\.5rem;/);
+    expect(tokens).not.toMatch(/12 \/ 13 \/ 15 \/ 17 \/ 24 \/ 48/);
     expect(tokens).not.toMatch(/11 \/ 12 \/ 13 \/ 15 \/ 20 \/ 40/);
     expect(tokens).not.toMatch(/title→20|hero→40|title->20|hero->40/);
   });
@@ -169,7 +174,7 @@ describe("house type roles", () => {
   });
 
   it("sizes the rail to house body 420 — not t-body-sm + idle font-normal", () => {
-    // Coinbase-pop A2 size + A3 weight: rail is 15px t-body, inherits 420.
+    // Rail is 17px t-body, inherits 420.
     // A4: t-rail tracking only. Do not invent a second rail weight.
     expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
     expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-rail(?:[\s"]|$)/);

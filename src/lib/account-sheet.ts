@@ -120,7 +120,7 @@ export const ACCOUNT_SHEET_LEFTOVER_CLASS =
   "h-[var(--space-6)] w-full shrink-0";
 
 export const ACCOUNT_SHEET_LOGOUT_CLASS =
-  "flex items-center gap-[var(--space-2)] text-[length:var(--text-base)] font-normal leading-5 text-accent";
+  "flex items-center gap-[var(--space-2)] text-[length:var(--text-base)] font-normal leading-6 text-accent";
 
 // Mobile pin — Log out, hairline, footer are siblings. Log out →
 // hairline 16. Hairline → footer 16. Footer → bottom 32 (sheet

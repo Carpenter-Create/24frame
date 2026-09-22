@@ -35,7 +35,7 @@ describe("UserMenuIdentity", () => {
     expect(html).toContain("ada@example.com");
     expect(html).toContain(">A<");
     expect(html).not.toContain("<img");
-    expect(html).toContain("size-12");
+    expect(html).toContain("size-14");
     expect(html).toContain("t-body-sm text-ink-3");
     expect(html).not.toContain("data-user-menu-name");
     expect(visibleText(html)).not.toMatch(/Notifications|Privacy|Phone|Job/);
@@ -47,7 +47,7 @@ describe("UserMenuIdentity", () => {
     );
     expect(html).toContain('data-user-menu-name=""');
     expect(html).toContain("Ada Lovelace");
-    expect(html).toContain("t-body text-ink");
+    expect(html).toContain("t-heading text-ink");
     expect(html).not.toContain("t-body font-normal");
     expect(html).toContain("t-body-sm text-ink-3");
   });
