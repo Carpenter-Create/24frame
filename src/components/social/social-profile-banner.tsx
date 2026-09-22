@@ -8,30 +8,23 @@ import {
   SOCIAL_PROFILE_COVER_IMAGE_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_PROFILE_COVER_IMAGE_SIZES } from "@/lib/social-media-display";
+import { socialProfileCoverPhoto } from "@/lib/social-profile-cover";
 
-export function SocialProfileBanner({
-  coverUrl,
-  coverEdit,
-}: {
-  coverUrl?: string | null;
-  coverEdit?: ReactNode;
-}) {
-  const photo = coverUrl?.trim() ? coverUrl : null;
+/** Visitor cover. No photo → no band. Owner empty wash lives on SocialProfileCoverBlock. */
+export function SocialProfileBanner({ coverUrl }: { coverUrl?: string | null }) {
+  const photo = socialProfileCoverPhoto(coverUrl);
+  if (!photo) return null;
   return (
     <div
       data-social-profile-cover=""
-      data-social-profile-cover-empty={photo ? undefined : ""}
-      className={cn(SOCIAL_PROFILE_COVER_CLASS, !photo ? SOCIAL_PROFILE_COVER_EMPTY_CLASS : "bg-surface-muted")}
+      className={cn(SOCIAL_PROFILE_COVER_CLASS, "bg-surface-muted")}
     >
-      {photo ? (
-        <SocialMediaImage
-          src={photo}
-          sizes={SOCIAL_PROFILE_COVER_IMAGE_SIZES}
-          priority
-          className={SOCIAL_PROFILE_COVER_IMAGE_CLASS}
-        />
-      ) : null}
-      {coverEdit}
+      <SocialMediaImage
+        src={photo}
+        sizes={SOCIAL_PROFILE_COVER_IMAGE_SIZES}
+        priority
+        className={SOCIAL_PROFILE_COVER_IMAGE_CLASS}
+      />
     </div>
   );
 }
@@ -43,13 +36,16 @@ export function SocialProfileCoverBlock({
   coverUrl?: string | null;
   coverEdit?: ReactNode;
 }) {
-  const photo = coverUrl?.trim() ? coverUrl : null;
+  const photo = socialProfileCoverPhoto(coverUrl);
   return (
     <div data-social-profile-cover-block="" className="relative">
       <div
         data-social-profile-cover=""
         data-social-profile-cover-empty={photo ? undefined : ""}
-        className={cn(SOCIAL_PROFILE_COVER_CLASS, !photo ? SOCIAL_PROFILE_COVER_EMPTY_CLASS : "bg-surface-muted")}
+        className={cn(
+          SOCIAL_PROFILE_COVER_CLASS,
+          !photo ? SOCIAL_PROFILE_COVER_EMPTY_CLASS : "bg-surface-muted",
+        )}
       >
         {photo ? (
           <SocialMediaImage

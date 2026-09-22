@@ -5,6 +5,8 @@ import {
   SOCIAL_PROFILE_COVER_HANG_DESKTOP_PX,
   SOCIAL_PROFILE_COVER_HANG_MOBILE_PX,
   SOCIAL_PROFILE_COVER_LOCK_A,
+  socialProfileCoverPhoto,
+  socialProfileRendersCoverBand,
 } from "@/lib/social-profile-cover";
 
 describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
@@ -28,6 +30,43 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(chrome).toContain("-mt-[29px]");
     expect(chrome).toContain("md:-mt-[35px]");
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_EDIT_CLASS");
+  });
+
+  it("omits the visitor band unless a real cover photo exists", () => {
+    expect(socialProfileCoverPhoto(null)).toBeNull();
+    expect(socialProfileCoverPhoto(undefined)).toBeNull();
+    expect(socialProfileCoverPhoto("")).toBeNull();
+    expect(socialProfileCoverPhoto("   ")).toBeNull();
+    expect(socialProfileCoverPhoto("  https://cf.example/cover.jpg  ")).toBe(
+      "https://cf.example/cover.jpg",
+    );
+    expect(socialProfileRendersCoverBand({ coverUrl: null, owner: false })).toBe(false);
+    expect(socialProfileRendersCoverBand({ coverUrl: "   ", owner: false })).toBe(false);
+    expect(
+      socialProfileRendersCoverBand({
+        coverUrl: "https://cf.example/cover.jpg",
+        owner: false,
+      }),
+    ).toBe(true);
+    expect(socialProfileRendersCoverBand({ coverUrl: null, owner: true })).toBe(true);
+    expect(
+      socialProfileRendersCoverBand({
+        coverUrl: "https://cf.example/cover.jpg",
+        owner: true,
+      }),
+    ).toBe(true);
+
+    const banner = readFileSync("src/components/social/social-profile-banner.tsx", "utf8");
+    const visitor = banner.slice(
+      banner.indexOf("export function SocialProfileBanner"),
+      banner.indexOf("export function SocialProfileCoverBlock"),
+    );
+    expect(visitor).toContain("if (!photo) return null");
+    expect(visitor).not.toContain("SOCIAL_PROFILE_COVER_EMPTY_CLASS");
+    expect(visitor).not.toContain("data-social-profile-cover-empty");
+    const owner = banner.slice(banner.indexOf("export function SocialProfileCoverBlock"));
+    expect(owner).toContain("SOCIAL_PROFILE_COVER_EMPTY_CLASS");
+    expect(owner).toContain("data-social-profile-cover-empty");
   });
 
   it("labels master as LinkedIn header SoT", () => {

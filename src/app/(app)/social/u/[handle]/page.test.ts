@@ -80,6 +80,7 @@ type PublicProfile = {
   display_name: string;
   status: string;
   bio: string | null;
+  cover_key?: string | null;
   crafts?: string[] | null;
   topics?: string[] | null;
   imdb_url?: string | null;
@@ -162,8 +163,18 @@ describe("Social public profile", () => {
     const html = await renderPublic();
     expect(html).toContain("data-social-member");
     expect(html).toContain("data-social-profile-identity");
-    expect(html).toContain("data-social-profile-cover");
+    expect(html).not.toContain('data-social-profile-cover=""');
+    expect(html).not.toContain("data-social-profile-cover-empty");
     expect(html).not.toContain("data-social-profile-cover-edit");
+    const head = html.slice(
+      html.indexOf("data-social-profile-head"),
+      html.indexOf("data-social-profile-face"),
+    );
+    expect(head).toContain("data-social-avatar");
+    expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("-mt-[29px]");
+    expect(head).not.toContain("md:-mt-[35px]");
+    expect(head).not.toContain("h-[112px]");
     expect(html).not.toContain("data-social-profile-avatar-edit");
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain("@ada");
@@ -206,6 +217,25 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-roles");
     expect(html).not.toContain("data-social-profile-topics");
     expect(html).not.toContain("data-social-profile-imdb");
+  });
+
+  it("shows the cover band when the visited profile has a cover photo", async () => {
+    stubClient({
+      member: { ...ada, cover_key: "posts/u2/cover.jpg" },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-cover");
+    expect(html).toContain("posts%2Fu2%2Fcover.jpg");
+    expect(html).not.toContain("data-social-profile-cover-empty");
+    expect(html).not.toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("bg-accent-wash");
+    const head = html.slice(
+      html.indexOf("data-social-profile-head"),
+      html.indexOf("data-social-profile-face"),
+    );
+    expect(head).toContain("-mt-[29px]");
+    expect(head).toContain("md:-mt-[35px]");
+    expect(head).toContain("Ada Lovelace");
   });
 
   it("prints individual Profession pills after bio and omits a Professions prefix", async () => {

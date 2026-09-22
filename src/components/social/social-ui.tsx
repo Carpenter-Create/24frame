@@ -43,6 +43,7 @@ import {
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
+import { socialProfileRendersCoverBand } from "@/lib/social-profile-cover";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
   SOCIAL_POST_IMAGE_SIZES,
@@ -257,16 +258,21 @@ export function SocialProfileIdentity({
       {actions}
     </div>
   ) : null;
+  const ownerCover = Boolean(coverEdit);
+  const showCoverBand = socialProfileRendersCoverBand({ coverUrl, owner: ownerCover });
 
   return (
     <div data-social-profile-identity="" className={SOCIAL_PROFILE_IDENTITY_CLASS}>
       <div data-social-profile-cover-stack="" className={SOCIAL_PROFILE_COVER_STACK_CLASS}>
-        {coverEdit ? (
+        {ownerCover ? (
           <SocialProfileCoverBlock coverUrl={coverUrl} coverEdit={coverEdit} />
         ) : (
           <SocialProfileBanner coverUrl={coverUrl} />
         )}
-        <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}>
+        <div
+          data-social-profile-head=""
+          className={showCoverBand ? SOCIAL_PROFILE_HEAD_OVERLAP_CLASS : undefined}
+        >
           <div className={SOCIAL_PROFILE_HEAD_CLASS}>
             <div className="relative shrink-0">
               <SocialAvatar

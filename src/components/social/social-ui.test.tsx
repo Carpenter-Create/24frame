@@ -218,11 +218,10 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("actions?: () => ReactNode");
     expect(uiSrc).not.toContain("{actions()}");
     expect(identity).toContain("data-social-profile-identity");
-    expect(identity).toContain("data-social-profile-cover");
-    expect(identity).toContain("data-social-profile-cover-empty");
-    expect(identity.indexOf("data-social-profile-cover")).toBeLessThan(
-      identity.indexOf("data-social-profile-head"),
-    );
+    expect(identity).not.toContain('data-social-profile-cover=""');
+    expect(identity).not.toContain("data-social-profile-cover-empty");
+    expect(identity).not.toContain("h-[112px]");
+    expect(identity).not.toContain("bg-accent-wash");
     expect(identity).toContain("data-social-profile-head");
     expect(identity).toContain("data-social-profile-face");
     expect(identity).toContain("data-social-profile-name");
@@ -236,8 +235,8 @@ describe("Social profile public face", () => {
       identity.indexOf("data-social-profile-head"),
       identity.indexOf("data-social-profile-face"),
     );
-    expect(identityHead).toContain("-mt-[29px]");
-    expect(identityHead).toContain("md:-mt-[35px]");
+    expect(identityHead).not.toContain("-mt-[29px]");
+    expect(identityHead).not.toContain("md:-mt-[35px]");
     expect(identityHead).toContain("border-2 border-surface");
     expect(identityHead).toContain("data-social-avatar");
     expect(identityHead).toContain("data-social-profile-meta");
@@ -254,6 +253,7 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("socialShareHint");
     expect(uiSrc).toContain("data-social-profile-head");
     expect(uiSrc).toContain("SocialProfileBanner");
+    expect(uiSrc).toContain("socialProfileRendersCoverBand");
     expect(uiSrc).toContain("SOCIAL_PROFILE_COVER_STACK_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
@@ -1022,5 +1022,90 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(postCard).not.toContain("SOCIAL.home.photoKind");
     expect(postCard).not.toContain("SOCIAL.create.text");
     expect(postCard).not.toContain("SOCIAL.follow.following");
+  });
+});
+
+describe("Social profile cover band", () => {
+  it("omits the empty band and avatar hang for a visitor with no cover", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileIdentity name="Ada Lovelace" handle="ada" coverUrl="   " />,
+    );
+    expect(html).not.toContain('data-social-profile-cover=""');
+    expect(html).not.toContain("data-social-profile-cover-empty");
+    expect(html).not.toContain("h-[112px]");
+    expect(html).not.toContain("md:h-[224px]");
+    expect(html).not.toContain("bg-accent-wash");
+    expect(html).not.toContain("-mt-[29px]");
+    expect(html).not.toContain("md:-mt-[35px]");
+    expect(html).toContain("data-social-profile-head");
+    expect(html).toContain("data-social-profile-name");
+    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain("data-social-avatar");
+  });
+
+  it("shows the cover photo and avatar hang when a visitor has a cover", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        coverUrl="https://cf.example/cover.jpg"
+      />,
+    );
+    expect(html).toContain('src="https://cf.example/cover.jpg"');
+    expect(html).toContain("data-social-profile-cover");
+    expect(html).not.toContain("data-social-profile-cover-empty");
+    expect(html).not.toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("bg-accent-wash");
+    expect(html.indexOf("data-social-profile-cover")).toBeLessThan(
+      html.indexOf("data-social-profile-head"),
+    );
+    const head = html.slice(
+      html.indexOf("data-social-profile-head"),
+      html.indexOf("data-social-profile-face"),
+    );
+    expect(head).toContain("-mt-[29px]");
+    expect(head).toContain("md:-mt-[35px]");
+    expect(head).toContain("Ada Lovelace");
+  });
+
+  it("keeps the empty band, Add cover chrome, and avatar hang on the owner profile", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        coverUrl={null}
+        coverEdit={<button type="button" data-social-profile-cover-edit="">Add cover photo</button>}
+      />,
+    );
+    expect(html).toContain("data-social-profile-cover-block");
+    expect(html).toContain("data-social-profile-cover-empty");
+    expect(html).toContain("bg-accent-wash");
+    expect(html).toContain("h-[112px]");
+    expect(html).toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("<img");
+    const head = html.slice(
+      html.indexOf("data-social-profile-head"),
+      html.indexOf("data-social-profile-face"),
+    );
+    expect(head).toContain("-mt-[29px]");
+    expect(head).toContain("md:-mt-[35px]");
+    expect(head).toContain("Ada Lovelace");
+  });
+
+  it("keeps the photo and edit chrome when the owner has a cover", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        coverUrl="https://cf.example/cover.jpg"
+        coverEdit={<button type="button" data-social-profile-cover-edit="">Edit cover</button>}
+      />,
+    );
+    expect(html).toContain('src="https://cf.example/cover.jpg"');
+    expect(html).toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("data-social-profile-cover-empty");
+    expect(html).not.toContain("bg-accent-wash");
+    expect(html).toContain("-mt-[29px]");
+    expect(html).toContain("md:-mt-[35px]");
   });
 });

@@ -48,3 +48,21 @@ export const COVER_CROP_OUTPUT_WIDTH = SOCIAL_PROFILE_COVER_LOCK_A.masterWidth;
 export const COVER_CROP_OUTPUT_HEIGHT = SOCIAL_PROFILE_COVER_LOCK_A.masterHeight;
 export const COVER_CROP_OUTPUT_NAME = "cover.jpg";
 export const COVER_CROP_MAX_BYTES = 10 * 1024 * 1024;
+
+/** Trimmed cover URL. Blank is absent — visitors must not paint an empty band. */
+export function socialProfileCoverPhoto(coverUrl?: string | null): string | null {
+  if (typeof coverUrl !== "string") return null;
+  const photo = coverUrl.trim();
+  return photo.length > 0 ? photo : null;
+}
+
+/**
+ * Owner keeps the band so Add cover stays on it.
+ * Visitors render the band only when a real cover photo exists.
+ */
+export function socialProfileRendersCoverBand(input: {
+  coverUrl?: string | null;
+  owner: boolean;
+}): boolean {
+  return input.owner || socialProfileCoverPhoto(input.coverUrl) !== null;
+}

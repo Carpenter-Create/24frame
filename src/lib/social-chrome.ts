@@ -316,8 +316,10 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 }
 
 // Profile cover — Lock A. Full 892 column width; 4:1 band. Mobile 112px,
-// desktop 224px. Empty = accent wash. Avatar hangs ~40% below the banner
-// bottom (see social-profile-cover.ts). Owner pencil on banner only.
+// desktop 224px. Owner with no photo keeps the accent wash so Add cover
+// stays on the band. Visitors omit the band when no photo exists
+// (socialProfileRendersCoverBand). Avatar hangs ~40% below the banner
+// bottom only while that band is present (see social-profile-cover.ts).
 export const SOCIAL_PROFILE_COVER_CLASS =
   "relative w-full h-[112px] shrink-0 overflow-hidden md:h-[224px]";
 
