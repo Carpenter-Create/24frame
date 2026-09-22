@@ -861,7 +861,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("Instagram: one centered profile stack");
     expect(chrome).not.toContain("Facebook: side air / gutters");
     expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("flex-col");
-    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-title");
+    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-heading");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("t-title");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toMatch(/md:|max-md:|text-\[/);
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-bold");
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-semibold");
     expect(SOCIAL_PROFILE_HANDLE_CLASS).toContain("text-ink-2");

@@ -40,6 +40,13 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(chrome).toContain("43px phone");
     expect(chrome).toContain("53px desktop");
     expect(chrome).toContain("hang the face, never the name stack");
+    expect(chrome).toContain("Name is house t-heading");
+    expect(chrome).toMatch(
+      /export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-heading text-ink";/,
+    );
+    expect(chrome).not.toMatch(
+      /export const SOCIAL_PROFILE_NAME_CLASS = "[^"]*t-title/,
+    );
     expect(chrome).toContain("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
     const ui = readFileSync("src/components/social/social-ui.tsx", "utf8");
     const identity = ui.slice(

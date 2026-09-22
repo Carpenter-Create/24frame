@@ -379,10 +379,10 @@ export const SOCIAL_PROFILE_COVER_STACK_CLASS = "flex flex-col";
 
 // Avatar lip only. Phone 29px / desktop 35px (~40% of 72 / 88).
 // Adam lock 2026-09-22: hang the face, never the name stack.
-// One line of t-title (28 × 1.1) + --space-1 + t-body-sm (15 × 1.6)
-// is ~59px. The face below the lip is 43px phone (72 − 29) and
+// One line of t-heading (20 × 1.2) + --space-1 + t-body-sm (15 × 1.6)
+// is ~52px. The face below the lip is 43px phone (72 − 29) and
 // 53px desktop (88 − 35). A negative margin on the head row paints
-// the title into the cover; on a dark photo that ink disappears.
+// the name into the cover; on a dark photo that ink disappears.
 // Apply on the avatar column only.
 export const SOCIAL_PROFILE_HEAD_OVERLAP_CLASS =
   "relative z-10 -mt-[29px] md:-mt-[35px]";
@@ -439,14 +439,15 @@ export const SOCIAL_PROFILE_FACE_CLASS =
   `flex w-full min-w-0 flex-col gap-[var(--space-4)] pb-[var(--space-2)] ${SOCIAL_PROFILE_INSET_CLASS}`;
 
 // Phone and desktop share this stack (Adam 2026-09-22 profile phone).
-// Name is house t-title. @handle is muted body-sm on the next line,
-// beside the avatar. No breakpoint hides the handle. The 720 cap and
-// For You rail stay lg+ only. On a cover the avatar lips; the name
-// stack stays below the band.
+// Name is house t-heading (Adam lock 2026-09-22 follow-up). @handle is
+// muted t-body-sm on the next line, beside the avatar. No breakpoint
+// hides the handle or steps the name. The 720 cap and For You rail
+// stay lg+ only. On a cover the avatar lips; the name stack stays
+// below the band.
 export const SOCIAL_PROFILE_NAME_STACK_CLASS =
   "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-1)]";
 
-export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-title text-ink";
+export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-heading text-ink";
 
 export const SOCIAL_PROFILE_HANDLE_CLASS = "min-w-0 break-words t-body-sm text-ink-2";
 

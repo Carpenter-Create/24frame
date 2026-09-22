@@ -582,7 +582,9 @@ describe("Social profile public face", () => {
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[12px]");
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[16px]");
     expect(SOCIAL_PROFILE_NAME_CLASS).toContain("break-words");
-    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-title");
+    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-heading");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("t-title");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toMatch(/md:|max-md:|text-\[/);
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("truncate");
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-semibold");
     expect(withStats).not.toContain("truncate");
@@ -1134,6 +1136,8 @@ function expectNameBelowCover(html: string) {
   expect(handleAt).toBeGreaterThan(nameAt);
   expect(head.slice(hangTagEnd, nameAt)).toContain("data-social-avatar");
   const nameOpen = head.slice(head.lastIndexOf("<", nameAt), head.indexOf(">", nameAt));
+  expect(nameOpen).toContain("t-heading");
+  expect(nameOpen).not.toContain("t-title");
   expect(nameOpen).toContain("text-ink");
   expect(nameOpen).not.toContain("text-white");
   expect(nameOpen).not.toContain("text-band-ink");
