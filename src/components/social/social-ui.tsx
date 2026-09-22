@@ -127,7 +127,7 @@ export function SocialConversationFaces({
 
   const shown = people.slice(0, 2);
   return (
-    <div data-social-conversation-faces="" className="relative size-12 shrink-0">
+    <div data-social-conversation-faces="" className="relative size-14 shrink-0">
       <div className="absolute left-0 top-0 origin-top-left scale-75">
         <SocialAvatar name={shown[0].name} photoUrl={shown[0].photoUrl} />
       </div>

@@ -287,7 +287,7 @@ export function SocialDmsRowsSkeleton() {
           key={i}
           className="flex items-center gap-[var(--space-3)] border-b border-hairline py-[var(--space-4)]"
         >
-          <Skeleton className="size-12 rounded-full" />
+          <Skeleton className="size-14 rounded-full" />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-3 w-1/4" />

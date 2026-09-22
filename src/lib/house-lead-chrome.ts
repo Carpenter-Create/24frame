@@ -96,6 +96,8 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // is edge-to-edge theme · AI · bell · avatar. Do not cancel padding with -mx:
 // that pulled adjacent hits to zero flex width and stacked the glyphs.
 // Do not add phone padding that overflows the control box.
+// At 360px and below, tokens.css shortens header gap, insets, and the
+// avatar so this shrink-0 trail still clears the nowrap workspace word.
 // Desktop hits follow the same token (44 on the 88 bar).
 // Circular quiet, no muted wash, no hairline box.
 export const HOUSE_HEADER_TRAILING_HIT_CLASS =

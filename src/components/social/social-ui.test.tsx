@@ -113,6 +113,8 @@ describe("SocialConversationFaces", () => {
       />,
     );
     expect(html).toContain("data-social-conversation-faces");
+    expect(html).toContain('class="relative size-14 shrink-0"');
+    expect(html).not.toContain("size-12");
     expect(html).toContain("BO");
     expect(html).toContain("CO");
   });

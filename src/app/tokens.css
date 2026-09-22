@@ -150,6 +150,30 @@
   }
 }
 
+/* Narrow phone fit. Hits stay 24px and shrink-0; the workspace word
+   stays a full nowrap label. That rhythm clears 375. At 360px and
+   below the same stack meets the lead word (Aggregation near 356px,
+   Social's fifth hit near 352px). Shorten header gap, insets, and the
+   avatar to 32px so the word and the trail each keep their box. The
+   lead row stays overflow-visible (#412). Wider phones keep space-6,
+   space-3, the 40px avatar, and --chrome-gutter. */
+@media (max-width: 360px) {
+  [data-house-lead-chrome] {
+    --header-avatar-size: 32px;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 8px;
+  }
+  [data-app-header-leading],
+  [data-app-header-trailing] {
+    gap: 0.5rem;
+  }
+  [data-house-under-nav] {
+    padding-left: 0.5rem;
+    padding-right: 8px;
+  }
+}
+
 /* --- Neutral ramp — DARK (secondary; add class="dark") --- */
 .dark {
   /* Adam trial 2026-09-19 brand canvas; surfaces unchanged pending glance. */
