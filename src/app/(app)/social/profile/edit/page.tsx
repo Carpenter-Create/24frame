@@ -1,15 +1,23 @@
 import { SocialProfileEditForm } from "@/components/social/social-profile-edit";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaUrl } from "@/lib/s3-social-media";
-import { SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL_PROFILE_EDIT_FACE_PARAM, SOCIAL_ROUTES } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
+import { parseSocialProfileEditFace } from "@/lib/social-profile-edit";
 import { requireSocialSession } from "@/lib/social-session";
 import { redirect } from "next/navigation";
 
 export const runtime = "nodejs";
 
-export default async function SocialProfileEditPage() {
-  const { ctx, supabase } = await requireSocialSession();
+export default async function SocialProfileEditPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+} = {}) {
+  const [{ ctx, supabase }, sp] = await Promise.all([
+    requireSocialSession(),
+    searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
+  ]);
   const [{ profile }, photoUrl] = await Promise.all([
     ensureOwnSocialProfileResult(supabase, ctx.user),
     signedAvatarUrl(ctx.user.id),
@@ -31,6 +39,7 @@ export default async function SocialProfileEditPage() {
       topics={profile.topics ?? []}
       imdbUrl={profile.imdb_url ?? ""}
       websiteUrl={profile.website_url ?? ""}
+      initialFace={parseSocialProfileEditFace(sp[SOCIAL_PROFILE_EDIT_FACE_PARAM])}
     />
   );
 }

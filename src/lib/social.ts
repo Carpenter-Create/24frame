@@ -342,11 +342,17 @@ export function socialHomeLaneHref(lane: SocialHomeLane): string {
 }
 
 export const SOCIAL_PROFILE_TAB_PARAM = "tab";
-export const SOCIAL_PROFILE_TABS = ["activity", "highlights", "credits"] as const;
+export const SOCIAL_PROFILE_TABS = ["activity", "highlights", "credits", "interests"] as const;
 export type SocialProfileTab = (typeof SOCIAL_PROFILE_TABS)[number];
 export const SOCIAL_PROFILE_DEFAULT_TAB: SocialProfileTab = "activity";
 /** Retired top-level Posts tab. Bookmarks hard-redirect to Activity + Posts pill. */
 export const SOCIAL_PROFILE_LEGACY_POSTS_TAB = "posts";
+/** Opens the existing Edit profile Topics drill. Not a second editor. */
+export const SOCIAL_PROFILE_EDIT_FACE_PARAM = "face";
+
+export function socialProfileEditTopicsHref(): string {
+  return `${SOCIAL_ROUTES.profileEdit}?${SOCIAL_PROFILE_EDIT_FACE_PARAM}=topics`;
+}
 
 export function isLegacySocialProfilePostsTab(
   raw: string | string[] | undefined | null,
@@ -357,7 +363,33 @@ export function isLegacySocialProfilePostsTab(
 
 export function parseSocialProfileTab(raw: string | string[] | undefined | null): SocialProfileTab {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "highlights" || value === "credits" ? value : SOCIAL_PROFILE_DEFAULT_TAB;
+  if (value && (SOCIAL_PROFILE_TABS as readonly string[]).includes(value)) {
+    return value as SocialProfileTab;
+  }
+  return SOCIAL_PROFILE_DEFAULT_TAB;
+}
+
+/**
+ * Interests stays on the shared tab list. Visitors with no Topics omit it.
+ * Own profile always keeps the tab so the empty state can point at Edit Topics.
+ */
+export function socialProfileVisibleTabs(input: {
+  owner: boolean;
+  topicCount: number;
+}): readonly SocialProfileTab[] {
+  if (input.owner || input.topicCount > 0) return SOCIAL_PROFILE_TABS;
+  return SOCIAL_PROFILE_TABS.filter((tab) => tab !== "interests");
+}
+
+/** Unknown tabs and a hidden Interests deep link land on Activity. */
+export function resolveSocialProfileTab(
+  raw: string | string[] | undefined | null,
+  tabs: readonly SocialProfileTab[] = SOCIAL_PROFILE_TABS,
+): SocialProfileTab {
+  const requested = parseSocialProfileTab(raw);
+  if (tabs.includes(requested)) return requested;
+  if (tabs.includes(SOCIAL_PROFILE_DEFAULT_TAB)) return SOCIAL_PROFILE_DEFAULT_TAB;
+  return tabs[0] ?? SOCIAL_PROFILE_DEFAULT_TAB;
 }
 
 export function socialProfileTabHref(base: string, tab: SocialProfileTab): string {
@@ -375,6 +407,8 @@ export function socialProfileTabLabel(tab: SocialProfileTab): string {
       return SOCIAL.profile.highlightsTab;
     case "credits":
       return SOCIAL.profile.creditsTab;
+    case "interests":
+      return SOCIAL.profile.interestsTab;
     default:
       return SOCIAL.profile.activityTab;
   }
@@ -676,6 +710,9 @@ export const SOCIAL = {
     creditsEmpty: "No credits yet",
     creditsEmptyHint: "Credits are the titles and roles attached to your name.",
     creditsEmptyOwnHint: "Add the titles and roles you want attached to your name.",
+    interestsTab: "Interests",
+    interestsEmpty: "No interests yet.",
+    interestsEmptyOwnHint: "Choose topics on Edit profile.",
     postsStat: "posts",
     followersStat: "followers",
     followingStat: "following",

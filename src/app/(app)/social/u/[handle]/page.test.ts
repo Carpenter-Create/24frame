@@ -208,6 +208,8 @@ describe("Social public profile", () => {
     expect(html).toContain(SOCIAL.profile.creditsTab);
     expect(html).toContain('data-social-profile-tab="activity"');
     expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).not.toContain('data-social-profile-tab="interests"');
+    expect(html).not.toContain(SOCIAL.profile.interestsTab);
     expect(html).not.toContain('data-social-profile-tab="posts"');
     expect(html).toContain('data-social-activity-pill="posts"');
     expect(html).toContain("overflow-x-auto");
@@ -298,16 +300,77 @@ describe("Social public profile", () => {
     expect(html).not.toContain("Topics:");
   });
 
-  it("prints selected Topics chips and never a Topics prefix", async () => {
+  it("keeps Roles on the face and lists Topics only on Interests", async () => {
     stubClient({
-      member: { ...ada, topics: ["Acting", "Financing"] },
+      member: { ...ada, crafts: ["actor"], topics: ["Acting", "Financing"] },
     });
+    const listed = await renderPublic();
+    const listedFace = listed.slice(
+      listed.indexOf("data-social-profile-face"),
+      listed.indexOf("data-social-profile-tabs"),
+    );
+    expect(listedFace).toContain('data-social-profile-role="actor"');
+    expect(listedFace).not.toContain("data-social-profile-topic");
+    expect(listed).toContain('data-social-profile-tab="interests"');
+    expect(listed).not.toContain("data-social-profile-interests");
+    expect(listed).not.toContain("Topics:");
+
+    const html = await renderServerMarkup(
+      await SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@ada" }),
+        searchParams: Promise.resolve({ tab: "interests" }),
+      }),
+    );
+    const face = html.slice(
+      html.indexOf("data-social-profile-face"),
+      html.indexOf("data-social-profile-tabs"),
+    );
+    expect(face).toContain("data-social-profile-roles");
+    expect(face).toContain('data-social-profile-role="actor"');
+    expect(face).not.toContain("data-social-profile-topics");
+    expect(face).not.toContain("data-social-profile-topic");
+    const panelStart = html.indexOf("data-social-profile-interests");
+    const panelEnd = html.indexOf("data-social-for-you", panelStart);
+    const panel = html.slice(panelStart, panelEnd === -1 ? undefined : panelEnd);
+    expect(panel).toContain('data-social-profile-topic="Acting"');
+    expect(panel).toContain('data-social-profile-topic="Financing"');
+    expect(panel).toContain("flex-wrap");
+    expect(panel).not.toContain("truncate");
+    expect(panel).not.toContain("text-ellipsis");
+    expect(html).not.toContain("data-social-profile-interests-edit");
+    expect(panel).not.toContain(">Actor<");
+    expect(face).toContain(">Actor<");
+  });
+
+  it("omits Interests for a visitor with no Topics and falls back from the deep link", async () => {
+    stubClient({ member: ada });
     const html = await renderPublic();
-    expect(html).toContain("data-social-profile-topics");
-    expect(html).toContain('data-social-profile-topic="Acting"');
-    expect(html).toContain("Acting");
-    expect(html).not.toContain("Topics:");
-    expect(html).not.toContain("Actor");
+    expect(html).not.toContain('data-social-profile-tab="interests"');
+    expect(html).not.toContain("data-social-profile-interests");
+
+    await expect(
+      SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@ada" }),
+        searchParams: Promise.resolve({ tab: "interests" }),
+      }),
+    ).rejects.toThrow("REDIRECT:/social/u/ada");
+  });
+
+  it("keeps Interests on the viewer's own public route when Topics are empty", async () => {
+    stubClient({ member: { ...viewer, bio: null } });
+    vi.mocked(ensureOwnSocialProfile).mockResolvedValue(viewer);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx("u1") as never);
+
+    const html = await renderServerMarkup(
+      await SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@bob" }),
+        searchParams: Promise.resolve({ tab: "interests" }),
+      }),
+    );
+    expect(html).toContain('data-social-profile-tab="interests"');
+    expect(html).toContain("data-social-profile-interests-empty");
+    expect(html).toContain('href="/social/profile/edit?face=topics"');
+    expect(html).not.toContain("data-social-profile-topic=");
   });
 
   it("renders Instagram as a quiet icon and omits the links row when empty", async () => {
@@ -457,6 +520,16 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-follow");
     expect(html).not.toContain("data-social-profile-form");
     expect(html).not.toContain("data-social-profile-photo");
+  });
+
+  it("drops a hidden Interests deep link when the handle casing redirects", async () => {
+    stubClient({ member: { ...ada, handle: "AdamC" } });
+    await expect(
+      SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "adamc" }),
+        searchParams: Promise.resolve({ tab: "interests" }),
+      }),
+    ).rejects.toThrow("REDIRECT:/@AdamC");
   });
 
   it("redirects a casing miss to the stored public URL", async () => {

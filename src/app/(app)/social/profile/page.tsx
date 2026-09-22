@@ -6,6 +6,7 @@ import { HouseLink } from "@/components/chrome/house-link";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
+import { SocialProfileInterests } from "@/components/social/social-profile-interests";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
@@ -221,6 +222,8 @@ async function SocialProfileMain({
         ) : (
           <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
         )
+      ) : tab === "interests" ? (
+        <SocialProfileInterests topics={identity.topics} owner />
       ) : (
         <SocialActivityHistory
           baseHref={SOCIAL_ROUTES.profile}

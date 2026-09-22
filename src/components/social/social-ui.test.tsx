@@ -304,11 +304,10 @@ describe("Social profile public face", () => {
       identityMarkup.indexOf("{actionRow}"),
     );
     expect(identityMarkup.indexOf("{actionRow}")).toBeLessThan(
-      identityMarkup.indexOf("data-social-profile-topics"),
-    );
-    expect(identityMarkup.indexOf("data-social-profile-topics")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-mutuals"),
     );
+    expect(identityMarkup).not.toContain("data-social-profile-topics");
+    expect(identityMarkup).not.toContain("data-social-profile-topic");
     expect(uiSrc).toContain("data-social-profile-handle");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
@@ -427,20 +426,19 @@ describe("Social profile public face", () => {
     expect(adamRoles).not.toContain("+2");
     expect(adamRoles).not.toContain("data-social-profile-roles-more");
 
-    const withTopics = renderToStaticMarkup(
+    const withRolesOnly = renderToStaticMarkup(
       <SocialProfileIdentity
         name="Ada Lovelace"
         handle="ada"
         photoUrl={null}
-        topics={["Acting", "Financing"]}
+        roles={["actor"]}
       />,
     );
-    expect(withTopics).toContain("data-social-profile-topics");
-    expect(withTopics).toContain('data-social-profile-topic="Acting"');
-    expect(withTopics).toContain("Acting");
-    expect(withTopics).toContain("Financing");
-    expect(withTopics).not.toContain("Actor");
-    expect(withTopics).not.toContain("Topics:");
+    expect(withRolesOnly).toContain("data-social-profile-roles");
+    expect(withRolesOnly).toContain('data-social-profile-role="actor"');
+    expect(withRolesOnly).not.toContain("data-social-profile-topics");
+    expect(withRolesOnly).not.toContain("data-social-profile-topic");
+    expect(withRolesOnly).not.toContain("Topics:");
 
     const stacked = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -450,7 +448,6 @@ describe("Social profile public face", () => {
         bio="Writes engines."
         stats={{ posts: 1, followers: 2, following: 3 }}
         roles={["actor"]}
-        topics={["Acting"]}
         websiteUrl="https://example.com"
         actions={<button type="button">Edit profile</button>}
         mutuals={{
@@ -467,7 +464,6 @@ describe("Social profile public face", () => {
       "data-social-profile-roles",
       "data-social-profile-links",
       "data-social-profile-actions",
-      "data-social-profile-topics",
       "data-social-profile-mutuals",
     ];
     let stackAt = -1;
@@ -476,9 +472,9 @@ describe("Social profile public face", () => {
       expect(at, marker).toBeGreaterThan(stackAt);
       stackAt = at;
     }
-    expect(stacked.indexOf("data-social-profile-actions")).toBeLessThan(
-      stacked.indexOf("data-social-profile-topics"),
-    );
+    expect(stacked).not.toContain("data-social-profile-topics");
+    expect(stacked).not.toContain("data-social-profile-topic");
+    expect(stacked).toContain("data-social-profile-roles");
     expect(stacked).not.toContain("data-social-profile-cover-dims");
 
     const withStats = renderToStaticMarkup(
