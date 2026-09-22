@@ -213,6 +213,16 @@ export type HouseChildSeen = {
   key: string;
   child: unknown;
   stale: boolean;
+  /**
+   * Child that must not be stored under `key`. Set when a warm-hop
+   * history entry is restored: its flight data is the screen we left.
+   */
+  rejected?: unknown;
+};
+
+export type HouseFlightHistory = {
+  state: unknown;
+  href: string;
 };
 
 /**
@@ -223,37 +233,82 @@ export type HouseChildSeen = {
  * render (and React's restart after setState during render) must both
  * report stale, or the previous tree is stored under the new key and
  * never replaced. A same-render key+child change is a real landing.
+ *
+ * `flight` is the live history entry. A warm-hop entry (`houseClient`)
+ * whose URL Next has caught up to is not that landing: the restored
+ * child is the previous screen, even when the element identity changed.
+ * The following distinct page is the fetch and may be stored.
  */
 export function houseSyncChildSeen(
   seen: HouseChildSeen | null,
   nextKey: string,
   child: unknown,
+  flight: HouseFlightHistory | null = null,
+  fallback = false,
 ): { seen: HouseChildSeen; childrenStale: boolean } {
-  if (seen !== null && seen.key === nextKey && seen.child === child) {
-    return { seen, childrenStale: seen.stale };
-  }
-  if (seen !== null && seen.key !== nextKey && seen.child === child) {
+  const foreign =
+    flight !== null && houseClientFlightForeign(flight.state, nextKey, flight.href);
+  if (!foreign) {
+    if (seen !== null && seen.key === nextKey && seen.child === child) {
+      return { seen, childrenStale: seen.stale };
+    }
+    if (seen !== null && seen.key !== nextKey && seen.child === child) {
+      return {
+        seen: { key: nextKey, child, stale: true },
+        childrenStale: true,
+      };
+    }
     return {
-      seen: { key: nextKey, child, stale: true },
-      childrenStale: true,
+      seen: { key: nextKey, child, stale: false },
+      childrenStale: false,
     };
   }
-  return {
-    seen: { key: nextKey, child, stale: false },
-    childrenStale: false,
-  };
+
+  if (seen !== null && seen.key === nextKey && seen.child === child && !seen.stale) {
+    return { seen, childrenStale: false };
+  }
+  if (
+    !fallback &&
+    seen !== null &&
+    seen.key === nextKey &&
+    seen.rejected !== undefined &&
+    seen.rejected !== child
+  ) {
+    return {
+      seen: { key: nextKey, child, stale: false },
+      childrenStale: false,
+    };
+  }
+  const rejected =
+    seen !== null && seen.key === nextKey && seen.rejected !== undefined ? seen.rejected : child;
+  const nextSeen: HouseChildSeen = { key: nextKey, child, stale: true, rejected };
+  if (
+    seen !== null &&
+    seen.key === nextSeen.key &&
+    seen.child === nextSeen.child &&
+    seen.stale &&
+    seen.rejected === nextSeen.rejected
+  ) {
+    return { seen, childrenStale: true };
+  }
+  return { seen: nextSeen, childrenStale: true };
 }
+
+const NEXT_FLIGHT_TREE_KEY = "__PRIVATE_NEXTJS_INTERNALS_TREE";
 
 /**
  * History entry for a warm client hop.
  *
  * Next 16 patches `history.pushState` and, unless the state is marked
- * `__NA`, dispatches ACTION_RESTORE with the *previous* FlightRouterState
- * and the new URL. That restore keeps the previous screen (and its rail
- * selection) mounted while the address bar already shows the dest.
- * `__NA` is the same flag Next sets on its own history writes to skip
- * that restore. The previous flight tree is copied so Back is not a
- * full reload.
+ * `__NA`, dispatches ACTION_RESTORE with the previous FlightRouterState
+ * and the new URL. That restore keeps the previous screen mounted while
+ * the address bar already shows the dest. `__NA` is the flag Next sets
+ * on its own history writes to skip that restore, and it keeps Back from
+ * being a full reload.
+ *
+ * The previous flight tree is not copied. A later Back or Forward would
+ * restore it as `children` for the dest URL, and after the dest has been
+ * evicted that tree would be stored under the dest key.
  */
 export function houseClientHistoryState(prior: unknown): Record<string, unknown> & {
   __NA: true;
@@ -261,7 +316,33 @@ export function houseClientHistoryState(prior: unknown): Record<string, unknown>
 } {
   const base =
     prior !== null && typeof prior === "object" ? { ...(prior as Record<string, unknown>) } : {};
+  delete base[NEXT_FLIGHT_TREE_KEY];
   return { ...base, __NA: true, houseClient: true };
+}
+
+/**
+ * True when Next has caught up to a warm-hop history entry.
+ * That entry's flight data is the screen we left, not the dest.
+ */
+export function houseClientFlightForeign(
+  historyState: unknown,
+  nextKey: string,
+  locationHref: string,
+): boolean {
+  if (historyState === null || typeof historyState !== "object") return false;
+  if ((historyState as { houseClient?: unknown }).houseClient !== true) return false;
+  return houseHrefKey(locationHref) === nextKey;
+}
+
+/** Evicted warm-hop entries must be fetched. A cached dest is already on screen. */
+export function houseShouldRefetchHistoryEntry(
+  historyState: unknown,
+  href: string,
+  cachedKeys: Iterable<string>,
+): boolean {
+  if (historyState === null || typeof historyState !== "object") return false;
+  if ((historyState as { houseClient?: unknown }).houseClient !== true) return false;
+  return !houseShouldClientNavigate(href, cachedKeys);
 }
 
 /**
@@ -290,21 +371,35 @@ export function houseCanIngest(
   return true;
 }
 
+function houseScreenPath(key: string): string {
+  const query = key.indexOf("?");
+  return query === -1 ? key : key.slice(0, query);
+}
+
 /**
  * Resolves which cached screen to display and whether to paint
  * ingress (live RSC / loading skeleton).
  *
  * When activeKey is not in the store, the live children are either a
- * skeleton or still the previous screen. Paint the skeleton. Do not
- * keep the previous screen visible — the URL and rail have already
- * moved, and a stuck slot would leave that screen up forever.
+ * skeleton or still the previous screen. A path change hides that
+ * screen — the URL and rail have moved. A query-only hop stays on the
+ * same pathname and does not paint `loading.tsx`, so keep that
+ * pathname's lead mounted until the new key is stored.
  */
 export function houseResolveDisplay(
   activeKey: string,
   known: boolean,
   fallback: boolean,
+  holdKey: string | null = null,
 ): { displayKey: string | null; showIngress: boolean } {
   if (known) return { displayKey: activeKey, showIngress: false };
   if (fallback) return { displayKey: null, showIngress: true };
+  if (
+    holdKey &&
+    holdKey !== activeKey &&
+    houseScreenPath(holdKey) === houseScreenPath(activeKey)
+  ) {
+    return { displayKey: holdKey, showIngress: false };
+  }
   return { displayKey: null, showIngress: false };
 }

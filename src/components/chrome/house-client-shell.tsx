@@ -18,7 +18,9 @@ import {
   HOUSE_CLIENT_SHELL,
   houseCanIngest,
   houseClientHistoryState,
+  type HouseFlightHistory,
   houseFocusBelongsToInactiveScreen,
+  houseShouldRefetchHistoryEntry,
   type HouseChildSeen,
   houseForgetUnlisted,
   houseHrefKey,
@@ -189,11 +191,18 @@ function HousePathProviderCore({
   useEffect(() => {
     const onPop = () => {
       captureLeadScroll(screenKey);
-      setOwnedHref(`${window.location.pathname}${window.location.search}`);
+      const next = `${window.location.pathname}${window.location.search}`;
+      setOwnedHref(next);
+      if (!houseShouldRefetchHistoryEntry(window.history.state, next, housePaintedKeys())) return;
+      window.setTimeout(() => {
+        const current = `${window.location.pathname}${window.location.search}`;
+        if (current !== next) return;
+        router.replace(next, { scroll: false });
+      }, 0);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [screenKey]);
+  }, [router, screenKey]);
 
   useEffect(() => {
     const onClick = (event: globalThis.MouseEvent) => {
@@ -239,7 +248,14 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   // stale across the setState restart, so the key-flip pass cannot
   // store the previous tree under the new key.
   const [childSeen, setChildSeen] = useState<HouseChildSeen | null>(null);
-  const advanced = houseSyncChildSeen(childSeen, nextKey, children);
+  const flight: HouseFlightHistory | null =
+    typeof window === "undefined"
+      ? null
+      : {
+          state: window.history.state,
+          href: housePathFromLocation(window.location.pathname, window.location.search),
+        };
+  const advanced = houseSyncChildSeen(childSeen, nextKey, children, flight, fallback);
   if (advanced.seen !== childSeen) setChildSeen(advanced.seen);
 
   let nextStore = store;
@@ -264,7 +280,13 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   }
 
   const known = activeKey in nextStore.nodes;
-  const { displayKey, showIngress } = houseResolveDisplay(activeKey, known, fallback);
+  const leadKey = nextStore.order[0] ?? null;
+  const { displayKey, showIngress } = houseResolveDisplay(
+    activeKey,
+    known,
+    fallback,
+    leadKey !== null && leadKey in nextStore.nodes ? leadKey : null,
+  );
 
   const ingress = showIngress ? children : null;
 

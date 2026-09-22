@@ -8,6 +8,7 @@ import FollowsLoading from "@/app/(app)/social/u/[handle]/follows/loading";
 import {
   HOUSE_CLIENT_SHELL,
   houseCanIngest,
+  houseClientFlightForeign,
   houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
   houseHrefKey,
@@ -22,6 +23,7 @@ import {
   houseSyncChildSeen,
   houseShouldClientNavigate,
   houseShouldKeepAlive,
+  houseShouldRefetchHistoryEntry,
   houseTouchOrder,
   houseWorkspaceLandKey,
   isHouseClientOwnedPath,
@@ -190,6 +192,37 @@ describe("houseResolveDisplay — cold-nav display", () => {
     expect(result).toEqual({ displayKey: null, showIngress: false });
     expect(result.displayKey).not.toBe("/social/dms");
   });
+
+  it("keeps the same pathname visible on a query hop", () => {
+    expect(
+      houseResolveDisplay("/social/profile?tab=credits", false, false, "/social/profile"),
+    ).toEqual({ displayKey: "/social/profile", showIngress: false });
+    expect(houseResolveDisplay("/social/explore?q=ada", false, false, "/social/explore")).toEqual({
+      displayKey: "/social/explore",
+      showIngress: false,
+    });
+    expect(houseResolveDisplay("/home?period=ytd", false, false, "/home")).toEqual({
+      displayKey: "/home",
+      showIngress: false,
+    });
+    expect(houseResolveDisplay("/social?topic=Music", false, false, "/social?topic=Film")).toEqual({
+      displayKey: "/social?topic=Film",
+      showIngress: false,
+    });
+  });
+
+  it("hides a different pathname while a query hop still paints a skeleton", () => {
+    expect(houseResolveDisplay("/social/profile", false, false, "/social/dms")).toEqual({
+      displayKey: null,
+      showIngress: false,
+    });
+    expect(
+      houseResolveDisplay("/social/profile?tab=credits", false, true, "/social/profile"),
+    ).toEqual({ displayKey: null, showIngress: true });
+    expect(
+      houseResolveDisplay("/social/profile?tab=credits", true, false, "/social/profile"),
+    ).toEqual({ displayKey: "/social/profile?tab=credits", showIngress: false });
+  });
 });
 
 describe("cold-nav poison prevention (integration)", () => {
@@ -327,11 +360,20 @@ describe("Messages → Profile key flip", () => {
   const messagesKey = "/social/dms";
   const profileKey = "/social/profile";
 
-  function hop(seen: ReturnType<typeof houseSyncChildSeen>["seen"] | null, key: string, child: unknown, nodes: Record<string, unknown>) {
-    const advanced = houseSyncChildSeen(seen, key, child);
-    const canIngest = houseCanIngest(key, key, key, false, key in nodes, advanced.childrenStale);
+  function hop(
+    seen: ReturnType<typeof houseSyncChildSeen>["seen"] | null,
+    key: string,
+    child: unknown,
+    nodes: Record<string, unknown>,
+    flight: { state: unknown; href: string } | null = null,
+    fallback = false,
+  ) {
+    const advanced = houseSyncChildSeen(seen, key, child, flight, fallback);
+    const canIngest = houseCanIngest(key, key, key, fallback, key in nodes, advanced.childrenStale);
     const nextNodes = canIngest ? { ...nodes, [key]: child } : nodes;
-    const display = houseResolveDisplay(key, key in nextNodes, false);
+    const stored = Object.keys(nodes);
+    const hold = stored.length > 0 ? stored[stored.length - 1] : null;
+    const display = houseResolveDisplay(key, key in nextNodes, fallback, key in nextNodes ? null : hold);
     return { seen: advanced.seen, stale: advanced.childrenStale, canIngest, nodes: nextNodes, display };
   }
 
@@ -407,13 +449,59 @@ describe("Messages → Profile key flip", () => {
   });
 
   it("marks warm history so Next does not restore the previous flight tree", () => {
-    const prior = { __PRIVATE_NEXTJS_INTERNALS_TREE: { tree: messagesKey } };
+    const prior = { __PRIVATE_NEXTJS_INTERNALS_TREE: { tree: messagesKey }, custom: "keep" };
     const state = houseClientHistoryState(prior);
     expect(state.__NA).toBe(true);
     expect(state.houseClient).toBe(true);
-    expect(state.__PRIVATE_NEXTJS_INTERNALS_TREE).toEqual({ tree: messagesKey });
+    expect(state.custom).toBe("keep");
+    expect(state.__PRIVATE_NEXTJS_INTERNALS_TREE).toBeUndefined();
     expect(houseClientHistoryState(null).__NA).toBe(true);
     // Next's pushState patch skips ACTION_RESTORE when __NA is set.
     expect(Boolean(state.__NA)).toBe(true);
+    expect(houseClientFlightForeign(state, profileKey, profileKey)).toBe(true);
+    expect(houseClientFlightForeign(state, messagesKey, profileKey)).toBe(false);
+    expect(houseClientFlightForeign({ __NA: true }, profileKey, profileKey)).toBe(false);
+    expect(houseShouldRefetchHistoryEntry(state, profileKey, [])).toBe(true);
+    expect(houseShouldRefetchHistoryEntry(state, profileKey, [profileKey])).toBe(false);
+    expect(houseShouldRefetchHistoryEntry(prior, profileKey, [])).toBe(false);
+  });
+
+  it("does not store a restored flight tree under the dest key", () => {
+    const restored = { screen: "messages-restored" };
+    const flight = {
+      state: houseClientHistoryState({ __PRIVATE_NEXTJS_INTERNALS_TREE: { tree: messagesKey } }),
+      href: profileKey,
+    };
+    const booted = hop(null, messagesKey, messages, {});
+    const restarted = hop(booted.seen, messagesKey, messages, booted.nodes);
+    const flip = hop(restarted.seen, profileKey, restored, restarted.nodes, flight);
+    expect(flip.stale).toBe(true);
+    expect(flip.canIngest).toBe(false);
+    expect(flip.nodes[profileKey]).toBeUndefined();
+
+    const flipRestart = hop(flip.seen, profileKey, restored, flip.nodes, flight);
+    expect(flipRestart.stale).toBe(true);
+    expect(flipRestart.canIngest).toBe(false);
+    expect(flipRestart.seen).toBe(flip.seen);
+
+    const skeleton = { screen: "skeleton" };
+    const loading = hop(flipRestart.seen, profileKey, skeleton, flipRestart.nodes, flight, true);
+    expect(loading.canIngest).toBe(false);
+    expect(loading.nodes[profileKey]).toBeUndefined();
+    expect(loading.seen.rejected).toBe(restored);
+
+    const loadingRestart = hop(loading.seen, profileKey, skeleton, loading.nodes, flight, true);
+    expect(loadingRestart.seen).toBe(loading.seen);
+    expect(loadingRestart.canIngest).toBe(false);
+
+    const landed = hop(loadingRestart.seen, profileKey, profile, loadingRestart.nodes, flight);
+    expect(landed.stale).toBe(false);
+    expect(landed.canIngest).toBe(true);
+    expect(landed.nodes[profileKey]).toBe(profile);
+    expect(landed.nodes[profileKey]).not.toBe(restored);
+
+    const landedRestart = hop(landed.seen, profileKey, profile, landed.nodes, flight);
+    expect(landedRestart.seen).toBe(landed.seen);
+    expect(landedRestart.canIngest).toBe(false);
   });
 });
