@@ -13,9 +13,11 @@ import {
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
+  SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_HANDLE_CLASS,
+  SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_NAME_STACK_CLASS,
 } from "./social-chrome";
 import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
@@ -809,8 +811,21 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("Instagram: one centered profile stack");
     expect(chrome).not.toContain("Facebook: side air / gutters");
     expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("flex-col");
+    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-title");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-bold");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-semibold");
     expect(SOCIAL_PROFILE_HANDLE_CLASS).toContain("text-ink-2");
+    expect(SOCIAL_PROFILE_HANDLE_CLASS).toContain("t-body-sm");
     expect(SOCIAL_PROFILE_HANDLE_CLASS).not.toContain("truncate");
+    expect(SOCIAL_PROFILE_HANDLE_CLASS).not.toMatch(/\bhidden\b|max-lg:|md:hidden|sm:hidden/);
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).not.toMatch(/\bhidden\b|max-lg:|md:hidden|sm:hidden/);
+    expect(SOCIAL_FOR_YOU_RAIL_CLASS).toContain("hidden");
+    expect(SOCIAL_FOR_YOU_RAIL_CLASS).toContain("lg:flex");
+    expect(SOCIAL_FOR_YOU_RAIL_CLASS).not.toContain("md:flex");
+    expect(SOCIAL_HOME_CENTER_CLASS).toContain("w-full");
+    expect(SOCIAL_HOME_CENTER_CLASS).toContain("lg:max-w-[600px]");
+    expect(SOCIAL_HOME_CENTER_CLASS).not.toMatch(/(^|\s)max-w-\[600px\]/);
+    expect(chrome).toContain("Phone and desktop share this stack");
     expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(profile).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(profile).toContain("SocialDesktopForYouSlot");

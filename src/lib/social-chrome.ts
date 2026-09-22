@@ -411,8 +411,10 @@ export const SOCIAL_PROFILE_STAT_LABEL_CLASS =
 export const SOCIAL_PROFILE_FACE_CLASS =
   `flex w-full min-w-0 flex-col gap-[var(--space-4)] pb-[var(--space-2)] ${SOCIAL_PROFILE_INSET_CLASS}`;
 
-// X pattern (Adam + Joshua 2026-09-22). Name is t-title. @handle is
-// muted body-sm on the next line. The stack sits beside the avatar.
+// Phone and desktop share this stack (Adam 2026-09-22 profile phone).
+// Name is house t-title. @handle is muted body-sm on the next line,
+// beside the avatar. No breakpoint hides the handle. The 600 cap and
+// For You rail stay lg+ only. Cover overlap stays.
 export const SOCIAL_PROFILE_NAME_STACK_CLASS =
   "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-1)]";
 
