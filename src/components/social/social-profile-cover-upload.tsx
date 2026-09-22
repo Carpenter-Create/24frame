@@ -600,6 +600,12 @@ export function SocialProfileCoverUpload({
         </div>
       ) : null}
 
+      <span
+        data-social-profile-cover-dims=""
+        className="pointer-events-none absolute bottom-2 left-3 z-30 rounded bg-surface/80 px-2 py-0.5 text-[length:var(--text-xs)] font-medium text-ink-2"
+      >
+        {SOCIAL_PROFILE_COVER_LOCK_A.masterWidth} × {SOCIAL_PROFILE_COVER_LOCK_A.masterHeight} px
+      </span>
       <input
         ref={fileRef}
         type="file"
