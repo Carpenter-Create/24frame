@@ -1,5 +1,9 @@
-import { createElement, isValidElement } from "react";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { createElement, isValidElement, type ReactNode } from "react";
 import { describe, expect, it } from "vitest";
+
+import FollowsLoading from "@/app/(app)/social/u/[handle]/follows/loading";
 
 import {
   HOUSE_CLIENT_SHELL,
@@ -229,5 +233,90 @@ describe("cold-nav poison prevention (integration)", () => {
 
     expect(houseShouldClientNavigate("/social/explore", housePaintedKeys())).toBe(true);
     expect(houseShouldClientNavigate("/social/profile", housePaintedKeys())).toBe(false);
+  });
+});
+
+const FOLLOWS_KEY = houseScreenKey("/social/u/ada/follows", "?tab=following");
+const FOLLOWS_PATH = "/social/u/ada/follows";
+
+function walkLoadingFiles(dir: string, out: string[] = []): string[] {
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) walkLoadingFiles(path, out);
+    else if (name === "loading.tsx") out.push(path);
+  }
+  return out;
+}
+
+function routeFromLoadingFile(file: string): string {
+  const route = file
+    .replace(/\\/g, "/")
+    .replace(/^src\/app\/\(app\)/, "")
+    .replace(/\/loading\.tsx$/, "");
+  return route || "/";
+}
+
+/**
+ * Cold Profile → Following. Pathname flips first (stale profile), then
+ * loading.tsx, then the resolved list. The shell must paint the skeleton
+ * as ingress and store only the resolved list.
+ */
+function coldFollowsNav(loading: ReactNode, page: ReactNode) {
+  const profile = createElement("div", { "data-social-profile": "" }, "profile");
+  let nodes: Record<string, ReactNode> = { "/social/profile": profile };
+  let order = ["/social/profile"];
+  const has = (key: string) => key in nodes;
+  const lead = () => order[0] ?? null;
+
+  const apply = (children: ReactNode, stale: boolean) => {
+    const fallback = isHouseRscFallback(children);
+    if (houseCanIngest(FOLLOWS_KEY, FOLLOWS_KEY, FOLLOWS_PATH, fallback, has(FOLLOWS_KEY), stale)) {
+      nodes = { ...nodes, [FOLLOWS_KEY]: children };
+      order = [FOLLOWS_KEY, ...order.filter((key) => key !== FOLLOWS_KEY)];
+    }
+    return houseResolveDisplay(FOLLOWS_KEY, has(FOLLOWS_KEY), fallback, lead(), has);
+  };
+
+  return {
+    flip: apply(profile, true),
+    loading: apply(loading, false),
+    page: apply(page, false),
+    stored: nodes[FOLLOWS_KEY],
+  };
+}
+
+describe("follows cold nav leaves the skeleton", () => {
+  const page = createElement("div", { "data-social-follows": "" }, "list");
+
+  it("marks every client-owned loading.tsx so the shell cannot cache it", () => {
+    const owned = walkLoadingFiles("src/app/(app)").filter((file) =>
+      isHouseClientOwnedPath(routeFromLoadingFile(file)),
+    );
+    expect(owned.length).toBeGreaterThan(0);
+    const bare = owned.filter(
+      (file) => !readFileSync(file, "utf8").includes(HOUSE_CLIENT_SHELL.rscFallbackAttr),
+    );
+    expect(bare).toEqual([]);
+  });
+
+  it("treats Follows loading as ingress and stores the resolved list", () => {
+    const loading = FollowsLoading();
+    expect(isHouseRscFallback(loading)).toBe(true);
+    const nav = coldFollowsNav(loading, page);
+    expect(nav.flip).toEqual({ displayKey: "/social/profile", showIngress: false });
+    expect(nav.loading).toEqual({ displayKey: null, showIngress: true });
+    expect(nav.page).toEqual({ displayKey: FOLLOWS_KEY, showIngress: false });
+    expect(nav.stored).toBe(page);
+  });
+
+  it("an unmarked skeleton is stored and blocks the resolved list", () => {
+    const unmarked = createElement("div", { "data-social-follows-skeleton": "" });
+    expect(isHouseRscFallback(unmarked)).toBe(false);
+    const nav = coldFollowsNav(unmarked, page);
+    expect(nav.loading).toEqual({ displayKey: FOLLOWS_KEY, showIngress: false });
+    expect(nav.page.displayKey).toBe(FOLLOWS_KEY);
+    expect(nav.page.showIngress).toBe(false);
+    expect(nav.stored).toBe(unmarked);
+    expect(nav.stored).not.toBe(page);
   });
 });
