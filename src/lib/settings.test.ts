@@ -440,7 +440,7 @@ describe("settings hub lock", () => {
     expect(settingsSrc).not.toContain("md:max-w-[40rem]");
   });
 
-  it("locks the settings rail on 220 pad 16 and house workspace-rail SoT", () => {
+  it("locks the settings rail on house pad 16 and workspace-rail SoT", () => {
     expect(SETTINGS_RAIL_PAD_CLASS).toBe("p-[var(--space-4)]");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");

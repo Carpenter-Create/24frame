@@ -94,6 +94,7 @@ import {
   RAIL_COLLAPSE_EXPAND_ROW_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
+  RAIL_WIDTH_CLASS,
   SIDEBAR_COLLAPSED_COOKIE,
 } from "@/lib/rail-collapse";
 
@@ -355,13 +356,13 @@ describe("AppShell Home chrome", () => {
 });
 
 describe("AppShell Access rail and home frame", () => {
-  it("uses a white 220 rail and the locked `/` page pad", () => {
+  it("uses the house dest-rail slot and the locked `/` page pad", () => {
     const tokens = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "../../app/tokens.css"),
       "utf8",
     );
-    expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
-    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+    expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
     expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
@@ -487,9 +488,9 @@ describe("AppShell client mobile chrome", () => {
       join(dirname(fileURLToPath(import.meta.url)), "../../app/tokens.css"),
       "utf8",
     );
-    expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
+    expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*60px;/);
-    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
     expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/@media \(max-width:\s*767px\)/);
     expect(tokens).toMatch(/--sidebar-width:\s*0px;/);
@@ -719,12 +720,12 @@ describe("AppShell /help account chrome", () => {
 });
 
 describe("AppShell /settings rail", () => {
-  it("puts one 220 settings rail in the Access slot and kills the dashboard destinations", () => {
+  it("puts one house dest rail in the Access slot and kills the dashboard destinations", () => {
     const tokens = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "../../app/tokens.css"),
       "utf8",
     );
-    expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
+    expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
 
     navigation.pathname = "/settings";
     const html = renderShell();
@@ -795,7 +796,7 @@ describe("AppShell /settings rail", () => {
     }
   });
 
-  it("keeps the focused 220 rail on every /settings path", () => {
+  it("keeps the focused dest rail on every /settings path", () => {
     for (const path of [
       "/settings/profile",
       "/settings/organization",
@@ -1174,6 +1175,29 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("h-dvh");
     expect(html).toContain("overflow-hidden");
     expect(html).toContain("overflow-y-auto");
+  });
+
+  it("paints one dest-rail width on every workspace that shows the rail", () => {
+    const railWidth = RAIL_WIDTH_CLASS;
+    for (const path of [
+      "/aggregation/titles",
+      "/education",
+      "/social",
+      "/staff/queue",
+      "/settings",
+    ]) {
+      navigation.pathname = path;
+      const html = renderShell();
+      const aside = html.slice(html.indexOf("<aside"), html.indexOf("</aside>"));
+      expect(aside, path).toContain(railWidth);
+      expect(aside, path).not.toContain("calc(200px");
+      expect(html, path).toContain("margin-left:var(--sidebar-width)");
+      expect(html, path).not.toContain("md:ml-[200px]");
+    }
+    navigation.pathname = "/co-productions";
+    const coProductions = renderShell();
+    expect(coProductions).not.toContain("data-app-rail");
+    expect(coProductions).toContain("--sidebar-width:0px");
   });
 
   it("adds Social X-lane chrome on the shared house rail collapse", () => {

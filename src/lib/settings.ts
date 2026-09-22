@@ -52,7 +52,7 @@
 // share it. Get Help / Give feedback stay on /help — never Settings
 // hub chrome.
 //
-// 600:881 shell — one 220 rail occupies the Access slot on every
+// 600:881 shell — one dest-rail slot occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
 // Rail keeps house Settings title + Profile · Organization · Preferences · Security.
 // Body H1 is the hub section only — never repeat Settings in the pane.
@@ -155,7 +155,7 @@ export function settingsHubNav(): readonly SettingsHubNavItem[] {
 /** Desktop rail + mobile list. Profile · Organization · Preferences · Security. */
 export const SETTINGS_HUB_NAV = settingsHubNav();
 
-// Rail chrome — 220 slot, pad 16, 8 between rows. Do not put Titles,
+// Rail chrome — house dest-rail slot, pad 16, 8 between rows. Do not put Titles,
 // Appearance, Workspace, Account, Users, API, Team, or Manage courses here.
 // Item / active / idle / title tokens come from HOUSE_RAIL_* in house-shell.ts.
 // Settings is not a workspace but its rail shares the house rail SoT —

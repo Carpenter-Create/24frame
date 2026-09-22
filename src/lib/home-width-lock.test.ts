@@ -44,8 +44,9 @@ describe("Home width lock", () => {
     expect(stamp).not.toContain("Phantom Access rail inset");
   });
 
-  it("insets Home with house tokens — not the 220 Access rail or page cap", () => {
-    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+  it("insets Home with house tokens — not the dest-rail slot or page cap", () => {
+    expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--home-content-width:\s*1376px;/);

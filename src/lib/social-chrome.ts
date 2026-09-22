@@ -42,23 +42,28 @@ export const SOCIAL_FIGMA_HOME_MOBILE = "169:1519";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136", "164:1360"] as const;
 
-// Desktop Social shell. One center measure for Home, Explore,
-// Messages, and Profile.
-// Adam + Joshua 2026-09-22: X-narrow center. FB familiarity and
-// house type stay. Geometry only.
-// dest 200 | gutter 16 | center 600 | gutter 16 | For you 300 | padR 16 = 1148.
-// Adam 2026-09-22: the row spans the content canvas. Leftover air
-// sits between the center and For You, so For You sits on the right
-// of the screen. Do not pack the cluster to the start. Do not stretch
-// the center past 600. For you stays 300. Phone is full-bleed of the
-// phone canvas: the cap applies at lg, when the For You rail appears.
+// Desktop Social content row. The left dest rail is the house slot
+// (`--sidebar-width` via RAIL_WIDTH_CLASS). It stays left-pinned.
+// This row is only the tight pair to the right of that rail:
+// center 600 + gutter 16 + For You 300 = 916.
+// Adam 2026-09-22: at lg the pair is that fixed width and centered in
+// the canvas beside the rail. Leftover air is outside the pair, split
+// on both sides. Do not justify-between the row. Do not pack the pair
+// to the start. Do not slide the rail inward. Do not stretch the
+// center past 600. For You stays 300. Phone is full-bleed: the pair
+// cap applies at lg, when the For You rail appears.
+// Complete class strings below — Tailwind does not see interpolations.
 export const SOCIAL_DESKTOP_MEASURE = {
-  dest: 200,
   gutter: 16,
   center: 600,
   right: 300,
   padR: 16,
 } as const;
+
+export const SOCIAL_CONTENT_PAIR_WIDTH =
+  SOCIAL_DESKTOP_MEASURE.center +
+  SOCIAL_DESKTOP_MEASURE.gutter +
+  SOCIAL_DESKTOP_MEASURE.right;
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_PROFILE_OWN = ["181:230", "181:2000"] as const;
 export const SOCIAL_FIGMA_PROFILE_EDIT = ["180:206", "180:1946", "181:2184"] as const;
@@ -78,30 +83,27 @@ export const SOCIAL_FIGMA_STORY_STUDIO = [
 ] as const;
 export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 
-// Dest column stays 200 (measure). Panel insets 16 so the r16
-// corner reads — same float as Aggregation / Education. Not a
-// flush-left strip.
-export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-var(--chrome-gutter))]";
-export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
+// Dest rail width is RAIL_WIDTH_CLASS. Panel chrome matches Aggregation.
 export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
-const socialCenterMaxClass = `lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`;
+const socialCenterMaxClass = "lg:max-w-[600px]";
 export const SOCIAL_CENTER_WIDTH_CLASS = `w-full min-w-0 ${socialCenterMaxClass}`;
 export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] py-4";
 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-4)] pb-[var(--space-12)]";
 
-// One shell for every Social row. Full width of the content canvas.
-// justify-between parks For You on the right once the center hits its
-// cap. Below lg the rail is display:none, so the spread is a no-op
-// and the center stays full-bleed.
+// One shell for every Social row. At lg the row is the 916 pair,
+// centered in the canvas to the right of the fixed dest rail.
+// Below lg there is no max-width and no auto margin: For You is
+// display:none and the center stays full-bleed.
 export const SOCIAL_HOME_LAYOUT_CLASS =
-  "flex w-full items-start justify-between gap-[16px]";
+  "flex w-full items-start gap-[16px] lg:mx-auto lg:max-w-[916px]";
 
 // Shared center column. Home, Explore, Messages, and Profile use this
-// string — no width fork. flex-1 fills the desktop row until the lg
-// cap. w-full keeps phone, and the save-hop overlay, full-bleed of
+// string — no width fork. flex-1 shrinks the center when the lg canvas
+// is narrower than the pair. The literal lg cap stops the grow at 600.
+// w-full keeps phone, and the save-hop overlay, full-bleed of
 // their parent.
 const socialShellCenterClass =
   `flex min-w-0 w-full flex-1 flex-col gap-2 ${socialCenterMaxClass}`;
@@ -110,8 +112,7 @@ export const SOCIAL_HOME_CENTER_CLASS = socialShellCenterClass;
 
 // Profile desktop row matches Home: this column plus SocialForYouRail
 // at lg+. Explore and Messages use that same row. The center stays
-// X-narrow. Leftover canvas sits between this column and For You.
-// Phone stays the full phone canvas.
+// X-narrow. The pair stays tight. Phone stays the full phone canvas.
 export const SOCIAL_PROFILE_CENTER_CLASS = socialShellCenterClass;
 
 // 40px face. Export name stays so search, home, and overview share one SoT.
@@ -121,7 +122,7 @@ export const SOCIAL_AVATAR_32_CLASS =
 export const SOCIAL_SURFACE_RADIUS_CLASS = "rounded-[var(--radius-lg)]";
 
 export const SOCIAL_FOR_YOU_RAIL_CLASS =
-  `hidden w-[300px] shrink-0 flex-col gap-4 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-4 lg:flex`;
+  `hidden ${SOCIAL_FOR_YOU_WIDTH_CLASS} shrink-0 flex-col gap-4 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-4 lg:flex`;
 
 export const SOCIAL_CARD_CLASS =
   "flex flex-col gap-[var(--space-3)] rounded-[8px] border border-hairline bg-surface p-[var(--space-4)]";

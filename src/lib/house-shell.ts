@@ -25,7 +25,7 @@ export const HOUSE_PHONE_TRAILING_GUTTER_CLASS = "max-md:pr-[var(--chrome-gutter
 
 export const HOUSE_CANVAS_X_CLASS = "px-[var(--chrome-gutter)]";
 
-/** Access rail measure. Aggregation uses --sidebar-width; this stays 220. */
+/** Dest-rail slot. Alias of `--sidebar-width` — not a second measure. */
 export const HOUSE_ACCESS_RAIL_WIDTH = "var(--access-rail-width)";
 
 /** Home canvas at 1440: 48 left + 16 right + 1376 column. */
