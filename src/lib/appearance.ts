@@ -1,9 +1,10 @@
 // Theme preference copy. Lives in lib/, not JSX.
-// One SoT: gc-theme via lib/theme.ts. Header sun/moon and
-// Settings → Preferences Theme all read/write that key. Do
-// not invent a second store. Theme is not an avatar-menu row.
+// One SoT: gc-theme via lib/theme.ts. The avatar Theme drill
+// (/settings/theme) reads and writes that key. Do not invent a
+// second store. Theme is an avatar-menu row (Adam lock
+// 2026-09-22) — not a Preferences block, not a header sun/moon.
 // Existing kinds stay light / dark / auto. Auto is System
-// default on every preference surface.
+// default on the Theme page.
 
 import {
   SETTINGS_CONTENT_MEASURE_CLASS,

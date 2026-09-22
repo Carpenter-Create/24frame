@@ -5,10 +5,10 @@ import { SettingsEditPane } from "@/components/settings/settings-drill";
 import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 
-// Theme drill-in. Picker only — same gc-theme SoT as desktop
-// Preferences Appearance and the phone sheet. Back to Preferences.
+// Theme drill. Picker only — gc-theme SoT. Peer of Preferences,
+// not nested under it. Back to Settings.
 
-export default async function SettingsPreferencesThemePage() {
+export default async function SettingsThemePage() {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
@@ -17,7 +17,6 @@ export default async function SettingsPreferencesThemePage() {
       title={SETTINGS.theme}
       helper={SETTINGS.themeHelper}
       pathname={SETTINGS.themeHref}
-      hub="preferences"
     >
       <AppearanceThemePicker />
     </SettingsEditPane>

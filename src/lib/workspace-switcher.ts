@@ -8,21 +8,21 @@
 // redesign desktop in this slice.
 // Leading air (settings back ↔ emblem) is --space-3 (12). Not
 // --space-1. Do not put overflow-hidden on the leading row (#412).
-// Phone trailing: [search if needed] [theme] [24Frame AI] [bell]
+// Phone trailing: [search if needed] [24Frame AI] [bell]
 // [avatar], with --chrome-gutter so the avatar is not flush.
 // Cluster gap is --space-2 on every breakpoint; phone
-// theme/AI/bell/search hug the 16px glyph so that gap is optical,
+// AI/bell/search hug the 16px glyph so that gap is optical,
 // not 16-in-32 vs a 32 disk. Do not cancel that hug with -mx.
-// #452 stacked AI on the bell. Sun/moon is shared immediately
-// left of Ask on every breakpoint. One trail. No phone-only
-// sun/moon twin. Ask 24Frame AI sits immediately left of the
+// #452 stacked AI on the bell. Color mode is the avatar Theme
+// row only (Adam lock 2026-09-22). No header sun/moon.
+// Ask 24Frame AI sits immediately left of the
 // bell and opens the Mercury overlay. Ask AI is header + Home
 // module only (#465). Do not reintroduce a dest hamburger.
 // Desktop md+ replaces the single-name+chevron trigger with a
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
 // active ink fill, idle muted grey. Desktop trailing: pills, then
-// sun/moon, then Ask, then bell, then avatar. Social uses the same
+// Ask, then bell, then avatar. Social uses the same
 // split. Phone uses word+chevron + sheet. Do not force three
 // labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the

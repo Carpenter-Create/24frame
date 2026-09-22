@@ -338,9 +338,9 @@ function AccountMenuBody({
 // (h-auto), slides up. Same sheet craft — not a new mini language.
 // Do not restyle to the desktop leftover dropdown chrome
 // (264 / rounded-12). One top row: Identity 48 + Close/44.
-// Hairline — phone items. Settings — Get Help.
-// Theme SoT is Settings Preferences. Desktop theme stays the
-// header sun/moon. 618:785 overlay is void. Closed
+// Hairline — phone items. Settings — Theme — Get Help.
+// Theme drills to /settings/theme. No header sun/moon.
+// 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
 // Leftover under the last item is 24 house row air (--space-6),
 // shrink-0 — not leftover grow (open white). Log out,
@@ -388,13 +388,13 @@ export function MobileAccountMenu({
 }
 
 // Desktop 629:795 — same destinations as mobile (Settings,
-// Get Help). 264. Height is
+// Theme, Get Help). 264. Height is
 // relative to the stack (h-auto hug). Leftover last-item →
 // Log out is 24 (house --space-6). The 24 adds to the stack.
 // Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672
 // floor. Align-end to the avatar (right edge flush). 8px under
 // the trigger. Close killed. Stacked identity. 24 pad.
-// Tight Settings / Get Help. No leftover grow. Pin
+// Tight Settings / Theme / Get Help. No leftover grow. Pin
 // Log out, hairline, footer as siblings.
 // Hairline only under Log out. Log out → hairline 16. Hairline →
 // footer 16. Do not hug the rule. Footer → bottom 24. Not a 90%

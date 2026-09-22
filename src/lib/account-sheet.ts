@@ -4,13 +4,13 @@
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Phone sheet and desktop 264 share one stack:
-// USER_MENU_ACTIONS (Settings — Get Help). Hairline before Get Help.
+// USER_MENU_ACTIONS (Settings — Theme — Get Help). Hairline before Get Help.
 // Profile is a Settings pane, not a
 // menu row. Give feedback lives on /help/feedback, not this
 // menu and not Settings. 24Frame AI is the header
 // sparkle only — not a menu row. Workspace is
-// the header control, not this menu. Theme SoT is Settings
-// Preferences (desktop header sun/moon may stay). Destinations
+// the header control, not this menu. Theme is the avatar-menu
+// row at /settings/theme (Adam lock 2026-09-22). Destinations
 // use existing routes only — not
 // /account/workspace, /account/appearance, or /account/feedback.
 // Company stays off this menu. Log out +
@@ -146,7 +146,7 @@ export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 // 24 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
 // min-h. NOT 522. NOT 570. NOT 672. NOT 384. Align-end to the
 // avatar (right edge flush). 8px (--space-2) under the trigger.
-// Not a 90% sheet. 24 pad. Tight Settings / Get Help stack.
+// Not a 90% sheet. 24 pad. Tight Settings / Theme / Get Help stack.
 // No leftover grow. Pin Log out,
 // hairline, footer as siblings. Hairline only under Log out.
 // Log out → hairline 16. Hairline → footer 16. Do not hug the

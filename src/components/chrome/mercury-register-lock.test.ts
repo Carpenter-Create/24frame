@@ -51,6 +51,7 @@ describe("Adam Mercury register lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)[0]).toBe("settings");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("theme");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
       "Profile",

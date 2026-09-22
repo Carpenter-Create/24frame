@@ -13,11 +13,13 @@ import {
 import { ASSISTANT_NAME } from "./product";
 
 describe("user menu lock", () => {
-  it("keeps one Apple stack on phone and desktop: Settings — Get Help", () => {
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual(["settings", "help"]);
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
+  it("keeps one Apple stack on phone and desktop: Settings — Theme — Get Help", () => {
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual(["settings", "theme", "help"]);
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Theme", "Get Help"]);
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
+    expect(USER_MENU.theme).toBe("Theme");
+    expect(USER_MENU.themeHref).toBe("/settings/theme");
     expect(USER_MENU.help).toBe("Get Help");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
@@ -28,7 +30,7 @@ describe("user menu lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
     expect(USER_MENU_PHONE_ACTIONS).toBe(USER_MENU_ACTIONS);
-    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual(["settings", "theme", "help"]);
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).not.toContain("askAssistant");
@@ -37,9 +39,10 @@ describe("user menu lock", () => {
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
   });
 
-  it("keeps Profile as a Settings pane href — Appearance is not a page", () => {
+  it("keeps Profile as a Settings pane href — Theme is /settings/theme", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
     expect(USER_MENU.settingsHref).toBe("/settings");
+    expect(USER_MENU.themeHref).toBe("/settings/theme");
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");
@@ -50,6 +53,7 @@ describe("user menu lock", () => {
     expect(USER_MENU).not.toHaveProperty("companyProfile");
     expect(USER_MENU).not.toHaveProperty("companyProfileHref");
     expect(USER_MENU.appearance).toBe("Appearance");
+    expect(USER_MENU.theme).toBe("Theme");
     expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ACTIONS[0]).toEqual({
       kind: "settings",
@@ -57,11 +61,16 @@ describe("user menu lock", () => {
       href: "/settings",
     });
     expect(USER_MENU_ACTIONS[1]).toEqual({
+      kind: "theme",
+      label: "Theme",
+      href: "/settings/theme",
+    });
+    expect(USER_MENU_ACTIONS[2]).toEqual({
       kind: "help",
       label: "Get Help",
       href: "/help",
     });
-    expect(USER_MENU_ACTIONS).toHaveLength(2);
+    expect(USER_MENU_ACTIONS).toHaveLength(3);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
     expect(USER_MENU_ABSENT).toContain(ASSISTANT_NAME);
@@ -76,14 +85,17 @@ describe("user menu lock", () => {
     }
     expect(labels).not.toContain("Profile");
     expect(labels).toContain("Settings");
+    expect(labels).toContain("Theme");
     expect(labels).toContain("Get Help");
     expect(labels).not.toContain("User Profile");
     expect(labels).not.toContain("Agreements");
     expect(labels).not.toContain("Help");
     expect(labels).not.toContain("Give feedback");
     expect(labels).not.toContain("Refer a friend");
-    expect(hrefs).toEqual(["/settings", "/help"]);
+    expect(hrefs).toEqual(["/settings", "/settings/theme", "/help"]);
     expect(hrefs).not.toContain("/account/appearance");
+    expect(hrefs).not.toContain("/settings/appearance");
+    expect(hrefs).not.toContain("/settings/preferences/theme");
     expect(hrefs).not.toContain("/account/profile");
     expect(hrefs).not.toContain("/account/company");
     expect(hrefs).not.toContain("/account/settings");

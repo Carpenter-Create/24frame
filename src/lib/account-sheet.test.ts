@@ -40,13 +40,13 @@ import {
 } from "./account-sheet";
 
 describe("account sheet lock", () => {
-  it("uses the same Settings — Get Help stack on desktop and the phone sheet", () => {
+  it("uses the same Settings — Theme — Get Help stack on desktop and the phone sheet", () => {
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(ACCOUNT_SHEET_ITEMS);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
-    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "theme", "help"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual(["Settings", "Theme", "Get Help"]);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual(["settings", "theme", "help"]);
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).not.toContain("appearance");
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.label)).not.toContain("Appearance");
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("settings");
@@ -56,13 +56,16 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.label)).not.toContain(ASSISTANT_NAME);
   });
 
-  it("wires only existing routes — Appearance is not a page", () => {
+  it("wires Theme to /settings/theme — not a Preferences nest", () => {
     const hrefs = ACCOUNT_SHEET_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []));
-    expect(hrefs).toEqual([USER_MENU.settingsHref, USER_MENU.helpHref]);
+    expect(hrefs).toEqual([USER_MENU.settingsHref, USER_MENU.themeHref, USER_MENU.helpHref]);
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
     expect(hrefs).not.toContain("/account/appearance");
+    expect(hrefs).not.toContain("/settings/preferences/theme");
+    expect(hrefs).not.toContain("/settings/appearance");
     expect(ACCOUNT_SHEET_PHONE_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []))).toEqual([
       USER_MENU.settingsHref,
+      USER_MENU.themeHref,
       USER_MENU.helpHref,
     ]);
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");

@@ -8,7 +8,7 @@
 // Emblem is a workspace-home link, not the rail.
 // Phone grammar IA A:
 //   Left inline: [emblem] [workspace word ▾] — no mark, no truncate.
-//   Trailing: [search if needed] [theme] [24Frame AI] [bell] [avatar]
+//   Trailing: [search if needed] [24Frame AI] [bell] [avatar]
 //   Trailing rhythm: one --space-2 gap between distinct siblings.
 //   Phone icon hits hug the 24px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
 //   without negative margin. #452 -mx collapsed AI onto the bell.
@@ -21,9 +21,9 @@
 // window, never a workspace hop. Second click uses the same close
 // path as X / Escape. Expand/collapse stays overlay-scoped. Close
 // strips ?ai=1 and leaves the current path. Ask AI is header + Home
-// module only (#465). Sun/moon is shared immediately left of Ask on
-// every breakpoint. One trail. No phone-only sun/moon twin.
-// Desktop md+ keeps switcher · theme · Ask · bell · avatar. The Ask
+// module only (#465). Color mode is the avatar Theme row only
+// (Adam lock 2026-09-22). No header sun/moon. One trail.
+// Desktop md+ keeps switcher · Ask · bell · avatar. The Ask
 // control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
@@ -93,7 +93,7 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // Equal CSS gap was not equal air when glyphs sat in oversized hits
 // beside the avatar. Phone hit hugs --header-control-size (24) so
 // APP_HEADER_TRAILING_CLUSTER_CLASS phone --space-3 / desktop --space-2
-// is edge-to-edge theme · AI · bell · avatar. Do not cancel padding with -mx:
+// is edge-to-edge AI · bell · avatar. Do not cancel padding with -mx:
 // that pulled adjacent hits to zero flex width and stacked the glyphs.
 // Do not add phone padding that overflows the control box.
 // Desktop hits follow the same token (44 on the 88 bar).
@@ -101,7 +101,7 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 export const HOUSE_HEADER_TRAILING_HIT_CLASS =
   `flex size-[var(--header-control-size)] min-h-[var(--header-control-size)] min-w-[var(--header-control-size)] shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS}`;
 
-// Phone wrappers stay contents so theme · Ask · bell · search are
+// Phone wrappers stay contents so Ask · bell · search are
 // flex siblings of the avatar and share the cluster gap. They are
 // not a collapse device. Hits must occupy the control-size box.
 export const HOUSE_HEADER_TRAILING_SLOT_CLASS = "contents";
@@ -110,13 +110,15 @@ export const HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS = "contents md:hidden";
 
 // Avatar follows --header-avatar-size on both breakpoints (40 phone,
 // 44 desktop). No extra pad. The shared cluster gap is the only air
-// to theme / AI / bell / search.
+// to AI / bell / search.
 export const HOUSE_HEADER_TRAILING_AVATAR_CLASS =
   "flex size-[var(--header-avatar-size)] shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
 
+// Shared header hit. Ask AI uses this box. The sun/moon toggle is
+// not mounted — Theme is the avatar-menu door only.
 export const HOUSE_THEME_TOGGLE_CLASS =
   `${HOUSE_HEADER_TRAILING_HIT_CLASS} text-ink-3 transition-colors hover:text-ink`;
 
-// Header Ask AI is the same hit as theme. Pressed ink marks open.
+// Header Ask AI uses the shared hit. Pressed ink marks open.
 export const HOUSE_ASK_AI_HEADER_CLASS =
   `${HOUSE_THEME_TOGGLE_CLASS} aria-pressed:text-ink`;

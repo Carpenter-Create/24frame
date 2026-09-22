@@ -16,16 +16,15 @@
 // Organization holds the company profile and Team invite (same
 // account, existing org_role). House grant/comp is staff-only on
 // /gc/clients — never a customer Settings directory.
-// Preferences holds Appearance (same gc-theme SoT as the header
-// sun/moon), the speech-learning opt-out, and the notification
-// matrix. Mobile Preferences is a
-// Coinbase drill-in: Theme and Notifications are rows; edit panes
-// live at /theme and /notifications. Desktop keeps the on-page
-// card and matrix inside SETTINGS_CONTENT_MEASURE_CLASS — a
-// constrained measure, not full-bleed rows across the rail-to-edge
-// span. Leftover workspace prefs may appear as optional
-// subsections only — never as a You / Social / Education /
-// Aggregation spine.
+// Preferences holds the speech-learning opt-out and the
+// notification matrix. Theme is not a Preferences block. Adam
+// lock 2026-09-22: Theme is an avatar-menu row at /settings/theme
+// (peer of Preferences, same gc-theme SoT). Mobile Preferences
+// drills to Notifications. Desktop keeps the matrix inside
+// SETTINGS_CONTENT_MEASURE_CLASS — a constrained measure, not full-bleed rows
+// across the rail-to-edge span. Leftover
+// workspace prefs may appear as optional subsections only —
+// never as a You / Social / Education / Aggregation spine.
 //
 // Canonical paths only (hard-cut — no users yet, no redirects):
 //   /settings → hub (mobile list) / Profile pane (desktop)
@@ -36,11 +35,12 @@
 //   /settings/organization/entities/new
 //   /settings/organization/entities/[id]
 //   /settings/preferences
-//   /settings/preferences/theme
 //   /settings/preferences/notifications
+//   /settings/theme
 //   /settings/security
-// Retired /settings/you|social|education|aggregation and ?section=
-// aliases are gone. Dead paths 404. Do not add a redirect table.
+// Retired /settings/you|social|education|aggregation, ?section=
+// aliases, and /settings/preferences/theme are gone. Dead paths
+// 404. Do not add a redirect table.
 //
 // Account menu Settings always opens the hub. settingsLandHref is
 // /settings from every workspace — no context land that swaps the
@@ -48,9 +48,10 @@
 //
 // Existing /settings/agreements, /settings/refer stay Profile doors.
 // Company persist stays organizations.name.
-// Theme SoT is gc-theme — header sun/moon and Preferences Appearance
-// share it. Get Help / Give feedback stay on /help — never Settings
-// hub chrome.
+// Theme SoT is gc-theme. The only door is the avatar-menu Theme
+// row at /settings/theme. Header sun/moon is gone. Preferences
+// does not host Appearance. Get Help / Give feedback stay on
+// /help — never Settings hub chrome.
 //
 // 600:881 shell — one dest-rail slot occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
@@ -77,8 +78,8 @@ export const SETTINGS = {
   preferencesHref: "/settings/preferences",
   security: "Security",
   securityHref: "/settings/security",
-  theme: "Theme",
-  themeHref: "/settings/preferences/theme",
+  theme: USER_MENU.theme,
+  themeHref: USER_MENU.themeHref,
   themeHelper: "Choose Light, Dark, or System default.",
   notificationsHref: "/settings/preferences/notifications",
   profileNameHref: "/settings/profile/name",
@@ -321,7 +322,11 @@ export function settingsHubHasInAppReferrer(
   }
 }
 
-function pathSection(pathname: string): SettingsHubSection {
+function pathSection(pathname: string): SettingsHubSection | null {
+  // Theme is an avatar door, not a hub section. Do not wash Profile.
+  if (pathname === SETTINGS.themeHref || pathname.startsWith(`${SETTINGS.themeHref}/`)) {
+    return null;
+  }
   if (
     pathname === SETTINGS.organizationHref
     || pathname.startsWith(`${SETTINGS.organizationHref}/`)
@@ -343,8 +348,8 @@ function pathSection(pathname: string): SettingsHubSection {
   return "profile";
 }
 
-/** Hub section from the path. Profile doors (agreements / refer) wash Profile. */
-export function settingsHubSection(pathname: string | null | undefined): SettingsHubSection {
+/** Hub section from the path. Profile doors (agreements / refer) wash Profile. Theme washes none. */
+export function settingsHubSection(pathname: string | null | undefined): SettingsHubSection | null {
   if (!pathname) return "profile";
   return pathSection(pathname);
 }
@@ -354,7 +359,10 @@ export function settingsPaneTitle(section: SettingsHubSection): string {
   return SETTINGS_HUB_LABELS[section];
 }
 
-/** Active follows the hub section. */
-export function settingsRailActive(kind: SettingsRailKind, section: SettingsHubSection): boolean {
-  return kind === section;
+/** Active follows the hub section. Theme and other non-hub paths wash nothing. */
+export function settingsRailActive(
+  kind: SettingsRailKind,
+  section: SettingsHubSection | null,
+): boolean {
+  return section !== null && kind === section;
 }

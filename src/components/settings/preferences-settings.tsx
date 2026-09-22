@@ -1,7 +1,3 @@
-import {
-  AppearancePreferences,
-  AppearanceThemeRow,
-} from "@/components/settings/appearance-preferences";
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
 import { SpeechLearningPreference } from "@/components/settings/speech-learning-preference";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
@@ -17,17 +13,16 @@ import {
   settingsPaneTitle,
 } from "@/lib/settings";
 
-// Preferences pane — Appearance (gc-theme SoT) + speech-learning
-// opt-out + notification matrix. Never a You / Social / Education /
-// Aggregation spine.
+// Preferences pane — speech-learning opt-out + notification matrix.
+// Theme is the avatar-menu door at /settings/theme, not this pane.
+// Never a You / Social / Education / Aggregation spine.
 // Course management lives on the Education operator workspace,
 // not a Preferences row. Not a CMS. Not GC Staff admin.
 //
-// Mobile: Coinbase drill-in. Theme and Notifications are one-row
-// summaries. Instant switches stay on the Notifications pane.
-// Desktop keeps the on-page Appearance card and matrix inside
-// SETTINGS_CONTENT_MEASURE_CLASS — constrained measure, not
-// full-bleed rows.
+// Mobile: Coinbase drill-in. Notifications is the one-row summary.
+// Instant switches stay on the Notifications pane.
+// Desktop keeps the matrix inside SETTINGS_CONTENT_MEASURE_CLASS —
+// constrained measure, not full-bleed rows.
 
 export function PreferencesSettings({
   prefs,
@@ -42,7 +37,6 @@ export function PreferencesSettings({
           pathname={SETTINGS.preferencesHref}
         />
         <div data-settings-pref-index="" className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
-          <AppearanceThemeRow />
           <SettingsDrillRow
             kind="notifications"
             label={NOTIFICATION_PREFS.title}
@@ -54,7 +48,6 @@ export function PreferencesSettings({
           data-settings-pref-desktop=""
           className={`hidden md:block ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
         >
-          <AppearancePreferences />
           <SpeechLearningPreference />
           <NotificationPreferences initialPrefs={prefs} />
         </div>

@@ -60,7 +60,7 @@ function htmlClass(html: string, attr: string): string {
 }
 
 describe("phone header grammar A — trim trailing", () => {
-  it("keeps phone trailing as search · theme · AI · bell · avatar", () => {
+  it("keeps phone trailing as search · AI · bell · avatar — no sun/moon", () => {
     expect(leadSrc).not.toContain("data-app-header-desktop-trailing");
     expect(leadSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
     expect(switcherSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
@@ -70,13 +70,14 @@ describe("phone header grammar A — trim trailing", () => {
       leadSrc.indexOf("data-app-header-trailing-nav"),
     );
     expect(leadSrc.indexOf("data-app-header-trailing-nav")).toBeLessThan(
-      leadSrc.indexOf("<ThemeToggle"),
+      leadSrc.indexOf("<AskAssistantHeaderLink"),
     );
-    expect(leadSrc.indexOf("<ThemeToggle")).toBeLessThan(leadSrc.indexOf("<AskAssistantHeaderLink"));
+    expect(leadSrc).not.toContain("ThemeToggle");
+    expect(leadSrc).not.toContain("theme-toggle");
     expect(leadSrc.indexOf("<AskAssistantHeaderLink")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
     expect(leadSrc.indexOf("<ActivityBell")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
     expect(leadSrc).toMatch(
-      /data-app-header-workspace-desktop[\s\S]*<\/div>\s*<ThemeToggle \/>\s*<AskAssistantHeaderLink/,
+      /data-app-header-workspace-desktop[\s\S]*<\/div>\s*<AskAssistantHeaderLink/,
     );
 
     const aggregation = renderToStaticMarkup(
@@ -99,34 +100,21 @@ describe("phone header grammar A — trim trailing", () => {
     expect(aggregation).not.toContain("data-mobile-nav-trigger");
     expect(trailing).not.toContain("data-app-header-desktop-trailing");
     expect(trailing).toContain("data-ask-assistant-header");
-    expect(trailing).toContain("data-theme-toggle");
+    expect(trailing).not.toContain("data-theme-toggle");
     expect(trailing).toContain("data-activity-bell");
     expect(trailing).toContain("data-user-menu-host");
-    expect(trailing.indexOf("data-theme-toggle")).toBeLessThan(
-      trailing.indexOf("data-ask-assistant-header"),
-    );
     expect(trailing.indexOf("data-ask-assistant-header")).toBeLessThan(
       trailing.indexOf("data-activity-bell"),
     );
     expect(trailing.indexOf("data-activity-bell")).toBeLessThan(
       trailing.indexOf("data-user-menu-host"),
     );
-    const themeToAsk = trailing.slice(
-      trailing.indexOf("data-theme-toggle"),
-      trailing.indexOf("data-ask-assistant-header"),
-    );
-    expect(themeToAsk).not.toContain("md:contents");
     const askToBell = trailing.slice(
       trailing.indexOf("data-ask-assistant-header"),
       trailing.indexOf("data-activity-bell"),
     );
     expect(askToBell).not.toContain("data-theme-toggle");
     expect(askToBell).not.toContain("data-user-menu-host");
-    const themeBtn = trailing.slice(
-      trailing.lastIndexOf("<", trailing.indexOf("data-theme-toggle")),
-      trailing.indexOf(">", trailing.indexOf("data-theme-toggle")),
-    );
-    expect(themeBtn).not.toMatch(/(?:^|\s)hidden(?:\s|$)/);
     expect(trailing).toContain("data-ask-ai-open");
     expect(trailing).not.toContain('href="/messages"');
     expect(trailing).not.toContain('href="/dashboard"');
@@ -161,11 +149,9 @@ describe("phone header grammar A — trim trailing", () => {
       social.indexOf("data-app-header-trailing"),
     );
     expect(social.indexOf("data-social-header-search-icon")).toBeLessThan(
-      social.indexOf("data-theme-toggle"),
-    );
-    expect(social.indexOf("data-theme-toggle")).toBeLessThan(
       social.indexOf("data-ask-assistant-header"),
     );
+    expect(social).not.toContain("data-theme-toggle");
     expect(social.indexOf("data-ask-assistant-header")).toBeLessThan(
       social.indexOf("data-activity-bell"),
     );
@@ -188,7 +174,7 @@ describe("phone header grammar A — trim trailing", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
   });
 
-  it("keeps phone trailing theme · AI · bell · avatar on one gap without collapsing hits", () => {
+  it("keeps phone trailing AI · bell · avatar on one gap without collapsing hits", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toMatch(
       /(?:^|\s)gap-\[var\(--space-3\)\](?:\s|$)/,
     );
@@ -232,9 +218,10 @@ describe("phone header grammar A — trim trailing", () => {
     }
   });
 
-  it("keeps the same Settings — Get Help stack on phone and desktop — 24Frame AI stays header-only", () => {
+  it("keeps the same Settings — Theme — Get Help stack on phone and desktop — 24Frame AI stays header-only", () => {
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
       "settings",
+      "theme",
       "help",
     ]);
     expect(USER_MENU_PHONE_ACTIONS).toBe(USER_MENU_ACTIONS);
@@ -242,7 +229,7 @@ describe("phone header grammar A — trim trailing", () => {
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "theme", "help"]);
 
     const sheet = renderToStaticMarkup(
       createElement(AccountSheet, {
@@ -253,13 +240,22 @@ describe("phone header grammar A — trim trailing", () => {
     );
     expect(sheet).not.toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
+    expect(sheet).toContain('data-sheet-group-item="theme"');
     expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).not.toContain('data-sheet-group-item="appearance"');
     expect(sheet).toContain('data-sheet-group-item="help"');
+    expect(sheet).toContain(USER_MENU.theme);
+    expect(sheet).toContain(USER_MENU.themeHref);
     expect(sheet).toContain(USER_MENU.help);
     expect(sheet).not.toContain(ASSISTANT_NAME);
     expect(sheet).not.toContain('href="/messages"');
     expect(sheet).not.toContain(USER_MENU.appearance);
+    expect(sheet.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
+      sheet.indexOf('data-sheet-group-item="theme"'),
+    );
+    expect(sheet.indexOf('data-sheet-group-item="theme"')).toBeLessThan(
+      sheet.indexOf('data-sheet-group-item="help"'),
+    );
     expect(sheet).not.toContain("data-account-menu-appearance-mode");
     expect(sheetSrc).not.toContain("AccountSheetAppearance");
     expect(sheetSrc).not.toContain("applyDocumentThemePreference");
@@ -274,10 +270,18 @@ describe("phone header grammar A — trim trailing", () => {
     );
     expect(dropdown).not.toContain('data-sheet-group-item="profile"');
     expect(dropdown).toContain('data-sheet-group-item="settings"');
+    expect(dropdown).toContain('data-sheet-group-item="theme"');
     expect(dropdown).not.toContain('data-sheet-group-item="askAssistant"');
     expect(dropdown).not.toContain('data-sheet-group-item="appearance"');
     expect(dropdown).toContain('data-sheet-group-item="help"');
+    expect(dropdown).toContain(USER_MENU.theme);
     expect(dropdown).toContain(USER_MENU.help);
+    expect(dropdown.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
+      dropdown.indexOf('data-sheet-group-item="theme"'),
+    );
+    expect(dropdown.indexOf('data-sheet-group-item="theme"')).toBeLessThan(
+      dropdown.indexOf('data-sheet-group-item="help"'),
+    );
     expect(dropdown).not.toContain(ASSISTANT_NAME);
     expect(dropdown).not.toContain(USER_MENU.appearance);
   });

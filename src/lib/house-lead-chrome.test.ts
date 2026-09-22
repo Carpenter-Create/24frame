@@ -188,7 +188,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("search ?");
   });
 
-  it("G7 keeps trailing workspace switcher + Ask 24Frame AI + sun/moon + bell + avatar on all three", () => {
+  it("G7 keeps trailing workspace switcher + Ask 24Frame AI + bell + avatar on all three", () => {
     for (const workspace of ["aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
       expect(html).toContain("data-app-header-trailing");
@@ -196,13 +196,10 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).toContain(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS);
       expect(html).toContain('data-workspace-switcher-presentation="pills"');
       expect(html).toContain("data-ask-assistant-header");
-      expect(html).toContain("data-theme-toggle");
+      expect(html).not.toContain("data-theme-toggle");
       expect(html).toContain("data-activity-bell");
       expect(html).toContain("data-user-menu-host");
       expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
-        html.indexOf("data-theme-toggle"),
-      );
-      expect(html.indexOf("data-theme-toggle")).toBeLessThan(
         html.indexOf("data-ask-assistant-header"),
       );
       expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(
@@ -217,7 +214,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     }
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
-    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).not.toContain("ThemeToggle");
+    expect(leadSrc).not.toContain("theme-toggle");
     expect(leadSrc).toContain("<ActivityBell");
     expect(leadSrc).toContain("workspace={workspace}");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
@@ -251,7 +249,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("max-md:h-auto");
   });
 
-  it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {
+  it("evens phone trailing AI · bell · avatar with one gap and no overlapping hits", () => {
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-[var(--header-control-size)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-4");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);

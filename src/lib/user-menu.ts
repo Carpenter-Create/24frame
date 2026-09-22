@@ -1,11 +1,12 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
 // Apple door — phone sheet and desktop 264 share one stack:
-// identity → Settings → Get Help → Log out. Chrome may differ
-// (full-bleed sheet vs dropdown). Labels may not fork.
+// identity → Settings → Theme → Get Help → Log out. Chrome may
+// differ (full-bleed sheet vs dropdown). Labels may not fork.
+// Adam lock 2026-09-22: Theme is its own avatar-menu row. It
+// drills to /settings/theme. One gc-theme SoT — not a Preferences
+// nest, not a header sun/moon, not a second store.
 // 24Frame AI is the header sparkle only — not a menu row.
-// Workspace lives on the header switcher. Theme SoT is Settings
-// Preferences (and the desktop header sun/moon). Do not put a
-// second Appearance row on this menu. One Settings hub. No
+// Workspace lives on the header switcher. One Settings hub. No
 // forked Settings.
 // Profile is a Settings hub pane (/settings/profile), not a
 // second avatar-menu door. Settings land href is
@@ -14,7 +15,8 @@
 // is the avatar-menu footer door — /help. Give feedback lives on
 // /help/feedback, not Settings. Company stays off this menu. Do
 // not invent /account/workspace, /settings/workspace,
-// /account/appearance, /settings/appearance, or /account/feedback.
+// /account/appearance, /settings/appearance,
+// /settings/preferences/theme, or /account/feedback.
 // Legal is parked. Do not invent Phone, Job, Notifications,
 // Privacy, Manage account, or a name derived from the email
 // local-part.
@@ -28,6 +30,8 @@ export const USER_MENU = {
   profileHref: "/settings/profile",
   settings: "Settings",
   settingsHref: "/settings",
+  theme: "Theme",
+  themeHref: "/settings/theme",
   agreements: "Agreements",
   agreementsHref: "/settings/agreements",
   appearance: "Appearance",
@@ -61,18 +65,31 @@ export type UserMenuSettingsAction = {
   href: typeof USER_MENU.settingsHref;
 };
 
+export type UserMenuThemeAction = {
+  kind: "theme";
+  label: typeof USER_MENU.theme;
+  href: typeof USER_MENU.themeHref;
+};
+
 export type UserMenuHelpAction = {
   kind: "help";
   label: typeof USER_MENU.help;
   href: typeof USER_MENU.helpHref;
 };
 
-export type UserMenuLinkAction = UserMenuSettingsAction | UserMenuHelpAction;
+export type UserMenuLinkAction =
+  | UserMenuSettingsAction
+  | UserMenuThemeAction
+  | UserMenuHelpAction;
 
 export type UserMenuAction = UserMenuLinkAction;
 
 export const USER_MENU_PRIMARY_ACTIONS: readonly UserMenuSettingsAction[] = [
   { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
+];
+
+export const USER_MENU_THEME_ACTIONS: readonly UserMenuThemeAction[] = [
+  { kind: "theme", label: USER_MENU.theme, href: USER_MENU.themeHref },
 ];
 
 export const USER_MENU_HELP_ACTIONS: readonly UserMenuHelpAction[] = [
@@ -81,10 +98,11 @@ export const USER_MENU_HELP_ACTIONS: readonly UserMenuHelpAction[] = [
 
 export const USER_MENU_ACTIONS: readonly UserMenuLinkAction[] = [
   ...USER_MENU_PRIMARY_ACTIONS,
+  ...USER_MENU_THEME_ACTIONS,
   ...USER_MENU_HELP_ACTIONS,
 ];
 
-// Same IA on phone and desktop. Theme lives in Settings Preferences.
+// Same IA on phone and desktop. Theme is this row — not Preferences.
 export const USER_MENU_PHONE_ACTIONS: readonly UserMenuAction[] = USER_MENU_ACTIONS;
 
 export function userMenuVersion(): string {
