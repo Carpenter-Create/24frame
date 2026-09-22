@@ -219,7 +219,11 @@ describe("Social public profile", () => {
     expect(html).not.toContain("Copies ");
     expect(html).not.toContain("data-social-share-hint");
     expect(html).toContain("data-social-for-you");
-    expect(html).toContain("lg:max-w-[600px]");
+    expect(html).toContain("lg:max-w-[720px]");
+    expect(html).toContain("lg:max-w-[1052px]");
+    expect(html).toContain("gap-[32px]");
+    expect(html).not.toContain("lg:max-w-[600px]");
+    expect(html).not.toContain("lg:max-w-[932px]");
     expect(html).toContain("w-[300px]");
     expect(html).toContain("lg:flex");
     expect(html).not.toContain("max-w-[935px]");

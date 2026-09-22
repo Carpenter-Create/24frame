@@ -94,7 +94,11 @@ describe("Social Explore", () => {
     expect(html).not.toContain("data-social-feed");
     expect(html).toContain("data-social-for-you");
     expect(html).toContain(SOCIAL.forYou.title);
-    expect(html).toContain("lg:max-w-[600px]");
+    expect(html).toContain("lg:max-w-[720px]");
+    expect(html).toContain("lg:max-w-[1052px]");
+    expect(html).toContain("gap-[32px]");
+    expect(html).not.toContain("lg:max-w-[600px]");
+    expect(html).not.toContain("lg:max-w-[932px]");
     expect(html).toContain("lg:flex");
     expect(html).toContain("w-[300px]");
     expect(html).not.toContain("892");

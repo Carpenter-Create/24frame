@@ -318,7 +318,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("dest:");
     expect(chrome).not.toContain("chats: 200");
     expect(chrome).toContain("gutter: 32");
-    expect(chrome).toContain("center: 600");
+    expect(chrome).toContain("center: 720");
+    expect(chrome).not.toContain("center: 600");
     expect(chrome).not.toContain("center: 892");
     expect(chrome).not.toContain("892");
     expect(chrome).toContain("right: 300");
@@ -353,6 +354,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("gap-[32px]");
     expect(chrome).not.toContain("gap-[16px]");
     expect(chrome).not.toContain("lg:max-w-[916px]");
+    expect(chrome).not.toContain("lg:max-w-[932px]");
+    expect(chrome).not.toContain("lg:max-w-[600px]");
     expect(chrome).toContain("SOCIAL_COMPOSER_MEDIA_CLASS");
     expect(chrome).not.toContain("SOCIAL_COMPOSER_ACTION_CLASS");
     expect(home).not.toContain("SocialFirstWin");
@@ -580,7 +583,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(messages).toContain("SOCIAL.dms.startCta");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       gutter: 32,
-      center: 600,
+      center: 720,
       right: 300,
       padR: 16,
     });
@@ -591,7 +594,8 @@ describe("Social Home miss list v1 P0 lock", () => {
         SOCIAL_DESKTOP_MEASURE.gutter +
         SOCIAL_DESKTOP_MEASURE.right,
     );
-    expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(932);
+    expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(1052);
+    expect(SOCIAL_CONTENT_PAIR_WIDTH).not.toBe(932);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
@@ -804,14 +808,14 @@ describe("Social Home miss list v1 P0 lock", () => {
   it("locks Home and Profile to one X-narrow center and puts the handle under the name", () => {
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const ownFace = readFileSync("src/components/social/social-own-profile.tsx", "utf8");
-    expect(SOCIAL_DESKTOP_MEASURE.center).toBe(600);
+    expect(SOCIAL_DESKTOP_MEASURE.center).toBe(720);
     expect(SOCIAL_DESKTOP_MEASURE.right).toBe(300);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(SOCIAL_PROFILE_CENTER_CLASS);
     // Adam 2026-09-22: left rail stays the house slot. The row is the
-    // 600 + 32 + 300 pair, centered beside that rail at lg. No
+    // 720 + 32 + 300 pair, centered beside that rail at lg. No
     // justify-between stretch. No unprefixed cap (phone stays full-bleed).
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
-      "flex w-full items-start gap-[32px] lg:mx-auto lg:max-w-[932px]",
+      "flex w-full items-start gap-[32px] lg:mx-auto lg:max-w-[1052px]",
     );
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
       `flex w-full items-start gap-[${SOCIAL_DESKTOP_MEASURE.gutter}px] lg:mx-auto lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`,
@@ -827,7 +831,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(railSlot).toBe(256);
     const pairOuter =
       (1440 - railSlot - SOCIAL_DESKTOP_MEASURE.padR * 2 - SOCIAL_CONTENT_PAIR_WIDTH) / 2;
-    expect(pairOuter).toBe(110);
+    expect(pairOuter).toBe(50);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(
       `flex min-w-0 w-full flex-1 flex-col gap-2 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );
@@ -835,7 +839,8 @@ describe("Social Home miss list v1 P0 lock", () => {
       `w-full min-w-0 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );
     expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("flex-1");
-    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("lg:max-w-[600px]");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("lg:max-w-[720px]");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("lg:max-w-[600px]");
     expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("md:max-w");
     expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("mx-auto");
     expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("935");
@@ -858,8 +863,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_FOR_YOU_RAIL_CLASS).toContain("lg:flex");
     expect(SOCIAL_FOR_YOU_RAIL_CLASS).not.toContain("md:flex");
     expect(SOCIAL_HOME_CENTER_CLASS).toContain("w-full");
-    expect(SOCIAL_HOME_CENTER_CLASS).toContain("lg:max-w-[600px]");
-    expect(SOCIAL_HOME_CENTER_CLASS).not.toMatch(/(^|\s)max-w-\[600px\]/);
+    expect(SOCIAL_HOME_CENTER_CLASS).toContain("lg:max-w-[720px]");
+    expect(SOCIAL_HOME_CENTER_CLASS).not.toContain("lg:max-w-[600px]");
+    expect(SOCIAL_HOME_CENTER_CLASS).not.toMatch(/(^|\s)max-w-\[720px\]/);
     expect(chrome).toContain("Phone and desktop share this stack");
     expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(profile).toContain("SOCIAL_HOME_LAYOUT_CLASS");

@@ -198,6 +198,12 @@ describe("Social home", () => {
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
     expect(html).toContain("data-social-for-you");
+    expect(html).toContain("lg:max-w-[720px]");
+    expect(html).toContain("lg:max-w-[1052px]");
+    expect(html).toContain("gap-[32px]");
+    expect(html).toContain("w-[300px]");
+    expect(html).not.toContain("lg:max-w-[600px]");
+    expect(html).not.toContain("lg:max-w-[932px]");
     expect(html).not.toContain("data-social-latest-course");
     expect(html).not.toContain(SOCIAL.forYou.latestCourse);
     expect(html).not.toContain("data-social-recent-chats");
