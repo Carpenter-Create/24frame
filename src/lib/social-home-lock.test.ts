@@ -118,7 +118,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL.home.forYouTab).toBe("For you");
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
-    expect(SOCIAL.forYou.topics).toBe("Topics");
+    expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
     expect(SOCIAL.checklist.bio).toBe("Write a short bio");
@@ -250,7 +250,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topics).toContain("data-social-home-topics");
     expect(topics).toContain("data-social-home-topics-rail");
     expect(topics).toContain("HouseChipRail");
-    expect(topics).toContain("SOCIAL.forYou.topics");
+    expect(topics).not.toContain("SOCIAL.forYou.topics");
+    expect(topics).not.toMatch(/>Topics</);
     expect(topics).toContain("socialTopicRailChipClass");
     expect(topics).toContain("SOCIAL_CATEGORY_LABELS");
     expect(topics).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");

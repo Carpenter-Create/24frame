@@ -88,7 +88,7 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
-    expect(SOCIAL.forYou.topics).toBe("Topics");
+    expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.firstName).toBe("First name");
     expect(SOCIAL.profile.middleName).toBe("Middle name");
@@ -458,7 +458,7 @@ describe("profile opt-in", () => {
     expect(socialComposerPrompt("")).toBe("Write something");
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
-    expect(SOCIAL.forYou.topics).toBe("Topics");
+    expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.activityTab).toBe("Activity");
     expect(SOCIAL.profile.activityPosts).toBe("Posts");

@@ -104,7 +104,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-house-chip-rail");
     expect(html).toContain('data-house-chip-rail-row="0"');
     expect(html).not.toContain('data-house-chip-rail-row="1"');
-    expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html).not.toMatch(/>Topics</);
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_ROW_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CHIP_CLASS);
@@ -130,7 +130,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("Topics.");
     expect(html).not.toContain("truncate");
     expect(html).not.toContain("data-social-for-you-topics");
-    expect(SOCIAL.forYou.topics).toBe("Topics");
+    expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL_TOPIC_RAIL_ROWS).toBe(1);
     expect(SOCIAL_CATEGORY_TOPICS).toHaveLength(15);
     const row = html.slice(html.indexOf('data-house-chip-rail-row="0"'));

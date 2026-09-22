@@ -8,16 +8,15 @@ import {
   socialHomeLensHref,
   type SocialCategoryLabel,
 } from "@/lib/social-categories";
-import { SOCIAL } from "@/lib/social";
 
+// Adam 2026-09-22: no section label. The chip rail is the control.
 export function SocialHomeTopics({
   active = SOCIAL_CATEGORY_ALL,
 }: {
   active?: SocialCategoryLabel;
 }) {
   return (
-    <section data-social-home-topics="" className="flex min-w-0 flex-col gap-2">
-      <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.topics}</p>
+    <div data-social-home-topics="" className="min-w-0">
       <HouseChipRail
         data-social-home-topics-rail=""
         rows={SOCIAL_TOPIC_RAIL_ROWS}
@@ -38,6 +37,6 @@ export function SocialHomeTopics({
           );
         }}
       />
-    </section>
+    </div>
   );
 }

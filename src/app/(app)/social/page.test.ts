@@ -186,8 +186,7 @@ describe("Social home", () => {
     expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-home-composer"));
     expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
     expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-tabs"));
-    expect(html).toContain(SOCIAL.forYou.topics);
-    expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
+    expect(html).not.toMatch(/>Topics</);
     expect(html).toContain("Write something");
     expect(html).not.toContain("What's on your mind");
     expect(html).not.toContain("Topics for you");
@@ -436,8 +435,7 @@ describe("Social home", () => {
     expect(html).toContain("data-social-for-you-lane");
     expect(html).not.toContain("data-social-home-setup");
     expect(html).toContain(SOCIAL.forYou.people);
-    expect(html).toContain(SOCIAL.forYou.topics);
-    expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
+    expect(html).not.toMatch(/>Topics</);
     expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-for-you-lane"));
     expect(html).not.toContain("data-social-for-you-topics");
     expect(html).not.toContain("data-social-latest-course");
