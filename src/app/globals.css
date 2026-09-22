@@ -4,8 +4,9 @@
 /* ============================================================
    GLOBAL CONTENT — house design system foundation.
    Greyscale neutral ramp + exactly ONE accent: Sporty Blue
-   (confirmed 2026-07-18). Logo/wordmark accent remains a
-   founder checkpoint — do not pick a new hex.
+   (confirmed 2026-07-18) on light. Dark flips that same token to
+   LinkedIn soft #70b5f9 (Adam 2026-09-22). Logo/wordmark accent
+   remains a founder checkpoint — do not pick a new hex.
    Light is the default base; dark is secondary (.dark class).
    House tokens (tokens.css) drive both modes.
    ============================================================ */
