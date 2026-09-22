@@ -96,6 +96,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.themeHref).toBe(USER_MENU.themeHref);
     expect(SETTINGS.themeHelper).toBe("Choose Light, Dark, or System default.");
     expect(SETTINGS.notificationsHref).toBe("/settings/preferences/notifications");
+    expect(SETTINGS.locationHref).toBe("/settings/preferences/location");
     expect(SETTINGS.profileNameHref).toBe("/settings/profile/name");
     expect(SETTINGS).not.toHaveProperty("sectionQuery");
     expect(SETTINGS.agreements).toBe("Agreements");
@@ -156,6 +157,7 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
     expect(settingsHubSection("/settings/theme")).toBeNull();
     expect(settingsHubSection("/settings/preferences/notifications")).toBe("preferences");
+    expect(settingsHubSection("/settings/preferences/location")).toBe("preferences");
     expect(settingsHubSection("/settings/profile/name")).toBe("profile");
     expect(settingsHubSection("/settings/security")).toBe("security");
     expect(settingsHubSection("")).toBe("profile");
@@ -306,6 +308,10 @@ describe("settings hub lock", () => {
       label: "Settings",
     });
     expect(settingsHeaderBack("/settings/preferences/notifications")).toEqual({
+      href: "/settings/preferences",
+      label: "Preferences",
+    });
+    expect(settingsHeaderBack("/settings/preferences/location")).toEqual({
       href: "/settings/preferences",
       label: "Preferences",
     });

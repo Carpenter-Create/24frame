@@ -1,10 +1,13 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { PreferencesSettings } from "@/components/settings/preferences-settings";
 import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
+import { EMPTY_PROFILE_LOCATION, LOCATION } from "@/lib/location";
 import {
   NOTIFICATION_PREF_DEFAULTS,
   NOTIFICATION_PREF_EVENTS,
@@ -36,6 +39,9 @@ vi.mock("@/app/(app)/settings/preferences/actions", () => ({
 vi.mock("./actions", () => ({
   loadOwnNotificationPrefs: vi.fn(async () => NOTIFICATION_PREF_DEFAULTS),
   saveNotificationPref: vi.fn(),
+}));
+vi.mock("@/app/(app)/settings/preferences/location/actions", () => ({
+  loadProfileLocation: vi.fn(async () => ({ city: "Austin", region: "TX", country: "US" })),
 }));
 
 function ctx(isGcStaff: boolean) {
@@ -80,6 +86,11 @@ describe("SettingsPreferencesPage", () => {
     expect(html).not.toContain("Learn from typed and dictated text");
     expect(html).toContain('data-settings-drill-row="notifications"');
     expect(html).toContain(`href="${SETTINGS.notificationsHref}"`);
+    expect(html).toContain('data-settings-drill-row="location"');
+    expect(html).toContain(`href="${SETTINGS.locationHref}"`);
+    expect(html).toContain(LOCATION.title);
+    expect(html).toContain("Austin, TX, US");
+    expect(paneSrc).not.toContain("truncate");
     expect(html).toContain("md:hidden");
     expect(html).toContain("hidden md:block");
     expect(html).toContain('data-settings-pref-desktop=""');
@@ -147,6 +158,18 @@ describe("SettingsPreferencesPage", () => {
     expect(paneSrc).not.toContain("SpeechLearningPreference");
     expect(paneSrc).toContain("NotificationPreferences");
     expect(paneSrc).toContain("SettingsDrillRow");
+  });
+
+  it("shows the empty location placeholder when no place is saved", () => {
+    const html = renderToStaticMarkup(
+      createElement(PreferencesSettings, {
+        prefs: NOTIFICATION_PREF_DEFAULTS,
+        location: EMPTY_PROFILE_LOCATION,
+      }),
+    );
+    expect(html).toContain('data-settings-drill-row="location"');
+    expect(html).toContain(LOCATION.empty);
+    expect(html).not.toContain("Austin, TX, US");
   });
 
   it("never shows Manage courses on Preferences, including staff", async () => {

@@ -1,6 +1,7 @@
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
+import { composeLocationLabel, LOCATION, type ProfileLocation } from "@/lib/location";
 import type { NotificationPrefs } from "@/lib/notification-prefs";
 import { NOTIFICATION_PREFS } from "@/lib/notification-prefs";
 import {
@@ -12,7 +13,7 @@ import {
   settingsPaneTitle,
 } from "@/lib/settings";
 
-// Preferences pane — notification matrix only.
+// Preferences pane — Location drill and the notification matrix.
 // Theme is the avatar-menu door at /settings/theme, not this pane.
 // Speech-learning is parked off Preferences (Adam 2026-09-22).
 // The gc-speech-learning store stays; this pane does not surface it.
@@ -20,16 +21,22 @@ import {
 // Course management lives on the Education operator workspace,
 // not a Preferences row. Not a CMS. Not GC Staff admin.
 //
-// Mobile: Coinbase drill-in. Notifications is the one-row summary.
-// Instant switches stay on the Notifications pane.
+// Location is a Coinbase drill on phone and desktop. The muted
+// value is the composed place, or the empty placeholder.
+// Mobile also drills to Notifications. Instant switches stay
+// on the Notifications pane.
 // Desktop keeps the matrix inside SETTINGS_CONTENT_MEASURE_CLASS —
 // constrained measure, not full-bleed rows.
 
 export function PreferencesSettings({
   prefs,
+  location,
 }: {
   prefs: NotificationPrefs;
+  location: ProfileLocation;
 }) {
+  const locationValue =
+    composeLocationLabel(location.city, location.region, location.country) || LOCATION.empty;
   return (
     <div data-settings-page="" data-settings-hub="preferences" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="preferences" className={SETTINGS_SECTION_CLASS}>
@@ -37,12 +44,20 @@ export function PreferencesSettings({
           title={settingsPaneTitle("preferences")}
           pathname={SETTINGS.preferencesHref}
         />
-        <div data-settings-pref-index="" className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
+        <div data-settings-pref-index="" className={SETTINGS_DRILL_LIST_CLASS}>
           <SettingsDrillRow
-            kind="notifications"
-            label={NOTIFICATION_PREFS.title}
-            href={SETTINGS.notificationsHref}
+            kind="location"
+            label={LOCATION.title}
+            value={locationValue}
+            href={SETTINGS.locationHref}
           />
+          <div className="md:hidden">
+            <SettingsDrillRow
+              kind="notifications"
+              label={NOTIFICATION_PREFS.title}
+              href={SETTINGS.notificationsHref}
+            />
+          </div>
         </div>
         <div
           data-settings-pref-desktop=""

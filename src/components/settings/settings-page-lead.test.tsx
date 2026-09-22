@@ -42,6 +42,7 @@ const SETTINGS_EDIT_PANES = [
   "src/app/(app)/settings/profile/name/page.tsx",
   "src/app/(app)/settings/theme/page.tsx",
   "src/app/(app)/settings/preferences/notifications/page.tsx",
+  "src/app/(app)/settings/preferences/location/page.tsx",
   "src/app/(app)/settings/organization/company/page.tsx",
   "src/app/(app)/settings/organization/entities/new/page.tsx",
   "src/app/(app)/settings/organization/entities/[entityId]/page.tsx",
