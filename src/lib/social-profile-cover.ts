@@ -8,8 +8,9 @@
 // it is not the primary size. 1784×446 is the canonical target.
 //
 // Display: phone 112px, desktop 224px, column 892, aspect 4:1.
-// Avatar hang ~40% (72 / 88). These display values are Lock A and
-// must not change without a new founder lock.
+// Avatar lip ~40% (72 / 88 → 29 / 35). The lip is the face only.
+// Name and counts stay on the page. Crop master stays 1784×446 and
+// is never painted in the profile UI.
 
 import { SOCIAL_IMAGE_CONTENT_TYPES } from "@/lib/social-media";
 

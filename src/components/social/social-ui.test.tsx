@@ -42,13 +42,14 @@ import {
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
-  SOCIAL_PROFILE_META_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_PROFILE_ROLES_ROW_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
+  SOCIAL_PROFILE_STAT_LABEL_CLASS,
+  SOCIAL_PROFILE_STAT_VALUE_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
@@ -231,6 +232,9 @@ describe("Social profile public face", () => {
     expect(identity.indexOf("data-social-profile-head")).toBeLessThan(
       identity.indexOf("data-social-profile-name"),
     );
+    expect(identity.indexOf("data-social-profile-name")).toBeLessThan(
+      identity.indexOf("data-social-profile-face"),
+    );
     const identityHead = identity.slice(
       identity.indexOf("data-social-profile-head"),
       identity.indexOf("data-social-profile-face"),
@@ -239,9 +243,9 @@ describe("Social profile public face", () => {
     expect(identityHead).not.toContain("md:-mt-[35px]");
     expect(identityHead).toContain("border-2 border-surface");
     expect(identityHead).toContain("data-social-avatar");
-    expect(identityHead).toContain("data-social-profile-meta");
     expect(identityHead).toContain("data-social-profile-name");
     expect(identityHead).toContain("Ada Lovelace");
+    expect(identityHead).not.toContain("data-social-profile-stats");
     expect(identity).not.toContain("data-social-profile-stats");
     expect(identity).not.toContain("data-social-profile-mutuals");
     expect(identity).not.toContain("data-social-profile-url");
@@ -257,25 +261,24 @@ describe("Social profile public face", () => {
     expect(uiSrc).toContain("SOCIAL_PROFILE_COVER_STACK_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
-    expect(uiSrc).toContain("SOCIAL_PROFILE_META_CLASS");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_INSET_CLASS");
+    expect(uiSrc).not.toContain("SOCIAL_PROFILE_META_CLASS");
+    expect(uiSrc).not.toContain("data-social-profile-meta");
     expect(uiSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     const identityMarkup = uiSrc.slice(
       uiSrc.indexOf("data-social-profile-identity"),
       uiSrc.indexOf("export function SocialHighlights"),
     );
     expect(identityMarkup.indexOf("data-social-profile-head")).toBeLessThan(
-      identityMarkup.indexOf("data-social-profile-meta"),
-    );
-    expect(identityMarkup.indexOf("data-social-profile-meta")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-name"),
     );
     expect(identityMarkup.indexOf("data-social-profile-name")).toBeLessThan(
-      identityMarkup.indexOf("SocialProfileStats"),
-    );
-    expect(identityMarkup.indexOf("data-social-profile-head")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-face"),
     );
     expect(identityMarkup.indexOf("data-social-profile-face")).toBeLessThan(
+      identityMarkup.indexOf("SocialProfileStats"),
+    );
+    expect(identityMarkup.indexOf("SocialProfileStats")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-bio"),
     );
     expect(identityMarkup.indexOf("HouseChipRail")).toBeLessThan(
@@ -283,6 +286,12 @@ describe("Social profile public face", () => {
     );
     expect(identityMarkup.indexOf("<SocialProfileLinkRow")).toBeLessThan(
       identityMarkup.indexOf("{actionRow}"),
+    );
+    expect(identityMarkup.indexOf("{actionRow}")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-topics"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-topics")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-mutuals"),
     );
     expect(uiSrc).not.toContain("data-social-profile-handle");
     expect(identity).toContain("Writes engines.");
@@ -417,6 +426,44 @@ describe("Social profile public face", () => {
     expect(withTopics).not.toContain("Actor");
     expect(withTopics).not.toContain("Topics:");
 
+    const stacked = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        bio="Writes engines."
+        stats={{ posts: 1, followers: 2, following: 3 }}
+        roles={["actor"]}
+        topics={["Acting"]}
+        websiteUrl="https://example.com"
+        actions={<button type="button">Edit profile</button>}
+        mutuals={{
+          people: [{ id: "u3", handle: "carol", displayName: "Carol", label: "Carol" }],
+          extra: 0,
+        }}
+      />,
+    );
+    const stackOrder = [
+      "data-social-profile-name",
+      "data-social-profile-stats",
+      "data-social-profile-bio",
+      "data-social-profile-roles",
+      "data-social-profile-links",
+      "data-social-profile-actions",
+      "data-social-profile-topics",
+      "data-social-profile-mutuals",
+    ];
+    let stackAt = -1;
+    for (const marker of stackOrder) {
+      const at = stacked.indexOf(marker);
+      expect(at, marker).toBeGreaterThan(stackAt);
+      stackAt = at;
+    }
+    expect(stacked.indexOf("data-social-profile-actions")).toBeLessThan(
+      stacked.indexOf("data-social-profile-topics"),
+    );
+    expect(stacked).not.toContain("data-social-profile-cover-dims");
+
     const withStats = renderToStaticMarkup(
       <SocialProfileIdentity
         name="Ada Lovelace"
@@ -430,12 +477,9 @@ describe("Social profile public face", () => {
     );
     expect(withStats).toContain("data-social-profile-head");
     expect(withStats).toContain(SOCIAL_PROFILE_HEAD_CLASS);
-    expect(withStats).toContain(SOCIAL_PROFILE_META_CLASS);
-    expect(SOCIAL_PROFILE_HEAD_CLASS).toContain("items-center");
-    expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("items-start");
-    expect(SOCIAL_PROFILE_META_CLASS).toContain("flex-col");
-    expect(SOCIAL_PROFILE_META_CLASS).toContain("min-w-0");
-    expect(SOCIAL_PROFILE_META_CLASS).not.toContain("truncate");
+    expect(withStats).not.toContain("data-social-profile-meta");
+    expect(SOCIAL_PROFILE_HEAD_CLASS).toContain("items-end");
+    expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("items-center");
     expect(withStats).toContain(SOCIAL_AVATAR_PROFILE_CLASS);
     expect(withStats).toContain("size-[72px]");
     expect(withStats).toContain("md:size-[88px]");
@@ -443,18 +487,28 @@ describe("Social profile public face", () => {
     expect(withStats).toContain("data-social-profile-stats");
     expect(withStats).toContain(SOCIAL_PROFILE_STATS_CLASS);
     expect(withStats).toContain(SOCIAL_PROFILE_STATS_GRID_CLASS);
-    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("w-fit");
-    expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("flex-1");
-    expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("w-full");
+    expect(SOCIAL_PROFILE_STATS_CLASS).toBe("w-full min-w-0");
+    expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("w-fit");
     expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("max-w-xs");
-    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("inline-flex");
-    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("gap-x-[var(--space-4)]");
-    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).not.toContain("w-full");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("flex-wrap");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("gap-x-[var(--space-8)]");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("border-b border-hairline");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).not.toContain("inline-flex");
     expect(SOCIAL_PROFILE_STATS_GRID_CLASS).not.toContain("grid-cols-3");
     expect(withStats).not.toContain("grid w-full grid-cols-3");
     expect(withStats).not.toContain("flex min-w-0 max-w-xs flex-1 items-center");
     expect(withStats).toContain(SOCIAL_PROFILE_STAT_CLASS);
-    expect(withStats).toContain("flex-col");
+    expect(SOCIAL_PROFILE_STAT_CLASS).toContain("items-start");
+    expect(SOCIAL_PROFILE_STAT_CLASS).toContain("text-left");
+    expect(SOCIAL_PROFILE_STAT_CLASS).not.toContain("text-center");
+    expect(withStats).toContain(SOCIAL_PROFILE_STAT_VALUE_CLASS);
+    expect(SOCIAL_PROFILE_STAT_VALUE_CLASS).toContain("t-heading");
+    expect(SOCIAL_PROFILE_STAT_VALUE_CLASS).toContain("t-data");
+    expect(SOCIAL_PROFILE_STAT_VALUE_CLASS).not.toContain("font-semibold");
+    expect(withStats).toContain(SOCIAL_PROFILE_STAT_LABEL_CLASS);
+    expect(SOCIAL_PROFILE_STAT_LABEL_CLASS).toContain("text-ink-3");
+    expect(SOCIAL_PROFILE_STAT_LABEL_CLASS).not.toContain("t-label");
+    expect(SOCIAL_PROFILE_STAT_LABEL_CLASS).toContain("break-words");
     expect(withStats).toContain('data-social-profile-stat="posts"');
     expect(withStats).toContain('data-social-profile-stat="followers"');
     expect(withStats).toContain('data-social-profile-stat="following"');
@@ -471,21 +525,20 @@ describe("Social profile public face", () => {
       withStats.indexOf("data-social-profile-face"),
     );
     expect(head).toContain("data-social-avatar");
-    expect(head).toContain("data-social-profile-meta");
     expect(head).toContain("data-social-profile-name");
-    expect(head).toContain("data-social-profile-stats");
+    expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-stats");
     expect(head).not.toContain("data-social-profile-handle");
     expect(head).not.toContain("data-social-profile-roles");
     expect(head).not.toContain("data-social-profile-bio");
     expect(head).not.toContain("@ada");
-    const meta = head.slice(head.indexOf("data-social-profile-meta"));
-    expect(meta.indexOf("data-social-profile-name")).toBeLessThan(
-      meta.indexOf("data-social-profile-stats"),
-    );
     expect(head.indexOf("data-social-avatar")).toBeLessThan(
-      head.indexOf("data-social-profile-meta"),
+      head.indexOf("data-social-profile-name"),
     );
     expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
+      withStats.indexOf("data-social-profile-face"),
+    );
+    expect(withStats.indexOf("data-social-profile-face")).toBeLessThan(
       withStats.indexOf("data-social-profile-stats"),
     );
     expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
@@ -505,8 +558,12 @@ describe("Social profile public face", () => {
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[12px]");
     expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[16px]");
     expect(SOCIAL_PROFILE_NAME_CLASS).toContain("break-words");
+    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-title");
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("truncate");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("font-semibold");
     expect(withStats).not.toContain("truncate");
+    expect(withStats).not.toContain("1784");
+    expect(withStats).not.toContain("data-social-profile-cover-dims");
     expect(withStats).toContain("Actor");
     expect(withStats).not.toContain("flex-wrap gap-4");
     expect(withStats).not.toContain("data-social-profile-copy");
@@ -1065,7 +1122,9 @@ describe("Social profile cover band", () => {
     );
     expect(head).toContain("-mt-[29px]");
     expect(head).toContain("md:-mt-[35px]");
+    expect(head).toContain("data-social-avatar");
     expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-stats");
   });
 
   it("keeps the empty band, Add cover chrome, and avatar hang on the owner profile", () => {
@@ -1089,7 +1148,9 @@ describe("Social profile cover band", () => {
     );
     expect(head).toContain("-mt-[29px]");
     expect(head).toContain("md:-mt-[35px]");
+    expect(head).toContain("data-social-avatar");
     expect(head).toContain("Ada Lovelace");
+    expect(head).not.toContain("data-social-profile-stats");
   });
 
   it("keeps the photo and edit chrome when the owner has a cover", () => {

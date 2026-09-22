@@ -43,6 +43,7 @@ import {
   SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS,
   SOCIAL_PROFILE_COVER_MENU_CLASS,
   SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS,
+  SOCIAL_PROFILE_COVER_PILL_ANCHOR_CLASS,
   SOCIAL_PROFILE_COVER_PILL_CLASS,
   SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS,
 } from "@/lib/social-chrome";
@@ -517,7 +518,7 @@ export function SocialProfileCoverUpload({
       {/* --- Idle / menu mode: pill + dropdown below cover --- */}
       {!isReposition ? (
         <div
-          className="absolute bottom-3 right-3 z-20"
+          className={SOCIAL_PROFILE_COVER_PILL_ANCHOR_CLASS}
           ref={menuRef}
           onMouseDown={(event) => event.stopPropagation()}
         >
@@ -600,12 +601,6 @@ export function SocialProfileCoverUpload({
         </div>
       ) : null}
 
-      <span
-        data-social-profile-cover-dims=""
-        className="pointer-events-none absolute bottom-2 left-3 z-30 rounded bg-surface/80 px-2 py-0.5 text-[length:var(--text-xs)] font-medium text-ink-2"
-      >
-        {SOCIAL_PROFILE_COVER_LOCK_A.masterWidth} × {SOCIAL_PROFILE_COVER_LOCK_A.masterHeight} px
-      </span>
       <input
         ref={fileRef}
         type="file"

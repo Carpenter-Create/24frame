@@ -648,8 +648,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     );
     expect(card).toContain("SocialProfileStats");
     expect(card).toContain("data-social-profile-head");
-    expect(card).toContain("data-social-profile-meta");
-    expect(card).toContain("SOCIAL_PROFILE_META_CLASS");
+    expect(card).not.toContain("data-social-profile-meta");
+    expect(card).not.toContain("SOCIAL_PROFILE_META_CLASS");
+    expect(card).toContain("SOCIAL_PROFILE_INSET_CLASS");
     expect(card).toContain("data-social-profile-actions");
     expect(card).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(card).toContain("socialProfileRolesRailItems");
@@ -659,7 +660,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).not.toContain("emptyHint");
     expect(card).not.toContain("data-social-profile-handle");
     expect(chrome).toContain("SOCIAL_PROFILE_HEAD_CLASS");
-    expect(chrome).toContain("SOCIAL_PROFILE_META_CLASS");
+    expect(chrome).not.toContain("SOCIAL_PROFILE_META_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_INSET_CLASS");
+    expect(chrome).not.toContain("IG geometry");
     expect(chrome).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
@@ -688,11 +691,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_STATS_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_STATS_GRID_CLASS");
-    expect(chrome).toContain("w-fit");
-    expect(chrome).toContain("inline-flex items-start gap-x-[var(--space-4)]");
+    expect(chrome).toContain("gap-x-[var(--space-8)]");
+    expect(chrome).toContain("flex-wrap items-start");
+    expect(chrome).not.toContain("inline-flex items-start gap-x-[var(--space-4)]");
     expect(chrome).not.toContain("max-w-xs");
     expect(chrome).not.toContain("grid w-full grid-cols-3");
-    expect(chrome).toContain("items-center");
+    expect(chrome).toContain("items-end");
     expect(empty).toContain("SocialProfilePostsEmpty");
     expect(empty).toContain("SOCIAL_PROFILE_POSTS_EMPTY_CLASS");
     expect(profile).not.toContain("SOCIAL.profile.sharePost");
@@ -721,13 +725,11 @@ describe("Social Home miss list v1 P0 lock", () => {
       homeSkeleton.indexOf("export function SocialProfileCenterSkeleton"),
       homeSkeleton.indexOf("export function SocialProfileSkeleton"),
     );
+    expect(profileCenterSkeleton).not.toContain("SOCIAL_PROFILE_META_CLASS");
     expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
-      profileCenterSkeleton.indexOf("SOCIAL_PROFILE_META_CLASS"),
+      profileCenterSkeleton.indexOf("h-7 w-40"),
     );
-    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_META_CLASS")).toBeLessThan(
-      profileCenterSkeleton.indexOf("h-4 w-32"),
-    );
-    expect(profileCenterSkeleton.indexOf("h-4 w-32")).toBeLessThan(
+    expect(profileCenterSkeleton.indexOf("h-7 w-40")).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_STATS_CLASS"),
     );
     expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
@@ -752,7 +754,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("Education");
   });
 
-  it("locks the desktop profile column to the Home 892 measure (FB gutters + IG stack)", () => {
+  it("locks the desktop profile column to the Home 892 measure", () => {
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const ownFace = readFileSync("src/components/social/social-own-profile.tsx", "utf8");
     expect(SOCIAL_DESKTOP_MEASURE.center).toBe(892);
@@ -766,8 +768,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("935");
     expect(SOCIAL_HOME_CENTER_CLASS).toContain("flex-1");
     expect(SOCIAL_HOME_CENTER_CLASS).toContain("lg:max-w-[892px]");
-    expect(chrome).toContain("Instagram: one centered profile stack");
-    expect(chrome).toContain("Facebook: side air / gutters");
+    expect(chrome).toContain("One centered stack");
+    expect(chrome).not.toContain("Instagram: one centered profile stack");
+    expect(chrome).not.toContain("Facebook: side air / gutters");
     expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(profile).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(profile).not.toContain("SOCIAL_HOME_CENTER_CLASS");
