@@ -224,6 +224,18 @@ export async function saveSocialProfileCover(formData: FormData): Promise<Action
   return {};
 }
 
+export async function clearSocialProfileCover(): Promise<ActionResult> {
+  const { user, supabase, profile, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+  const { error } = await supabase.from("profiles").update({ cover_key: null }).eq("id", user.id);
+  if (error) return { error: error.message };
+  await bustSocialProfileHotCache(user.id, [profile?.handle]);
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
+  return {};
+}
+
 export async function presignSocialMediaUpload(formData: FormData): Promise<{
   error?: string;
   key?: string;

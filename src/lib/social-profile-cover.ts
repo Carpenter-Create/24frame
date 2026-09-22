@@ -41,3 +41,10 @@ export const SOCIAL_PROFILE_COVER_HANG_DESKTOP_PX = Math.round(
 );
 
 export const SOCIAL_PROFILE_COVER_ACCEPT = SOCIAL_IMAGE_CONTENT_TYPES.join(",");
+
+export const COVER_CROP_VIEW_WIDTH = 320;
+export const COVER_CROP_VIEW_HEIGHT = 80;
+export const COVER_CROP_OUTPUT_WIDTH = SOCIAL_PROFILE_COVER_LOCK_A.masterWidth;
+export const COVER_CROP_OUTPUT_HEIGHT = SOCIAL_PROFILE_COVER_LOCK_A.masterHeight;
+export const COVER_CROP_OUTPUT_NAME = "cover.jpg";
+export const COVER_CROP_MAX_BYTES = 10 * 1024 * 1024;

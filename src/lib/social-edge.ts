@@ -15,6 +15,8 @@ export const SOCIAL_NODE_RUNTIME = "nodejs" as const;
 
 export const SOCIAL_AVATAR_ROUTE = "/api/social/avatar";
 export const SOCIAL_MEDIA_ROUTE = "/api/social/media";
+/** Owner cover bytes. Streams the object; never a redirect to the CDN. */
+export const SOCIAL_COVER_BYTES_ROUTE = "/api/social/cover";
 
 export function socialAvatarHref(userId: string): string {
   return `${SOCIAL_AVATAR_ROUTE}/${userId}`;

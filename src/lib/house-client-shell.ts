@@ -121,6 +121,32 @@ export function houseShouldClientNavigate(
   return new Set(cachedKeys).has(houseHrefKey(dest));
 }
 
+export type HouseNavHop = "stay" | "owned" | "refresh-next" | "next";
+
+/**
+ * Dock tap while a warm hop has the App Router pathname stuck on the
+ * previous screen. A cached dest switches in place. An uncached dest
+ * whose Next pathname already matches must refresh — a plain Link
+ * click is a no-op. Otherwise Next navigates.
+ */
+export function houseNavHop(input: {
+  cached: boolean;
+  ownedIsDest: boolean;
+  nextIsDest: boolean;
+}): HouseNavHop {
+  if (input.cached) return input.ownedIsDest ? "stay" : "owned";
+  if (input.nextIsDest && !input.ownedIsDest) return "refresh-next";
+  return "next";
+}
+
+/** Focus trapped in a hidden keep-alive screen eats later dock clicks. */
+export function houseFocusBelongsToInactiveScreen(
+  screenHidden: boolean,
+  focusInsideScreen: boolean,
+): boolean {
+  return screenHidden && focusInsideScreen;
+}
+
 export function houseTouchOrder(
   order: readonly string[],
   key: string,

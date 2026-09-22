@@ -158,7 +158,7 @@ function SocialOwnProfileFaceView({
         handle={merged.handle}
         photoUrl={merged.photoUrl}
         coverUrl={merged.coverUrl}
-        coverEdit={<SocialProfileCoverUpload />}
+        coverEdit={<SocialProfileCoverUpload coverUrl={merged.coverUrl} />}
         photoAction={<SocialProfileAvatarEdit />}
         bio={shownBio}
         roles={merged.crafts}

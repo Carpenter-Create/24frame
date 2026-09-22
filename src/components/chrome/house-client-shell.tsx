@@ -12,13 +12,15 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
   HOUSE_CLIENT_SHELL,
   houseCanIngest,
+  houseFocusBelongsToInactiveScreen,
   houseForgetUnlisted,
   houseHrefKey,
+  houseNavHop,
   housePaintedKeys,
   housePathFromLocation,
   houseReadScroll,
@@ -128,6 +130,7 @@ function HousePathProviderCore({
   nextSearch: string;
 }) {
   const nextPath = usePathname();
+  const router = useRouter();
   const nextHref = housePathFromLocation(nextPath, nextSearch);
   const nextKey = houseScreenKey(nextPath, nextSearch);
   const [ownedHref, setOwnedHref] = useState<string | null>(null);
@@ -157,17 +160,27 @@ function HousePathProviderCore({
       hasScreen: (dest: string) => houseShouldClientNavigate(dest, housePaintedKeys()),
       navigateOwned: (dest: string, event?: HouseNavClickLike) => {
         if (event && houseNavIgnorePendingClick(event)) return false;
-        if (!houseShouldClientNavigate(dest, housePaintedKeys())) return false;
         const parsedDest = parseHouseHref(dest);
         const next = housePathFromLocation(parsedDest.pathname, parsedDest.search);
-        if (next === href) return true;
+        const hop = houseNavHop({
+          cached: houseShouldClientNavigate(dest, housePaintedKeys()),
+          ownedIsDest: houseHrefKey(href) === houseHrefKey(dest),
+          nextIsDest: houseHrefKey(nextHref) === houseHrefKey(dest),
+        });
+        if (hop === "next") return false;
+        if (hop === "stay") return true;
+        if (hop === "refresh-next") {
+          setOwnedHref(null);
+          router.refresh();
+          return true;
+        }
         captureLeadScroll(screenKey);
         window.history.pushState({ houseClient: true }, "", next);
         setOwnedHref(next);
         return true;
       },
     }),
-    [href, nextKey, nextPath, nextSearch, parsed.pathname, parsed.search, screenKey],
+    [href, nextHref, nextKey, nextPath, nextSearch, parsed.pathname, parsed.search, router, screenKey],
   );
 
   useEffect(() => {
@@ -271,6 +284,15 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   );
 
   const ingress = showIngress ? children : null;
+
+  useEffect(() => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return;
+    const screen = active.closest(`[${HOUSE_CLIENT_SHELL.screenAttr}]`);
+    if (!(screen instanceof HTMLElement)) return;
+    if (!houseFocusBelongsToInactiveScreen(screen.hasAttribute("hidden"), screen.contains(active))) return;
+    active.blur();
+  }, [displayKey]);
 
   useEffect(() => {
     const scroller = document.querySelector(`[${HOUSE_CLIENT_SHELL.scrollAttr}]`);

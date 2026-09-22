@@ -6,8 +6,10 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
   isForbiddenMediaBucket,
   isForbiddenMediaKey,
+  SOCIAL_IMAGE_MAX_BYTES,
   SOCIAL_MEDIA_PUT_TTL_SECONDS,
   SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
+  socialMediaKindFor,
   type SocialMediaContentType,
   type SocialMediaKind,
   type SocialMediaLane,
@@ -111,6 +113,34 @@ export async function presignSocialMediaGet(key: string): Promise<string> {
     }),
     stablePresignOptions(SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS),
   );
+}
+
+function imageTypeForStoredObject(key: string, header: string | undefined): string | null {
+  const normalized = header?.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (socialMediaKindFor(normalized) === "image") return normalized;
+  if (/\.jpe?g$/i.test(key)) return "image/jpeg";
+  if (/\.png$/i.test(key)) return "image/png";
+  if (/\.webp$/i.test(key)) return "image/webp";
+  if (/\.gif$/i.test(key)) return "image/gif";
+  return null;
+}
+
+/** Server-side read of one media object. Null when the key is closed, empty, or not an image. */
+export async function readSocialMediaObject(
+  key: string,
+): Promise<{ bytes: Uint8Array; contentType: string } | null> {
+  if (isForbiddenMediaKey(key)) return null;
+  try {
+    const { bucket, s3 } = mediaClient();
+    const response = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const bytes = await response.Body?.transformToByteArray();
+    if (!bytes || bytes.byteLength === 0 || bytes.byteLength > SOCIAL_IMAGE_MAX_BYTES) return null;
+    const contentType = imageTypeForStoredObject(key, response.ContentType);
+    if (!contentType) return null;
+    return { bytes, contentType };
+  } catch {
+    return null;
+  }
 }
 
 export async function signedSocialMediaUrl(key: string): Promise<string | null> {

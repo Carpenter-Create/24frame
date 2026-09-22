@@ -36,6 +36,7 @@ import {
   presignSocialMediaPut,
   signedSocialMediaItems,
   signedSocialMediaUrl,
+  readSocialMediaObject,
 } from "./s3-social-media";
 
 const USER = "11111111-1111-4111-8111-111111111111";
@@ -137,6 +138,27 @@ describe("s3-social-media isolated lane", () => {
     );
     await expect(signedSocialMediaUrl(`orgs/${USER}/titles/${OBJECT}/master/a.mov`)).resolves.toBeNull();
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("reads an image object from the media source bucket without signing a URL", async () => {
+    mockSend.mockResolvedValue({
+      ContentType: "image/jpeg",
+      Body: { transformToByteArray: async () => new Uint8Array([9, 8, 7]) },
+    });
+    await expect(readSocialMediaObject(KEY)).resolves.toEqual({
+      bytes: new Uint8Array([9, 8, 7]),
+      contentType: "image/jpeg",
+    });
+    const cmd = mockSend.mock.calls[0]?.[0] as GetObjectCommand;
+    expect(cmd).toBeInstanceOf(GetObjectCommand);
+    expect(cmd.input.Bucket).toBe("test-media-source-bucket");
+    expect(cmd.input.Key).toBe(KEY);
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("does not read a forbidden media key", async () => {
+    await expect(readSocialMediaObject("avatars/secret")).resolves.toBeNull();
+    expect(mockSend).not.toHaveBeenCalled();
   });
 
   it("uses CloudFront signed URLs when FrameMediaDelivery env is present", async () => {
