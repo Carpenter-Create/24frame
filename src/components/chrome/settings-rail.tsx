@@ -18,7 +18,7 @@ import {
   settingsRailActive,
 } from "@/lib/settings";
 
-// Settings hub rail — occupies the 220 Access slot. Title Settings.
+// Settings hub rail — occupies the house dest-rail slot. Title Settings.
 // Profile · Organization · Preferences · Security. Accent wash SoT from
 // house-shell — same selected pill as every workspace rail. Not a
 // workspace switch. Same URLs from every workspace.

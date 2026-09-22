@@ -7,6 +7,7 @@ import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
   SOCIAL_CENTER_WIDTH_CLASS,
   SOCIAL_COMPOSER_CLASS,
+  SOCIAL_CONTENT_PAIR_WIDTH,
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
@@ -313,7 +314,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("169:1281");
     expect(chrome).toContain("164:1136");
     expect(chrome).toContain("164:1360");
-    expect(chrome).toContain("dest: 200");
+    expect(chrome).not.toContain("dest:");
     expect(chrome).not.toContain("chats: 200");
     expect(chrome).toContain("gutter: 16");
     expect(chrome).toContain("center: 600");
@@ -321,9 +322,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("892");
     expect(chrome).toContain("right: 300");
     expect(chrome).toContain("padR: 16");
-    expect(chrome).toContain("w-[calc(200px-var(--chrome-gutter))]");
-    expect(chrome).toContain("md:ml-[200px]");
-    expect(chrome).toContain("lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]");
+    expect(chrome).not.toContain("w-[calc(200px-var(--chrome-gutter))]");
+    expect(chrome).not.toContain("md:ml-[200px]");
+    expect(chrome).not.toContain("SOCIAL_RAIL_WIDTH_CLASS");
+    expect(chrome).not.toContain("SOCIAL_RAIL_MAIN_OFFSET_CLASS");
+    expect(chrome).toContain(`lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
+    expect(chrome).not.toContain("lg:max-w-[${");
+    expect(shell).toContain("RAIL_WIDTH_CLASS");
+    expect(shell).not.toContain("SOCIAL_RAIL_WIDTH_CLASS");
+    expect(shell).not.toContain("SOCIAL_RAIL_MAIN_OFFSET_CLASS");
     expect(chrome).not.toContain("lg:max-w-[892px]");
     expect(chrome).not.toContain("lg:max-w-[676px]");
     expect(chrome).toContain("SOCIAL_RAIL_PANEL_CLASS");
@@ -569,22 +576,19 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(readFileSync("src/app/(app)/social/search/page.tsx", "utf8")).toContain("SocialSuggestedPeople");
     expect(messages).toContain("SOCIAL.dms.startCta");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
-      dest: 200,
       gutter: 16,
       center: 600,
       right: 300,
       padR: 16,
     });
     expect(SOCIAL_DESKTOP_MEASURE).not.toHaveProperty("chats");
-    const shellSum =
-      SOCIAL_DESKTOP_MEASURE.dest +
-      SOCIAL_DESKTOP_MEASURE.gutter +
+    expect(SOCIAL_DESKTOP_MEASURE).not.toHaveProperty("dest");
+    expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(
       SOCIAL_DESKTOP_MEASURE.center +
-      SOCIAL_DESKTOP_MEASURE.gutter +
-      SOCIAL_DESKTOP_MEASURE.right +
-      SOCIAL_DESKTOP_MEASURE.padR;
-    expect(shellSum).toBe(1148);
-    expect(1440 - shellSum).toBe(292);
+        SOCIAL_DESKTOP_MEASURE.gutter +
+        SOCIAL_DESKTOP_MEASURE.right,
+    );
+    expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(916);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
@@ -800,13 +804,27 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_DESKTOP_MEASURE.center).toBe(600);
     expect(SOCIAL_DESKTOP_MEASURE.right).toBe(300);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(SOCIAL_PROFILE_CENTER_CLASS);
-    // Adam 2026-09-22: one shell spans the canvas. Leftover air sits
-    // between the X-narrow center and For You — not in a gutter after
-    // the rail. No max-width on the cluster.
+    // Adam 2026-09-22: left rail stays the house slot. The row is the
+    // 600 + 16 + 300 pair, centered beside that rail at lg. No
+    // justify-between stretch. No unprefixed cap (phone stays full-bleed).
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
-      "flex w-full items-start justify-between gap-[16px]",
+      "flex w-full items-start gap-[16px] lg:mx-auto lg:max-w-[916px]",
     );
-    expect(SOCIAL_HOME_LAYOUT_CLASS).not.toMatch(/max-w-/);
+    expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
+      `flex w-full items-start gap-[${SOCIAL_DESKTOP_MEASURE.gutter}px] lg:mx-auto lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`,
+    );
+    expect(SOCIAL_HOME_LAYOUT_CLASS).not.toContain("justify-between");
+    expect(SOCIAL_HOME_LAYOUT_CLASS).not.toMatch(/(^|\s)mx-auto(\s|$)/);
+    expect(SOCIAL_HOME_LAYOUT_CLASS).not.toMatch(/(^|\s)max-w-/);
+    expect(SOCIAL_HOME_LAYOUT_CLASS).toContain("lg:mx-auto");
+    expect(SOCIAL_HOME_LAYOUT_CLASS).toContain(`lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`);
+    const railSlot = Number(
+      readFileSync("src/app/tokens.css", "utf8").match(/--sidebar-width:\s*(\d+)px;/)?.[1],
+    );
+    expect(railSlot).toBe(256);
+    const pairOuter =
+      (1440 - railSlot - SOCIAL_DESKTOP_MEASURE.padR * 2 - SOCIAL_CONTENT_PAIR_WIDTH) / 2;
+    expect(pairOuter).toBe(118);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(
       `flex min-w-0 w-full flex-1 flex-col gap-2 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );

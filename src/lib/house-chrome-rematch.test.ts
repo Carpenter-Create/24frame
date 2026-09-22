@@ -44,10 +44,8 @@ import {
 } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL_DESKTOP_NAV } from "@/lib/nav";
-import {
-  SOCIAL_FOR_YOU_CARD_CLASS,
-  SOCIAL_RAIL_WIDTH_CLASS,
-} from "@/lib/social-chrome";
+import { RAIL_WIDTH_CLASS } from "@/lib/rail-collapse";
+import { SOCIAL_FOR_YOU_CARD_CLASS } from "@/lib/social-chrome";
 
 const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
@@ -251,7 +249,8 @@ describe("house chrome rematch miss list v1.1", () => {
   it("uses one rounded register on Aggregation, Social, and Education", () => {
     expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(2);
     expect(shell).not.toContain("fixed left-0 top-[calc(var(--header-height)+16px)]");
-    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
+    expect(RAIL_WIDTH_CLASS).toBe("w-[calc(var(--sidebar-width)-var(--chrome-gutter))]");
+    expect(socialChrome).not.toContain("SOCIAL_RAIL_WIDTH_CLASS");
     expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
     expect(switcher).toContain("HOUSE_CONTROL_PILL_CLASS");
@@ -318,19 +317,23 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(socialAside).not.toContain("SocialRailAccountChip");
     expect(socialAside).not.toContain("data-social-rail-account");
 
-    expect(shell).toContain("socialChrome && !collapsed ? SOCIAL_RAIL_MAIN_OFFSET_CLASS");
-    expect(shell).toContain('marginLeft: "var(--sidebar-width)"');
+    expect(shell).not.toContain("SOCIAL_RAIL_MAIN_OFFSET_CLASS");
+    expect(shell).not.toContain("SOCIAL_RAIL_WIDTH_CLASS");
+    expect(shell).toContain("RAIL_WIDTH_CLASS");
+    expect(shell).toContain('style={{ marginLeft: "var(--sidebar-width)" }}');
     expect(shell).toContain("data-social-workspace");
     expect(shell).toContain("<HouseLeadChrome");
     expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
     expect(shell).not.toContain("StudioRail");
-    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
+    expect(RAIL_WIDTH_CLASS).toBe("w-[calc(var(--sidebar-width)-var(--chrome-gutter))]");
+    expect(socialChrome).not.toContain("SOCIAL_RAIL_WIDTH_CLASS");
   });
 
   it("locks lead ↔ rail chrome gutter (G6)", () => {
     const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
-    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+    expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
     expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
@@ -351,7 +354,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).not.toContain("md:px-[var(--content-inset)]");
     expect(collapse).toContain("var(--chrome-gutter)");
     expect(socialChrome).toContain("px-[var(--chrome-gutter)]");
-    expect(socialChrome).toContain("w-[calc(200px-var(--chrome-gutter))]");
+    expect(socialChrome).not.toContain("w-[calc(200px-var(--chrome-gutter))]");
+    expect(socialChrome).not.toContain("md:ml-[200px]");
     expect(socialChrome).not.toContain("md:px-[var(--content-inset)]");
     expect(houseShell).toContain("HOUSE_CHROME_GUTTER");
     expect(houseShell).not.toContain("SOCIAL_CHROME_GUTTER");

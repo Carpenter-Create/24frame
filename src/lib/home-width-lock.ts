@@ -1,9 +1,9 @@
 // Home width SoT. Stamp: HOME-width-lock.md (amended 2026-09-18).
 // Header stays full-bleed. Dest rail stays off. Phone unchanged.
-// Dest/Access rail is off on Home — do not keep the 220 phantom.
+// Dest rail is off on Home — do not inset with `--sidebar-width`.
 
 export const HOME_FIGMA_FRAME_PX = 1440;
-/** House `--content-inset`. Calm left breath — not the 220 Access rail. */
+/** House `--content-inset`. Calm left breath — not the dest-rail slot. */
 export const HOME_LEFT_INSET_PX = 48;
 /** House `--chrome-gutter`. Slight News outer inset — not a second rail. */
 export const HOME_RIGHT_INSET_PX = 16;
