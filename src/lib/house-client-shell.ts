@@ -205,43 +205,61 @@ export function resetHousePaintedForTests(): void {
 
 /**
  * What the shell last committed for the live RSC slot.
- * `stale` means `child` was still the previous screen's tree when the
- * URL key moved — do not store it under the new key, and keep treating
- * that same reference as stale after the render-phase state restart.
+ * `snapshot` is the child tree captured when the URL key moved and that
+ * tree had not swapped yet. It stays set across the render-phase
+ * restart so the same reference is still stale after setState commits.
+ * `child` is the last tree rendered. A child that arrives already
+ * different from `child` on the key-change render is not snapshotted.
  */
 export type HouseChildSeen = {
   key: string;
+  snapshot: unknown;
   child: unknown;
-  stale: boolean;
 };
 
 /**
- * Advance the child-seen record and say whether `child` still belongs
- * to the previous URL key.
+ * Stale on the key-change render itself — do not wait for setState.
  *
- * A cold soft-nav flips the key before the RSC slot swaps. The first
- * render (and React's restart after setState during render) must both
- * report stale, or the previous tree is stored under the new key and
- * never replaced. A same-render key+child change is a real landing.
+ * `keyChanged || (guard.key === nextKey && child === snapshot)`.
+ * The committed guard still has the previous key on the flip render,
+ * so a check that requires `guard.key === nextKey` misses that frame,
+ * ingests the previous tree, and `storeHasKey` blocks the real screen.
  */
 export function houseSyncChildSeen(
   seen: HouseChildSeen | null,
   nextKey: string,
   child: unknown,
 ): { seen: HouseChildSeen; childrenStale: boolean } {
-  if (seen !== null && seen.key === nextKey && seen.child === child) {
-    return { seen, childrenStale: seen.stale };
+  if (seen === null) {
+    return { seen: { key: nextKey, snapshot: null, child }, childrenStale: false };
   }
-  if (seen !== null && seen.key !== nextKey && seen.child === child) {
+
+  const keyChanged = seen.key !== nextKey;
+  const childrenStale =
+    keyChanged ||
+    (seen.key === nextKey && seen.snapshot !== null && child === seen.snapshot);
+
+  if (keyChanged) {
     return {
-      seen: { key: nextKey, child, stale: true },
-      childrenStale: true,
+      seen: {
+        key: nextKey,
+        snapshot: child === seen.child ? child : null,
+        child,
+      },
+      childrenStale,
     };
   }
-  return {
-    seen: { key: nextKey, child, stale: false },
-    childrenStale: false,
-  };
+
+  if (seen.snapshot !== null && child === seen.snapshot) {
+    if (seen.child === child) return { seen, childrenStale };
+    return { seen: { ...seen, child }, childrenStale };
+  }
+
+  if (seen.snapshot === null && seen.child === child) {
+    return { seen, childrenStale };
+  }
+
+  return { seen: { key: nextKey, snapshot: null, child }, childrenStale };
 }
 
 /**
@@ -281,13 +299,108 @@ export function houseCanIngest(
   fallback: boolean,
   storeHasKey: boolean,
   childrenStale: boolean,
+  storedDiffers = false,
 ): boolean {
   if (fallback) return false;
-  if (storeHasKey) return false;
+  if (storeHasKey && !storedDiffers) return false;
   if (!houseShouldKeepAlive(nextPath)) return false;
   if (activeKey !== nextKey) return false;
   if (childrenStale) return false;
   return true;
+}
+
+/**
+ * One cache render. Stale is decided from the committed guard before
+ * setState. A stale or fallback tree already stored under `nextKey`
+ * is dropped. A proven-fresh tree replaces that slot.
+ */
+export function houseApplyCachedChild<T>(input: {
+  seen: HouseChildSeen | null;
+  nextKey: string;
+  activeKey: string;
+  nextPath: string;
+  child: T;
+  fallback: boolean;
+  order: readonly string[];
+  nodes: Record<string, T>;
+}): {
+  seen: HouseChildSeen;
+  childrenStale: boolean;
+  order: readonly string[];
+  nodes: Record<string, T>;
+  displayKey: string | null;
+  showIngress: boolean;
+} {
+  const advanced = houseSyncChildSeen(input.seen, input.nextKey, input.child);
+  let order = input.order;
+  let nodes = input.nodes;
+
+  const poisoned =
+    (advanced.childrenStale || input.fallback) &&
+    input.nextKey in nodes &&
+    nodes[input.nextKey] === input.child;
+  if (poisoned) {
+    const nextNodes = { ...nodes };
+    delete nextNodes[input.nextKey];
+    nodes = nextNodes;
+    order = order.filter((key) => key !== input.nextKey);
+  }
+
+  const has = input.nextKey in nodes;
+  const storedDiffers = has && nodes[input.nextKey] !== input.child;
+  if (
+    houseCanIngest(
+      input.nextKey,
+      input.activeKey,
+      input.nextPath,
+      input.fallback,
+      has,
+      advanced.childrenStale,
+      storedDiffers,
+    )
+  ) {
+    const nextOrder = houseTouchOrder(order, input.nextKey);
+    const nextNodes: Record<string, T> = { [input.nextKey]: input.child };
+    for (const key of nextOrder) {
+      if (key !== input.nextKey && key in nodes) nextNodes[key] = nodes[key] as T;
+    }
+    nodes = nextNodes;
+    order = nextOrder;
+  }
+
+  if (input.activeKey in nodes && order[0] !== input.activeKey) {
+    const nextOrder = houseTouchOrder(order, input.activeKey);
+    const nextNodes: Record<string, T> = {};
+    for (const key of nextOrder) {
+      if (key in nodes) nextNodes[key] = nodes[key] as T;
+    }
+    nodes = nextNodes;
+    order = nextOrder;
+  }
+
+  const display = houseResolveDisplay(input.activeKey, input.activeKey in nodes, input.fallback);
+  const orderSame =
+    order === input.order ||
+    (order.length === input.order.length && order.every((key, index) => key === input.order[index]));
+  if (advanced.seen === input.seen && nodes === input.nodes && orderSame) {
+    return {
+      seen: advanced.seen,
+      childrenStale: advanced.childrenStale,
+      order: input.order,
+      nodes: input.nodes,
+      displayKey: display.displayKey,
+      showIngress: display.showIngress,
+    };
+  }
+
+  return {
+    seen: advanced.seen,
+    childrenStale: advanced.childrenStale,
+    order,
+    nodes,
+    displayKey: display.displayKey,
+    showIngress: display.showIngress,
+  };
 }
 
 /**

@@ -7,6 +7,7 @@ import FollowsLoading from "@/app/(app)/social/u/[handle]/follows/loading";
 
 import {
   HOUSE_CLIENT_SHELL,
+  houseApplyCachedChild,
   houseCanIngest,
   houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
@@ -158,6 +159,18 @@ describe("houseCanIngest — stable-ingest guard", () => {
   it("blocks ingest when the key is already in the store", () => {
     expect(
       houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, true, false),
+    ).toBe(false);
+  });
+
+  it("replaces a stored tree when a proven-fresh child differs", () => {
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, true, false, true),
+    ).toBe(true);
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, true, true, true),
+    ).toBe(false);
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", true, true, false, true),
     ).toBe(false);
   });
 
@@ -321,99 +334,136 @@ describe("follows cold nav leaves the skeleton", () => {
   });
 });
 
-describe("Messages → Profile key flip", () => {
-  const messages = { screen: "messages" };
-  const profile = { screen: "profile" };
-  const messagesKey = "/social/dms";
-  const profileKey = "/social/profile";
+const SOCIAL_RAIL = [
+  SOCIAL_ROUTES.home,
+  SOCIAL_ROUTES.explore,
+  SOCIAL_ROUTES.create,
+  SOCIAL_ROUTES.dms,
+  SOCIAL_ROUTES.profile,
+] as const;
 
-  function hop(seen: ReturnType<typeof houseSyncChildSeen>["seen"] | null, key: string, child: unknown, nodes: Record<string, unknown>) {
-    const advanced = houseSyncChildSeen(seen, key, child);
-    const canIngest = houseCanIngest(key, key, key, false, key in nodes, advanced.childrenStale);
-    const nextNodes = canIngest ? { ...nodes, [key]: child } : nodes;
-    const display = houseResolveDisplay(key, key in nextNodes, false);
-    return { seen: advanced.seen, stale: advanced.childrenStale, canIngest, nodes: nextNodes, display };
-  }
+function railTree(key: string): { screen: string } {
+  return { screen: key };
+}
 
-  it("does not ingest or show the previous tree when the URL key changes first", () => {
-    const booted = hop(null, messagesKey, messages, {});
-    expect(booted.canIngest).toBe(true);
-    expect(booted.display).toEqual({ displayKey: messagesKey, showIngress: false });
+function cacheStep(
+  seen: Parameters<typeof houseApplyCachedChild>[0]["seen"],
+  key: string,
+  child: unknown,
+  nodes: Record<string, unknown>,
+  order: readonly string[],
+) {
+  return houseApplyCachedChild({
+    seen,
+    nextKey: key,
+    activeKey: key,
+    nextPath: key,
+    child,
+    fallback: false,
+    nodes,
+    order,
+  });
+}
 
-    // React restarts after setState during render. The restarted pass
-    // must still refuse the previous tree.
-    const restarted = hop(booted.seen, messagesKey, messages, booted.nodes);
-    expect(restarted.stale).toBe(false);
-    expect(restarted.canIngest).toBe(false);
+describe("Social rail cache flips", () => {
+  it("treats the flip render as stale while the committed guard still has the old key", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const committed = { key: SOCIAL_ROUTES.dms, snapshot: null, child: messages };
+    expect(committed.key).not.toBe(SOCIAL_ROUTES.profile);
 
-    const flip = hop(restarted.seen, profileKey, messages, restarted.nodes);
-    expect(flip.stale).toBe(true);
-    expect(flip.canIngest).toBe(false);
-    expect(flip.nodes[profileKey]).toBeUndefined();
-    expect(flip.display).toEqual({ displayKey: null, showIngress: false });
-    expect(flip.display.displayKey).not.toBe(messagesKey);
+    const flip = houseSyncChildSeen(committed, SOCIAL_ROUTES.profile, messages);
+    expect(flip.childrenStale).toBe(true);
 
-    const flipRestart = hop(flip.seen, profileKey, messages, flip.nodes);
-    expect(flipRestart.stale).toBe(true);
-    expect(flipRestart.canIngest).toBe(false);
-    expect(flipRestart.nodes[profileKey]).toBeUndefined();
-    expect(flipRestart.display.displayKey).not.toBe(profileKey);
-
-    const landed = hop(flipRestart.seen, profileKey, profile, flipRestart.nodes);
-    expect(landed.stale).toBe(false);
-    expect(landed.canIngest).toBe(true);
-    expect(landed.nodes[profileKey]).toBe(profile);
-    expect(landed.nodes[profileKey]).not.toBe(messages);
-    expect(landed.display).toEqual({ displayKey: profileKey, showIngress: false });
+    const applied = cacheStep(committed, SOCIAL_ROUTES.profile, messages, { [SOCIAL_ROUTES.dms]: messages }, [SOCIAL_ROUTES.dms]);
+    expect(applied.childrenStale).toBe(true);
+    expect(applied.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    expect(applied.displayKey).not.toBe(SOCIAL_ROUTES.profile);
+    expect(applied.displayKey).not.toBe(SOCIAL_ROUTES.dms);
   });
 
-  it("keeps the reverse hop and Explore on the URL key", () => {
-    const explore = { screen: "explore" };
-    const exploreKey = "/social/explore";
-    let seen: ReturnType<typeof houseSyncChildSeen>["seen"] | null = null;
-    let nodes: Record<string, unknown> = {};
+  it("drops a poisoned slot and stores the fresh tree when it arrives", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const poisoned = cacheStep(
+      { key: SOCIAL_ROUTES.profile, snapshot: messages, child: messages },
+      SOCIAL_ROUTES.profile,
+      messages,
+      { [SOCIAL_ROUTES.profile]: messages },
+      [SOCIAL_ROUTES.profile],
+    );
+    expect(poisoned.childrenStale).toBe(true);
+    expect(poisoned.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    expect(poisoned.displayKey).toBeNull();
 
-    const boot = hop(seen, profileKey, profile, nodes);
-    seen = hop(boot.seen, profileKey, profile, boot.nodes).seen;
-    nodes = boot.nodes;
-
-    const toMessages = hop(seen, messagesKey, profile, nodes);
-    const toMessagesRestart = hop(toMessages.seen, messagesKey, profile, toMessages.nodes);
-    expect(toMessagesRestart.stale).toBe(true);
-    expect(toMessagesRestart.nodes[messagesKey]).toBeUndefined();
-    expect(toMessagesRestart.display.displayKey).not.toBe(profileKey);
-
-    const messagesLanded = hop(toMessagesRestart.seen, messagesKey, messages, toMessagesRestart.nodes);
-    expect(messagesLanded.nodes[messagesKey]).toBe(messages);
-    expect(messagesLanded.display.displayKey).toBe(messagesKey);
-
-    const toExplore = hop(messagesLanded.seen, exploreKey, messages, messagesLanded.nodes);
-    const toExploreRestart = hop(toExplore.seen, exploreKey, messages, toExplore.nodes);
-    expect(toExploreRestart.canIngest).toBe(false);
-    expect(toExploreRestart.nodes[exploreKey]).toBeUndefined();
-
-    const exploreLanded = hop(toExploreRestart.seen, exploreKey, explore, toExploreRestart.nodes);
-    expect(exploreLanded.nodes[exploreKey]).toBe(explore);
-    expect(exploreLanded.display.displayKey).toBe(exploreKey);
+    const healed = cacheStep(poisoned.seen, SOCIAL_ROUTES.profile, profile, poisoned.nodes, poisoned.order);
+    expect(healed.childrenStale).toBe(false);
+    expect(healed.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(healed.displayKey).toBe(SOCIAL_ROUTES.profile);
   });
 
-  it("ingests when the URL key and the child tree change in one render", () => {
-    const booted = hop(null, messagesKey, messages, {});
-    const restarted = hop(booted.seen, messagesKey, messages, booted.nodes);
-    const landed = hop(restarted.seen, profileKey, profile, restarted.nodes);
-    expect(landed.stale).toBe(false);
-    expect(landed.nodes[profileKey]).toBe(profile);
-    expect(landed.display.displayKey).toBe(profileKey);
+  it("replaces a poisoned slot when the fresh tree differs from the stored node", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const healed = cacheStep(
+      { key: SOCIAL_ROUTES.profile, snapshot: null, child: messages },
+      SOCIAL_ROUTES.profile,
+      profile,
+      { [SOCIAL_ROUTES.profile]: messages },
+      [SOCIAL_ROUTES.profile],
+    );
+    expect(healed.childrenStale).toBe(false);
+    expect(healed.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(healed.nodes[SOCIAL_ROUTES.profile]).not.toBe(messages);
+    expect(healed.displayKey).toBe(SOCIAL_ROUTES.profile);
+  });
+
+  it("keeps URL key, stored tree, and display aligned for every rail hop", () => {
+    for (const from of SOCIAL_RAIL) {
+      for (const to of SOCIAL_RAIL) {
+        if (from === to) continue;
+        const fromTree = railTree(from);
+        const toTree = railTree(to);
+        const booted = cacheStep(null, from, fromTree, {}, []);
+        const settled = cacheStep(booted.seen, from, fromTree, booted.nodes, booted.order);
+        expect(settled.nodes[from]).toBe(fromTree);
+        expect(settled.displayKey).toBe(from);
+
+        const flip = cacheStep(settled.seen, to, fromTree, settled.nodes, settled.order);
+        const flipRestart = cacheStep(flip.seen, to, fromTree, flip.nodes, flip.order);
+        expect(flip.childrenStale).toBe(true);
+        expect(flipRestart.childrenStale).toBe(true);
+        expect(flipRestart.nodes[to]).toBeUndefined();
+        expect(flipRestart.displayKey).toBeNull();
+
+        const landed = cacheStep(flipRestart.seen, to, toTree, flipRestart.nodes, flipRestart.order);
+        expect(landed.childrenStale).toBe(false);
+        expect(landed.nodes[to]).toBe(toTree);
+        expect(landed.displayKey).toBe(to);
+        expect(landed.nodes[from]).toBe(fromTree);
+      }
+    }
+  });
+
+  it("ingests a child that arrives in the same render as the key, on the restart", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const booted = cacheStep(null, SOCIAL_ROUTES.dms, messages, {}, []);
+    const settled = cacheStep(booted.seen, SOCIAL_ROUTES.dms, messages, booted.nodes, booted.order);
+    const flip = cacheStep(settled.seen, SOCIAL_ROUTES.profile, profile, settled.nodes, settled.order);
+    expect(flip.childrenStale).toBe(true);
+    expect(flip.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    const restart = cacheStep(flip.seen, SOCIAL_ROUTES.profile, profile, flip.nodes, flip.order);
+    expect(restart.childrenStale).toBe(false);
+    expect(restart.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(restart.displayKey).toBe(SOCIAL_ROUTES.profile);
   });
 
   it("marks warm history so Next does not restore the previous flight tree", () => {
-    const prior = { __PRIVATE_NEXTJS_INTERNALS_TREE: { tree: messagesKey } };
+    const prior = { __PRIVATE_NEXTJS_INTERNALS_TREE: { tree: SOCIAL_ROUTES.dms } };
     const state = houseClientHistoryState(prior);
     expect(state.__NA).toBe(true);
     expect(state.houseClient).toBe(true);
-    expect(state.__PRIVATE_NEXTJS_INTERNALS_TREE).toEqual({ tree: messagesKey });
+    expect(state.__PRIVATE_NEXTJS_INTERNALS_TREE).toEqual({ tree: SOCIAL_ROUTES.dms });
     expect(houseClientHistoryState(null).__NA).toBe(true);
-    // Next's pushState patch skips ACTION_RESTORE when __NA is set.
-    expect(Boolean(state.__NA)).toBe(true);
   });
 });

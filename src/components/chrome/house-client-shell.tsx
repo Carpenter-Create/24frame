@@ -16,7 +16,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
   HOUSE_CLIENT_SHELL,
-  houseCanIngest,
+  houseApplyCachedChild,
   houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
   type HouseChildSeen,
@@ -29,11 +29,8 @@ import {
   houseReconcileOwnedHref,
   houseRememberPainted,
   houseRememberScroll,
-  houseResolveDisplay,
   houseScreenKey,
-  houseSyncChildSeen,
   houseShouldClientNavigate,
-  houseTouchOrder,
   parseHouseHref,
 } from "@/lib/house-client-shell";
 import { houseNavIgnorePendingClick, type HouseNavClickLike } from "@/lib/house-nav-pending";
@@ -78,29 +75,9 @@ export function isHouseRscFallback(node: ReactNode): boolean {
   return isHouseRscFallback(props.children);
 }
 
-function nextScreenStore(store: ScreenStore, key: string, node: ReactNode): ScreenStore {
-  if (store.nodes[key] === node && store.order[0] === key) return store;
-  const order = houseTouchOrder(store.order, key);
-  const nodes: Record<string, ReactNode> = { [key]: node };
-  for (const item of order) {
-    if (item !== key && item in store.nodes) nodes[item] = store.nodes[item];
-  }
-  return { order, nodes };
-}
-
 function captureLeadScroll(key: string): void {
   const scroller = document.querySelector(`[${HOUSE_CLIENT_SHELL.scrollAttr}]`);
   if (scroller instanceof HTMLElement) houseRememberScroll(key, scroller.scrollTop);
-}
-
-function touchScreenStore(store: ScreenStore, key: string): ScreenStore {
-  if (!(key in store.nodes) || store.order[0] === key) return store;
-  const order = houseTouchOrder(store.order, key);
-  const nodes: Record<string, ReactNode> = {};
-  for (const item of order) {
-    if (item in store.nodes) nodes[item] = store.nodes[item];
-  }
-  return { order, nodes };
 }
 
 // useSearchParams must stay in this gated child. Always-mounted chrome
@@ -235,37 +212,31 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
 
-  // State only — no refs during render. `houseSyncChildSeen` stays
-  // stale across the setState restart, so the key-flip pass cannot
-  // store the previous tree under the new key.
+  // `houseApplyCachedChild` decides staleness from the committed guard
+  // on this render. setState is only the record for the next pass.
   const [childSeen, setChildSeen] = useState<HouseChildSeen | null>(null);
-  const advanced = houseSyncChildSeen(childSeen, nextKey, children);
-  if (advanced.seen !== childSeen) setChildSeen(advanced.seen);
-
-  let nextStore = store;
-  const canIngest = houseCanIngest(
+  const applied = houseApplyCachedChild({
+    seen: childSeen,
     nextKey,
     activeKey,
     nextPath,
+    child: children,
     fallback,
-    nextKey in store.nodes,
-    advanced.childrenStale,
-  );
-  if (canIngest) {
-    nextStore = nextScreenStore(store, nextKey, children);
-  }
-  if (activeKey in nextStore.nodes) {
-    nextStore = touchScreenStore(nextStore, activeKey);
-  }
+    order: store.order,
+    nodes: store.nodes,
+  });
+  if (applied.seen !== childSeen) setChildSeen(applied.seen);
+  const nextStore: ScreenStore =
+    applied.nodes === store.nodes && applied.order === store.order
+      ? store
+      : { order: [...applied.order], nodes: applied.nodes };
   if (nextStore !== store) {
     setStore(nextStore);
-    houseRememberPainted(nextStore.order[0] ?? activeKey);
+    if (nextStore.order[0]) houseRememberPainted(nextStore.order[0]);
     houseForgetUnlisted(nextStore.order);
   }
 
-  const known = activeKey in nextStore.nodes;
-  const { displayKey, showIngress } = houseResolveDisplay(activeKey, known, fallback);
-
+  const { displayKey, showIngress } = applied;
   const ingress = showIngress ? children : null;
 
   useEffect(() => {
