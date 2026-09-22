@@ -10,9 +10,9 @@
 //   Left inline: [emblem] [workspace word ▾] — no mark, no truncate.
 //   Trailing: [search if needed] [theme] [24Frame AI] [bell] [avatar]
 //   Trailing rhythm: one --space-2 gap between distinct siblings.
-//   Phone icon hits hug the 16px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
+//   Phone icon hits hug the 24px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
 //   without negative margin. #452 -mx collapsed AI onto the bell.
-//   Avatar stays 32.
+//   Avatar follows --header-avatar-size (40 phone / 44 desktop).
 //   Bottom: HousePhoneBottomNav dests for the current workspace.
 // Phone header owns workspace switching. Dock dests stay local.
 // 24Frame AI sits immediately left of the notification bell on every
@@ -87,34 +87,32 @@ export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "w-full min-w-0 md:hidden";
 export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS} py-[var(--space-3)]`;
 
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
-  "flex h-9 w-full min-w-0 items-center gap-2 px-3 md:h-[var(--header-search-height)]";
+  "flex h-[var(--header-search-height)] w-full min-w-0 items-center gap-2 px-3";
 
 // Phone trailing optical rhythm (Adam 2026-09-18 fail after #452).
-// Equal CSS gap was not equal air when 16px glyphs sat in size-8
-// hits beside a 32px avatar. Phone hit hugs the 16px glyph so
+// Equal CSS gap was not equal air when glyphs sat in oversized hits
+// beside the avatar. Phone hit hugs --header-control-size (24) so
 // APP_HEADER_TRAILING_CLUSTER_CLASS phone --space-3 / desktop --space-2
 // is edge-to-edge theme · AI · bell · avatar. Do not cancel padding with -mx:
 // that pulled adjacent hits to zero flex width and stacked the glyphs.
-// Do not add phone padding that overflows a size-4 box — same overlap.
-// Desktop hits follow --header-control-size (reference desktop
-// header height, Adam 2026-09-20). Glyph size stays size-4 (#451).
+// Do not add phone padding that overflows the control box.
+// Desktop hits follow the same token (44 on the 88 bar).
 // Circular quiet, no muted wash, no hairline box.
 export const HOUSE_HEADER_TRAILING_HIT_CLASS =
-  `flex size-4 min-h-4 min-w-4 shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} md:size-[var(--header-control-size)] md:min-h-[var(--header-control-size)] md:min-w-[var(--header-control-size)]`;
+  `flex size-[var(--header-control-size)] min-h-[var(--header-control-size)] min-w-[var(--header-control-size)] shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS}`;
 
 // Phone wrappers stay contents so theme · Ask · bell · search are
 // flex siblings of the avatar and share the cluster gap. They are
-// not a collapse device. Hits must occupy their size-4 box.
+// not a collapse device. Hits must occupy the control-size box.
 export const HOUSE_HEADER_TRAILING_SLOT_CLASS = "contents";
 
 export const HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS = "contents md:hidden";
 
-// Phone avatar stays the 32 disk (#451 trail). Desktop follows
-// --header-avatar-size on the reference desktop header. No extra
-// pad. The shared cluster gap is the only air to theme / AI /
-// bell / search.
+// Avatar follows --header-avatar-size on both breakpoints (40 phone,
+// 44 desktop). No extra pad. The shared cluster gap is the only air
+// to theme / AI / bell / search.
 export const HOUSE_HEADER_TRAILING_AVATAR_CLASS =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2 md:h-[var(--header-avatar-size)] md:w-[var(--header-avatar-size)]";
+  "flex size-[var(--header-avatar-size)] shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
 
 export const HOUSE_THEME_TOGGLE_CLASS =
   `${HOUSE_HEADER_TRAILING_HIT_CLASS} text-ink-3 transition-colors hover:text-ink`;

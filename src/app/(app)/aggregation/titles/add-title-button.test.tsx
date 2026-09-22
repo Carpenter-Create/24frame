@@ -40,7 +40,7 @@ describe("AddTitleButton header", () => {
     expect(src).toContain("<Button");
     expect(src).not.toContain("t-body-sm text-accent");
     expect(src).not.toContain("fixed");
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.9375rem;/);
     expect(tokens).toContain("--accent: #1769ff;");
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
   });

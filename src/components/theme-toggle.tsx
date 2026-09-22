@@ -16,6 +16,7 @@ import {
   type ThemePreference,
 } from "@/lib/theme";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 // Reads the live `.dark` class on <html>. Light is the default base; the
@@ -112,7 +113,7 @@ export function ThemeToggle() {
       }}
       className={HOUSE_THEME_TOGGLE_CLASS}
     >
-      <ThemeGlyph />
+      <ThemeGlyph className={HOUSE_HEADER_TRAILING_ICON_CLASS} />
     </button>
   );
 }

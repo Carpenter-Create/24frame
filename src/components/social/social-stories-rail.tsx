@@ -228,7 +228,7 @@ export function SocialStoriesRail({
                 </span>
               </span>
             </span>
-            <p className="text-[10px] font-medium text-ink">{SOCIAL.stories.you}</p>
+            <p className="break-words text-center t-body-sm font-medium text-ink">{SOCIAL.stories.you}</p>
           </Link>
         ) : null}
         {cards.map((card) => {
@@ -256,7 +256,7 @@ export function SocialStoriesRail({
                   <SocialAvatar name={name} photoUrl={photo ?? null} size="sm" className="size-full" />
                 </span>
               </span>
-              <p className="w-full truncate text-center text-[10px] font-medium text-ink">{storyLabel(name)}</p>
+              <p className="w-full break-words text-center t-body-sm font-medium text-ink">{storyLabel(name)}</p>
             </Link>
           );
         })}

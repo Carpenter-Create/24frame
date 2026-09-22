@@ -334,12 +334,12 @@ describe("house type register", () => {
   const globals = readFileSync("src/app/globals.css", "utf8");
 
   it("keeps one large moment in the shared --text-* scale", () => {
-    expect(tokens).toMatch(/--text-xs:\s*0\.75rem;/);
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
-    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
-    expect(tokens).toMatch(/--text-lg:\s*1\.0625rem;/);
-    expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
-    expect(tokens).toMatch(/--text-hero:\s*3rem;/);
+    expect(tokens).toMatch(/--text-xs:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-base:\s*1\.0625rem;/);
+    expect(tokens).toMatch(/--text-lg:\s*1\.25rem;/);
+    expect(tokens).toMatch(/--text-title:\s*1\.75rem;/);
+    expect(tokens).toMatch(/--text-hero:\s*3\.5rem;/);
   });
 
   it("binds .t-* steps to those tokens instead of display clamp()", () => {

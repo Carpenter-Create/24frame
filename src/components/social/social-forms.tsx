@@ -15,6 +15,8 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_CREATE_AVATAR_CLASS,
+  SOCIAL_PERSON_PRIMARY_CLASS,
+  SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
@@ -557,9 +559,9 @@ export function SocialCreateCompose({
           className={SOCIAL_CREATE_AVATAR_CLASS}
         />
         <span className="min-w-0">
-          <span className="block truncate t-body-sm font-semibold text-ink md:t-body">{authorName}</span>
+          <span className={SOCIAL_PERSON_PRIMARY_CLASS}>{authorName}</span>
           {authorHandle ? (
-            <span className="block truncate text-[11px] text-ink-2 md:text-[12px]">{displayHandle(authorHandle)}</span>
+            <span className={SOCIAL_PERSON_SECONDARY_CLASS}>{displayHandle(authorHandle)}</span>
           ) : null}
         </span>
       </div>

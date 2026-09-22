@@ -43,26 +43,27 @@ describe("house sheet lock", () => {
     expect(CLOSE_44_CLASS).toContain("text-ink-3");
   });
 
-  it("keeps the house empty line on 15 Regular, no card", () => {
+  it("keeps the house empty line on 17 Regular, no card", () => {
     expect(HOUSE_EMPTY_CLASS).toBe("t-body text-ink-2");
     expect(HOUSE_EMPTY_CLASS).not.toContain("border");
     expect(HOUSE_EMPTY_CLASS).not.toContain("rounded");
   });
 
-  it("keeps Text action on 13 Sporty Blue", () => {
+  it("keeps Text action on 15 Sporty Blue", () => {
     expect(TEXT_ACTION_CLASS).toContain("t-body-sm");
     expect(TEXT_ACTION_CLASS).not.toContain("font-normal");
     expect(TEXT_ACTION_CLASS).toContain("text-accent");
     expect(TEXT_ACTION_CLASS).not.toContain("bg-accent");
   });
 
-  it("keeps Identity on a 48 circle with no pill well", () => {
-    expect(IDENTITY_AVATAR_CLASS).toContain("size-12");
+  it("keeps Identity on a 56 circle with no pill well", () => {
+    expect(IDENTITY_AVATAR_CLASS).toContain("size-14");
     expect(IDENTITY_AVATAR_CLASS).toContain("rounded-full");
     expect(IDENTITY_AVATAR_CLASS).toContain("bg-surface-muted");
     expect(IDENTITY_BLOCK_CLASS).not.toContain("bg-surface-muted");
     expect(IDENTITY_BLOCK_CLASS).not.toContain("rounded-[");
-    expect(IDENTITY_NAME_CLASS).toContain("t-body");
+    expect(IDENTITY_NAME_CLASS).toContain("t-heading");
+    expect(IDENTITY_NAME_CLASS).not.toContain("t-body");
     expect(IDENTITY_NAME_CLASS).toContain("text-ink");
     expect(IDENTITY_NAME_CLASS).not.toContain("truncate");
     expect(IDENTITY_EMAIL_CLASS).toContain("t-body-sm");
@@ -70,10 +71,11 @@ describe("house sheet lock", () => {
     expect(IDENTITY_EMAIL_CLASS).not.toContain("truncate");
   });
 
-  it("keeps Group on 12 tracked ACCOUNT rows and 15 Regular items", () => {
+  it("keeps Group on tracked ACCOUNT rows and 17 Regular items", () => {
     expect(SHEET_GROUP_CLASS).toContain("gap-[var(--space-6)]");
     expect(SHEET_GROUP_LABEL_CLASS).toContain("uppercase");
     expect(SHEET_GROUP_LABEL_CLASS).toContain("tracking-[0.08em]");
+    expect(SHEET_GROUP_ITEM_CLASS).toContain("leading-6");
     expect(SHEET_GROUP_ITEM_CLASS).toContain("text-[length:var(--text-base)]");
     expect(SHEET_GROUP_ITEM_CLASS).toContain("text-ink");
     expect(SHEET_GROUP_ITEM_CLASS).toContain("justify-between");
@@ -92,12 +94,12 @@ describe("house sheet lock", () => {
     expect(APP_SHEET_HOST_CLASS.split(" ")).not.toContain("items-end");
     expect(APP_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(APP_SHEET_SURFACE_CLASS).toContain("rounded-t-[16px]");
-    expect(APP_SHEET_SURFACE_CLASS).toContain("px-[var(--space-4)]");
+    expect(APP_SHEET_SURFACE_CLASS).toContain("px-[var(--space-6)]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("pt-[var(--space-6)]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("pb-[var(--space-12)]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("bg-surface");
     expect(APP_SHEET_SURFACE_CLASS).not.toContain("rounded-t-[24px]");
-    expect(APP_SHEET_HEAD_CLASS).toContain("h-[44px]");
+    expect(APP_SHEET_HEAD_CLASS).toContain("h-14");
     expect(APP_SHEET_HAIRLINE_CLASS).toContain("bg-hairline");
     expect(APP_SHEET_SCRIM_CLASS).toContain("absolute inset-0");
     expect(APP_SHEET_SCRIM_CLASS).toContain("bg-ink/24");

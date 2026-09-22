@@ -27,13 +27,13 @@
 // the glyph. Inactive sit bare. Stroke is Regular for both the
 // Mercury bar and the phone-top AI/bell cluster — one weight
 // register — but the glyph boxes ride TWO independent size SoT
-// tokens per Adam's #451 authoritative lock (2026-09-19,
-// live-glance): the Mercury bar sits at size-6 / 24px
+// tokens. Joshua bar 2026-09-22: the dock sits at size-7 / 28px
 // (HOUSE_PHONE_CHROME_ICON_CLASS) so dests read at thumb weight,
-// and the header trailing sits at size-4 / 16px
-// (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) matching desktop chrome
-// optical. Two literals, no alias — header must NOT re-export the
-// bottom-chrome class. Not Bold/Fill heavy. Active ink is accent
+// and the header trailing sits at size-6 / 24px
+// (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS). Desktop header glyphs
+// are size-5 / 20 inside the 44 control. Two literals, no alias.
+// Header must NOT re-export the bottom-chrome class. Phosphor rail
+// stays size-4. Not Bold/Fill heavy. Active ink is accent
 // on the chip; idle is ink-2 on both the bar off state and the top
 // trailing (AI + bell + phone search) via
 // HOUSE_PHONE_CHROME_IDLE_INK_CLASS.
@@ -60,7 +60,7 @@ import {
   overviewLeadSelected,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import { PHOSPHOR_CHROME_ICON_CLASS, type PhosphorIcon } from "@/lib/phosphor-icon";
+import { type PhosphorIcon } from "@/lib/phosphor-icon";
 import {
   WORKSPACE_AGGREGATION_LABEL,
   WORKSPACE_SOCIAL_LABEL,
@@ -118,32 +118,29 @@ export const HOUSE_PHONE_BOTTOM_NAV_CLASS =
 export const HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS = "pointer-events-none translate-y-full";
 
 export const HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS =
-  "flex h-14 w-full max-w-[420px] items-center rounded-[28px] border border-hairline bg-surface px-2 shadow-[var(--elevation-float)]";
+  "flex h-16 w-full max-w-[420px] items-center rounded-[32px] border border-hairline bg-surface px-2 shadow-[var(--elevation-float)]";
 
-export const HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS = "flex h-12 w-full items-center";
+export const HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS = "flex h-14 w-full items-center";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS =
   "flex h-full min-w-0 flex-1 items-center justify-center px-1";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS = "text-accent";
 
-/** Phone Mercury bottom bar glyph size — 24px box.
+/** Phone dock glyph — 28px box.
  *  Bottom bar owns in-workspace dests and sits at the base of the
  *  screen, so its glyphs stay at thumb weight. The phone header
  *  trailing cluster uses a SEPARATE size literal
- *  (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) — never aliased to this
- *  constant per Adam #451. Two tokens, two sizes. */
-export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-6 shrink-0";
+ *  (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS). Two tokens, two sizes.
+ *  Never alias them. */
+export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-7 shrink-0";
 
-/** Phone header trailing glyph size — 16px box, matches desktop chrome.
+/** Phone header trailing glyph — 24px box.
  *  AI mark + bell + phone search read off this token. Its value is a
- *  standalone literal, not an alias of HOUSE_PHONE_CHROME_ICON_CLASS
- *  — Adam #451 explicitly forbade re-exporting the bottom-chrome
- *  class as the header token so a bottom-bar shrink can never leak
- *  into the header, and vice versa. Phone and desktop coincide at
- *  16px today; the md:size-4 override on HOUSE_HEADER_TRAILING_ICON_CLASS
- *  stays so any future phone-header shift only touches this constant. */
-export const HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS = "size-4 shrink-0";
+ *  standalone literal, not an alias of HOUSE_PHONE_CHROME_ICON_CLASS,
+ *  so a dock resize cannot leak into the header. Desktop header
+ *  glyphs step to size-5 inside the 44 control. */
+export const HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS = "size-6 shrink-0";
 
 /** One phone chrome stroke register — bottom bar + top trailing. Not Bold/Fill. */
 export const HOUSE_PHONE_CHROME_ICON_WEIGHT = "regular" satisfies IconWeight;
@@ -157,26 +154,25 @@ export const HOUSE_PHONE_CHROME_IDLE_INK_CLASS = "text-ink-2";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS = HOUSE_PHONE_CHROME_IDLE_INK_CLASS;
 
-/** Soft light pill behind the selected glyph. Scales with the 24px box. */
+/** Soft light pill behind the selected glyph. Scales with the 28px box. */
 export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
-  "flex h-12 min-w-14 items-center justify-center rounded-full bg-surface-muted";
+  "flex h-14 min-w-16 items-center justify-center rounded-full bg-surface-muted";
 
-/** Phone 16px; desktop header keeps the 16px phosphor chrome box. Phone
- *  and desktop coincide today; the md:size-4 override stays so any
- *  future phone divergence only touches HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS. */
-export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS} md:size-4`;
+/** Phone 24px; desktop header is 20px inside the 44 control.
+ *  Not the Phosphor rail (size-4) and not the dock (size-7). */
+export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS} md:size-5`;
 
-/** Phone header trailing instance — Regular size-4 on bottom-bar idle ink.
+/** Phone header trailing instance — Regular size-6 on bottom-bar idle ink.
  *  Hidden from md+, so the ink override does not touch desktop text-ink-3. */
 export const HOUSE_HEADER_TRAILING_PHONE_CLASS = `${HOUSE_HEADER_TRAILING_ICON_CLASS} md:hidden ${HOUSE_PHONE_CHROME_IDLE_INK_CLASS}`;
 
-/** Desktop header trailing instance — 16px phosphor idle / filled AI. */
-export const HOUSE_HEADER_TRAILING_DESKTOP_CLASS = `${PHOSPHOR_CHROME_ICON_CLASS} hidden md:block`;
+/** Desktop header trailing instance — 20px. Not the 16px Phosphor rail. */
+export const HOUSE_HEADER_TRAILING_DESKTOP_CLASS = "size-5 shrink-0 hidden md:block";
 
-/** Bottom nav rides the 24px SoT (HOUSE_PHONE_CHROME_ICON_CLASS)
- *  independently of the phone header trailing per Adam #451. The two
- *  clusters share weight (Regular) and idle ink (text-ink-2), but the
- *  size tokens are two independent literals. Never Bold/Fill. */
+/** Bottom nav rides the 28px SoT (HOUSE_PHONE_CHROME_ICON_CLASS)
+ *  independently of the phone header trailing. The two clusters share
+ *  weight (Regular) and idle ink (text-ink-2), but the size tokens
+ *  are two independent literals. Never Bold/Fill. */
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = HOUSE_PHONE_CHROME_ICON_CLASS;
 
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT;
@@ -184,7 +180,7 @@ export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT
 /** Clears the float once on main. Do not stack a second phone bottom pad on children.
  *  Pad stays when the bar hides so scroll-hide does not jump the page. */
 export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
-  "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
+  "max-md:pb-[calc(6.5rem+env(safe-area-inset-bottom))]";
 
 /** Social phone dests are SOCIAL_NAV — Home · Explore · Create · Messages · Profile. */
 export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social");

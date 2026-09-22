@@ -212,7 +212,8 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV.label).toBe("Destinations");
     expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("md:hidden");
     expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("env(safe-area-inset-bottom)");
-    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("rounded-[28px]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("rounded-[32px]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("h-16");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("border-hairline");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("bg-surface");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("shadow-[var(--elevation-float)]");
@@ -254,36 +255,36 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(housePhoneWorkspaceSelected("social", "/settings", "social")).toBe(false);
   });
 
-  it("splits phone chrome size SoT — bottom nav size-6, header trailing size-4, no alias", () => {
-    expect(HOUSE_PHONE_CHROME_ICON_CLASS).toBe("size-6 shrink-0");
+  it("splits phone chrome size SoT — dock size-7, header trailing size-6, no alias", () => {
+    expect(HOUSE_PHONE_CHROME_ICON_CLASS).toBe("size-7 shrink-0");
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe(HOUSE_PHONE_CHROME_ICON_CLASS);
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).not.toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
     expect(HOUSE_PHONE_CHROME_ICON_WEIGHT).toBe("regular");
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe(HOUSE_PHONE_CHROME_ICON_WEIGHT);
-    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).toBe("size-4 shrink-0");
+    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).toBe("size-6 shrink-0");
     expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).not.toBe(HOUSE_PHONE_CHROME_ICON_CLASS);
-    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).toBe(PHOSPHOR_CHROME_ICON_CLASS);
+    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).not.toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe(
-      `${HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS} md:size-4`,
+      `${HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS} md:size-5`,
     );
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
-      "size-4 shrink-0 md:size-4 md:hidden text-ink-2",
+      "size-6 shrink-0 md:size-5 md:hidden text-ink-2",
     );
-    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-4 shrink-0 hidden md:block");
+    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-5 shrink-0 hidden md:block");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS");
     expect(bottomNavSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
     expect(bottomNavSrc).not.toContain("size-5");
     expect(bottomNavSrc).not.toContain("size-4");
+    expect(phoneShellSrc).toContain('"size-7 shrink-0"');
     expect(phoneShellSrc).toContain('"size-6 shrink-0"');
-    expect(phoneShellSrc).toContain('"size-4 shrink-0"');
-    expect(phoneShellSrc).not.toContain('"size-5 shrink-0"');
+    expect(phoneShellSrc).not.toContain('"size-4 shrink-0"');
     expect(phoneShellSrc.match(/"size-\d shrink-0"/g) ?? []).toEqual([
+      '"size-7 shrink-0"',
       '"size-6 shrink-0"',
-      '"size-4 shrink-0"',
     ]);
     expect(phoneShellSrc).toMatch(
-      /export const HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS = "size-4 shrink-0";/,
+      /export const HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS = "size-6 shrink-0";/,
     );
     expect(phoneShellSrc).not.toContain("bold");
     expect(phoneShellSrc).not.toContain('"fill"');
@@ -296,7 +297,8 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
       createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
     );
     expect(html).toContain(HOUSE_PHONE_CHROME_ICON_CLASS);
-    expect(html).toContain("size-6");
+    expect(html).toContain("size-7");
+    expect(html).not.toContain("size-6");
     expect(html).not.toContain("size-5");
     expect(html).not.toContain("size-4");
     expect(html).not.toContain('weight="bold"');
@@ -308,7 +310,7 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(html).toContain('aria-label="Aggregation"');
   });
 
-  it("uses the 16px header-trailing SoT for phone AI + bell + search without ballooning the avatar", () => {
+  it("uses the 24px header-trailing SoT for phone AI + bell + search", () => {
     expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
@@ -317,8 +319,9 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
     expect(accountSheetSrc).toContain("HOUSE_HEADER_TRAILING_AVATAR_CLASS");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
-    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-[var(--header-control-size)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-4");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("size-[var(--header-avatar-size)]");
     expect(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS).toBe("contents md:hidden");
 
     const lead = renderLead("social");
@@ -328,9 +331,10 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     );
     expect(trailing).toContain("data-ask-assistant-header");
     expect(trailing).toContain("data-activity-bell");
-    expect(trailing).toContain("size-4");
-    expect(trailing).not.toContain("size-6");
-    expect(trailing).not.toContain("size-5");
+    expect(trailing).toContain("size-6");
+    expect(trailing).toContain("size-5");
+    expect(trailing).not.toContain("size-7");
+    expect(trailing).not.toContain("size-4");
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS).toBe(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("text-ink-3");
@@ -354,7 +358,7 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
       aggregation.indexOf('data-house-phone-dest="Titles"'),
     );
     expect(dash).toContain("data-house-phone-bottom-nav-chip");
-    expect(dash).toContain("size-6");
+    expect(dash).toContain("size-7");
     const titles = aggregation.slice(aggregation.indexOf('data-house-phone-dest="Titles"'));
     expect(titles).not.toContain("data-house-phone-bottom-nav-chip");
 

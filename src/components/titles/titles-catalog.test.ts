@@ -386,9 +386,9 @@ describe("TitlesCatalogHeader type lock", () => {
     const tokens = readFileSync(join(ROOT, "src/app/tokens.css"), "utf8");
     const globals = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
 
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
-    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
-    expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-base:\s*1\.0625rem;/);
+    expect(tokens).toMatch(/--text-title:\s*1\.75rem;/);
     expect(globals).toMatch(/\.t-title\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/);
     expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-size:\s*var\(--text-lg\)/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);

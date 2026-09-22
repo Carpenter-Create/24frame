@@ -228,21 +228,16 @@ describe("ActivityBell", () => {
   it("matches #391 chrome idle weight on theme and the desktop bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
-    // Phone header trailing sits on its own 16px SoT (Adam #451
-    // authoritative — two literals, no alias). #447 shipped size-6,
-    // #448 collapsed to size-5, #449 split header down to size-4,
-    // #450 briefly re-collapsed to size-5, #451 restores the split
-    // with the phone header back at the 16px desktop-chrome optical.
-    // Mercury bar stays on size-6 via HOUSE_PHONE_CHROME_ICON_CLASS.
-    // Mutation of HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS to size-6
-    // or size-5 fails here.
+    // Phone header trailing is its own 24px literal. Dock is 28px.
+    // Desktop header is 20px. Phosphor rail stays 16px. Aliasing any
+    // of those three fails here.
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
-      "size-4 shrink-0 md:size-4 md:hidden text-ink-2",
+      "size-6 shrink-0 md:size-5 md:hidden text-ink-2",
     );
     // Phone bell rides bottom-bar idle ink; desktop bell stays on the
     // HOUSE_THEME_TOGGLE_CLASS text-ink-3 / hover:text-ink from #442.
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
-    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-4 shrink-0 hidden md:block");
+    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-5 shrink-0 hidden md:block");
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(themeSrc).toContain("PHOSPHOR_CHROME_ICON_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
@@ -260,11 +255,11 @@ describe("ActivityBell", () => {
     for (const src of [themeSrc, bellSrc]) {
       expect(src).not.toContain('weight="fill"');
       expect(src).not.toContain('weight="duotone"');
-      expect(src).not.toContain("size-5");
       expect(src).not.toContain("strokeWidth");
     }
-    expect(themeSrc).not.toContain("size-6");
+    expect(themeSrc).toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
     expect(bellSrc).not.toContain('"size-6');
+    expect(bellSrc).not.toContain('"size-4');
   });
 
   it("uses the house AI mark on the 24Frame AI header slot — not Phosphor Sparkle", () => {

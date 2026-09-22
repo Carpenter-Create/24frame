@@ -61,14 +61,17 @@
   /* --- NO status colors by default (greyscale + one accent). --- */
 
   /* --- Type scale (size, rem). House SSOT — one ladder for every workspace
-     (Aggregation · Social · Education). Geist face stays.
-     12 / 13 / 15 / 17 / 24 / 48. Do not reintroduce 11 / 20 / 40. --- */
-  --text-xs:   0.75rem;    /* 12 — .t-label / .card-meta */
-  --text-sm:   0.8125rem;  /* 13 — .t-body-sm / .data-text */
-  --text-base: 0.9375rem;  /* 15 — .t-body */
-  --text-lg:   1.0625rem;  /* 17 — .t-heading / .t-lead */
-  --text-title:1.5rem;     /* 24 — .t-title / .page-title */
-  --text-hero: 3rem;       /* 48 — .t-display / hero-value */
+     (Aggregation · Social · Education). Geist face stays. Same six roles.
+     13 / 15 / 17 / 20 / 28 / 56. Joshua bar 2026-09-22: one step toward
+     the reference body. Do not restore the previous smaller ladder.
+     Do not reintroduce 11, or title at 20 / hero at 40.
+     20 is the heading step (--text-lg), not a title regression. --- */
+  --text-xs:   0.8125rem;  /* 13 — .t-label / .card-meta */
+  --text-sm:   0.9375rem;  /* 15 — .t-body-sm / .data-text */
+  --text-base: 1.0625rem;  /* 17 — .t-body */
+  --text-lg:   1.25rem;    /* 20 — .t-heading / .t-lead */
+  --text-title:1.75rem;    /* 28 — .t-title / .page-title */
+  --text-hero: 3.5rem;     /* 56 — .t-display / hero-value */
   /* Tracking roles (Pass A4 optical densify). Geist reads optically
      lighter at the same CSS weight; close the gap here, not with a
      face swap or a return to A/A2 over-bold. Body stays looser
@@ -102,15 +105,14 @@
   /* --- Dashboard shell proportions ---
      Ported from watershedportal's shell (proportions kept, vocabulary dropped —
      see docs/known-divergences.md D2). GC had no equivalents, so these fill the gap.
-     Desktop header: top-nav row (Adam 2026-09-20 measure). Literal
-     measure ~80-84px effective. 80 is the house lock. Avatar, control
-     hit, and search height derive from this bar so Social and every
-     workspace share one SoT. Phone keeps 56 so the #451 trail does
-     not grow empty air. */
-  --header-height: 80px;
-  --header-avatar-size: 36px;
-  --header-control-size: 36px;
-  --header-search-height: 40px;
+     Desktop header: top-nav row. Joshua bar 2026-09-22 raises the
+     80 lock to 88 so avatar, control hit, and search share one taller
+     SoT. Phone rises 56 to 64 with the 24px trail so the bar is not
+     empty air around a larger glyph. */
+  --header-height: 88px;
+  --header-avatar-size: 44px;
+  --header-control-size: 44px;
+  --header-search-height: 48px;
   --sidebar-width: 220px;        /* Access rail — locked client `/` */
   --sidebar-width-collapsed: 60px;
   /* Access rail measure. Same 220 as --sidebar-width at tokens root.
@@ -141,10 +143,10 @@
     --sidebar-width: 0px;
     --sidebar-width-collapsed: 0px;
     --access-rail-width: 0px;
-    --header-height: 56px;
-    --header-avatar-size: 32px;
-    --header-control-size: 16px;
-    --header-search-height: 36px;
+    --header-height: 64px;
+    --header-avatar-size: 40px;
+    --header-control-size: 24px;
+    --header-search-height: 44px;
   }
 }
 
