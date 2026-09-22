@@ -2,28 +2,84 @@
 
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
+import {
+  FacebookLogo,
+  FilmSlate,
+  GlobeSimple,
+  InstagramLogo,
+  LinkedinLogo,
+  Play,
+  ThreadsLogo,
+  TiktokLogo,
+  XLogo,
+  YoutubeLogo,
+  type Icon,
+} from "@phosphor-icons/react";
 
 import { AppSheetHead, AppSheetSurface, Close44 } from "@/components/chrome/house";
 import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_PROFILE_LINK_CLASS,
   SOCIAL_PROFILE_LINKS_CLASS,
   SOCIAL_PROFILE_LINKS_MORE_CLASS,
+  SOCIAL_PROFILE_LINKS_SHEET_CLASS,
+  SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_ICON_SIZE_PROFILE_LINK } from "@/lib/social-icons";
 import {
+  socialProfileLinkAccessibleName,
+  socialProfileLinkGlyph,
   socialProfileLinksFace,
   socialProfileLinksMoreLabel,
   type SocialProfileLink,
+  type SocialProfileLinkGlyphName,
 } from "@/lib/social-profile-links";
 
-function SocialProfileLinkText({
-  link,
-  sheet = false,
-}: {
-  link: SocialProfileLink;
-  sheet?: boolean;
-}) {
+const GLYPH: Record<SocialProfileLinkGlyphName, Icon> = {
+  "instagram-logo": InstagramLogo,
+  "youtube-logo": YoutubeLogo,
+  "facebook-logo": FacebookLogo,
+  "x-logo": XLogo,
+  "linkedin-logo": LinkedinLogo,
+  "tiktok-logo": TiktokLogo,
+  play: Play,
+  "film-slate": FilmSlate,
+  "threads-logo": ThreadsLogo,
+  globe: GlobeSimple,
+};
+
+function SocialProfileLinkGlyph({ platform }: { platform: SocialProfileLink["platform"] }) {
+  const name = socialProfileLinkGlyph(platform);
+  const Glyph = GLYPH[name];
+  return (
+    <Glyph
+      aria-hidden="true"
+      data-social-profile-link-glyph={name}
+      size={SOCIAL_ICON_SIZE_PROFILE_LINK}
+      weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+    />
+  );
+}
+
+function SocialProfileFaceLink({ link }: { link: SocialProfileLink }) {
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={socialProfileLinkAccessibleName(link.url, link.platform)}
+      data-social-profile-link={link.platform}
+      data-social-profile-imdb={link.platform === "imdb" ? "" : undefined}
+      className={SOCIAL_PROFILE_LINK_CLASS}
+    >
+      <SocialProfileLinkGlyph platform={link.platform} />
+    </a>
+  );
+}
+
+function SocialProfileSheetLink({ link }: { link: SocialProfileLink }) {
   return (
     <a
       href={link.url}
@@ -31,8 +87,8 @@ function SocialProfileLinkText({
       rel="noopener noreferrer"
       data-social-profile-link={link.platform}
       data-social-profile-imdb={link.platform === "imdb" ? "" : undefined}
-      data-social-profile-links-sheet-link={sheet ? "" : undefined}
-      className={SOCIAL_PROFILE_LINK_CLASS}
+      data-social-profile-links-sheet-link=""
+      className={SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS}
     >
       {link.label}
     </a>
@@ -87,14 +143,10 @@ export function SocialProfileLinksSheet({
         </AppSheetHead>
         <div
           data-social-profile-links-sheet-list=""
-          className={SOCIAL_PROFILE_LINKS_CLASS}
+          className={SOCIAL_PROFILE_LINKS_SHEET_CLASS}
         >
           {links.map((link) => (
-            <SocialProfileLinkText
-              key={`${link.platform}:${link.url}`}
-              link={link}
-              sheet
-            />
+            <SocialProfileSheetLink key={`${link.platform}:${link.url}`} link={link} />
           ))}
         </div>
       </AppSheetSurface>
@@ -114,7 +166,7 @@ export function SocialProfileLinkRow({ links }: { links: readonly SocialProfileL
   return (
     <div data-social-profile-links="" className={SOCIAL_PROFILE_LINKS_CLASS}>
       {face.map((link) => (
-        <SocialProfileLinkText key={`${link.platform}:${link.url}`} link={link} />
+        <SocialProfileFaceLink key={`${link.platform}:${link.url}`} link={link} />
       ))}
       {overflow > 0 ? (
         <>

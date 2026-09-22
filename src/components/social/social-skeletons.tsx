@@ -135,7 +135,8 @@ export function SocialProfileCenterSkeleton() {
           <Skeleton className="h-3 w-2/3" />
           <Skeleton className="h-7 w-24 rounded-full" />
           <div data-social-profile-links-skeleton="" className={SOCIAL_PROFILE_LINKS_CLASS}>
-            <Skeleton className="h-3 w-40" />
+            <Skeleton className="size-9 rounded-[8px]" />
+            <Skeleton className="size-9 rounded-[8px]" />
           </div>
           <div className={SOCIAL_PROFILE_ACTIONS_CLASS}>
             <Skeleton className="h-8 w-28 rounded-[8px]" />

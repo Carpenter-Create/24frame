@@ -409,12 +409,21 @@ export const SOCIAL_PROFILE_ACTIONS_CLASS =
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body text-ink whitespace-pre-wrap";
 
-// Adam lock A 2026-09-20: calm muted type. Not chips, not
-// brand-colored glyphs. Phone stacks — never truncate. Same class for
+// Adam 2026-09-22: quiet icon rail. Not chips, not brand color.
+// Horizontal, wraps on a narrow phone — never truncate. Same class for
 // own + public. Max 2 face links; +N is the overflow control.
-export const SOCIAL_PROFILE_LINKS_CLASS = "flex min-w-0 flex-col items-start gap-1";
-export const SOCIAL_PROFILE_LINK_CLASS = "min-w-0 break-words t-body-sm text-ink-2 hover:text-ink";
-export const SOCIAL_PROFILE_LINKS_MORE_CLASS = "t-body-sm text-ink-2 hover:text-ink";
+export const SOCIAL_PROFILE_LINKS_CLASS =
+  "flex min-w-0 flex-wrap items-center gap-x-[var(--space-2)] gap-y-[var(--space-2)]";
+export const SOCIAL_PROFILE_LINK_CLASS =
+  "inline-flex size-9 shrink-0 items-center justify-center text-ink-2 hover:text-ink";
+export const SOCIAL_PROFILE_LINKS_MORE_CLASS =
+  "inline-flex h-9 shrink-0 items-center t-body-sm text-ink-2 hover:text-ink";
+
+// Links sheet keeps readable host labels in a column. Not the face rail.
+export const SOCIAL_PROFILE_LINKS_SHEET_CLASS =
+  "flex min-w-0 flex-col items-start gap-[var(--space-3)]";
+export const SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS =
+  "min-w-0 break-words t-body-sm text-ink-2 hover:text-ink";
 
 // Public Professions: one-row house chip rail (same primitive as Topics).
 // Phone: nowrap + overflow-x auto + no-scrollbar. Desktop: same one-row
