@@ -6,9 +6,12 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 import { SocialIcon } from "@/components/social/social-icon";
 import { SocialMediaImage } from "@/components/social/social-media-image";
-import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
+import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
+import { SocialExploreResultsSkeleton, SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
+  SOCIAL_HOME_CENTER_CLASS,
+  SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_PLAY_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
@@ -32,28 +35,33 @@ export default async function SocialExplorePage({
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
 
   return (
-    <div data-social-explore="">
-      <PageHeader title={SOCIAL.explore.title} subtitle={SOCIAL.explore.subtitle} />
-      <form data-social-explore-search="" action={SOCIAL_ROUTES.explore} method="get" className="pb-[var(--space-6)]">
-        <label className="sr-only" htmlFor="social-explore-q">
-          {SOCIAL.explore.search}
-        </label>
-        <Input
-          id="social-explore-q"
-          name="q"
-          defaultValue={q}
-          placeholder={SOCIAL.explore.searchPlaceholder}
-        />
-      </form>
-      {q ? (
-        <Suspense fallback={<SocialExploreResultsSkeleton />}>
-          <SocialExploreHits session={session} q={q} />
-        </Suspense>
-      ) : (
-        <Suspense fallback={null}>
-          <SocialExploreMedia session={session} />
-        </Suspense>
-      )}
+    <div data-social-explore="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <div className={SOCIAL_HOME_CENTER_CLASS}>
+        <PageHeader title={SOCIAL.explore.title} subtitle={SOCIAL.explore.subtitle} />
+        <form data-social-explore-search="" action={SOCIAL_ROUTES.explore} method="get" className="pb-[var(--space-6)]">
+          <label className="sr-only" htmlFor="social-explore-q">
+            {SOCIAL.explore.search}
+          </label>
+          <Input
+            id="social-explore-q"
+            name="q"
+            defaultValue={q}
+            placeholder={SOCIAL.explore.searchPlaceholder}
+          />
+        </form>
+        {q ? (
+          <Suspense fallback={<SocialExploreResultsSkeleton />}>
+            <SocialExploreHits session={session} q={q} />
+          </Suspense>
+        ) : (
+          <Suspense fallback={null}>
+            <SocialExploreMedia session={session} />
+          </Suspense>
+        )}
+      </div>
+      <Suspense fallback={<SocialForYouSkeleton />}>
+        <SocialDesktopForYouSlot session={session} />
+      </Suspense>
     </div>
   );
 }

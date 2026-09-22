@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+
+import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
+import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
 
 import { SocialActivityHistory } from "@/components/social/social-activity-history";
 import { SocialFollowButton } from "@/components/social/social-engagement";
@@ -13,7 +17,7 @@ import {
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
-import { SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
 import {
   socialAvatarFaces,
   socialAvatarHref,
@@ -172,7 +176,8 @@ export default async function SocialPublicProfilePage({
   const profileHref = socialMemberHref(member.handle);
 
   return (
-    <div data-social-member="" className={SOCIAL_PROFILE_CENTER_CLASS}>
+    <div data-social-member="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <div className={SOCIAL_PROFILE_CENTER_CLASS}>
         <h1 className="sr-only">
           {socialPersonLabel({ handle: member.handle, displayName: member.display_name })}
         </h1>
@@ -277,6 +282,10 @@ export default async function SocialPublicProfilePage({
             })}
           />
         )}
+      </div>
+      <Suspense fallback={<SocialForYouSkeleton />}>
+        <SocialDesktopForYouSlot session={session} />
+      </Suspense>
     </div>
   );
 }

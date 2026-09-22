@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
+import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialHomeTopics } from "@/components/social/social-home-topics";
@@ -22,7 +23,6 @@ import {
   type SocialCategoryLabel,
   type SocialCategoryTopic,
 } from "@/lib/social-categories";
-import { latestDiscoverableCourse, loadDiscoverableCourses } from "@/lib/courses";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { followingAuthorIds, SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 import {
@@ -64,7 +64,7 @@ export default async function SocialHomePage({
       </Suspense>
       {lane === "following" ? (
         <Suspense fallback={<SocialForYouSkeleton />}>
-          <SocialHomeForYouSlot session={session} />
+          <SocialDesktopForYouSlot session={session} signCourseCovers={signedEducationCoverUrls} />
         </Suspense>
       ) : null}
     </div>
@@ -77,29 +77,6 @@ async function loadHomeProfile(session: SocialSession) {
     loadCachedFolloweeIds(session.supabase, session.ctx.user.id),
   ]);
   return { profile, followees };
-}
-
-async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
-  const { ctx, supabase } = session;
-  const { profile, followees } = await loadHomeProfile(session);
-  const interest = { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] };
-  const [suggested, catalog] = await Promise.all([
-    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], interest),
-    loadDiscoverableCourses(supabase),
-  ]);
-  const latestCourse = catalog.failed ? null : latestDiscoverableCourse(catalog.courses, interest);
-  const [faces, courseCovers] = await Promise.all([
-    suggested.length > 0 ? signedAvatarUrls(suggested.map((person) => person.id)) : Promise.resolve(new Map()),
-    latestCourse ? signedEducationCoverUrls([latestCourse]) : Promise.resolve(new Map<string, string>()),
-  ]);
-  return (
-    <SocialForYouRail
-      people={suggested}
-      faces={faces}
-      latestCourse={latestCourse}
-      latestCourseCoverUrl={latestCourse ? courseCovers.get(latestCourse.id) ?? null : null}
-    />
-  );
 }
 
 async function SocialHomeCenter({

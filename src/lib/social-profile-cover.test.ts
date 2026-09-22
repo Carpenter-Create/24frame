@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
+import { SOCIAL_PROFILE_COVER_IMAGE_SIZES, SOCIAL_POST_IMAGE_SIZES } from "@/lib/social-media-display";
 import {
   SOCIAL_PROFILE_COVER_HANG_DESKTOP_PX,
   SOCIAL_PROFILE_COVER_HANG_MOBILE_PX,
@@ -11,7 +13,11 @@ import {
 
 describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
   it("locks column width, banner heights, master still, and avatar hang", () => {
-    expect(SOCIAL_PROFILE_COVER_LOCK_A.columnWidth).toBe(892);
+    expect(SOCIAL_PROFILE_COVER_LOCK_A.columnWidth).toBe(SOCIAL_DESKTOP_MEASURE.center);
+    expect(SOCIAL_PROFILE_COVER_LOCK_A.columnWidth).toBe(600);
+    expect(SOCIAL_POST_IMAGE_SIZES).toBe(`(max-width: 1023px) 100vw, ${SOCIAL_DESKTOP_MEASURE.center}px`);
+    expect(SOCIAL_PROFILE_COVER_IMAGE_SIZES).toBe(SOCIAL_POST_IMAGE_SIZES);
+    expect(SOCIAL_POST_IMAGE_SIZES).not.toContain("892");
     expect(SOCIAL_PROFILE_COVER_LOCK_A.heightMobile).toBe(112);
     expect(SOCIAL_PROFILE_COVER_LOCK_A.heightDesktop).toBe(224);
     expect(SOCIAL_PROFILE_COVER_LOCK_A.masterWidth).toBe(1784);

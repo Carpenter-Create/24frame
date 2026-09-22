@@ -52,7 +52,7 @@ function ctx() {
   };
 }
 
-function stub() {
+function emptyQuery() {
   const chain: Record<string, unknown> = {};
   const self = () => chain;
   chain.select = vi.fn(self);
@@ -64,7 +64,11 @@ function stub() {
   chain.in = vi.fn(self);
   chain.range = vi.fn(async () => ({ data: [], error: null }));
   chain.maybeSingle = vi.fn(async () => ({ data: null, error: null }));
-  vi.mocked(createClient).mockResolvedValue({ from: vi.fn(() => chain) } as never);
+  return chain;
+}
+
+function stub() {
+  vi.mocked(createClient).mockResolvedValue({ from: vi.fn(() => emptyQuery()) } as never);
 }
 
 describe("Social Explore", () => {
@@ -88,9 +92,19 @@ describe("Social Explore", () => {
     expect(html).not.toContain("data-social-lenses");
     expect(html).not.toContain("Cinematography");
     expect(html).not.toContain("data-social-feed");
+    expect(html).toContain("data-social-for-you");
+    expect(html).toContain(SOCIAL.forYou.title);
+    expect(html).toContain("lg:max-w-[600px]");
+    expect(html).toContain("lg:flex");
+    expect(html).toContain("w-[300px]");
+    expect(html).not.toContain("892");
     expect(html).not.toContain("data-social-for-you-people");
     expect(html).not.toContain(SOCIAL.forYou.people);
     expect(html).not.toContain(SOCIAL.search.people);
+    expect(src).toContain("SocialDesktopForYouSlot");
+    expect(src).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(src).not.toContain("SocialForYouRail");
+    expect(src).not.toContain("signSocialForYouCourseCovers");
     expect(src).not.toContain("SocialLensRow");
     expect(src).not.toContain("SocialSuggestedPeople");
     expect(src).not.toContain("loadSuggestedPeople");
@@ -125,8 +139,8 @@ describe("Social Explore", () => {
     postsChain.range = vi.fn(async () => ({ data: posts, error: null }));
     vi.mocked(createClient).mockResolvedValue({
       from: vi.fn((table: string) => {
-        if (table === "profiles") throw new Error("Explore must not search people");
-        return postsChain;
+        if (table === "posts") return postsChain;
+        return emptyQuery();
       }),
     } as never);
 
@@ -169,8 +183,8 @@ describe("Social Explore", () => {
     postsChain.range = vi.fn(async () => ({ data: posts, error: null }));
     vi.mocked(createClient).mockResolvedValue({
       from: vi.fn((table: string) => {
-        if (table === "profiles") throw new Error("Explore must not search people");
-        return postsChain;
+        if (table === "posts") return postsChain;
+        return emptyQuery();
       }),
     } as never);
 

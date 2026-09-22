@@ -1,10 +1,14 @@
+import { SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
 import { SOCIAL_AVATAR_ROUTE, SOCIAL_MEDIA_ROUTE } from "@/lib/social-edge";
 
 // Display-only Social media helpers. Signing stays in s3-avatars /
 // s3-social-media. No upload or recorder changes.
+// Feed and cover images follow the shared center column. Below lg the
+// column is the full canvas, so the optimizer uses 100vw.
 
-export const SOCIAL_POST_IMAGE_SIZES = "(max-width: 768px) 100vw, 892px";
-export const SOCIAL_PROFILE_COVER_IMAGE_SIZES = "(max-width: 768px) 100vw, 892px";
+export const SOCIAL_POST_IMAGE_SIZES =
+  `(max-width: 1023px) 100vw, ${SOCIAL_DESKTOP_MEASURE.center}px`;
+export const SOCIAL_PROFILE_COVER_IMAGE_SIZES = SOCIAL_POST_IMAGE_SIZES;
 export const SOCIAL_PROFILE_TILE_IMAGE_SIZES = "(max-width: 768px) 33vw, 297px";
 export const SOCIAL_STORY_CARD_IMAGE_SIZES = "(max-width: 768px) 108px, 112px";
 export const SOCIAL_OVERVIEW_FACE_IMAGE_SIZES = "32px";

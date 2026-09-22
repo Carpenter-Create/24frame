@@ -23,7 +23,9 @@ import {
   SOCIAL_PROFILE_INSET_CLASS,
   SOCIAL_PERSON_PRIMARY_CLASS,
   SOCIAL_PERSON_SECONDARY_CLASS,
+  SOCIAL_PROFILE_HANDLE_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_TOPIC_CHIP_CLASS,
@@ -289,10 +291,19 @@ export function SocialProfileIdentity({
               />
               {photoAction}
             </div>
-            {person.name ? (
-              <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
-                {person.name}
-              </p>
+            {person.name || person.handleLabel ? (
+              <div className={SOCIAL_PROFILE_NAME_STACK_CLASS}>
+                {person.name ? (
+                  <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
+                    {person.name}
+                  </p>
+                ) : null}
+                {person.handleLabel ? (
+                  <p data-social-profile-handle="" className={SOCIAL_PROFILE_HANDLE_CLASS}>
+                    {person.handleLabel}
+                  </p>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </div>

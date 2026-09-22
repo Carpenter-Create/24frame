@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
@@ -125,6 +125,7 @@ function stubClient({
     if (table === "follows") return chain([]);
     if (table === "stories") return chain([]);
     if (table === "comments") return chain([]);
+    if (table === "courses") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
@@ -132,7 +133,7 @@ function stubClient({
 }
 
 async function renderPublic(handle = "@ada") {
-  return renderToStaticMarkup(
+  return renderServerMarkup(
     await SocialPublicProfilePage({ params: Promise.resolve({ handle }) }),
   );
 }
@@ -215,10 +216,12 @@ describe("Social public profile", () => {
     expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).not.toContain("Copies ");
     expect(html).not.toContain("data-social-share-hint");
-    expect(html).not.toContain("data-social-for-you");
-    expect(html).toContain("mx-auto");
-    expect(html).toContain("md:max-w-[892px]");
+    expect(html).toContain("data-social-for-you");
+    expect(html).toContain("lg:max-w-[600px]");
+    expect(html).toContain("w-[300px]");
+    expect(html).toContain("lg:flex");
     expect(html).not.toContain("max-w-[935px]");
+    expect(html).not.toContain("md:max-w-[892px]");
     expect(html).not.toContain("lg:max-w-[892px]");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("data-social-open-dm");
@@ -274,16 +277,18 @@ describe("Social public profile", () => {
     expect(roles).toContain("no-scrollbar");
     expect(roles).not.toContain("flex-wrap");
     expect(html).not.toContain("data-social-profile-roles-more");
-    expect(html).not.toContain("data-social-profile-handle");
+    expect(html).toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-face"));
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-name");
+    expect(head).toContain("data-social-profile-handle");
+    expect(head).toContain("@ada");
+    expect(head.indexOf("data-social-profile-name")).toBeLessThan(head.indexOf("data-social-profile-handle"));
     expect(head).not.toContain("data-social-profile-meta");
     expect(head).not.toContain("data-social-profile-stats");
     expect(head).not.toContain("max-w-xs");
     expect(head).not.toContain("grid w-full grid-cols-3");
     expect(head).not.toContain("flex min-w-0 max-w-xs flex-1 items-center");
-    expect(head).not.toContain("@ada");
     expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-face"));
     expect(html.indexOf("data-social-profile-face")).toBeLessThan(html.indexOf("data-social-profile-stats"));
     expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-bio"));
@@ -397,7 +402,7 @@ describe("Social public profile", () => {
         },
       ],
     });
-    const html = renderToStaticMarkup(
+    const html = await renderServerMarkup(
       await SocialPublicProfilePage({
         params: Promise.resolve({ handle: "@ada" }),
         searchParams: Promise.resolve({ tab: "highlights" }),
@@ -426,7 +431,7 @@ describe("Social public profile", () => {
         },
       ],
     });
-    const html = renderToStaticMarkup(
+    const html = await renderServerMarkup(
       await SocialPublicProfilePage({
         params: Promise.resolve({ handle: "@ada" }),
         searchParams: Promise.resolve({ tab: "credits" }),
@@ -505,7 +510,7 @@ describe("Social public profile", () => {
 
   it("renders Activity on the public profile with Comments empty, not Posts grid", async () => {
     stubClient();
-    const html = renderToStaticMarkup(
+    const html = await renderServerMarkup(
       await SocialPublicProfilePage({
         params: Promise.resolve({ handle: "@ada" }),
         searchParams: Promise.resolve({ tab: "activity", activity: "comments" }),

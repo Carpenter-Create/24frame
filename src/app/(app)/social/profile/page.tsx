@@ -9,14 +9,16 @@ import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
-import { SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
+import { signSocialForYouCourseCovers } from "@/components/social/social-for-you-covers";
+import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
+import { SocialForYouSkeleton, SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
 import { SocialOwnProfileFace } from "@/components/social/social-own-profile";
 import { SocialActivityHistory } from "@/components/social/social-activity-history";
 import {
   SocialHighlights,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
-import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_ACTION_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
 import {
   signedAvatarUrls,
   signedSocialMediaByPostId,
@@ -87,9 +89,12 @@ export default async function SocialProfilePage({
   }
 
   return (
-    <div data-social-profile="" className={SOCIAL_PROFILE_CENTER_CLASS}>
+    <div data-social-profile="" className={SOCIAL_HOME_LAYOUT_CLASS}>
       <Suspense fallback={<SocialProfileCenterSkeleton />}>
         <SocialProfileMain session={session} tab={tab} activity={activity} />
+      </Suspense>
+      <Suspense fallback={<SocialForYouSkeleton />}>
+        <SocialDesktopForYouSlot session={session} signCourseCovers={signSocialForYouCourseCovers} />
       </Suspense>
     </div>
   );
@@ -176,7 +181,7 @@ async function SocialProfileMain({
   }));
 
   return (
-    <>
+    <div className={SOCIAL_PROFILE_CENTER_CLASS}>
       <h1 className="sr-only">{SOCIAL.profile.title}</h1>
       <SocialQueryBound profile={profile} counts={counts} />
       <SocialOwnProfileFace
@@ -257,6 +262,6 @@ async function SocialProfileMain({
           })}
         />
       )}
-    </>
+    </div>
   );
 }
