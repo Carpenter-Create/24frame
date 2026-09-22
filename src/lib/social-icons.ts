@@ -62,7 +62,8 @@ export const SOCIAL_ICON_SIZE_CREATE_TILE = 32;
 export const SOCIAL_ICON_SIZE_SEARCH = 16;
 export const SOCIAL_ICON_SIZE_HEADER = 20;
 export const SOCIAL_ICON_SIZE_PROFILE_LINK = 20;
-export const SOCIAL_ICON_SIZE_SHARE = 16;
+// Profile action-row Share is the glyph inside a 44px hit.
+export const SOCIAL_ICON_SIZE_SHARE = 20;
 export const SOCIAL_ICON_SIZE_PROFILE_PLAY = 16;
 export const SOCIAL_ICON_SIZE_SHARE_SHEET_CLOSE = 18;
 export const SOCIAL_ICON_SIZE_SHARE_SHEET_ACTION = 22;

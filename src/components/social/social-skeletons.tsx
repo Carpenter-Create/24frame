@@ -140,7 +140,7 @@ export function SocialProfileCenterSkeleton() {
           </div>
           <div className={SOCIAL_PROFILE_ACTIONS_CLASS}>
             <Skeleton className="h-8 w-28 rounded-[8px]" />
-            <Skeleton className="h-8 w-20 rounded-[8px]" />
+            <Skeleton className="size-[44px] shrink-0 rounded-full" />
           </div>
         </div>
       </div>
