@@ -223,7 +223,10 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-profile-photo");
     expect(html).not.toContain(SOCIAL.profile.uploadPhoto);
     expect(html).toContain("data-social-profile-cover");
+    expect(html).toContain("data-social-profile-cover-empty");
     expect(html).toContain("data-social-profile-cover-edit");
+    expect(html).toContain("bg-accent-wash");
+    expect(html).toContain("-mt-[29px]");
     expect(html).toContain("data-social-profile-avatar-edit");
     expect(html).toContain("/api/social/avatar/u1");
   });

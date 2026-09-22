@@ -11,34 +11,62 @@ import {
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
 } from "@/lib/social-chrome";
-import { SocialProfileBanner } from "./social-profile-banner";
+import { SocialProfileBanner, SocialProfileCoverBlock } from "./social-profile-banner";
 
 describe("SocialProfileBanner", () => {
-  it("renders the house wash when no cover is signed", () => {
-    const html = renderToStaticMarkup(<SocialProfileBanner coverUrl={null} />);
-    expect(html).toContain("data-social-profile-cover");
-    expect(html).toContain("data-social-profile-cover-empty");
-    expect(html).toContain(SOCIAL_PROFILE_COVER_CLASS);
-    expect(html).toContain(SOCIAL_PROFILE_COVER_EMPTY_CLASS);
-    expect(html).not.toContain("<img");
+  it("omits the band when a visitor has no cover photo", () => {
+    for (const coverUrl of [null, undefined, "", "   "]) {
+      const html = renderToStaticMarkup(<SocialProfileBanner coverUrl={coverUrl} />);
+      expect(html).toBe("");
+      expect(html).not.toContain("data-social-profile-cover");
+      expect(html).not.toContain("data-social-profile-cover-empty");
+      expect(html).not.toContain(SOCIAL_PROFILE_COVER_CLASS);
+      expect(html).not.toContain(SOCIAL_PROFILE_COVER_EMPTY_CLASS);
+      expect(html).not.toContain("h-[112px]");
+      expect(html).not.toContain("<img");
+    }
   });
 
-  it("renders a signed cover and omits owner edit chrome by default", () => {
+  it("renders a signed cover and omits the empty wash", () => {
     const html = renderToStaticMarkup(
       <SocialProfileBanner coverUrl="https://cf.example/cover.jpg" />,
     );
     expect(html).toContain('src="https://cf.example/cover.jpg"');
+    expect(html).toContain("data-social-profile-cover");
+    expect(html).toContain(SOCIAL_PROFILE_COVER_CLASS);
     expect(html).not.toContain("data-social-profile-cover-empty");
+    expect(html).not.toContain(SOCIAL_PROFILE_COVER_EMPTY_CLASS);
     expect(html).not.toContain("data-social-profile-cover-edit");
   });
+});
 
-  it("shows owner edit chrome only when passed", () => {
+describe("SocialProfileCoverBlock", () => {
+  it("keeps the empty band and owner edit chrome when there is no cover", () => {
     const html = renderToStaticMarkup(
-      <SocialProfileBanner
+      <SocialProfileCoverBlock
         coverUrl={null}
-        coverEdit={<button type="button" data-social-profile-cover-edit="">Edit</button>}
+        coverEdit={<button type="button" data-social-profile-cover-edit="">Add cover photo</button>}
       />,
     );
+    expect(html).toContain("data-social-profile-cover-block");
+    expect(html).toContain("data-social-profile-cover");
+    expect(html).toContain("data-social-profile-cover-empty");
+    expect(html).toContain(SOCIAL_PROFILE_COVER_CLASS);
+    expect(html).toContain(SOCIAL_PROFILE_COVER_EMPTY_CLASS);
     expect(html).toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("<img");
+  });
+
+  it("renders a signed cover without the empty wash", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileCoverBlock
+        coverUrl="  https://cf.example/cover.jpg  "
+        coverEdit={<button type="button" data-social-profile-cover-edit="">Edit cover</button>}
+      />,
+    );
+    expect(html).toContain('src="https://cf.example/cover.jpg"');
+    expect(html).toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("data-social-profile-cover-empty");
+    expect(html).not.toContain(SOCIAL_PROFILE_COVER_EMPTY_CLASS);
   });
 });
