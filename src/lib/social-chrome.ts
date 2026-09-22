@@ -340,8 +340,9 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 // desktop 224px. Owner with no photo keeps the accent wash so Add cover
 // stays on the band. Visitors omit the band when no photo exists
 // (socialProfileRendersCoverBand). Avatar may lip under the band while
-// it is present. The lip is the face only — name and counts stay on
-// the page. Upload master 1784×446 is crop math and is never painted.
+// it is present. The lip is the face only — name and @handle sit fully
+// below the cover on the page canvas (Adam lock 2026-09-22). Counts
+// stay on the page. Upload master 1784×446 is crop math and is never painted.
 export const SOCIAL_PROFILE_COVER_CLASS =
   "relative w-full h-[112px] shrink-0 overflow-hidden md:h-[224px]";
 
@@ -376,6 +377,13 @@ export const SOCIAL_PROFILE_COVER_REPOSITION_CLASS =
 
 export const SOCIAL_PROFILE_COVER_STACK_CLASS = "flex flex-col";
 
+// Avatar lip only. Phone 29px / desktop 35px (~40% of 72 / 88).
+// Adam lock 2026-09-22: hang the face, never the name stack.
+// One line of t-title (28 × 1.1) + --space-1 + t-body-sm (15 × 1.6)
+// is ~59px. The face below the lip is 43px phone (72 − 29) and
+// 53px desktop (88 − 35). A negative margin on the head row paints
+// the title into the cover; on a dark photo that ink disappears.
+// Apply on the avatar column only.
 export const SOCIAL_PROFILE_HEAD_OVERLAP_CLASS =
   "relative z-10 -mt-[29px] md:-mt-[35px]";
 
@@ -387,10 +395,11 @@ export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
 
 // Public profile head. One SoT for own /social/profile and public
 // /social/u/[handle]. Cover is a quiet media band. The avatar may lip
-// under it. Display name is primary, beside the avatar. @handle is
-// muted directly under the name — not beside the name, not in the
-// face stack. Counts, bio, role pills, links, and actions stack in
-// the column. Counts are a metric row — strong tabular numbers,
+// under it. Display name and @handle sit fully below the cover
+// (Adam lock 2026-09-22), beside the avatar, never painted on the
+// band. @handle is muted directly under the name — not beside the
+// name, not in the face stack. Counts, bio, role pills, links, and
+// actions stack in the column. Counts are a metric row — strong tabular numbers,
 // quiet labels — not a side column beside the avatar. Topic chips
 // follow the actions. Mutuals are last and omit when empty. Name,
 // handle, and labels wrap; never truncate.
@@ -400,8 +409,15 @@ export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-3)]
 // the type stack share one left edge.
 export const SOCIAL_PROFILE_INSET_CLASS = "px-[var(--space-4)] md:px-[var(--space-6)]";
 
+// No-cover baseline: name bottoms with the face.
 export const SOCIAL_PROFILE_HEAD_CLASS =
   "flex min-w-0 items-end gap-[var(--space-4)]";
+
+// Cover band: name and @handle start on the canvas at the cover's
+// bottom edge. items-end would straddle (see the hang note above).
+// Phone and desktop share this. Adam lock 2026-09-22.
+export const SOCIAL_PROFILE_HEAD_ON_COVER_CLASS =
+  "flex min-w-0 items-start gap-[var(--space-4)]";
 
 // House metric row. Three counts, left clustered, hairline under
 // the row. flex-wrap so a narrow phone stacks a cell instead of
@@ -425,7 +441,8 @@ export const SOCIAL_PROFILE_FACE_CLASS =
 // Phone and desktop share this stack (Adam 2026-09-22 profile phone).
 // Name is house t-title. @handle is muted body-sm on the next line,
 // beside the avatar. No breakpoint hides the handle. The 720 cap and
-// For You rail stay lg+ only. Cover overlap stays.
+// For You rail stay lg+ only. On a cover the avatar lips; the name
+// stack stays below the band.
 export const SOCIAL_PROFILE_NAME_STACK_CLASS =
   "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-1)]";
 

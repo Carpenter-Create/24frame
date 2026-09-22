@@ -777,13 +777,23 @@ describe("Social Home miss list v1 P0 lock", () => {
       homeSkeleton.indexOf("export function SocialProfileSkeleton"),
     );
     expect(profileCenterSkeleton).not.toContain("SOCIAL_PROFILE_META_CLASS");
-    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
-      profileCenterSkeleton.indexOf("h-7 w-40"),
+    const skeletonHeadRow = profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
+    const skeletonNameBar = profileCenterSkeleton.indexOf("h-7 w-40");
+    const skeletonAvatar = profileCenterSkeleton.indexOf("SOCIAL_AVATAR_PROFILE_CLASS");
+    const skeletonHang = profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
+    expect(skeletonHeadRow).toBeGreaterThan(-1);
+    expect(skeletonHeadRow).toBeLessThan(skeletonNameBar);
+    expect(skeletonAvatar).toBeGreaterThan(skeletonHeadRow);
+    expect(skeletonHang).toBeGreaterThan(skeletonAvatar);
+    expect(skeletonHang).toBeLessThan(skeletonNameBar);
+    expect(profileCenterSkeleton.slice(skeletonNameBar)).not.toContain(
+      "SOCIAL_PROFILE_HEAD_OVERLAP_CLASS",
     );
-    expect(profileCenterSkeleton.indexOf("h-7 w-40")).toBeLessThan(
+    expect(profileCenterSkeleton).not.toContain("${SOCIAL_PROFILE_HEAD_CLASS}");
+    expect(skeletonNameBar).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_STATS_CLASS"),
     );
-    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
+    expect(skeletonHeadRow).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_ACTIONS_CLASS"),
     );
     expect(
