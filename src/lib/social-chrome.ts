@@ -381,7 +381,7 @@ export const SOCIAL_PROFILE_INSET_CLASS = "px-[var(--space-4)] md:px-[var(--spac
 export const SOCIAL_PROFILE_HEAD_CLASS =
   "flex min-w-0 items-end gap-[var(--space-4)]";
 
-// Coinbase metric row. Three counts, left clustered, hairline under
+// House metric row. Three counts, left clustered, hairline under
 // the row. flex-wrap so a narrow phone stacks a cell instead of
 // truncating the label. Not a stretched 3-column dashboard grid.
 export const SOCIAL_PROFILE_STATS_CLASS = "w-full min-w-0";
