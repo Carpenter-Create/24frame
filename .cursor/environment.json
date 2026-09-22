@@ -1,0 +1,10 @@
+{
+  "name": "24Frame dashboard",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "next-dev",
+      "command": "pnpm dev"
+    }
+  ]
+}
