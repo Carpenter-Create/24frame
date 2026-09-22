@@ -8,6 +8,7 @@ import FollowsLoading from "@/app/(app)/social/u/[handle]/follows/loading";
 import {
   HOUSE_CLIENT_SHELL,
   houseApplyCachedChild,
+  houseBlankOutlet,
   houseCanIngest,
   houseClientHistoryState,
   houseFocusBelongsToInactiveScreen,
@@ -23,6 +24,7 @@ import {
   houseSyncChildSeen,
   houseShouldClientNavigate,
   houseShouldKeepAlive,
+  houseSyncPainted,
   houseTouchOrder,
   houseWorkspaceLandKey,
   isHouseClientOwnedPath,
@@ -202,6 +204,13 @@ describe("houseResolveDisplay — cold-nav display", () => {
     const result = houseResolveDisplay("/social/profile", false, false);
     expect(result).toEqual({ displayKey: null, showIngress: false });
     expect(result.displayKey).not.toBe("/social/dms");
+  });
+
+  it("paints the live tree when the active key is missing and the child is fresh", () => {
+    expect(houseResolveDisplay("/social", false, false, true)).toEqual({
+      displayKey: null,
+      showIngress: true,
+    });
   });
 });
 
@@ -444,18 +453,121 @@ describe("Social rail cache flips", () => {
     }
   });
 
-  it("ingests a child that arrives in the same render as the key, on the restart", () => {
+  it("ingests a child that arrives in the same render as the key", () => {
     const messages = railTree(SOCIAL_ROUTES.dms);
     const profile = railTree(SOCIAL_ROUTES.profile);
     const booted = cacheStep(null, SOCIAL_ROUTES.dms, messages, {}, []);
     const settled = cacheStep(booted.seen, SOCIAL_ROUTES.dms, messages, booted.nodes, booted.order);
     const flip = cacheStep(settled.seen, SOCIAL_ROUTES.profile, profile, settled.nodes, settled.order);
-    expect(flip.childrenStale).toBe(true);
-    expect(flip.nodes[SOCIAL_ROUTES.profile]).toBeUndefined();
+    expect(flip.childrenStale).toBe(false);
+    expect(flip.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(flip.displayKey).toBe(SOCIAL_ROUTES.profile);
+    expect(flip.showIngress).toBe(false);
     const restart = cacheStep(flip.seen, SOCIAL_ROUTES.profile, profile, flip.nodes, flip.order);
-    expect(restart.childrenStale).toBe(false);
-    expect(restart.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
     expect(restart.displayKey).toBe(SOCIAL_ROUTES.profile);
+    expect(restart.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+  });
+
+  it("paints Home when the live tree arrives with the URL and the slot was empty", () => {
+    const explore = railTree(SOCIAL_ROUTES.explore);
+    const home = railTree(SOCIAL_ROUTES.home);
+    const booted = cacheStep(null, SOCIAL_ROUTES.explore, explore, {}, []);
+    const settled = cacheStep(booted.seen, SOCIAL_ROUTES.explore, explore, booted.nodes, booted.order);
+    const landed = cacheStep(settled.seen, SOCIAL_ROUTES.home, home, settled.nodes, settled.order);
+    expect(landed.childrenStale).toBe(false);
+    expect(landed.displayKey).toBe(SOCIAL_ROUTES.home);
+    expect(landed.nodes[SOCIAL_ROUTES.home]).toBe(home);
+    expect(landed.showIngress).toBe(false);
+    expect(landed.nodes[SOCIAL_ROUTES.explore]).toBe(explore);
+    expect(houseBlankOutlet(landed.displayKey, landed.showIngress, SOCIAL_ROUTES.home, SOCIAL_ROUTES.home)).toBe(
+      "none",
+    );
+  });
+
+  it("does not leave a poisoned empty slot white once the settled tree is accepted", () => {
+    const messages = railTree(SOCIAL_ROUTES.dms);
+    const profile = railTree(SOCIAL_ROUTES.profile);
+    const poisoned = cacheStep(
+      { key: SOCIAL_ROUTES.profile, snapshot: messages, child: messages },
+      SOCIAL_ROUTES.profile,
+      messages,
+      { [SOCIAL_ROUTES.profile]: messages },
+      [SOCIAL_ROUTES.profile],
+    );
+    expect(poisoned.displayKey).toBeNull();
+    expect(poisoned.showIngress).toBe(false);
+    expect(houseBlankOutlet(poisoned.displayKey, poisoned.showIngress, SOCIAL_ROUTES.profile, SOCIAL_ROUTES.profile)).toBe(
+      "refresh",
+    );
+
+    const accepted = houseApplyCachedChild({
+      seen: poisoned.seen,
+      nextKey: SOCIAL_ROUTES.profile,
+      activeKey: SOCIAL_ROUTES.profile,
+      nextPath: SOCIAL_ROUTES.profile,
+      child: messages,
+      fallback: false,
+      nodes: poisoned.nodes,
+      order: poisoned.order,
+      acceptStale: true,
+    });
+    expect(accepted.childrenStale).toBe(false);
+    expect(accepted.displayKey).toBe(SOCIAL_ROUTES.profile);
+    expect(accepted.nodes[SOCIAL_ROUTES.profile]).toBe(messages);
+    expect(accepted.showIngress).toBe(false);
+
+    const real = cacheStep(accepted.seen, SOCIAL_ROUTES.profile, profile, accepted.nodes, accepted.order);
+    expect(real.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+    expect(real.nodes[SOCIAL_ROUTES.profile]).not.toBe(messages);
+    expect(real.displayKey).toBe(SOCIAL_ROUTES.profile);
+  });
+
+  it("asks Next to load a warm hop whose slot is missing instead of painting the other screen", () => {
+    const explore = railTree(SOCIAL_ROUTES.explore);
+    const applied = houseApplyCachedChild({
+      seen: { key: SOCIAL_ROUTES.explore, snapshot: null, child: explore },
+      nextKey: SOCIAL_ROUTES.explore,
+      activeKey: SOCIAL_ROUTES.home,
+      nextPath: SOCIAL_ROUTES.explore,
+      child: explore,
+      fallback: false,
+      nodes: { [SOCIAL_ROUTES.explore]: explore },
+      order: [SOCIAL_ROUTES.explore],
+    });
+    expect(applied.displayKey).toBeNull();
+    expect(applied.showIngress).toBe(false);
+    expect(applied.displayKey).not.toBe(SOCIAL_ROUTES.explore);
+    expect(applied.nodes[SOCIAL_ROUTES.home]).toBeUndefined();
+    expect(houseBlankOutlet(applied.displayKey, applied.showIngress, SOCIAL_ROUTES.home, SOCIAL_ROUTES.explore)).toBe(
+      "load",
+    );
+  });
+
+  it("paints a non-keepalive dest instead of an empty slot", () => {
+    const live = railTree("/social/create/live");
+    const applied = houseApplyCachedChild({
+      seen: null,
+      nextKey: "/social/create/live",
+      activeKey: "/social/create/live",
+      nextPath: "/social/create/live",
+      child: live,
+      fallback: false,
+      nodes: {},
+      order: [],
+    });
+    expect(applied.nodes["/social/create/live"]).toBeUndefined();
+    expect(applied.displayKey).toBeNull();
+    expect(applied.showIngress).toBe(true);
+  });
+
+  it("drops a painted key that has no slot so Home is not a warm hop to white", () => {
+    resetHousePaintedForTests();
+    houseRememberPainted(SOCIAL_ROUTES.home);
+    houseRememberPainted(SOCIAL_ROUTES.explore);
+    houseSyncPainted([SOCIAL_ROUTES.explore]);
+    expect(houseShouldClientNavigate(SOCIAL_ROUTES.home, housePaintedKeys())).toBe(false);
+    expect(houseShouldClientNavigate(SOCIAL_ROUTES.explore, housePaintedKeys())).toBe(true);
+    resetHousePaintedForTests();
   });
 
   it("marks warm history so Next does not restore the previous flight tree", () => {
