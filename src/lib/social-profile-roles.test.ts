@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { sortByLabelAlpha } from "@/lib/social-categories";
 import {
   SOCIAL_PROFILE_ROLES,
   SOCIAL_PROFILE_ROLES_COUNT,
@@ -262,8 +263,8 @@ describe("social profile roles", () => {
     expect(socialProfileRoleLabel("previs")).toBe("Storyboard Artist");
     expect(socialProfileRoleLabel("co_executive_producer")).toBe("Co Executive Producer");
     expect(socialProfileRoleChips(["host", "cinematographer"])).toEqual([
-      { slug: "host", label: "Host" },
       { slug: "cinematographer", label: "Cinematographer" },
+      { slug: "host", label: "Host" },
     ]);
   });
 
@@ -312,9 +313,9 @@ describe("social profile roles", () => {
       socialProfileRolesRailItems(["actor", "producer", "screenwriter", "investor"]),
     ).toEqual([
       { kind: "role", slug: "actor", label: "Actor" },
+      { kind: "role", slug: "investor", label: "Investor" },
       { kind: "role", slug: "producer", label: "Producer" },
       { kind: "role", slug: "screenwriter", label: "Screenwriter" },
-      { kind: "role", slug: "investor", label: "Investor" },
     ]);
     const five = socialProfileRolesRailItems([
       "executive_producer",
@@ -324,26 +325,34 @@ describe("social profile roles", () => {
       "music_director",
     ]);
     expect(five).toEqual([
-      { kind: "role", slug: "executive_producer", label: "Executive Producer" },
-      { kind: "role", slug: "music_supervisor", label: "Music Supervisor" },
       { kind: "role", slug: "composer", label: "Composer" },
-      { kind: "role", slug: "musician", label: "Musician" },
+      { kind: "role", slug: "executive_producer", label: "Executive Producer" },
       { kind: "role", slug: "music_director", label: "Music Director" },
+      { kind: "role", slug: "music_supervisor", label: "Music Supervisor" },
+      { kind: "role", slug: "musician", label: "Musician" },
     ]);
     expect(five).toHaveLength(5);
     expect(five.every((item) => item.kind === "role")).toBe(true);
+    expect(five.map((role) => role.label)).toEqual(
+      sortByLabelAlpha(five, (role) => role.label).map((role) => role.label),
+    );
     expect(socialProfileRolesRailItems(["investor", "actor", "producer"]).map((role) => role.slug)).toEqual([
+      "actor",
+      "investor",
+      "producer",
+    ]);
+    expect(parseSocialProfileRoles(["investor", "actor", "producer"])).toEqual([
       "investor",
       "actor",
       "producer",
     ]);
-    expect(socialProfileRolesRailItems(["screenwriter", "investor"]).map((role) => role.slug)).not.toEqual([
+    expect(socialProfileRolesRailItems(["screenwriter", "investor"]).map((role) => role.slug)).toEqual([
       "investor",
       "screenwriter",
     ]);
   });
 
-  it("lists every selected Profession in crafts order and moves by id", () => {
+  it("lists every selected Profession A→Z for display and moves persisted order by id", () => {
     expect(socialProfileRoleChips([])).toEqual([]);
     expect(socialProfileRoleChips(["actor"])).toEqual([{ slug: "actor", label: "Actor" }]);
     expect(socialProfileRolesRailItems([])).toEqual([]);
@@ -355,10 +364,14 @@ describe("social profile roles", () => {
       socialProfileRoleChips(["actor", "producer", "screenwriter", "investor", "director"]),
     ).toEqual([
       { slug: "actor", label: "Actor" },
+      { slug: "director", label: "Director" },
+      { slug: "investor", label: "Investor" },
       { slug: "producer", label: "Producer" },
       { slug: "screenwriter", label: "Screenwriter" },
-      { slug: "investor", label: "Investor" },
-      { slug: "director", label: "Director" },
+    ]);
+    expect(socialProfileRoleChips(["dit", "director"]).map((role) => role.label)).toEqual([
+      "Director",
+      "DIT",
     ]);
     expect(moveSocialProfileRole(["actor", "producer", "director"], "director", "actor")).toEqual([
       "director",
@@ -407,7 +420,8 @@ describe("social profile roles", () => {
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_LINKS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_LINK_CLASS");
-    expect(chromeSrc).toContain("SOCIAL_PROFILE_LINKS_MORE_CLASS");
+    expect(chromeSrc).not.toContain("SOCIAL_PROFILE_LINKS_MORE_CLASS");
+    expect(chromeSrc).toContain("never +N");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_GRID_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
@@ -444,6 +458,10 @@ describe("social profile roles", () => {
     expect(affinitySrc).toContain("SOCIAL_PROFILE_ROLE_GROUPS");
     expect(affinitySrc).toContain("satisfies Record<SocialProfileRoleGroupId");
     expect(affinitySrc).not.toContain('slug: "actor"');
+    expect(rolesSrc).toContain("sortByLabelAlpha");
+    expect(rolesSrc).not.toContain("localeCompare");
+    expect(fieldSrc).toContain("socialProfileRoleChips");
+    expect(fieldSrc).not.toContain("localeCompare");
     expect(fieldSrc).toContain("toggleSocialProfileRole");
     expect(fieldSrc).toContain("onChange(toggleSocialProfileRole");
     expect(fieldSrc).toContain("SocialProfileRolesEditor");

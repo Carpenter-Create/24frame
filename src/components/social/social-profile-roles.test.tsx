@@ -28,8 +28,8 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain("data-social-profile-edit-roles-selected");
     expect(html).toContain('data-social-profile-role-chip="investor"');
     expect(html).toContain('data-social-profile-role-chip="actor"');
-    expect(html.indexOf('data-social-profile-role-chip="investor"')).toBeLessThan(
-      html.indexOf('data-social-profile-role-chip="actor"'),
+    expect(html.indexOf('data-social-profile-role-chip="actor"')).toBeLessThan(
+      html.indexOf('data-social-profile-role-chip="investor"'),
     );
     expect(html).toContain(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_BANK_CLASS);
@@ -51,6 +51,44 @@ describe("SocialProfileRolesField", () => {
     expect(html).not.toContain("text-[11px]");
     expect(html).not.toContain("truncate");
     expect(html).not.toContain("type=\"checkbox\"");
+  });
+
+  it("sorts the selected profession chips A→Z and leaves the category bank grouped", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileRolesField
+        value={[
+          "executive_producer",
+          "music_supervisor",
+          "composer",
+          "executive",
+          "investor",
+        ]}
+        onChange={() => undefined}
+      />,
+    );
+    const selected = html.slice(
+      html.indexOf("data-social-profile-edit-roles-selected"),
+      html.indexOf("data-social-profile-edit-roles-count"),
+    );
+    const order = [
+      "composer",
+      "executive",
+      "executive_producer",
+      "investor",
+      "music_supervisor",
+    ];
+    let at = -1;
+    for (const slug of order) {
+      const next = selected.indexOf(`data-social-profile-role-chip="${slug}"`);
+      expect(next, slug).toBeGreaterThan(at);
+      at = next;
+    }
+    expect(html.indexOf('data-social-profile-role-group="actor"')).toBeLessThan(
+      html.indexOf('data-social-profile-role-group="writer"'),
+    );
+    expect(html.indexOf('data-social-profile-role-group="writer"')).toBeLessThan(
+      html.indexOf('data-social-profile-role-group="business"'),
+    );
   });
 
   it("omits the selected-chip row when none are chosen", () => {

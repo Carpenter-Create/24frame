@@ -5,15 +5,16 @@ import { SOCIAL } from "@/lib/social";
 // (identity-spine text): one URL stays a URL; two or more is a JSON array.
 // Face chrome is a quiet icon rail (Adam 2026-09-22): known hosts map to
 // a Phosphor glyph; unknown hosts use a globe. Accessible name is the
-// platform label, or the host when the platform is website. Max 2 on the
-// face; overflow is a quiet +N that opens a Links sheet. The sheet and
-// the Edit Profile drill keep readable host labels. Omit when empty.
+// platform label, or the host when the platform is website. Every public
+// link icon is on the face, up to SOCIAL_PROFILE_LINKS_MAX. No +N collapse.
+// The Links sheet and the Edit Profile drill keep readable host labels.
+// Omit when empty.
 // IMDb Phase 1 claim merges into this list so the name page is not shown twice.
 // Phosphor has no IMDb or Vimeo mark — film-slate and play stand in.
 // Do not add platforms that this module does not already classify.
+// Do not clear or rewrite imdb_url from this module.
 
 export const SOCIAL_PROFILE_LINKS_MAX = 8;
-export const SOCIAL_PROFILE_LINKS_FACE_MAX = 2;
 
 export const SOCIAL_LINK_PLATFORMS = [
   "instagram",
@@ -203,23 +204,6 @@ export function socialProfileLinkAccessibleName(
 ): string {
   if (platform !== "website") return SOCIAL_LINK_PLATFORM_LABEL[platform];
   return hostnameOf(url) || SOCIAL_LINK_PLATFORM_LABEL.website;
-}
-
-export function socialProfileLinksFace(links: readonly SocialProfileLink[]): {
-  face: SocialProfileLink[];
-  overflow: number;
-} {
-  if (links.length <= SOCIAL_PROFILE_LINKS_FACE_MAX) {
-    return { face: [...links], overflow: 0 };
-  }
-  return {
-    face: links.slice(0, SOCIAL_PROFILE_LINKS_FACE_MAX),
-    overflow: links.length - SOCIAL_PROFILE_LINKS_FACE_MAX,
-  };
-}
-
-export function socialProfileLinksMoreLabel(overflow: number): string {
-  return `+${overflow}`;
 }
 
 function uniqueUrls(urls: readonly (string | null)[]): string[] {

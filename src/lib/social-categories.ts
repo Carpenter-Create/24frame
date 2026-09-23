@@ -1,16 +1,24 @@
 // Locked Social Home category lenses. Labels are founder-locked.
 // Order is A→Z (locale-aware, case-insensitive) — Adam 2026-09-20.
-// sortTopicsAlpha is the shared sorter; the exported bank must already
-// match it. One SoT for Home rail, profile Topics picker, and every
-// other Topics chip surface. Do not reorder per device or per consumer.
+// sortByLabelAlpha is the shared sorter. sortTopicsAlpha is the Topics
+// wrapper; Professions display chips use the same helper. The exported
+// Topics bank must already match it. One SoT for Home rail, profile
+// Topics picker, and every other Topics chip surface. Do not reorder
+// per device or per consumer. Do not fork a second localeCompare.
 // Home only. Do not persist onto Explore or any other job.
 // All resets. Re-tap of the active topic returns All.
 // Do not consolidate, rename, or invent cousins.
 
 export const SOCIAL_CATEGORY_ALL = "All" as const;
 
+export function sortByLabelAlpha<T>(items: readonly T[], label: (item: T) => string): T[] {
+  return [...items].sort((a, b) =>
+    label(a).localeCompare(label(b), "en", { sensitivity: "base" }),
+  );
+}
+
 export function sortTopicsAlpha<T extends string>(topics: readonly T[]): T[] {
-  return [...topics].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+  return sortByLabelAlpha(topics, (topic) => topic);
 }
 
 export const SOCIAL_CATEGORY_TOPICS = [

@@ -5,14 +5,16 @@
 // profiles.crafts. primary_role stays the first selected slug.
 // UI label is Professions — not Topics, not Category, not crafts.
 // Public header is one house chip-rail row of gray pills: every
-// selected Role as its own chip, in crafts order. Phone scrolls
-// sideways (Topics SoT). Desktop uses the same one-row rail. No +N
-// / more chip — overflow scrolls. Omit when empty.
+// selected Role as its own chip, A→Z by label (sortByLabelAlpha,
+// same helper as Topics). Persist and primary_role stay selection
+// order. Phone scrolls sideways (Topics SoT). Desktop uses the same
+// one-row rail. No +N / more chip — overflow scrolls. Omit when empty.
 // Edit max 5. Select and write stay sync. Not on SocialPersonRow.
 // Investor is a Business add. Bio middots stay the author's copy.
 // Edit face is one Settings drill-in row. Selecting stays on the
 // existing professions chip-bank page.
 
+import { sortByLabelAlpha } from "@/lib/social-categories";
 import { SOCIAL } from "@/lib/social";
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
@@ -354,10 +356,13 @@ export function socialProfileRoleChips(raw: unknown): {
   slug: string;
   label: string;
 }[] {
-  return parseSocialProfileRoles(raw).map((slug) => ({
-    slug,
-    label: socialProfileRoleLabel(slug),
-  }));
+  return sortByLabelAlpha(
+    parseSocialProfileRoles(raw).map((slug) => ({
+      slug,
+      label: socialProfileRoleLabel(slug),
+    })),
+    (role) => role.label,
+  );
 }
 
 export type SocialProfileRolesRailItem = { kind: "role"; slug: string; label: string };

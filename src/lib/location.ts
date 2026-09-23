@@ -4,6 +4,8 @@ import { z } from "zod";
 // location_city, location_region, location_country — not a second store.
 // Composed label is city, region, country: "Austin, TX, US".
 // Clear writes null to all three. Copy lives here, not in JSX.
+// `clear` is the accessible name of the trailing X in the search bar,
+// not a separate remove control.
 
 export const LOCATION = {
   title: "Location",

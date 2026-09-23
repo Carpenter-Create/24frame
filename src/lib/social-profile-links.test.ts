@@ -1,8 +1,8 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL } from "@/lib/social";
 import {
-  SOCIAL_PROFILE_LINKS_FACE_MAX,
   SOCIAL_PROFILE_LINKS_MAX,
   composeSocialWebsiteUrlField,
   parseSocialExternalUrl,
@@ -15,8 +15,6 @@ import {
   socialProfileLinkError,
   socialProfileLinkGlyph,
   socialProfileLinkReadableLabel,
-  socialProfileLinksFace,
-  socialProfileLinksMoreLabel,
   socialProfileLinksRowSummary,
   socialProfilePublicLinks,
 } from "@/lib/social-profile-links";
@@ -155,26 +153,27 @@ describe("social profile links", () => {
     expect(socialProfileLinkGlyph("website")).toBe("globe");
   });
 
-  it("caps the face at two links and labels overflow as +N", () => {
-    expect(SOCIAL_PROFILE_LINKS_FACE_MAX).toBe(2);
-    const three = socialProfilePublicLinks({
+  it("returns every public link for the face, up to the existing max, with no +N split", () => {
+    const links = socialProfilePublicLinks({
       urls: [
+        "https://ada.example",
         "https://instagram.com/ada",
         "https://youtube.com/@ada",
-        "https://x.com/ada",
+        "https://www.imdb.com/name/nm0000158/",
       ],
     });
-    expect(socialProfileLinksFace(three)).toEqual({
-      face: three.slice(0, 2),
-      overflow: 1,
-    });
-    expect(socialProfileLinksMoreLabel(1)).toBe("+1");
-    expect(socialProfileLinksMoreLabel(3)).toBe("+3");
-    expect(socialProfileLinksFace(three.slice(0, 2))).toEqual({
-      face: three.slice(0, 2),
-      overflow: 0,
-    });
-    expect(socialProfileLinksFace([])).toEqual({ face: [], overflow: 0 });
+    expect(links.map((link) => link.platform)).toEqual([
+      "website",
+      "instagram",
+      "youtube",
+      "imdb",
+    ]);
+    expect(links).toHaveLength(4);
+    expect(links.length).toBeLessThanOrEqual(SOCIAL_PROFILE_LINKS_MAX);
+    const src = readFileSync("src/lib/social-profile-links.ts", "utf8");
+    expect(src).not.toContain("SOCIAL_PROFILE_LINKS_FACE_MAX");
+    expect(src).not.toContain("socialProfileLinksFace");
+    expect(src).not.toContain("socialProfileLinksMoreLabel");
   });
 
   it("summarizes the Edit Profile Links drill row", () => {

@@ -9,7 +9,6 @@ import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_PROFILE_LINK_CLASS,
   SOCIAL_PROFILE_LINKS_CLASS,
-  SOCIAL_PROFILE_LINKS_MORE_CLASS,
   SOCIAL_PROFILE_LINKS_SHEET_CLASS,
   SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS,
 } from "@/lib/social-chrome";
@@ -55,34 +54,36 @@ describe("SocialProfileLinkRow", () => {
     expect(html).not.toContain("data-social-profile-links-more");
   });
 
-  it("shows two face icons plus a quiet +N when more than two exist", () => {
+  it("shows every public link icon on the face and does not collapse the rest behind +N", () => {
     const html = renderToStaticMarkup(
       <SocialProfileLinkRow
         links={socialProfilePublicLinks({
           urls: [
+            "https://ada.example",
             "https://instagram.com/ada",
             "https://youtube.com/@ada",
-            "https://x.com/ada",
-            "https://tiktok.com/@ada",
+            "https://www.imdb.com/name/nm0000158/",
           ],
         })}
       />,
     );
+    expect(html).toContain('data-social-profile-link-glyph="globe"');
+    expect(html).toContain('aria-label="ada.example"');
     expect(html).toContain('data-social-profile-link-glyph="instagram-logo"');
     expect(html).toContain('aria-label="Instagram"');
     expect(html).toContain('data-social-profile-link-glyph="youtube-logo"');
     expect(html).toContain('aria-label="YouTube"');
-    expect(html).not.toContain('data-social-profile-link-glyph="x-logo"');
-    expect(html).not.toContain('data-social-profile-link-glyph="tiktok-logo"');
+    expect(html).toContain('data-social-profile-link-glyph="film-slate"');
+    expect(html).toContain(`aria-label="${SOCIAL.profile.imdb}"`);
     expect(html).not.toContain(">instagram.com/ada<");
     expect(html).not.toContain(">youtube.com/@ada<");
-    expect(html).not.toContain(">x.com/ada<");
-    expect(html).not.toContain(">tiktok.com/@ada<");
-    expect(html).toContain("data-social-profile-links-more");
-    expect(html).toContain(SOCIAL_PROFILE_LINKS_MORE_CLASS);
-    expect(html).toContain(">+2<");
-    expect(html).toContain(`aria-label="${SOCIAL.profile.links}"`);
+    expect(html).not.toContain(">imdb.com/name/nm0000158<");
+    expect(html).not.toContain("data-social-profile-links-more");
+    expect(html).not.toContain(">+2<");
     expect(html).not.toContain("data-social-profile-links-sheet");
+    expect(src).not.toContain("socialProfileLinksFace");
+    expect(src).not.toContain("data-social-profile-links-more");
+    expect(SOCIAL_PROFILE_LINKS_CLASS).toContain("flex-wrap");
   });
 
   it("uses a globe and the host name for an unknown link", () => {
