@@ -18,6 +18,7 @@ import {
   SOCIAL_PROFILE_COVER_STACK_CLASS,
   SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_HEAD_ON_COVER_CLASS,
   SOCIAL_PROFILE_HEAD_OVERLAP_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_INSET_CLASS,
@@ -26,6 +27,7 @@ import {
   SOCIAL_PROFILE_HANDLE_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_NAME_STACK_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
 } from "@/lib/social-chrome";
@@ -272,11 +274,21 @@ export function SocialProfileIdentity({
           data-social-profile-head=""
           className={cn(
             SOCIAL_PROFILE_INSET_CLASS,
-            showCoverBand ? SOCIAL_PROFILE_HEAD_OVERLAP_CLASS : "pt-[var(--space-4)]",
+            showCoverBand ? null : "pt-[var(--space-4)]",
           )}
         >
-          <div className={SOCIAL_PROFILE_HEAD_CLASS}>
-            <div className="relative shrink-0">
+          <div
+            className={
+              showCoverBand ? SOCIAL_PROFILE_HEAD_ON_COVER_CLASS : SOCIAL_PROFILE_HEAD_CLASS
+            }
+          >
+            <div
+              data-social-profile-avatar-hang={showCoverBand ? "" : undefined}
+              className={cn(
+                "relative shrink-0",
+                showCoverBand && SOCIAL_PROFILE_HEAD_OVERLAP_CLASS,
+              )}
+            >
               <SocialAvatar
                 name={person.avatarName}
                 photoUrl={photoUrl}
@@ -287,7 +299,13 @@ export function SocialProfileIdentity({
               {photoAction}
             </div>
             {person.name || person.handleLabel ? (
-              <div className={SOCIAL_PROFILE_NAME_STACK_CLASS}>
+              <div
+                className={
+                  showCoverBand
+                    ? SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS
+                    : SOCIAL_PROFILE_NAME_STACK_CLASS
+                }
+              >
                 {person.name ? (
                   <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
                     {person.name}
