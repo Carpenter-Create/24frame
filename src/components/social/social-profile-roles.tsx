@@ -10,7 +10,7 @@ import {
   filterSocialProfileRoleGroups,
   moveSocialProfileRole,
   parseSocialProfileRoles,
-  socialProfileRoleLabel,
+  socialProfileRoleChips,
   socialProfileRolesCountLabel,
   toggleSocialProfileRole,
 } from "@/lib/social-profile-roles";
@@ -26,6 +26,7 @@ export function SocialProfileRolesField({
 }) {
   const [query, setQuery] = useState("");
   const selected = parseSocialProfileRoles(value);
+  const chips = socialProfileRoleChips(selected);
   const atMax = selected.length >= SOCIAL_PROFILE_ROLES_MAX;
   const groups = filterSocialProfileRoleGroups(query);
   const notice = atMax ? SOCIAL.profile.rolesLimit : SOCIAL.profile.rolesHint;
@@ -40,7 +41,7 @@ export function SocialProfileRolesField({
 
   return (
     <SocialProfileChipSelectFace
-      selected={selected.map((slug) => ({ id: slug, label: socialProfileRoleLabel(slug) }))}
+      selected={chips.map((role) => ({ id: role.slug, label: role.label }))}
       countLabel={socialProfileRolesCountLabel(selected.length)}
       helper={notice}
       searchId="social-edit-roles-search"
