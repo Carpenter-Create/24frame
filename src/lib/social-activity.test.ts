@@ -5,6 +5,9 @@ import {
   socialActivityEmptyCopy,
   socialActivityPillLabel,
   socialPostMatchesActivityMedia,
+  readSocialProfileLocation,
+  resolveSocialProfileLocation,
+  socialActivityMediaPostIds,
   socialProfileActivityHref,
   socialProfileTabSearch,
   socialProfileViewHref,
@@ -42,5 +45,57 @@ describe("activity pills", () => {
     expect(socialPostMatchesActivityMedia(mixed, "videos")).toBe(false);
     expect(socialPostMatchesActivityMedia([], "images")).toBe(false);
     expect(socialActivityEmptyCopy("comments").title).toBe(SOCIAL.profile.activityCommentsEmpty);
+  });
+
+  it("reads the live profile tab from house search and keeps the RSC seed until owned", () => {
+    expect(readSocialProfileLocation("?tab=credits")).toEqual({
+      tab: "credits",
+      activity: "posts",
+    });
+    expect(readSocialProfileLocation("?tab=activity&activity=comments")).toEqual({
+      tab: "activity",
+      activity: "comments",
+    });
+    expect(
+      resolveSocialProfileLocation({
+        owned: false,
+        search: "",
+        nextSearch: "",
+        seedTab: "credits",
+        seedActivity: "posts",
+      }),
+    ).toEqual({ tab: "credits", activity: "posts" });
+    expect(
+      resolveSocialProfileLocation({
+        owned: true,
+        search: "?tab=highlights",
+        nextSearch: "",
+        seedTab: "activity",
+        seedActivity: "posts",
+      }),
+    ).toEqual({ tab: "highlights", activity: "posts" });
+    expect(
+      resolveSocialProfileLocation({
+        owned: true,
+        search: "?tab=activity&activity=videos",
+        nextSearch: "?tab=credits",
+        seedTab: "credits",
+        seedActivity: "posts",
+      }),
+    ).toEqual({ tab: "activity", activity: "videos" });
+    expect(
+      resolveSocialProfileLocation({
+        owned: false,
+        search: "",
+        nextSearch: "?activity=images",
+        seedTab: "credits",
+        seedActivity: "posts",
+      }),
+    ).toEqual({ tab: "activity", activity: "images" });
+    const image = [{ kind: "image" as const, key: "posts/u1/a.jpg", contentType: "image/jpeg" as const }];
+    expect(socialActivityMediaPostIds([{ id: "p1", media: image }, { id: "p2", media: [] }])).toEqual({
+      imageIds: ["p1"],
+      videoIds: [],
+    });
   });
 });

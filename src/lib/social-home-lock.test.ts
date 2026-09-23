@@ -661,9 +661,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).not.toContain("socialShareHint");
     expect(card).not.toContain("data-social-share-hint");
     expect(home).not.toContain("SocialShareButton");
-    expect(profile).toContain("SocialProfileTabs");
-    expect(profile).toContain("film-slate");
-    expect(profile).toContain("creditsEmpty");
+    const panels = readFileSync("src/components/social/social-profile-tab-panels.tsx", "utf8");
+    expect(profile).toContain("SocialProfileTabPanels");
+    expect(publicProfile).toContain("SocialProfileTabPanels");
+    expect(panels).toContain("SocialProfileTabs");
+    expect(panels).toContain("film-slate");
+    expect(panels).toContain("creditsEmpty");
     expect(profile).toContain("SocialOwnProfileFace");
     expect(readFileSync("src/components/social/social-own-profile.tsx", "utf8")).toContain(
       "SocialWelcomeVideo",
@@ -671,17 +674,16 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_PROFILE_TABS).toEqual(["activity", "highlights", "credits", "interests"]);
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.activityTab).toBe("Activity");
-    expect(profile).toContain("SocialActivityHistory");
-    expect(publicProfile).toContain("SocialActivityHistory");
+    expect(panels).toContain("SocialActivityHistory");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
     expect(icons).toContain('"film-slate"');
     expect(home).not.toContain("creditsEmpty");
     expect(home).not.toContain("SocialWelcomeVideo");
     expect(publicProfile).not.toContain("PageHeader");
-    expect(publicProfile).toContain("SocialProfileTabs");
     expect(publicProfile).toContain("SocialWelcomeVideo");
-    expect(publicProfile).toContain("film-slate");
-    expect(publicProfile).toContain("creditsEmpty");
+    expect(panels).toContain("SocialProfileTabs");
+    expect(panels).toContain("film-slate");
+    expect(panels).toContain("creditsEmpty");
     expect(existsSync("src/app/(app)/social/u/[handle]/follows/page.tsx")).toBe(true);
     expect(readFileSync("src/app/(app)/social/u/[handle]/follows/page.tsx", "utf8")).toContain(
       "loadProfileFollowList",
@@ -729,8 +731,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(authorHistory).not.toContain("SOCIAL_PROFILE_TILE_CLASS");
     expect(profile).not.toContain("SocialAuthorHistory");
     expect(publicProfile).not.toContain("SocialAuthorHistory");
-    expect(profile).toContain("SocialActivityHistory");
-    expect(publicProfile).toContain("SocialActivityHistory");
+    expect(panels).toContain("SocialActivityHistory");
     expect(chrome).not.toContain("h-[140px]");
     expect(chrome).toContain("HOUSE_PILL_ITEM_CLASS");
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
@@ -909,7 +910,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(explore).toContain("SocialForYouSkeleton");
     expect(explore).not.toContain("SocialForYouRail");
     expect(explore).not.toContain("loadSuggestedPeople");
-    expect(explore).not.toContain("signSocialForYouCourseCovers");
+    expect(explore).toContain("signSocialForYouCourseCovers");
     expect(explore).not.toContain("signedEducationCoverUrls");
     expect(messages).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(messages).toContain("SOCIAL_HOME_CENTER_CLASS");

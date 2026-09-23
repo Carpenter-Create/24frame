@@ -6,6 +6,7 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 import { SocialIcon } from "@/components/social/social-icon";
 import { SocialMediaImage } from "@/components/social/social-media-image";
+import { signSocialForYouCourseCovers } from "@/components/social/social-for-you-covers";
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialExploreResultsSkeleton, SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
@@ -23,7 +24,7 @@ import { loadExploreMedia, loadExploreSearch, type SocialExploreHit } from "@/li
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export default async function SocialExplorePage({
   searchParams,
@@ -60,7 +61,7 @@ export default async function SocialExplorePage({
         )}
       </div>
       <Suspense fallback={<SocialForYouSkeleton />}>
-        <SocialDesktopForYouSlot session={session} />
+        <SocialDesktopForYouSlot session={session} signCourseCovers={signSocialForYouCourseCovers} />
       </Suspense>
     </div>
   );

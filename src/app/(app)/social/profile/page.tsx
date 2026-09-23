@@ -5,20 +5,14 @@ import { redirect } from "next/navigation";
 import { HouseLink } from "@/components/chrome/house-link";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialProfileCreateForm } from "@/components/social/social-forms";
-import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialProfileInterests } from "@/components/social/social-profile-interests";
-import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
+import { SocialProfileTabPanels } from "@/components/social/social-profile-tab-panels";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import { signSocialForYouCourseCovers } from "@/components/social/social-for-you-covers";
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialForYouSkeleton, SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
 import { SocialOwnProfileFace } from "@/components/social/social-own-profile";
-import { SocialActivityHistory } from "@/components/social/social-activity-history";
-import {
-  SocialHighlights,
-  socialAuthorPostCard,
-} from "@/components/social/social-ui";
+import { socialAuthorPostCard } from "@/components/social/social-ui";
 import { SOCIAL_ACTION_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
 import {
   signedAvatarUrls,
@@ -41,6 +35,7 @@ import {
 import {
   parseSocialActivityPill,
   SOCIAL_ACTIVITY_PILL_PARAM,
+  socialActivityMediaPostIds,
   type SocialActivityPill,
 } from "@/lib/social-activity";
 import {
@@ -114,15 +109,7 @@ async function SocialProfileMain({
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) return null;
 
-  const activityComments =
-    tab === "activity" && activity === "comments"
-      ? loadAuthorActivityComments(supabase, profile.id)
-      : Promise.resolve({ items: [], truncated: false });
-  const activityPosts =
-    tab === "activity" && activity !== "comments"
-      ? loadAuthorActivityPosts(supabase, profile.id, activity)
-      : Promise.resolve(null);
-  const [photoUrl, coverUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, filtered] =
+  const [photoUrl, coverUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, postsPage] =
     await Promise.all([
       Promise.resolve(socialAvatarHref(profile.id)),
       Promise.resolve(profile.cover_key ? socialMediaHref(profile.cover_key) : null),
@@ -130,8 +117,8 @@ async function SocialProfileMain({
       loadCachedProfileSocialCounts(supabase, profile.id),
       Promise.resolve(profile.welcome_video_key ? socialMediaHref(profile.welcome_video_key) : null),
       cookies(),
-      activityComments,
-      activityPosts,
+      loadAuthorActivityComments(supabase, profile.id),
+      loadAuthorActivityPosts(supabase, profile.id, "posts"),
     ]);
   const identity = mergeSocialProfileIdentity(
     {
@@ -150,18 +137,11 @@ async function SocialProfileMain({
   );
   const liveStories = liveStoriesPage.stories;
   const commentParentPosts = commentsPage.items.map((item) => item.post);
-  const activityFeedPosts = filtered?.posts ?? [];
-  const cardPosts =
-    tab === "activity" && activity === "comments"
-      ? commentParentPosts
-      : activityFeedPosts;
+  const activityFeedPosts = postsPage.posts;
+  const cardPosts = [...activityFeedPosts, ...commentParentPosts];
+  const parentAuthorIds = [...new Set(commentParentPosts.map((post) => post.author_id))];
   const parentAuthors =
-    tab === "activity" && activity === "comments"
-      ? await loadProfilesByIds(
-          supabase,
-          [...new Set(commentParentPosts.map((post) => post.author_id))],
-        )
-      : new Map();
+    parentAuthorIds.length > 0 ? await loadProfilesByIds(supabase, parentAuthorIds) : new Map();
   const [media, liked, parentFaces] = await Promise.all([
     signedSocialMediaByPostId(cardPosts),
     loadLikedPostIds(
@@ -169,10 +149,11 @@ async function SocialProfileMain({
       ctx.user.id,
       cardPosts.map((post) => post.id),
     ),
-    tab === "activity" && activity === "comments"
-      ? signedAvatarUrls([...parentAuthors.keys()])
+    parentAuthorIds.length > 0
+      ? signedAvatarUrls(parentAuthorIds)
       : Promise.resolve(new Map<string, string | null>()),
   ]);
+  const mediaIds = socialActivityMediaPostIds(activityFeedPosts);
 
   const highlightCards = liveStories.map((story) => ({
     id: story.id,
@@ -209,27 +190,16 @@ async function SocialProfileMain({
           </>
         }
       />
-      <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
-      {tab === "credits" ? (
-        <SocialEmpty
-          icon="film-slate"
-          title={SOCIAL.profile.creditsEmpty}
-          hint={SOCIAL.profile.creditsEmptyOwnHint}
-        />
-      ) : tab === "highlights" ? (
-        highlightCards.length > 0 ? (
-          <SocialHighlights cards={highlightCards} />
-        ) : (
-          <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
-        )
-      ) : tab === "interests" ? (
-        <SocialProfileInterests topics={identity.topics} owner />
-      ) : (
-        <SocialActivityHistory
-          baseHref={SOCIAL_ROUTES.profile}
-          pill={activity}
-          truncated={activity === "comments" ? commentsPage.truncated : (filtered?.truncated ?? false)}
-          posts={activityFeedPosts.map((post) =>
+      <SocialProfileTabPanels
+        baseHref={SOCIAL_ROUTES.profile}
+        seedTab={tab}
+        seedActivity={activity}
+        creditsHint={SOCIAL.profile.creditsEmptyOwnHint}
+        highlights={highlightCards}
+        topics={identity.topics}
+        interestsOwner
+        activity={{
+          posts: activityFeedPosts.map((post) =>
             socialAuthorPostCard({
               post,
               authorHandle: profile.handle,
@@ -242,8 +212,12 @@ async function SocialProfileMain({
               canLike: true,
               media: media.get(post.id) ?? [],
             }),
-          )}
-          comments={commentsPage.items.map((item) => {
+          ),
+          imageIds: mediaIds.imageIds,
+          videoIds: mediaIds.videoIds,
+          postsTruncated: postsPage.truncated,
+          commentsTruncated: commentsPage.truncated,
+          comments: commentsPage.items.map((item) => {
             const author = parentAuthors.get(item.post.author_id);
             return {
               commentId: item.comment.id,
@@ -262,9 +236,9 @@ async function SocialProfileMain({
                 media: media.get(item.post.id) ?? [],
               }),
             };
-          })}
-        />
-      )}
+          }),
+        }}
+      />
     </div>
   );
 }

@@ -5,18 +5,12 @@ import { redirect } from "next/navigation";
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
 
-import { SocialActivityHistory } from "@/components/social/social-activity-history";
 import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialProfileInterests } from "@/components/social/social-profile-interests";
-import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
+import { SocialProfileTabPanels } from "@/components/social/social-profile-tab-panels";
 import { SocialShareButton } from "@/components/social/social-share-button";
-import {
-  SocialHighlights,
-  SocialProfileIdentity,
-  socialAuthorPostCard,
-} from "@/components/social/social-ui";
+import { SocialProfileIdentity, socialAuthorPostCard } from "@/components/social/social-ui";
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
 import {
@@ -47,6 +41,7 @@ import {
 import {
   parseSocialActivityPill,
   SOCIAL_ACTIVITY_PILL_PARAM,
+  socialActivityMediaPostIds,
   socialProfileViewHref,
 } from "@/lib/social-activity";
 import {
@@ -144,26 +139,16 @@ export default async function SocialPublicProfilePage({
   const coverUrl = member.cover_key ? socialMediaHref(member.cover_key) : null;
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadCachedIsFollowing(supabase, ctx.user.id, member.id) : false;
-  const commentsPage =
-    tab === "activity" && activity === "comments"
-      ? await loadAuthorActivityComments(supabase, member.id)
-      : { items: [], truncated: false };
-  const filtered =
-    tab === "activity" && activity !== "comments"
-      ? await loadAuthorActivityPosts(supabase, member.id, activity)
-      : { posts: [], truncated: false };
+  const [commentsPage, postsPage] = await Promise.all([
+    loadAuthorActivityComments(supabase, member.id),
+    loadAuthorActivityPosts(supabase, member.id, "posts"),
+  ]);
   const commentParentPosts = commentsPage.items.map((item) => item.post);
-  const cardPosts =
-    tab === "activity" && activity === "comments"
-      ? commentParentPosts
-      : filtered.posts;
+  const activityFeedPosts = postsPage.posts;
+  const cardPosts = [...activityFeedPosts, ...commentParentPosts];
+  const parentAuthorIds = [...new Set(commentParentPosts.map((post) => post.author_id))];
   const parentAuthors =
-    tab === "activity" && activity === "comments"
-      ? await loadProfilesByIds(
-          supabase,
-          [...new Set(commentParentPosts.map((post) => post.author_id))],
-        )
-      : new Map();
+    parentAuthorIds.length > 0 ? await loadProfilesByIds(supabase, parentAuthorIds) : new Map();
   const media = socialMediaProxiesByPostId(cardPosts);
   const liked = own
     ? await loadLikedPostIds(
@@ -172,10 +157,8 @@ export default async function SocialPublicProfilePage({
         cardPosts.map((post) => post.id),
       )
     : new Set<string>();
-  const parentFaces =
-    tab === "activity" && activity === "comments"
-      ? socialAvatarFaces([...parentAuthors.keys()])
-      : new Map();
+  const parentFaces = parentAuthorIds.length > 0 ? socialAvatarFaces(parentAuthorIds) : new Map();
+  const mediaIds = socialActivityMediaPostIds(activityFeedPosts);
   const counts = await loadCachedProfileSocialCounts(supabase, member.id);
   const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
   const mutualFaces =
@@ -242,27 +225,17 @@ export default async function SocialPublicProfilePage({
           }
         />
         {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
-        <SocialProfileTabs baseHref={profileHref} active={tab} tabs={visibleTabs} />
-        {tab === "credits" ? (
-          <SocialEmpty
-            icon="film-slate"
-            title={SOCIAL.profile.creditsEmpty}
-            hint={SOCIAL.profile.creditsEmptyHint}
-          />
-        ) : tab === "highlights" ? (
-          highlightCards.length > 0 ? (
-            <SocialHighlights cards={highlightCards} />
-          ) : (
-            <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
-          )
-        ) : tab === "interests" ? (
-          <SocialProfileInterests topics={member.topics} owner={isSelf} />
-        ) : (
-          <SocialActivityHistory
-            baseHref={profileHref}
-            pill={activity}
-            truncated={activity === "comments" ? commentsPage.truncated : filtered.truncated}
-            posts={filtered.posts.map((post) =>
+        <SocialProfileTabPanels
+          baseHref={profileHref}
+          seedTab={tab}
+          seedActivity={activity}
+          tabs={visibleTabs}
+          creditsHint={SOCIAL.profile.creditsEmptyHint}
+          highlights={highlightCards}
+          topics={member.topics}
+          interestsOwner={isSelf}
+          activity={{
+            posts: activityFeedPosts.map((post) =>
               socialAuthorPostCard({
                 post,
                 authorHandle: member.handle,
@@ -275,8 +248,12 @@ export default async function SocialPublicProfilePage({
                 canLike: !!own,
                 media: media.get(post.id) ?? [],
               }),
-            )}
-            comments={commentsPage.items.map((item) => {
+            ),
+            imageIds: mediaIds.imageIds,
+            videoIds: mediaIds.videoIds,
+            postsTruncated: postsPage.truncated,
+            commentsTruncated: commentsPage.truncated,
+            comments: commentsPage.items.map((item) => {
               const author = parentAuthors.get(item.post.author_id);
               return {
                 commentId: item.comment.id,
@@ -295,9 +272,9 @@ export default async function SocialPublicProfilePage({
                   media: media.get(item.post.id) ?? [],
                 }),
               };
-            })}
-          />
-        )}
+            }),
+          }}
+        />
       </div>
       <Suspense fallback={<SocialForYouSkeleton />}>
         <SocialDesktopForYouSlot session={session} />
