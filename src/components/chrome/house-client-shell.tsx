@@ -19,6 +19,7 @@ import {
   houseApplyCachedChild,
   houseBlankOutlet,
   houseClientHistoryState,
+  houseExactHref,
   houseFocusBelongsToInactiveScreen,
   type HouseChildSeen,
   houseHrefKey,
@@ -120,7 +121,7 @@ function HousePathProviderCore({
   if (reconciled !== ownedHref) {
     setOwnedHref(reconciled);
   }
-  if (houseHrefKey(seenNextHref) !== houseHrefKey(nextHref)) {
+  if (houseExactHref(seenNextHref) !== houseExactHref(nextHref)) {
     setSeenNextHref(nextHref);
   }
 
@@ -144,8 +145,9 @@ function HousePathProviderCore({
         const next = housePathFromLocation(parsedDest.pathname, parsedDest.search);
         const hop = houseNavHop({
           cached: houseShouldClientNavigate(dest, housePaintedKeys()),
-          ownedIsDest: houseHrefKey(href) === houseHrefKey(dest),
-          nextIsDest: houseHrefKey(nextHref) === houseHrefKey(dest),
+          ownedIsDest: houseExactHref(href) === houseExactHref(dest),
+          nextIsDest: houseExactHref(nextHref) === houseExactHref(dest),
+          sameScreen: houseHrefKey(href) === houseHrefKey(dest),
         });
         if (hop === "next") return false;
         if (hop === "stay") return true;

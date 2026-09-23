@@ -627,7 +627,10 @@ describe("Social public profile", () => {
     expect(src).toContain("socialAvatarHref");
     expect(src).toContain('export const runtime = "edge"');
     expect(src).toContain("loadAuthorActivityPosts");
-    expect(src).toContain("SocialActivityHistory");
+    expect(src).toContain("SocialProfileTabPanels");
+    expect(readFileSync("src/components/social/social-profile-tab-panels.tsx", "utf8")).toContain(
+      "SocialActivityHistory",
+    );
     expect(src).not.toContain("SocialAuthorHistory");
     expect(src).toContain("isLegacySocialProfilePostsTab");
     expect(src).toContain("socialProfileCasingRedirect");

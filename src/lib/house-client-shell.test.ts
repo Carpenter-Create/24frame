@@ -11,6 +11,7 @@ import {
   houseBlankOutlet,
   houseCanIngest,
   houseClientHistoryState,
+  houseExactHref,
   houseFocusBelongsToInactiveScreen,
   houseHrefKey,
   houseNavHop,
@@ -50,16 +51,20 @@ describe("house client shell SoT", () => {
     expect(houseScreenKey("/social")).toBe("/social");
     expect(houseScreenKey("/social", "?topic=Music")).toBe("/social?topic=Music");
     expect(houseScreenKey("/social/explore", "?q=ada")).toBe("/social/explore?q=ada");
-    expect(houseScreenKey("/social/profile", "?tab=credits")).toBe("/social/profile?tab=credits");
-    expect(houseScreenKey("/social/profile", "?tab=activity&activity=likes")).toBe(
-      "/social/profile?tab=activity&activity=likes",
-    );
+    expect(houseScreenKey("/social/profile", "?tab=credits")).toBe("/social/profile");
+    expect(houseScreenKey("/social/profile", "?tab=activity&activity=comments")).toBe("/social/profile");
+    expect(houseScreenKey("/social/u/ada", "?tab=highlights")).toBe("/social/u/ada");
+    expect(houseScreenKey("/social/u/ada", "?tab=activity&activity=videos")).toBe("/social/u/ada");
+    expect(houseHrefKey("/social/profile?tab=credits")).toBe("/social/profile");
+    expect(houseExactHref("/social/profile?tab=credits")).toBe("/social/profile?tab=credits");
+    expect(houseExactHref("/social/profile")).toBe("/social/profile");
     expect(houseScreenKey("/social/u/ada/follows", "?tab=following&q=ada")).toBe(
       "/social/u/ada/follows?tab=following&q=ada",
     );
     expect(houseScreenKey("/home", "?period=ytd")).toBe("/home?period=ytd");
     expect(houseHrefKey("/social/explore")).toBe("/social/explore");
-    expect(houseShouldClientNavigate("/social/profile?tab=credits", ["/social/profile"])).toBe(false);
+    expect(houseShouldClientNavigate("/social/profile?tab=credits", ["/social/profile"])).toBe(true);
+    expect(houseShouldClientNavigate("/social/u/ada?activity=comments", ["/social/u/ada"])).toBe(true);
     expect(houseWorkspaceLandKey("/social/u/ada")).toBe("/social");
     expect(houseWorkspaceLandKey("/home/news")).toBe("/home");
     expect(HOUSE_CLIENT_SHELL.cacheCap).toBeGreaterThanOrEqual(6);
@@ -94,6 +99,19 @@ describe("house client shell SoT", () => {
     expect(houseNavHop({ cached: true, ownedIsDest: true, nextIsDest: true })).toBe("stay");
     expect(houseNavHop({ cached: false, ownedIsDest: false, nextIsDest: true })).toBe("refresh-next");
     expect(houseNavHop({ cached: false, ownedIsDest: false, nextIsDest: false })).toBe("next");
+    expect(
+      houseNavHop({ cached: true, ownedIsDest: false, nextIsDest: false, sameScreen: true }),
+    ).toBe("owned");
+    expect(
+      houseNavHop({ cached: false, ownedIsDest: false, nextIsDest: false, sameScreen: true }),
+    ).toBe("owned");
+    expect(
+      houseNavHop({ cached: true, ownedIsDest: true, nextIsDest: false, sameScreen: true }),
+    ).toBe("stay");
+    const provider = readFileSync("src/components/chrome/house-client-shell.tsx", "utf8");
+    expect(provider).toContain("sameScreen: houseHrefKey(href) === houseHrefKey(dest)");
+    expect(provider).toContain("houseExactHref(href) === houseExactHref(dest)");
+    expect(provider).toContain("houseExactHref(seenNextHref) !== houseExactHref(nextHref)");
     expect(houseFocusBelongsToInactiveScreen(true, true)).toBe(true);
     expect(houseFocusBelongsToInactiveScreen(false, true)).toBe(false);
     expect(houseFocusBelongsToInactiveScreen(true, false)).toBe(false);
@@ -117,6 +135,27 @@ describe("house client shell SoT", () => {
     );
     expect(houseReconcileOwnedHref("/social", "/social/search", "/social/explore")).toBeNull();
     expect(houseReconcileOwnedHref(null, "/social", "/social")).toBeNull();
+    expect(
+      houseReconcileOwnedHref(
+        "/social/profile?tab=credits",
+        "/social/profile",
+        "/social/profile",
+      ),
+    ).toBe("/social/profile?tab=credits");
+    expect(
+      houseReconcileOwnedHref(
+        "/social/profile?tab=credits",
+        "/social/profile?tab=credits",
+        "/social/profile",
+      ),
+    ).toBeNull();
+    expect(
+      houseReconcileOwnedHref(
+        "/social/u/ada?tab=highlights",
+        "/social/u/ada?activity=comments",
+        "/social/u/ada",
+      ),
+    ).toBeNull();
   });
 
   it("touches a revisited screen to the front of the cap", () => {
