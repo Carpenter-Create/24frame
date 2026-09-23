@@ -36,7 +36,7 @@ export default async function SocialStoryPage({
         <SocialEmpty
           icon="warning-circle"
           title={SOCIAL.stories.missing}
-          action={{ href: SOCIAL_ROUTES.stories, label: SOCIAL.member.goHome }}
+          action={{ href: SOCIAL_ROUTES.home, label: SOCIAL.member.goHome }}
         />
       </div>
     );
@@ -48,7 +48,7 @@ export default async function SocialStoryPage({
         <SocialEmpty
           icon="warning-circle"
           title={SOCIAL.stories.expired}
-          action={{ href: SOCIAL_ROUTES.stories, label: SOCIAL.member.goHome }}
+          action={{ href: SOCIAL_ROUTES.home, label: SOCIAL.member.goHome }}
         />
       </div>
     );

@@ -526,6 +526,22 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
       /<a[^>]+href="\/social"[^>]*aria-current="page"/,
     );
     expect(socialCreate).toContain('data-house-phone-dest-create=""');
+
+    navigation.pathname = SOCIAL_ROUTES.stories;
+    const socialStories = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "social" }),
+    );
+    expect(socialStories).not.toMatch(
+      /<a[^>]+href="\/social"[^>]*aria-current="page"/,
+    );
+
+    navigation.pathname = SOCIAL_ROUTES.storiesNew;
+    const socialStoryNew = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "social" }),
+    );
+    expect(socialStoryNew).not.toMatch(
+      /<a[^>]+href="\/social"[^>]*aria-current="page"/,
+    );
   });
 
   it("mounts one HousePhoneAppShell on every workspace and keeps Social off a second float", () => {

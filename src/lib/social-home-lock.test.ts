@@ -140,8 +140,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("SocialLensRow");
     expect(create).not.toContain("SocialLensRow");
     expect(create).toContain("SocialCreateCompose");
-    expect(stories).toContain("SocialStoriesRail");
-    expect(stories).toContain("SocialStoriesEmpty");
+    expect(stories).toContain("permanentRedirect");
+    expect(stories).toContain("SOCIAL_ROUTES.home");
+    expect(stories).not.toContain("SocialStoriesEmpty");
     expect(stories).not.toContain("SocialLensRow");
   });
 
@@ -366,8 +367,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialOnboardingChecklist");
     expect(home).not.toContain("socialChecklistItems");
     expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
-    expect(home).toContain("SOCIAL.home.emptyQuiet");
-    expect(home).toContain("md:hidden");
+    expect(home).toContain("SocialHomeActivityEmpty");
+    expect(home).not.toContain("SOCIAL.home.emptyQuiet");
+    expect(home).not.toContain("md:hidden");
     expect(home).toContain("data-social-empty-lenses");
     expect(shell).not.toContain("Destinations");
     expect(shell).not.toContain("SocialRailCreateCta");
@@ -396,10 +398,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("138:163");
     expect(chrome).toContain("138:889");
     expect(chrome).toContain("138:943");
-    expect(stories).toContain('surface="stories"');
-    expect(stories).toContain("SocialForYouRail");
-    expect(stories).toContain("SocialStoriesEmpty");
+    expect(stories).toContain("permanentRedirect(SOCIAL_ROUTES.home)");
+    expect(stories).not.toContain("SocialStoriesEmpty");
     expect(stories).not.toContain("education");
+    const storyViewer = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
+    expect(storyViewer).toContain('surface="stories"');
+    expect(storyViewer).toContain("SocialForYouRail");
     expect(SOCIAL.stories.emptyHint).toBe(
       "When people you follow share stories, they show up here. Start with your own.",
     );
@@ -548,7 +552,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(readFileSync("src/app/(app)/social/layout.tsx", "utf8")).toContain("loadSocialSession()");
     expect(profile).toContain("Promise.all");
     expect(create).toContain("Promise.all");
-    expect(stories).toContain("Promise.all");
+    expect(stories).toContain("permanentRedirect");
+    expect(readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8")).toContain("Promise.all");
     expect(explore).toContain("Promise.all");
     expect(messages).toContain("Promise.all");
     const layout = readFileSync("src/app/(app)/layout.tsx", "utf8");
@@ -598,7 +603,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     );
     expect(SOCIAL_CONTENT_PAIR_WIDTH).toBe(1052);
     expect(SOCIAL_CONTENT_PAIR_WIDTH).not.toBe(932);
-    expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(SOCIAL.home.empty).toBe("No activity yet");
+    expect(SOCIAL.home).not.toHaveProperty("emptyQuiet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
     expect(chrome).not.toContain("119:112");

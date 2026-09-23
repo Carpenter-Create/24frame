@@ -188,10 +188,10 @@ export function isClientNavActive(pathname: string, item: NavItem): boolean {
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 
-/** Flush Social tab bar. Stories sit under Home. Public profiles sit under Profile. */
+/** Home is exact `/social`. Stories paths never wash Home. Public profiles sit under Profile. */
 export function isSocialTabActive(pathname: string, item: NavItem): boolean {
   if (item.href === SOCIAL_ROUTES.home) {
-    return pathname === SOCIAL_ROUTES.home || pathname.startsWith(SOCIAL_ROUTES.stories);
+    return pathname === SOCIAL_ROUTES.home;
   }
   if (item.href === SOCIAL_ROUTES.profile) {
     return (

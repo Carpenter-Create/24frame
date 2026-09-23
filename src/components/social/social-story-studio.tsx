@@ -439,7 +439,7 @@ export function SocialStoryCompose() {
               <p className="t-body-sm text-ink-2">{SOCIAL.stories.pickerHint}</p>
             </div>
             <Link
-              href={SOCIAL_ROUTES.stories}
+              href={SOCIAL_ROUTES.home}
               data-social-story-picker-close=""
               aria-label={SOCIAL.stories.close}
               className="flex size-8 items-center justify-center rounded-full bg-surface-muted text-ink-2"
@@ -489,7 +489,7 @@ export function SocialStoryCompose() {
           <p className="t-title text-ink">{SOCIAL.stories.posted}</p>
           <p className="t-body-sm text-ink-2">{SOCIAL.stories.postedHint}</p>
           <Link
-            href={SOCIAL_ROUTES.stories}
+            href={SOCIAL_ROUTES.home}
             className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 t-body-sm font-semibold text-accent-contrast"
           >
             {SOCIAL.stories.viewStories}

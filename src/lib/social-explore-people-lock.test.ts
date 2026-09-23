@@ -63,8 +63,12 @@ describe("Explore vs people discovery lock (Adam 2026-09-20)", () => {
 
   it("routes the empty following-wall CTA to Search(people), not Explore", () => {
     expect(SOCIAL.home.findPeople).toBe("Find people");
-    expect(SOCIAL.home.emptyHint).toBe("Search for people to follow and start your following wall.");
+    expect(SOCIAL.home.emptyHint).toBe(
+      "Posts, stories, and updates from people you follow show up here.",
+    );
     expect(SOCIAL.home.emptyHint).not.toMatch(/Explore/i);
+    expect(SOCIAL.home.findPeopleHint).toBe("Search for people to follow and start your following wall.");
+    expect(SOCIAL.home.findPeopleHint).not.toMatch(/Explore/i);
     expect(home).toContain("socialSearchHref({ intent: \"people\" })");
     expect(home).toContain("SOCIAL.home.findPeople");
     expect(home).not.toContain("SOCIAL_ROUTES.explore");
