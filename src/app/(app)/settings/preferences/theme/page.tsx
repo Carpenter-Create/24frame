@@ -6,8 +6,8 @@ import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 
 // Theme drill. One picker — gc-theme SoT. Avatar Theme and the
-// Preferences Theme row both land here. Not nested under
-// Notifications. Back to Settings.
+// Preferences Theme row both land here. Nested under Preferences.
+// Back to Preferences.
 
 export default async function SettingsThemePage() {
   const ctx = await getOrgContext();
@@ -18,6 +18,7 @@ export default async function SettingsThemePage() {
       title={SETTINGS.theme}
       helper={SETTINGS.themeHelper}
       pathname={SETTINGS.themeHref}
+      hub="preferences"
     >
       <AppearanceThemePicker />
     </SettingsEditPane>

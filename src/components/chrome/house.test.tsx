@@ -166,7 +166,7 @@ describe("house primitives", () => {
         <SheetGroupItem inset item="settings" href="/settings">
           Settings
         </SheetGroupItem>
-        <SheetGroupItem inset item="theme" href="/settings/theme">
+        <SheetGroupItem inset item="theme" href="/settings/preferences/theme">
           Theme
         </SheetGroupItem>
       </SheetGroup>,

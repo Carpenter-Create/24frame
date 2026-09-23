@@ -384,8 +384,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="settings"');
     expect(html).toContain('data-sheet-group-item="theme"');
-    expect(html).toContain('href="/settings/theme"');
-    expect(html).not.toContain("/settings/preferences/theme");
+    expect(html).toContain('href="/settings/preferences/theme"');
+    expect(html).not.toContain('href="/settings/theme"');
     expect(html).not.toContain('data-sheet-group-item="askAssistant"');
     expect(html).not.toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
@@ -665,7 +665,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("APPEARANCE.back");
     expect(sheet).not.toContain("data-account-menu-theme-switch");
     expect(sheet).not.toContain('role="switch"');
-    expect(sheet).toContain('href="/settings/theme"');
+    expect(sheet).toContain('href="/settings/preferences/theme"');
+    expect(sheet).not.toContain('href="/settings/theme"');
     expect(sheet).toContain("data-account-sheet-theme-value");
     expect(sheet).toContain(">Light<");
     expect(attrClass(sheet, 'data-sheet-group-item="theme"')).toContain("min-h-11");
@@ -839,7 +840,8 @@ describe("AccountMenuDropdown Coinbase grammar", () => {
     expect(attrClass(html, 'data-account-menu-row="logOut"')).not.toContain("text-accent");
     expect(attrClass(html, "data-account-menu-version")).toBe(ACCOUNT_MENU_DROPDOWN_VERSION_CLASS);
     expect(html).toContain('href="/settings"');
-    expect(html).toContain('href="/settings/theme"');
+    expect(html).toContain('href="/settings/preferences/theme"');
+    expect(html).not.toContain('href="/settings/theme"');
     expect(html).not.toContain('role="switch"');
     expect(html).not.toContain("data-account-menu-theme-switch");
     const themeRow = html.slice(theme, help);

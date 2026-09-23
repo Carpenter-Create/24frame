@@ -541,7 +541,7 @@ function AccountMenuBody({
 // (264 / rounded-12). One top row: Identity 48 + Close/44.
 // Inset cards — Settings + Theme, then Get Help. Log out is its
 // own inset row. Settings — Theme — Get Help.
-// Theme drills to /settings/theme — the same picker as Preferences.
+// Theme drills to /settings/preferences/theme — the same picker as Preferences.
 // Stored Light | Dark | Auto sits beside the chevron. No toggle.
 // 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.

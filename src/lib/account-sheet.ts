@@ -16,7 +16,8 @@
 // menu and not Settings. 24Frame AI is the header
 // sparkle only — not a menu row. Workspace is
 // the header control, not this menu. Theme is the avatar-menu
-// drill at /settings/theme (Adam lock 2026-09-22). The face is the
+// drill at /settings/preferences/theme (Adam lock 2026-09-22,
+// path amended 2026-09-23). The face is the
 // stored preference. No header sun/moon. Destinations
 // use existing routes only — not
 // /account/workspace, /account/appearance, or /account/feedback.

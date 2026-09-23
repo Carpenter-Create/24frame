@@ -219,7 +219,9 @@ describe("SettingsEditPane", () => {
     expect(html).toContain('data-settings-page-lead=""');
     expect(html).toContain(SETTINGS.themeHelper);
     expect(html).toContain(SETTINGS_EDIT_HELPER_CLASS);
-    expect(html).toContain(`href="${SETTINGS.href}"`);
+    expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
+    expect(html).toContain(">Preferences<");
+    expect(html).not.toMatch(/href="\/settings"/);
     expect(html).toContain("picker");
     expect(html).toMatch(/<h1[^>]*>Theme<\/h1>/);
   });

@@ -14,7 +14,7 @@ import { applyDocumentThemePreference, type ThemePreference } from "@/lib/theme"
 import { cn } from "@/lib/cn";
 
 // Theme picker — same gc-theme SoT as ThemeSync. Writes go through
-// theme.ts only. Mounted once on /settings/theme. The avatar Theme
+// theme.ts only. Mounted once on /settings/preferences/theme. The avatar Theme
 // drill and the Preferences Theme row both open this component.
 
 export function AppearanceThemePicker() {

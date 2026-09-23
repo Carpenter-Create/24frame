@@ -184,13 +184,13 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).not.toContain("/account/company");
   });
 
-  it("keeps Profile as a Settings pane href and Theme on /settings/theme", () => {
+  it("keeps Profile as a Settings pane href and Theme on /settings/preferences/theme", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
     expect(USER_MENU.profile).toBe("Profile");
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
     expect(USER_MENU.theme).toBe("Theme");
-    expect(USER_MENU.themeHref).toBe("/settings/theme");
+    expect(USER_MENU.themeHref).toBe("/settings/preferences/theme");
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { appearancePreferenceLabel } from "@/lib/appearance";
 import {
+  SETTINGS,
   SETTINGS_DRILL_COPY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_TRAIL_CLASS,
@@ -57,5 +58,10 @@ describe("PrefDrillGroup", () => {
     expect(html.indexOf('data-settings-drill-row="location"')).toBeLessThan(
       html.indexOf('data-settings-drill-row="theme"'),
     );
+    expect(html).toContain(`href="${SETTINGS.locationHref}"`);
+    expect(html).toContain(`href="${SETTINGS.themeHref}"`);
+    expect(SETTINGS.themeHref).toBe("/settings/preferences/theme");
+    expect(SETTINGS.locationHref).toBe("/settings/preferences/location");
+    expect(SETTINGS.notificationsHref).toBe("/settings/preferences/notifications");
   });
 });

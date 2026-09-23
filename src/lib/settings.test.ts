@@ -80,7 +80,6 @@ const RETIRED_SETTINGS_PAGES = [
   "src/app/(app)/account/agreements/page.tsx",
   "src/app/(app)/account/company/page.tsx",
   "src/app/(app)/refer/page.tsx",
-  "src/app/(app)/settings/preferences/theme/page.tsx",
 ] as const;
 
 describe("settings hub lock", () => {
@@ -99,7 +98,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.securityHref).toBe("/settings/security");
     expect(SETTINGS.theme).toBe("Theme");
     expect(SETTINGS.theme).toBe(USER_MENU.theme);
-    expect(SETTINGS.themeHref).toBe("/settings/theme");
+    expect(SETTINGS.themeHref).toBe("/settings/preferences/theme");
     expect(SETTINGS.themeHref).toBe(USER_MENU.themeHref);
     expect(SETTINGS.themeHelper).toBe("Choose Light, Dark, or Auto.");
     expect(SETTINGS.notificationsHref).toBe("/settings/preferences/notifications");
@@ -162,7 +161,7 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/organization/entities/new")).toBe("organization");
     expect(settingsHubSection("/settings/organization/roles")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
-    expect(settingsHubSection("/settings/theme")).toBeNull();
+    expect(settingsHubSection("/settings/preferences/theme")).toBe("preferences");
     expect(settingsHubSection("/settings/preferences/notifications")).toBe("preferences");
     expect(settingsHubSection("/settings/preferences/location")).toBe("preferences");
     expect(settingsHubSection("/settings/profile/name")).toBe("profile");
@@ -310,9 +309,9 @@ describe("settings hub lock", () => {
       href: "/settings",
       label: "Settings",
     });
-    expect(settingsHeaderBack("/settings/theme")).toEqual({
-      href: "/settings",
-      label: "Settings",
+    expect(settingsHeaderBack("/settings/preferences/theme")).toEqual({
+      href: "/settings/preferences",
+      label: "Preferences",
     });
     expect(settingsHeaderBack("/settings/preferences/notifications")).toEqual({
       href: "/settings/preferences",
