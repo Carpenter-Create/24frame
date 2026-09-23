@@ -237,6 +237,10 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   // `houseApplyCachedChild` decides staleness from the committed guard
   // on this render. setState is only the record for the next pass.
   const [childSeen, setChildSeen] = useState<HouseChildSeen | null>(null);
+  // A blank outlet revalidates first. The next kick treats an unchanged
+  // tree as this URL's screen so the retry does not run forever.
+  const [settledKey, setSettledKey] = useState<string | null>(null);
+  const acceptStale = settledKey === activeKey && activeKey === nextKey;
   const applied = houseApplyCachedChild({
     seen: childSeen,
     nextKey,
@@ -246,8 +250,12 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
     fallback,
     order: store.order,
     nodes: store.nodes,
+    acceptStale,
   });
   if (applied.seen !== childSeen) setChildSeen(applied.seen);
+  if (settledKey !== null && (applied.displayKey !== null || applied.showIngress || !acceptStale)) {
+    setSettledKey(null);
+  }
   const nextStore: ScreenStore =
     applied.nodes === store.nodes && applied.order === store.order
       ? store
@@ -268,11 +276,14 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   useEffect(() => {
     const action = houseBlankOutlet(displayKey, showIngress, activeKey, nextKey);
     if (action === "none") return;
+    let kicks = 0;
     const kick = () => {
       if (action === "load") {
         if (house?.href) router.push(house.href);
         return;
       }
+      kicks += 1;
+      if (kicks > 1) setSettledKey(activeKey);
       router.refresh();
     };
     kick();

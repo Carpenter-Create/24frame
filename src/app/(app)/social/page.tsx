@@ -6,7 +6,7 @@ import { SocialHomeActivityEmpty } from "@/components/social/social-home-activit
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
-import { SocialHomeColdSlot } from "@/components/social/social-home-cold-slot";
+import { SocialHomeColdSlot, SocialHomeFollowingRail } from "@/components/social/social-home-cold-slot";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialHomeTopics } from "@/components/social/social-home-topics";
 import {
@@ -64,11 +64,13 @@ export default async function SocialHomePage({
       <Suspense fallback={<SocialHomeCenterSkeleton />}>
         <SocialHomeCenter session={session} category={category} cursor={cursor} lane={lane} topic={topic} />
       </Suspense>
-      {lane === "following" ? (
-        <Suspense fallback={<SocialForYouSkeleton />}>
-          <SocialDesktopForYouSlot session={session} signCourseCovers={signedEducationCoverUrls} />
-        </Suspense>
-      ) : null}
+      <SocialHomeFollowingRail seedLane={lane} seedTopic={topic}>
+        {lane === "following" ? (
+          <Suspense fallback={<SocialForYouSkeleton />}>
+            <SocialDesktopForYouSlot session={session} signCourseCovers={signedEducationCoverUrls} />
+          </Suspense>
+        ) : null}
+      </SocialHomeFollowingRail>
     </div>
   );
 }

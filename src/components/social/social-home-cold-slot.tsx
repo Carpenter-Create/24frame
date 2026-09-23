@@ -8,7 +8,7 @@ import { houseExactHref } from "@/lib/house-client-shell";
 import type { SocialCategoryLabel } from "@/lib/social-categories";
 import type { SocialHomeLane } from "@/lib/social";
 
-import { SocialHomeCenterSkeleton } from "./social-skeletons";
+import { SocialForYouSkeleton, SocialHomeCenterSkeleton } from "./social-skeletons";
 import { useSocialHomeLive } from "./social-home-live";
 import { SocialHomeTabs } from "./social-home-tabs";
 
@@ -41,4 +41,21 @@ export function SocialHomeColdSlot({
 
   if (!cold) return children;
   return <SocialHomeCenterSkeleton topics={false} middle={<SocialHomeTabs active={seedLane} />} />;
+}
+
+// Desktop For You sits beside Home, outside the cold center. Lane is
+// owned client state, so the server `lane` prop stays stale for the hop.
+export function SocialHomeFollowingRail({
+  seedLane,
+  seedTopic,
+  children,
+}: {
+  seedLane: SocialHomeLane;
+  seedTopic: SocialCategoryLabel;
+  children: ReactNode;
+}) {
+  const live = useSocialHomeLive(seedLane, seedTopic);
+  if (live.lane !== "following") return null;
+  if (seedLane !== "following") return <SocialForYouSkeleton />;
+  return children;
 }

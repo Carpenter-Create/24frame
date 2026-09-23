@@ -46,6 +46,9 @@ describe("soft-nav pending selection", () => {
     expect(slot).toContain("router.push(house.href)");
     expect(home).toContain("<SocialHomeTopics active={topic}");
     expect(home).toContain("<SocialHomeColdSlot");
+    expect(home).toContain("<SocialHomeFollowingRail");
+    expect(slot).toContain("live.lane !== \"following\"");
+    expect(slot).toContain("<SocialForYouSkeleton />");
     expect(
       resolveSocialHomeLocation({
         owned: true,
@@ -74,6 +77,8 @@ describe("soft-nav cold hop", () => {
     expect(cache).toContain("houseBlankOutlet");
     expect(cache).toContain("HOUSE_BLANK_OUTLET_RETRY_MS");
     expect(cache).toContain("window.setInterval(kick, HOUSE_BLANK_OUTLET_RETRY_MS)");
+    expect(cache).toContain("acceptStale");
+    expect(cache).toContain("setSettledKey(activeKey)");
     expect(cache).not.toContain("setTimeout");
     expect(cache).not.toContain("setAcceptKey");
     expect(provider).toContain("houseSocialHomePanelHop");
