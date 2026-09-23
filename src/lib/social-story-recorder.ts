@@ -15,6 +15,15 @@ import {
 //   stays. getUserMedia still needs HTTPS, a user gesture, and playsInline.
 //   Flip stops the live stream before the next getUserMedia (iOS one-stream).
 // - Empty blob.type on some Safari versions — persist the probed house type.
+// - Do not timeslice. WebKit’s video/mp4 is playable only as the single blob
+//   from start() with no slice. Concatenating timesliced chunks has no
+//   complete moov: review stays black, then a blurry fragment, and a PUT of
+//   that blob can sit forever while the <video> still holds it.
+// - Stop the camera before the review element mounts. iOS has one capture
+//   pipeline; a live track plus a blob video paints blank.
+// - Copy the file bytes before PUT. Safari will not finish reading a blob
+//   that is the review video’s src.
+// - onstop can beat the last dataavailable. Seal the file after a short flush.
 // - Chrome-recorded webm may not play in Safari’s story viewer. No browser
 //   remux / AWS IVS / Elemental in this PR.
 // - No invented duration cap.
@@ -97,6 +106,35 @@ export function formatStoryRecorderClock(ms: number): string {
 
 export function storyRecorderHoldMs(): number {
   return 220;
+}
+
+/** Null means recorder.start() with no timeslice. */
+export function storyRecorderTimesliceMs(): number | null {
+  return null;
+}
+
+/** WebKit can deliver the last dataavailable after onstop. */
+export function storyRecorderStopFlushMs(): number {
+  return 50;
+}
+
+/** A hair past zero makes WebKit paint a frame before play. */
+export function storyReviewFrameSeconds(): number {
+  return 0.001;
+}
+
+export function storyReviewMediaSrc(objectUrl: string): string {
+  if (!objectUrl || objectUrl.includes("#")) return objectUrl;
+  return `${objectUrl}#t=${storyReviewFrameSeconds()}`;
+}
+
+/** Detached bytes. The review element must not be the upload body. */
+export async function cloneStoryUploadFile(file: File): Promise<File> {
+  const bytes = await file.arrayBuffer();
+  return new File([bytes], file.name || storyRecorderFileName("video/webm"), {
+    type: file.type,
+    lastModified: file.lastModified,
+  });
 }
 
 export function nextStoryStudioLive(current: number): number {

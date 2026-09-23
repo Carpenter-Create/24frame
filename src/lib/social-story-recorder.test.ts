@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL_VIDEO_CONTENT_TYPES } from "./social-media";
@@ -8,8 +9,13 @@ import {
   resolveStoryRecorderBlobType,
   SOCIAL_STORY_RECORDER_CANDIDATES,
   storyRecorderContentType,
+  cloneStoryUploadFile,
   storyRecorderFileName,
   storyRecorderHoldMs,
+  storyRecorderStopFlushMs,
+  storyRecorderTimesliceMs,
+  storyReviewFrameSeconds,
+  storyReviewMediaSrc,
   nextStoryStudioLive,
   storyRecorderVideoConstraints,
   storyStudioIsLive,
@@ -82,6 +88,31 @@ describe("story MediaRecorder mime probe", () => {
     expect(JSON.stringify(storyRecorderVideoConstraints("environment"))).not.toMatch(
       /width|height|aspectRatio/,
     );
+  });
+
+  it("seals one playable blob and a detached upload body for WebKit", async () => {
+    expect(storyRecorderTimesliceMs()).toBeNull();
+    expect(storyRecorderStopFlushMs()).toBeGreaterThan(0);
+    expect(storyReviewFrameSeconds()).toBeGreaterThan(0);
+    expect(storyReviewFrameSeconds()).toBeLessThan(1);
+    expect(storyReviewMediaSrc("blob:https://24frame.local/clip")).toBe(
+      "blob:https://24frame.local/clip#t=0.001",
+    );
+    expect(storyReviewMediaSrc("blob:https://24frame.local/clip#t=0.001")).toBe(
+      "blob:https://24frame.local/clip#t=0.001",
+    );
+    const source = new File([new Uint8Array([9, 8, 7, 6])], "story.mp4", { type: "video/mp4" });
+    const copy = await cloneStoryUploadFile(source);
+    expect(copy).not.toBe(source);
+    expect(copy.type).toBe("video/mp4");
+    expect(copy.size).toBe(4);
+    expect(new Uint8Array(await copy.arrayBuffer())).toEqual(new Uint8Array([9, 8, 7, 6]));
+    const studio = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
+    expect(studio).toContain("storyRecorderTimesliceMs()");
+    expect(studio).not.toContain("recorder.start(1000)");
+    expect(studio).toContain("cloneStoryUploadFile");
+    expect(studio).toContain("storyRecorderStopFlushMs()");
+    expect(studio).toContain("stopStream(streamRef.current)");
   });
 
   it("captures a jpeg still from the live preview frame", async () => {

@@ -67,10 +67,15 @@ import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   formatStoryRecorderClock,
   nextStoryStudioLive,
+  cloneStoryUploadFile,
   probeStoryRecorderMimeType,
   resolveStoryRecorderBlobType,
   storyRecorderFileName,
   storyRecorderHoldMs,
+  storyRecorderStopFlushMs,
+  storyRecorderTimesliceMs,
+  storyReviewFrameSeconds,
+  storyReviewMediaSrc,
   storyRecorderVideoConstraints,
   captureStoryStillFrame,
   storyStudioIsLive,
@@ -101,11 +106,17 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
   if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
     return { error: signed.error ?? SOCIAL.home.uploadFailed };
   }
-  const put = await fetch(signed.url, {
-    method: "PUT",
-    headers: { "Content-Type": signed.contentType },
-    body: file,
-  });
+  let put: Response;
+  try {
+    put = await fetch(signed.url, {
+      method: "PUT",
+      headers: { "Content-Type": signed.contentType },
+      body: file,
+      signal: AbortSignal.timeout(120_000),
+    });
+  } catch {
+    return { error: SOCIAL.home.uploadFailed };
+  }
   if (!put.ok) return { error: SOCIAL.home.uploadFailed };
   const kind = socialMediaKindFor(file.type);
   if (kind !== "image" && kind !== "video") return { error: SOCIAL.home.uploadFailed };
@@ -335,30 +346,50 @@ export function SocialStoryCompose({
       if (event.data.size > 0) chunksRef.current.push(event.data);
     };
     recorder.onstop = () => {
-      if (!storyStudioIsLive(liveRef.current, live)) return;
-      const contentType = resolveStoryRecorderBlobType(
-        chunksRef.current[0] instanceof Blob ? chunksRef.current[0].type : recorder.mimeType,
-        mimeRef.current,
-      );
-      const blob = new Blob(chunksRef.current, { type: contentType });
-      if (blob.size <= 0) {
-        setError(SOCIAL.stories.mediaMissing);
-        setPhase("preview");
-        return;
-      }
-      const file = new File([blob], storyRecorderFileName(contentType), { type: contentType });
-      if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
-      const url = URL.createObjectURL(file);
-      clipUrlRef.current = url;
-      setClip({ file, url, contentType, kind: "video" });
-      setPlaying(false);
-      setPhase("review");
+      // WebKit can emit the last chunk after onstop. Seal only after that flush.
+      window.setTimeout(() => sealRecording(live), storyRecorderStopFlushMs());
     };
-    recorder.start(1000);
+    const slice = storyRecorderTimesliceMs();
+    if (slice == null) recorder.start();
+    else recorder.start(slice);
     recorderRef.current = recorder;
     recordingRef.current = true;
     startClock();
     setPhase("recording");
+  }
+
+  function sealRecording(live: number) {
+    if (!storyStudioIsLive(liveRef.current, live)) return;
+    const contentType = resolveStoryRecorderBlobType(
+      chunksRef.current[0] instanceof Blob ? chunksRef.current[0].type : mimeRef.current,
+      mimeRef.current,
+    );
+    const blob = new Blob(chunksRef.current, { type: contentType });
+    if (blob.size <= 0) {
+      setError(SOCIAL.stories.mediaMissing);
+      setPhase("preview");
+      return;
+    }
+    let file: File;
+    try {
+      file = new File([blob], storyRecorderFileName(contentType), { type: contentType });
+    } catch {
+      setError(SOCIAL.home.uploadFailed);
+      setPhase("preview");
+      return;
+    }
+    // Release the camera before the review element mounts. iOS will not
+    // paint a second video while the capture track is still live.
+    stopStream(streamRef.current);
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
+    const url = URL.createObjectURL(file);
+    clipUrlRef.current = url;
+    setClip({ file, url, contentType, kind: "video" });
+    setPlaying(false);
+    setError("");
+    setPhase("review");
   }
 
   function stopRecording() {
@@ -521,31 +552,57 @@ export function SocialStoryCompose({
     setPhase("review");
   }
 
+  function restoreReviewPlayback(objectUrl: string) {
+    const node = reviewRef.current;
+    if (!node) return;
+    node.muted = true;
+    node.playsInline = true;
+    node.preload = "auto";
+    node.src = storyReviewMediaSrc(objectUrl);
+    node.load();
+  }
+
   async function postClip() {
     if (!clip || posting) return;
     const postId = nextStoryStudioLive(postRef.current);
     postRef.current = postId;
+    const objectUrl = clip.url;
     setError("");
     setPosting(true);
-    const uploaded = await uploadStoryMedia(clip.file);
-    if (!storyStudioIsLive(postRef.current, postId)) return;
-    if (uploaded.error || !uploaded.item) {
-      setPosting(false);
-      setError(uploaded.error ?? SOCIAL.home.uploadFailed);
-      return;
+    const reviewNode = reviewRef.current;
+    if (reviewNode) {
+      reviewNode.pause();
+      reviewNode.removeAttribute("src");
+      reviewNode.load();
     }
-    const form = new FormData();
-    form.set("media", JSON.stringify([uploaded.item]));
-    const result = await createSocialStory(form);
-    if (!storyStudioIsLive(postRef.current, postId)) return;
-    setPosting(false);
-    if (result?.error) {
-      setError(result.error);
-      return;
+    try {
+      const body = await cloneStoryUploadFile(clip.file);
+      const uploaded = await uploadStoryMedia(body);
+      if (!storyStudioIsLive(postRef.current, postId)) return;
+      if (uploaded.error || !uploaded.item) {
+        setError(uploaded.error ?? SOCIAL.home.uploadFailed);
+        restoreReviewPlayback(objectUrl);
+        return;
+      }
+      const form = new FormData();
+      form.set("media", JSON.stringify([uploaded.item]));
+      const result = await createSocialStory(form);
+      if (!storyStudioIsLive(postRef.current, postId)) return;
+      if (result?.error) {
+        setError(result.error);
+        restoreReviewPlayback(objectUrl);
+        return;
+      }
+      releasePreview();
+      releaseClip();
+      setPhase("posted");
+    } catch {
+      if (!storyStudioIsLive(postRef.current, postId)) return;
+      setError(SOCIAL.home.uploadFailed);
+      restoreReviewPlayback(objectUrl);
+    } finally {
+      if (storyStudioIsLive(postRef.current, postId)) setPosting(false);
     }
-    releasePreview();
-    releaseClip();
-    setPhase("posted");
   }
 
   const accept = SOCIAL_VIDEO_CONTENT_TYPES.join(",");
@@ -789,9 +846,21 @@ export function SocialStoryCompose({
               <video
                 ref={reviewRef}
                 data-social-story-video=""
-                src={clip.url}
+                src={storyReviewMediaSrc(clip.url)}
                 playsInline
+                muted
+                preload="auto"
                 className={SOCIAL_STORY_STUDIO_REVIEW_CLASS}
+                onLoadedData={(event) => {
+                  const node = event.currentTarget;
+                  if (node.currentTime < storyReviewFrameSeconds()) {
+                    try {
+                      node.currentTime = storyReviewFrameSeconds();
+                    } catch {
+                      // WebKit can reject the seek until the moov is readable.
+                    }
+                  }
+                }}
                 onPlay={() => setPlaying(true)}
                 onPause={() => setPlaying(false)}
                 onEnded={() => setPlaying(false)}
@@ -850,7 +919,12 @@ export function SocialStoryCompose({
                 data-social-story-play=""
                 aria-label={SOCIAL.stories.play}
                 className="absolute left-1/2 top-1/2 z-10 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-band-ink/20 text-band-ink"
-                onClick={() => void reviewRef.current?.play()}
+                onClick={() => {
+                  const node = reviewRef.current;
+                  if (!node) return;
+                  node.muted = false;
+                  void node.play();
+                }}
               >
                 <SocialIcon name="play" size={SOCIAL_ICON_SIZE_STORY_PLAY} />
               </button>
@@ -920,7 +994,7 @@ export function SocialStoryCompose({
                   ) : null}
                 </>
               )}
-              {error ? <p className="t-body-sm text-band-ink">{error}</p> : null}
+              {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
             </div>
           </div>
         </div>
