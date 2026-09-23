@@ -5,8 +5,10 @@ import { createPortal } from "react-dom";
 
 import { SocialIcon } from "@/components/social/social-icon";
 import { AppSheetSurface } from "@/components/chrome/house";
+import { HouseScrim, useHouseDesktop } from "@/components/chrome/house-overlay";
 import { AVATAR_ACCEPT } from "@/lib/account-avatar";
-import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
+import { menuSurfaceContentClass, menuSurfaceDensityForCount } from "@/lib/menu-surface";
 import {
   SOCIAL_PROFILE_AVATAR_SHEET_DANGER_CLASS,
   SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_CLASS,
@@ -35,6 +37,7 @@ export function SocialProfileAvatarSheet({
   onRemove: () => void;
 }) {
   const titleId = useId();
+  const desktop = useHouseDesktop();
   const libraryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const dragStartY = useRef<number | null>(null);
@@ -76,14 +79,91 @@ export function SocialProfileAvatarSheet({
     if (start != null && event.clientY - start >= DISMISS_DRAG_PX) onClose();
   }
 
-  const sheet = (
-    <div data-social-profile-avatar-sheet="" className={APP_SHEET_HOST_CLASS}>
-      <button
-        type="button"
-        aria-label={SOCIAL.create.close}
-        className={APP_SHEET_SCRIM_CLASS}
-        onClick={onClose}
+  const rows = (
+        <div data-social-profile-avatar-sheet-list="" className={SOCIAL_PROFILE_AVATAR_SHEET_LIST_CLASS}>
+          <button
+            type="button"
+            data-social-profile-avatar-library=""
+            disabled={pending}
+            className={SOCIAL_PROFILE_AVATAR_SHEET_ROW_CLASS}
+            onClick={() => pickFrom(libraryRef.current)}
+          >
+            <SocialIcon name="image" size={SOCIAL_ICON_SIZE_HEADER} />
+            {SOCIAL.profile.chooseFromLibrary}
+          </button>
+          <button
+            type="button"
+            data-social-profile-avatar-camera=""
+            disabled={pending}
+            className={SOCIAL_PROFILE_AVATAR_SHEET_ROW_CLASS}
+            onClick={() => pickFrom(cameraRef.current)}
+          >
+            <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_HEADER} />
+            {SOCIAL.profile.takePhoto}
+          </button>
+          {hasPhoto ? (
+            <button
+              type="button"
+              data-social-profile-avatar-remove=""
+              disabled={pending}
+              className={SOCIAL_PROFILE_AVATAR_SHEET_DANGER_CLASS}
+              onClick={() => {
+                onClose();
+                onRemove();
+              }}
+            >
+              <SocialIcon name="trash" size={SOCIAL_ICON_SIZE_HEADER} />
+              {SOCIAL.profile.removePicture}
+            </button>
+          ) : null}
+        </div>
+      );
+
+  const inputs = (
+    <>
+      <input
+        ref={libraryRef}
+        type="file"
+        accept={AVATAR_ACCEPT}
+        className="sr-only"
+        aria-label={SOCIAL.profile.chooseFromLibrary}
+        onChange={(e) => onFile(e.target.files?.[0])}
       />
+      <input
+        ref={cameraRef}
+        type="file"
+        accept={AVATAR_ACCEPT}
+        capture="user"
+        className="sr-only"
+        aria-label={SOCIAL.profile.takePhoto}
+        onChange={(e) => onFile(e.target.files?.[0])}
+      />
+    </>
+  );
+
+  const sheet = desktop ? (
+    <div
+      data-social-profile-avatar-sheet=""
+      data-house-overlay-host="menu-surface"
+      className="fixed inset-0 z-50 hidden md:flex md:items-start md:justify-end md:p-[var(--space-6)]"
+    >
+      <HouseScrim label={SOCIAL.create.close} onClose={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className={`relative z-10 ${menuSurfaceContentClass(menuSurfaceDensityForCount(hasPhoto ? 3 : 2))}`}
+      >
+        <h2 id={titleId} className="sr-only">
+          {SOCIAL.profile.editPicture}
+        </h2>
+        {rows}
+        {inputs}
+      </div>
+    </div>
+  ) : (
+    <div data-social-profile-avatar-sheet="" data-house-overlay-host="app-sheet" className={APP_SHEET_HOST_CLASS}>
+      <HouseScrim label={SOCIAL.create.close} onClose={onClose} />
       <AppSheetSurface
         role="dialog"
         aria-modal="true"

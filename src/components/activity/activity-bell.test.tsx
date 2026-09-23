@@ -206,7 +206,8 @@ describe("ActivityBell", () => {
         defaultOpen: true,
       }),
     );
-    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toBe(`${APP_SHEET_HOST_CLASS} md:hidden`);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toBe(APP_SHEET_HOST_CLASS);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("md:hidden");
     expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain(ACCOUNT_SHEET_HOST_CLASS);
     expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("flex-col");
     expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("justify-end");

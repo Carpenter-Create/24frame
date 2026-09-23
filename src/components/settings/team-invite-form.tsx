@@ -232,7 +232,6 @@ export function TeamInviteForm({
           onClose={closeInvite}
           title={ACCOUNT_INVITE.invite}
           size="md"
-          presentation="sheet"
         >
           <form
             onSubmit={onSubmit}

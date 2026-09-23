@@ -1,8 +1,12 @@
 import {
+  HOUSE_DIALOG_FORM_CLASS,
+  HOUSE_DIALOG_HOST_CLASS,
+  HOUSE_DIALOG_PANEL_CLASS,
+  HOUSE_OVERLAY_SCRIM_CLASS,
+} from "@/lib/house-overlay";
+import {
   APP_SHEET_HEAD_CLASS,
   APP_SHEET_HOST_CLASS,
-  APP_SHEET_MODAL_PROMOTE_HOST,
-  APP_SHEET_MODAL_PROMOTE_SURFACE,
   APP_SHEET_SURFACE_CLASS,
 } from "@/lib/house-sheet";
 import {
@@ -12,11 +16,9 @@ import {
 } from "@/lib/social";
 import type { SocialPhosphorIconName } from "@/lib/social-icons";
 
-// Social Create chooser. Adam lock 2026-09-20; presentation + craft
-// refine same day. Desktop lock 2026-09-21: FB centered modal on md+.
-// Presentation: responsive — phone: iMessage New Message bottom sheet,
-// desktop (md+): Facebook Create-post centered modal card. Bounded
-// width, rounded, shadow, dim scrim. Same tiles/content both sizes.
+// Social Create chooser. Phone is AppSheet. Desktop is HouseDialog
+// (short form, 480) — not an AppSheet promoted into a modal.
+// HouseOverlay dual-host lock v1. Same tiles both hosts.
 // Register: Coinbase institutional — modern trust, calm precision,
 // one Sporty Blue primary, sharp selected states, quiet helpers —
 // still social/creator/fun enough for Media · Write · Go live.
@@ -65,21 +67,25 @@ export function socialCreateTile(
 
 export const SOCIAL_CREATE_SHEET_PRESENTATION = "responsive";
 
-export const SOCIAL_CREATE_SHEET_HOST_CLASS =
-  `${APP_SHEET_HOST_CLASS} ${APP_SHEET_MODAL_PROMOTE_HOST}`;
+export const SOCIAL_CREATE_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const SOCIAL_CREATE_SHEET_SURFACE_CLASS =
-  `${APP_SHEET_SURFACE_CLASS} relative z-10 w-full ${APP_SHEET_MODAL_PROMOTE_SURFACE}`;
+  `${APP_SHEET_SURFACE_CLASS} relative z-10 w-full`;
+
+export const SOCIAL_CREATE_SHEET_DESKTOP_HOST_CLASS = HOUSE_DIALOG_HOST_CLASS;
+
+export const SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS =
+  `${HOUSE_DIALOG_PANEL_CLASS} ${HOUSE_DIALOG_FORM_CLASS} relative z-10`;
 
 export const SOCIAL_CREATE_SHEET_HEAD_CLASS =
-  `${APP_SHEET_HEAD_CLASS} relative justify-between md:border-b md:border-hairline`;
+  `${APP_SHEET_HEAD_CLASS} relative justify-between`;
 
 export const SOCIAL_CREATE_SHEET_TITLE_CLASS =
   "pointer-events-none absolute inset-0 flex items-center justify-center t-body font-medium text-ink";
 
 // Dim the feed behind. Opaque wash — not frost, not backdrop-blur.
 export const SOCIAL_CREATE_SHEET_SCRIM_CLASS =
-  "absolute inset-0 bg-ink/40 app-sheet-scrim-fade";
+  `${HOUSE_OVERLAY_SCRIM_CLASS} app-sheet-scrim-fade`;
 
 // One equal row. More vertical air than original. Never truncate — labels wrap/stack.
 export const SOCIAL_CREATE_TILES_CLASS =

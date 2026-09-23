@@ -170,7 +170,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
 
     expect(html).toContain("data-account-sheet=\"\"");
     expect(html).toContain("data-account-sheet-scrim");
-    expect(html).not.toContain("md:hidden");
+    expect(hostClass).toContain("md:hidden");
     expect(html).toContain('aria-label="Account"');
     expect(hostClass).toBe(ACCOUNT_SHEET_HOST_CLASS);
     expect(hostClass).toContain("justify-end");

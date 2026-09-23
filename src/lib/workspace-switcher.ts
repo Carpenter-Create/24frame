@@ -63,6 +63,7 @@ import {
   HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
 import {
+  APP_SHEET_HOST_CLASS,
   APP_SHEET_SCRIM_CLASS,
   APP_SHEET_SURFACE_CLASS,
 } from "@/lib/house-sheet";
@@ -170,8 +171,7 @@ export const WORKSPACE_SWITCHER_MENU_GAP_PX = 8;
 export const WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR =
   "[data-house-under-nav]";
 
-export const WORKSPACE_SWITCHER_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
+export const WORKSPACE_SWITCHER_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const WORKSPACE_SWITCHER_SHEET_SURFACE_CLASS = APP_SHEET_SURFACE_CLASS;
 

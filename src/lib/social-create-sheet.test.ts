@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import { SOCIAL, SOCIAL_ROUTES, socialCreateHref } from "./social";
 import {
+  SOCIAL_CREATE_SHEET_DESKTOP_HOST_CLASS,
+  SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS,
   SOCIAL_CREATE_SHEET_HEAD_CLASS,
   SOCIAL_CREATE_SHEET_HOST_CLASS,
   SOCIAL_CREATE_SHEET_PRESENTATION,
@@ -17,9 +19,11 @@ import {
   socialCreateTile,
 } from "./social-create-sheet";
 import {
+  HOUSE_DIALOG_FORM_CLASS,
+  HOUSE_DIALOG_HOST_CLASS,
+} from "./house-overlay";
+import {
   APP_SHEET_HOST_CLASS,
-  APP_SHEET_MODAL_PROMOTE_HOST,
-  APP_SHEET_MODAL_PROMOTE_SURFACE,
   APP_SHEET_SURFACE_CLASS,
 } from "./house-sheet";
 
@@ -45,32 +49,26 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_ROUTES.createLive).toBe("/social/create/live");
   });
 
-  it("phone: rises as a bottom sheet; desktop (md+): centered modal card — Adam lock 2026-09-21", () => {
+  it("phone: AppSheet; desktop: HouseDialog — not a promoted sheet", () => {
     expect(SOCIAL_CREATE_SHEET_PRESENTATION).toBe("responsive");
 
-    // Phone: bottom sheet (justify-end, full-width surface)
     expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("justify-end");
-    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain(APP_SHEET_HOST_CLASS);
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("md:hidden");
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toBe(APP_SHEET_HOST_CLASS);
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).not.toContain("md:items-center");
 
-    // Desktop: centered modal card (md: items-center + justify-center)
-    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("md:items-center");
-    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("md:justify-center");
-    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain(APP_SHEET_MODAL_PROMOTE_HOST);
-
-    // Surface: phone stays full-width bottom sheet; desktop bounded card
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain(APP_SHEET_SURFACE_CLASS);
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("app-sheet-rise");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("bg-surface");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("backdrop-blur");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain(APP_SHEET_MODAL_PROMOTE_SURFACE);
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:w-auto");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:min-w-[22rem]");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:max-w-[min(92vw,28rem)]");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:rounded-b-[16px]");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:border");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:border-hairline");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:shadow-[var(--elevation)]");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("md:items-center");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("md:shadow");
+
+    expect(SOCIAL_CREATE_SHEET_DESKTOP_HOST_CLASS).toBe(HOUSE_DIALOG_HOST_CLASS);
+    expect(SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS).toContain(HOUSE_DIALOG_FORM_CLASS);
+    expect(SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS).toContain("480px");
+    expect(SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS).toContain("shadow-none");
 
     // Scrim: opaque wash, no frost
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).toContain("bg-ink/40");
@@ -106,11 +104,9 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_CREATE_TILE_LABEL_CLASS).not.toContain("truncate");
     expect(SOCIAL_CREATE_TILE_LABEL_CLASS).not.toContain("t-label");
     expect(SOCIAL_CREATE_TILE_LABEL_CLASS).not.toContain("uppercase");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("shadow-none");
-
-    // Desktop head hairline — dialog-grade separator
-    expect(SOCIAL_CREATE_SHEET_HEAD_CLASS).toContain("md:border-b");
-    expect(SOCIAL_CREATE_SHEET_HEAD_CLASS).toContain("md:border-hairline");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("shadow-none");
+    expect(SOCIAL_CREATE_SHEET_HEAD_CLASS).not.toContain("md:border-b");
+    expect(SOCIAL_CREATE_SHEET_HEAD_CLASS).not.toContain("md:max-w");
 
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).not.toContain("bg-ink/60");
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).not.toContain("bg-ink/80");

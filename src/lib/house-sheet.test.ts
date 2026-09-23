@@ -7,8 +7,6 @@ import {
   APP_SHEET_HAIRLINE_CLASS,
   APP_SHEET_HEAD_CLASS,
   APP_SHEET_HOST_CLASS,
-  APP_SHEET_MODAL_PROMOTE_HOST,
-  APP_SHEET_MODAL_PROMOTE_SURFACE,
   APP_SHEET_MOTION_DURATION_MS,
   APP_SHEET_MOTION_EASING,
   APP_SHEET_RISE_CLASS,
@@ -105,7 +103,7 @@ describe("house sheet lock", () => {
 
   it("locks app-sheet chrome to 543:576 — r16, pad 16/24/48, quiet scrim", () => {
     expect(APP_SHEET_HOST_CLASS).toBe(
-      "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end",
+      "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden",
     );
     expect(APP_SHEET_HOST_CLASS).toContain("flex-col");
     expect(APP_SHEET_HOST_CLASS).toContain("justify-end");
@@ -114,15 +112,16 @@ describe("house sheet lock", () => {
     expect(APP_SHEET_HOST_CLASS.split(" ")).not.toContain("items-end");
     expect(APP_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(APP_SHEET_SURFACE_CLASS).toContain("rounded-t-[16px]");
-    expect(APP_SHEET_SURFACE_CLASS).toContain("px-[var(--space-6)]");
-    expect(APP_SHEET_SURFACE_CLASS).toContain("pt-[var(--space-6)]");
-    expect(APP_SHEET_SURFACE_CLASS).toContain("pb-[var(--space-12)]");
+    expect(APP_SHEET_SURFACE_CLASS).toContain("p-[var(--space-4)]");
+    expect(APP_SHEET_SURFACE_CLASS).toContain("max-h-[90vh]");
+    expect(APP_SHEET_SURFACE_CLASS).toContain("shadow-none");
+    expect(APP_SHEET_SURFACE_CLASS).toContain("env(safe-area-inset-bottom)");
     expect(APP_SHEET_SURFACE_CLASS).toContain("bg-surface");
     expect(APP_SHEET_SURFACE_CLASS).not.toContain("rounded-t-[24px]");
     expect(APP_SHEET_HEAD_CLASS).toContain("h-14");
     expect(APP_SHEET_HAIRLINE_CLASS).toContain("bg-hairline");
     expect(APP_SHEET_SCRIM_CLASS).toContain("absolute inset-0");
-    expect(APP_SHEET_SCRIM_CLASS).toContain("bg-ink/24");
+    expect(APP_SHEET_SCRIM_CLASS).toContain("bg-ink/40");
     expect(APP_SHEET_SCRIM_CLASS).toContain(APP_SHEET_SCRIM_FADE_CLASS);
     expect(APP_SHEET_SURFACE_CLASS).toContain(APP_SHEET_RISE_CLASS);
   });
@@ -162,19 +161,12 @@ describe("house sheet lock", () => {
     expect(THREAD_POPOVER_ICON_CLASS).not.toContain("min-w-");
   });
 
-  it("provides modal-promote classes: phone sheet → desktop centered modal", () => {
-    expect(APP_SHEET_MODAL_PROMOTE_HOST).toContain("md:items-center");
-    expect(APP_SHEET_MODAL_PROMOTE_HOST).toContain("md:justify-center");
-    expect(APP_SHEET_MODAL_PROMOTE_HOST).not.toContain("justify-end");
-
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:w-auto");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:min-w-[22rem]");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:max-w-[min(92vw,28rem)]");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:rounded-b-[16px]");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:border");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:border-hairline");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:shadow-[var(--elevation)]");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).not.toContain("backdrop-blur");
-    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).not.toContain("frost");
+  it("does not promote AppSheet into a desktop modal", () => {
+    const src = readFileSync(join(here, "house-sheet.ts"), "utf8");
+    expect(src).not.toContain("APP_SHEET_MODAL_PROMOTE");
+    expect(src).not.toContain("md:items-center");
+    expect(APP_SHEET_HOST_CLASS).toContain("md:hidden");
+    expect(APP_SHEET_SURFACE_CLASS).not.toContain("md:shadow");
+    expect(APP_SHEET_SURFACE_CLASS).not.toContain("backdrop-blur");
   });
 });

@@ -290,7 +290,7 @@ describe("SettingsOrganizationPage", () => {
     expect(html).not.toMatch(/<h2[^>]*>Rights Holder<\/h2>/);
   });
 
-  it("mutates Company and Legal Entities through Dialog on desktop and drill-in panes on mobile", () => {
+  it("keeps Company on HouseDialog and Legal Entities on HouseDrawer / AppSheet", () => {
     const companyForm = readFileSync("src/app/(app)/account/company-profile-form.tsx", "utf8");
     const companyEditor = readFileSync("src/components/settings/company-name-editor.tsx", "utf8");
     const entities = readFileSync("src/components/settings/legal-entities-section.tsx", "utf8");
@@ -303,7 +303,9 @@ describe("SettingsOrganizationPage", () => {
     expect(companyForm).toContain("COMPANY_PROFILE.editHref");
     expect(companyEditor).toContain("DialogFooter");
     expect(companyEditor).toContain("SETTINGS_DIALOG_FORM_CLASS");
-    expect(entities).toContain("<Dialog");
+    expect(entities).toContain("HouseDrawerFrame");
+    expect(entities).toContain("AppSheetFrame");
+    expect(entities).not.toContain("<Dialog");
     expect(entities).toContain("SettingsDrillRow");
     expect(entities).toContain("SettingsGroupList");
     expect(entities).toContain('cta="entity-add"');

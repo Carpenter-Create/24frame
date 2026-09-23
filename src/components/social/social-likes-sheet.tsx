@@ -5,9 +5,15 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 
 import { AppSheetHead, AppSheetSurface, Close44 } from "@/components/chrome/house";
+import {
+  HouseDialogFrame,
+  HouseOverlayHead,
+  HouseScrim,
+  useHouseDesktop,
+} from "@/components/chrome/house-overlay";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialAvatar } from "@/components/social/social-avatar";
-import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { displayHandle, socialMemberHref, SOCIAL } from "@/lib/social";
 
 export type SocialLikerCard = {
@@ -27,6 +33,7 @@ export function SocialLikesSheet({
   onClose: () => void;
 }) {
   const titleId = useId();
+  const desktop = useHouseDesktop();
   const [people, setPeople] = useState<SocialLikerCard[]>([]);
   const [truncated, setTruncated] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -80,21 +87,7 @@ export function SocialLikesSheet({
 
   if (!open) return null;
 
-  const sheet = (
-    <div data-social-likes-sheet="" className={APP_SHEET_HOST_CLASS}>
-      <button
-        type="button"
-        aria-label={SOCIAL.create.close}
-        className={APP_SHEET_SCRIM_CLASS}
-        onClick={onClose}
-      />
-      <AppSheetSurface role="dialog" aria-modal="true" aria-labelledby={titleId}>
-        <AppSheetHead>
-          <h2 id={titleId} className="min-w-0 flex-1 t-heading text-ink">
-            {SOCIAL.post.likesTitle}
-          </h2>
-          <Close44 label={SOCIAL.create.close} onClick={onClose} />
-        </AppSheetHead>
+  const list = (
         <div data-social-likes-list="" className="flex min-h-0 max-h-[70dvh] flex-col overflow-y-auto">
           {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
           {truncated ? <InlineNotice>{SOCIAL.post.likesTruncated}</InlineNotice> : null}
@@ -123,6 +116,37 @@ export function SocialLikesSheet({
             ))
           )}
         </div>
+  );
+
+  const sheet = desktop ? (
+    <HouseDialogFrame
+      size="form"
+      titleId={titleId}
+      label={SOCIAL.post.likesTitle}
+      onClose={onClose}
+      closeLabel={SOCIAL.create.close}
+    >
+      <div data-social-likes-sheet="">
+        <HouseOverlayHead
+          title={SOCIAL.post.likesTitle}
+          titleId={titleId}
+          closeLabel={SOCIAL.create.close}
+          onClose={onClose}
+        />
+        {list}
+      </div>
+    </HouseDialogFrame>
+  ) : (
+    <div data-social-likes-sheet="" data-house-overlay-host="app-sheet" className={APP_SHEET_HOST_CLASS}>
+      <HouseScrim label={SOCIAL.create.close} onClose={onClose} />
+      <AppSheetSurface role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <AppSheetHead>
+          <h2 id={titleId} className="min-w-0 flex-1 t-heading text-ink">
+            {SOCIAL.post.likesTitle}
+          </h2>
+          <Close44 label={SOCIAL.create.close} onClick={onClose} />
+        </AppSheetHead>
+        {list}
       </AppSheetSurface>
     </div>
   );

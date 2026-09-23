@@ -6,9 +6,9 @@
 // never a StatusFilter chip fork or a wrapping Home period row.
 
 import { HOUSE_PERIOD_SELECTED_CLASS } from "@/lib/house-shell";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 
-export const HOUSE_PAGE_SELECT_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
+export const HOUSE_PAGE_SELECT_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS = "max-md:hidden";
 

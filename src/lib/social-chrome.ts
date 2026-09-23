@@ -282,10 +282,10 @@ export const SOCIAL_FEED_GUTTER_CLASS =
 // Comment thread — house app-sheet rise. Same host/scrim as Create.
 // Composer stays at the bottom. Do not fork a second sheet grammar.
 export const SOCIAL_COMMENT_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
 
 export const SOCIAL_COMMENT_SHEET_SURFACE_CLASS =
-  "relative z-10 flex max-h-[90dvh] w-full flex-col rounded-t-[16px] bg-surface app-sheet-rise md:mx-auto md:max-w-[480px] md:rounded-[16px] md:border md:border-hairline";
+  "relative z-10 flex max-h-[90vh] w-full flex-col rounded-t-[16px] bg-surface p-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))] app-sheet-rise";
 
 export const SOCIAL_COMMENT_SHEET_SCRIM_CLASS =
   "absolute inset-0 bg-ink/40 app-sheet-scrim-fade";
@@ -537,10 +537,10 @@ export const SOCIAL_SHARE_CLASS =
 // 180:206 / 180:1946 / 181:2184 — Edit profile. Mobile full page; desktop
 // 480 sheet on wash. 180:2004 / 180:2026 — Bio editor. Tokens only.
 export const SOCIAL_PROFILE_EDIT_HOST_CLASS =
-  "fixed inset-0 z-50 flex flex-col bg-bg md:items-center md:justify-center md:bg-ink/40";
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col bg-surface md:hidden";
 
 export const SOCIAL_PROFILE_EDIT_SHEET_CLASS =
-  "flex h-full w-full flex-col overflow-y-auto bg-bg md:h-auto md:max-h-[90dvh] md:w-[480px] md:rounded-[16px] md:border md:border-hairline md:bg-surface";
+  "flex h-full min-h-0 w-full flex-col overflow-y-auto bg-bg";
 
 export const SOCIAL_PROFILE_EDIT_HEADER_CLASS =
   "flex h-16 shrink-0 items-center gap-2 border-b border-hairline bg-surface py-2 pl-2 pr-4";
@@ -618,7 +618,7 @@ export const SOCIAL_PROFILE_BIO_CARD_CLASS =
 
 // 155:194 / 155:372 — wash overlay, QR card, three actions. No glass, no drop shadow.
 export const SOCIAL_SHARE_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col bg-bg";
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col bg-bg md:hidden";
 
 export const SOCIAL_SHARE_SHEET_WASH_CLASS =
   "pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-accent/18 to-transparent md:h-[520px] md:from-accent/12";

@@ -38,7 +38,8 @@ describe("TeamInviteForm ROLE select", () => {
     expect(html).toContain(HOUSE_FORM_SELECT_TRIGGER_CLASS);
     expect(html).toContain(SETTINGS_DIALOG_LABEL_CLASS);
     expect(html).toContain(SETTINGS_DIALOG_GROUP_CLASS);
-    expect(html).toContain('data-dialog-presentation="sheet"');
+    expect(html).toContain('data-house-overlay-host="house-dialog"');
+    expect(html).not.toContain('data-dialog-presentation="sheet"');
     expect(html).toContain("data-team-invite-fields");
     const emailLabel = html.slice(
       html.indexOf('for="team-invite-email"'),
@@ -99,7 +100,8 @@ describe("TeamInviteForm ROLE select", () => {
     expect(src).toContain("SETTINGS_DIALOG_ERROR_CLASS");
     expect(src).toContain("teamInviteUserError");
     expect(src).toContain("DialogFooter");
-    expect(src).toContain('presentation="sheet"');
+    expect(src).not.toContain('presentation="sheet"');
+    expect(src).toContain('size="md"');
     expect(src).not.toContain("<select");
     expect(src).not.toContain("formControlClass");
     expect(src).not.toContain("bg-ink");

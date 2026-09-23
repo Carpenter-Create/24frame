@@ -275,7 +275,8 @@ describe("Activity bell cap", () => {
     expect(ACTIVITY_BELL_OPEN_DOT_CLASS).toContain("bg-accent");
     expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("border-hairline");
     expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("bg-surface");
-    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toBe(`${APP_SHEET_HOST_CLASS} md:hidden`);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toBe(APP_SHEET_HOST_CLASS);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("md:hidden");
     expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain(ACCOUNT_SHEET_HOST_CLASS);
     expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("flex-col");
     expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("justify-end");

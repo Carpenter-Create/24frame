@@ -109,7 +109,7 @@ export const ACTIVITY_BELL_OPEN_DOT_CLASS = "size-2 shrink-0 rounded-full bg-acc
 // full-width. Do not fork a third panel. md:hidden keeps desktop
 // on the anchored popover.
 export const ACTIVITY_BELL_POPOVER_CLASS = REPORTS_USER_PANEL_CLASS;
-export const ACTIVITY_BELL_SHEET_HOST_CLASS = `${APP_SHEET_HOST_CLASS} md:hidden`;
+export const ACTIVITY_BELL_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 export const ACTIVITY_BELL_SHEET_SURFACE_CLASS = APP_SHEET_SURFACE_CLASS;
 export const ACTIVITY_BELL_VIEW_ALL_CLASS =
   `block border-t border-hairline px-[var(--space-4)] py-[var(--space-3)] ${TEXT_ACTION_CLASS}`;

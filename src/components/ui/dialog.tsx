@@ -3,40 +3,41 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { X } from "@phosphor-icons/react";
 
+import { Close44 } from "@/components/chrome/house";
+import { AppSheetCard, AppSheetFrame, HouseScrim, useHouseDesktop } from "@/components/chrome/house-overlay";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-
 import { cn } from "@/lib/cn";
+import {
+  HOUSE_DIALOG_CONFIRM_CLASS,
+  HOUSE_DIALOG_FORM_CLASS,
+  HOUSE_DIALOG_PANEL_CLASS,
+} from "@/lib/house-overlay";
 
-// Minimal premium modal on the native <dialog> element: focus trap, Esc-to-close, and
-// a11y come free — no Radix dep. Backdrop click closes. `size` widens it for media
-// (the video player) without touching the default form width.
-//
-// `h-fit` is the confirm-air lock: `m-auto` without it stretches the panel to the
-// viewport (tall empty body). `overflow-visible` lets the house form Select
-// Listbox paint past the panel — UA dialog overflow would clip it.
-// Footer chrome is DialogFooter — not a per-surface gap.
+// HouseDialog — desktop blocking confirm and short form.
+// HouseOverlay dual-host lock v1 G4. Phone confirm/form is AppSheet.
+// Do not skin this panel into a bottom sheet. Media (xl) stays this
+// host at the existing player width — not a fifth overlay.
 
-export const DIALOG_PANEL_CLASS =
-  "m-auto h-fit overflow-visible rounded-[var(--radius-lg)] border border-hairline bg-surface p-0 text-ink shadow-[var(--elevation)] backdrop:bg-black/40 backdrop:backdrop-blur-sm";
+export const DIALOG_PANEL_CLASS = HOUSE_DIALOG_PANEL_CLASS;
 
+// Ask-AI overlay still consumes this header measure. HouseDialog pad
+// lives on the panel (24). Do not retarget the overlay from here.
 export const DIALOG_HEADER_CLASS =
   "flex items-center justify-between border-b border-hairline px-5 py-3";
 
-export const DIALOG_BODY_CLASS = "px-5 py-3";
+export const HOUSE_DIALOG_HEADER_CLASS =
+  "flex items-center justify-between border-b border-hairline pb-[var(--space-4)]";
+
+export const DIALOG_BODY_CLASS = "pt-[var(--space-4)]";
 
 export const DIALOG_FOOTER_CLASS =
   "mt-[var(--space-3)] flex justify-end gap-[var(--space-2)]";
 
 export const DIALOG_SIZES = {
-  sm: "w-[min(92vw,22rem)]",
-  md: "w-[min(92vw,32rem)]",
+  sm: HOUSE_DIALOG_CONFIRM_CLASS,
+  md: HOUSE_DIALOG_FORM_CLASS,
   xl: "w-[min(94vw,56rem)]",
 } as const;
-
-// Soft bottom sheet on phone. Desktop stays the centered card.
-// Invite uses this. Do not fork a Team-Invite overlay.
-export const DIALOG_SHEET_CLASS =
-  "max-md:mx-0 max-md:mb-0 max-md:mt-auto max-md:w-full max-md:max-w-none max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)]";
 
 export function DialogFooter({
   className,
@@ -50,52 +51,74 @@ export function Dialog({
   onClose,
   title,
   size = "md",
-  presentation = "dialog",
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   size?: keyof typeof DIALOG_SIZES;
-  presentation?: "dialog" | "sheet";
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const desktop = useHouseDesktop();
+  // Closed dialog keeps its children so SSR still finds the form.
+  // Open phone confirm/form moves onto AppSheet. Media (xl) stays
+  // this host on every viewport.
+  const phoneSheet = open && size !== "xl" && !desktop;
+  const showDialog = open && !phoneSheet;
 
   useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (showDialog && !dialog.open) dialog.showModal();
+    if (!showDialog && dialog.open) dialog.close();
+  }, [showDialog]);
 
   return (
-    <dialog
-      ref={ref}
-      onClose={onClose}
-      onClick={(e) => {
-        if (e.target === ref.current) onClose(); // click on the backdrop (the dialog element itself)
-      }}
-      data-dialog-size={size}
-      data-dialog-presentation={presentation}
-      className={cn(
-        DIALOG_PANEL_CLASS,
-        DIALOG_SIZES[size],
-        presentation === "sheet" && DIALOG_SHEET_CLASS,
-      )}
-    >
-      <div className={DIALOG_HEADER_CLASS}>
-        <h2 className="t-body font-medium text-ink">{title}</h2>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="text-ink-3 transition-colors hover:text-ink"
-        >
-          <X className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-        </button>
-      </div>
-      <div className={DIALOG_BODY_CLASS}>{children}</div>
-    </dialog>
+    <>
+      <dialog
+        ref={ref}
+        onClose={onClose}
+        onClick={(event) => {
+          if (event.target === ref.current) onClose();
+        }}
+        data-house-overlay-host="house-dialog"
+        data-dialog-size={size}
+        className={cn(
+          DIALOG_PANEL_CLASS,
+          DIALOG_SIZES[size],
+          size !== "xl" && "max-md:hidden",
+        )}
+      >
+        {phoneSheet ? null : (
+          <>
+            <div className={HOUSE_DIALOG_HEADER_CLASS}>
+              <h2 className="t-body font-medium text-ink">{title}</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="text-ink-3 transition-colors hover:text-ink"
+              >
+                <X className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
+              </button>
+            </div>
+            <div className={DIALOG_BODY_CLASS}>{children}</div>
+          </>
+        )}
+      </dialog>
+      {phoneSheet && open ? (
+        <AppSheetFrame label={title}>
+          <HouseScrim label="Close" onClose={onClose} />
+          <AppSheetCard>
+            <div className="flex items-center justify-between">
+              <h2 className="t-body font-medium text-ink">{title}</h2>
+              <Close44 label="Close" onClick={onClose} />
+            </div>
+            {children}
+          </AppSheetCard>
+        </AppSheetFrame>
+      ) : null}
+    </>
   );
 }

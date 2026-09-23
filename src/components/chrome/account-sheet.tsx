@@ -466,6 +466,7 @@ export function AccountSheet({
       aria-label={ACCOUNT_SHEET.sheet}
       data-account-sheet=""
       data-account-menu-face="main"
+      data-house-overlay-host="app-sheet"
       className={ACCOUNT_SHEET_HOST_CLASS}
     >
       <button
@@ -513,6 +514,7 @@ export function AccountMenuDropdown({
       aria-modal="true"
       aria-label={ACCOUNT_SHEET.sheet}
       data-user-menu-desktop-panel=""
+      data-house-overlay-host="menu-surface"
       className={ACCOUNT_MENU_DROPDOWN_HOST_CLASS}
     >
       <button

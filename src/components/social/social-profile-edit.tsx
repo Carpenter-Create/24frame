@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 
 import { removeAccountPhoto, uploadAccountPhoto } from "@/app/(app)/account/actions";
+import { HouseDrawerFrame, useHouseDesktop } from "@/components/chrome/house-overlay";
 import { HouseLink } from "@/components/chrome/house-link";
 import {
   clearSocialWelcomeVideo,
@@ -171,6 +172,7 @@ export function SocialProfileEditForm({
   const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
   const [avatarSheet, setAvatarSheet] = useState(false);
   const [face, setFace] = useState<SocialProfileEditFace>(initialFace);
+  const desktop = useHouseDesktop();
   const [bioText, setBioText] = useState(seed.bio);
   const [roles, setRoles] = useState(() => parseSocialProfileRoles(seed.crafts));
   const [interestTopics, setInterestTopics] = useState(() => parseSocialProfileTopics(seed.topics));
@@ -486,8 +488,12 @@ export function SocialProfileEditForm({
     );
   }
 
-  return (
-    <div data-social-profile-edit="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
+  const edit = (
+    <div
+      data-social-profile-edit=""
+      data-house-overlay-host={desktop ? undefined : "app-sheet"}
+      className={desktop ? undefined : SOCIAL_PROFILE_EDIT_HOST_CLASS}
+    >
       <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
         <EditHeader
           title={SOCIAL.profile.edit}
@@ -658,6 +664,22 @@ export function SocialProfileEditForm({
           {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      {desktop ? (
+        <HouseDrawerFrame
+          label={SOCIAL.profile.edit}
+          onClose={() => router.push(SOCIAL_ROUTES.profile)}
+          closeLabel={SOCIAL.profile.back}
+        >
+          {edit}
+        </HouseDrawerFrame>
+      ) : (
+        edit
+      )}
       <SocialProfileAvatarSheet
         open={avatarSheet}
         hasPhoto={Boolean(previewPhoto)}
@@ -666,6 +688,6 @@ export function SocialProfileEditForm({
         onPick={beginCrop}
         onRemove={() => void onPhotoRemove()}
       />
-    </div>
+    </>
   );
 }

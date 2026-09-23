@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { X } from "@phosphor-icons/react";
 
-import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import {
+  AppSheetFrame,
+  HouseDrawerFrame,
+  HouseOverlayHead,
+  useHouseDesktop,
+} from "@/components/chrome/house-overlay";
 
-import { cn } from "@/lib/cn";
-
-// Staff Education settings only. Hairline + surface — no drop shadow.
-// Outline is king; the drawer is a side job, not a second page.
+// Staff Education settings. Durable side edit.
+// Desktop: HouseDrawer (right 400). Phone: AppSheet full.
+// Never a side strip on phone. HouseOverlay dual-host lock v1 G5.
 
 export function EducationDrawer({
   open,
@@ -21,6 +24,8 @@ export function EducationDrawer({
   title: string;
   children: React.ReactNode;
 }) {
+  const desktop = useHouseDesktop();
+
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -32,32 +37,25 @@ export function EducationDrawer({
 
   if (!open) return null;
 
+  const head = (
+    <HouseOverlayHead title={title} closeLabel="Close" onClose={onClose} />
+  );
+
+  if (desktop) {
+    return (
+      <HouseDrawerFrame label={title} onClose={onClose} closeLabel="Close">
+        {head}
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+      </HouseDrawerFrame>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50" data-education-settings-drawer="">
-      <button
-        type="button"
-        aria-label="Close"
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      />
-      <aside
-        className={cn(
-          "absolute inset-y-0 right-0 flex w-[min(100%,28rem)] flex-col border-l border-hairline bg-surface",
-        )}
-      >
-        <div className="flex items-center justify-between border-b border-hairline px-[var(--space-6)] py-[var(--space-4)]">
-          <h2 className="t-body font-medium text-ink">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-ink-3 transition-colors hover:text-ink"
-          >
-            <X className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-[var(--space-6)] py-[var(--space-6)]">{children}</div>
-      </aside>
-    </div>
+    <AppSheetFrame span="full" label={title}>
+      <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-6)] overflow-y-auto p-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
+        {head}
+        {children}
+      </div>
+    </AppSheetFrame>
   );
 }

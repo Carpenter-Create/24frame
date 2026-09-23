@@ -57,32 +57,20 @@ export const APP_SHEET_MOTION_EASING = "ease-out";
 export const APP_SHEET_RISE_CLASS = "app-sheet-rise";
 export const APP_SHEET_SCRIM_FADE_CLASS = "app-sheet-scrim-fade";
 
-// Phone host — column + justify-end so the surface rises full-width
-// from the bottom. Default flex is row; items-end on a row host
-// hugs content and pins a card to the start. Account, workspace,
-// and the notifications bell consume this. md:hidden is a caller
-// concern when a desktop peek stays on screen.
+// Phone host — HouseOverlay dual-host lock v1 G3.
+// Column + justify-end, full width, from the bottom. md:hidden so
+// AppSheet never paints on desktop. Do not promote this into a modal.
 export const APP_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
 
 export const APP_SHEET_SURFACE_CLASS =
-  "flex w-full flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-12)] pt-[var(--space-6)] app-sheet-rise";
+  "flex w-full max-h-[90vh] flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface p-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))] shadow-none app-sheet-rise";
 
 export const APP_SHEET_HEAD_CLASS = "flex h-14 shrink-0 items-center";
 
 export const APP_SHEET_HAIRLINE_CLASS = "h-px w-full bg-hairline";
 
-export const APP_SHEET_SCRIM_CLASS = "absolute inset-0 bg-ink/24 app-sheet-scrim-fade";
-
-// Desktop modal promotion — apply alongside APP_SHEET_HOST_CLASS and
-// APP_SHEET_SURFACE_CLASS to upgrade a phone bottom sheet to a centered
-// modal card on md+. Phone layout stays untouched. Pattern mirrors
-// DIALOG_SHEET_CLASS (dialog.tsx) which does the reverse (dialog → sheet).
-export const APP_SHEET_MODAL_PROMOTE_HOST =
-  "md:items-center md:justify-center";
-
-export const APP_SHEET_MODAL_PROMOTE_SURFACE =
-  "md:w-auto md:min-w-[22rem] md:max-w-[min(92vw,28rem)] md:rounded-b-[16px] md:border md:border-hairline md:pb-[var(--space-6)] md:shadow-[var(--elevation)]";
+export const APP_SHEET_SCRIM_CLASS = "absolute inset-0 bg-ink/40 app-sheet-scrim-fade";
 
 // Thread ··· item glyphs only — surface chrome is MenuSurface.
 export const THREAD_POPOVER_ICON_CLASS = "size-4 shrink-0 text-ink-3";
