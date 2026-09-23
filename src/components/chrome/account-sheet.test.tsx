@@ -399,6 +399,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).toContain('data-sheet-group-item="help"');
     expect(html).toContain('data-sheet-group-id="preferences"');
     expect(html).toContain('data-sheet-group-id="help"');
+    expect(html).toContain('data-sheet-group-id="logOut"');
     expect(html).toContain("data-sheet-group-inset");
     expect(html).not.toContain("data-account-sheet-help-rule");
     expect(html.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
@@ -456,6 +457,13 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(logOutClass).toBe(ACCOUNT_SHEET_LOGOUT_CLASS);
     expect(logOutClass).toContain("text-accent");
     expect(logOutClass).not.toContain("text-ink ");
+    expect(logOutClass).not.toContain("rounded-");
+    expect(logOutClass).not.toContain("bg-surface-muted");
+    const logOutCard = html.slice(html.indexOf('data-sheet-group-id="logOut"'));
+    expect(logOutCard.indexOf('data-sheet-group-item="logOut"')).toBeGreaterThan(0);
+    expect(logOutCard.slice(0, logOutCard.indexOf('data-sheet-group-item="logOut"'))).toContain(
+      "data-sheet-group-inset",
+    );
     expect(html).toContain(SHEET_GROUP_CHEVRON_CLASS);
     expect(html).toContain('fill="currentColor"');
     expect(html).toContain('viewBox="0 0 256 256"');
@@ -923,6 +931,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(html).toContain("Get Help");
     expect(html).toContain('data-sheet-group-id="preferences"');
     expect(html).toContain('data-sheet-group-id="help"');
+    expect(html).toContain('data-sheet-group-id="logOut"');
     expect(html).not.toContain("data-account-sheet-help-rule");
     expect(html.match(/data-sheet-group-rule/g)).toHaveLength(1);
     expect(html).not.toContain("Give feedback");

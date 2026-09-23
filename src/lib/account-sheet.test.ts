@@ -158,10 +158,11 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("text-accent");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("text-ink");
-    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("rounded-[var(--radius-lg)]");
-    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("bg-surface-muted");
-    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("border-hairline");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("px-[var(--space-4)]");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("py-[var(--space-3)]");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("rounded-");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("bg-surface-muted");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("border-");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toMatch(/#[0-9a-fA-F]{3,8}/);
     expect(ACCOUNT_SHEET_PIN_CLASS).toContain("gap-[var(--space-4)]");
     expect(ACCOUNT_SHEET_PIN_CLASS).not.toContain("gap-[var(--space-6)]");

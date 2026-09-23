@@ -7,7 +7,7 @@
 // USER_MENU_ACTIONS (Settings — Theme — Get Help) and one grouping
 // SoT (ACCOUNT_SHEET_GROUPS). Settings + Theme share an inset card
 // (hairline between those rows). Get Help is its own inset card.
-// Log out is its own inset row, Sporty blue, outside the nav cards.
+// Log out sits in the same inset card, Sporty blue, outside the nav cards.
 // Profile is a Settings pane, not a
 // menu row. Give feedback lives on /help/feedback, not this
 // menu and not Settings. 24Frame AI is the header
@@ -41,7 +41,7 @@
 // bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
-import { APP_SHEET_HOST_CLASS, SHEET_GROUP_INSET_SHELL_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
@@ -85,7 +85,7 @@ export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
 
 // One grouping SoT for the phone sheet and the desktop 264.
 // Settings + Theme share a card. Get Help is its own card.
-// Log out is not a group — it stays the accent inset row in the pin.
+// Log out uses the same inset card in the pin. It is not a nav group.
 export const ACCOUNT_SHEET_GROUPS = [
   { id: "preferences", kinds: ["settings", "theme"] },
   { id: "help", kinds: ["help"] },
@@ -144,10 +144,11 @@ export const ACCOUNT_SHEET_LEFTOVER = 24;
 export const ACCOUNT_SHEET_LEFTOVER_CLASS =
   "h-[var(--space-6)] w-full shrink-0";
 
-// Own inset row — same card shell as the nav groups, Sporty blue label.
+// Row inside the shared inset card. Accent label and sign-out icon stay.
+// The card shell is SheetGroup inset — not a second chrome on this button.
 // Not a chevron destination. Not inside the nav cards.
 export const ACCOUNT_SHEET_LOGOUT_CLASS =
-  `flex w-full items-center gap-[var(--space-2)] ${SHEET_GROUP_INSET_SHELL_CLASS} px-[var(--space-4)] py-[var(--space-3)] text-[length:var(--text-base)] font-normal leading-6 text-accent`;
+  "flex w-full items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-3)] text-[length:var(--text-base)] font-normal leading-6 text-accent";
 
 // Mobile pin — Log out, hairline, footer are siblings. Log out →
 // hairline 16. Hairline → footer 16. Footer → bottom 32 (sheet
