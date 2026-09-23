@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { SOCIAL_CATEGORY_ALL } from "@/lib/social-categories";
 import { resolveSocialHomeLocation } from "@/lib/social-home-location";
+import { workspacePillClickDest } from "@/lib/workspace-switcher";
 
 const AGGREGATION_LOADING = [
   "src/app/(app)/aggregation/dashboard/loading.tsx",
@@ -28,27 +29,55 @@ describe("soft-nav pending selection", () => {
     expect(settings).toContain("markPending(item.href, event)");
     expect(settings).toContain("HouseNavPendingProbe");
     expect(pills).toContain("resolveWorkspaceMode(activePath, current)");
+    expect(pills).toContain("shellPath");
+    expect(pills).toContain("house?.navigateOwned");
     expect(pills).toContain("markPending?.(dest, event)");
-    expect(pills).toContain("markPending?.(pill.href, event)");
+    expect(pills).toContain("if (navigateOwned?.(dest, event)) return");
     expect(pills).toContain("router.push(dest)");
-    expect(pills).toContain("router.push(pill.href)");
+    expect(pills).not.toContain("router.push(pill.href)");
+    expect(pills).not.toContain("selectLeadPill(\n                  routeWorkspace,");
+    expect(
+      workspacePillClickDest({
+        shellPath: "/social",
+        workspace: "social",
+        pill: { id: "home", href: "/home" },
+        options: [],
+      }),
+    ).toBe("/home");
+    expect(
+      workspacePillClickDest({
+        shellPath: "/home",
+        workspace: "aggregation",
+        pill: { id: "home", href: "/home" },
+        options: [],
+      }),
+    ).toBeNull();
+    expect(
+      workspacePillClickDest({
+        shellPath: "/social",
+        workspace: "aggregation",
+        pill: { id: "aggregation", href: "/aggregation/dashboard" },
+        options: [{ mode: "aggregation" }],
+      }),
+    ).toBe("/aggregation/dashboard");
   });
 
-  it("reads Home lane and topic from the owned href and skeletons a cold chip", () => {
+  it("reads Home lane and topic from the owned href without swapping the center", () => {
     const topics = readFileSync("src/components/social/social-home-topics.tsx", "utf8");
     const tabs = readFileSync("src/components/social/social-home-tabs.tsx", "utf8");
     const slot = readFileSync("src/components/social/social-home-cold-slot.tsx", "utf8");
     const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
     expect(topics).toContain("useSocialHomeLive");
     expect(tabs).toContain("useSocialHomeLive");
-    expect(slot).toContain("SocialHomeCenterSkeleton");
-    expect(slot).toContain("topics={false}");
-    expect(slot).toContain("router.push(house.href)");
+    expect(slot).toContain("return children");
+    expect(slot).toContain("router.push(house.href, { scroll: false })");
+    expect(slot).toContain("pushed.current = null");
+    expect(slot).not.toContain("<SocialHomeCenterSkeleton");
+    expect(slot).not.toContain("<SocialForYouSkeleton");
+    expect(slot).not.toContain("live.lane !== \"following\"");
     expect(home).toContain("<SocialHomeTopics active={topic}");
     expect(home).toContain("<SocialHomeColdSlot");
     expect(home).toContain("<SocialHomeFollowingRail");
-    expect(slot).toContain("live.lane !== \"following\"");
-    expect(slot).toContain("<SocialForYouSkeleton />");
     expect(
       resolveSocialHomeLocation({
         owned: true,
@@ -77,11 +106,18 @@ describe("soft-nav cold hop", () => {
     expect(cache).toContain("houseBlankOutlet");
     expect(cache).toContain("HOUSE_BLANK_OUTLET_RETRY_MS");
     expect(cache).toContain("window.setInterval(kick, HOUSE_BLANK_OUTLET_RETRY_MS)");
+    expect(cache).toContain("if (!houseBlankOutletRepeats(action)) return");
+    expect(cache).toContain("action === \"load\"");
     expect(cache).toContain("acceptStale");
     expect(cache).toContain("setSettledKey(activeKey)");
     expect(cache).not.toContain("setTimeout");
     expect(cache).not.toContain("setAcceptKey");
     expect(provider).toContain("houseSocialHomePanelHop");
+    expect(provider).toContain("houseHomePeriodHop");
+    expect(provider).toContain("router.push(href, { scroll: false })");
+    const home = readFileSync("src/app/(app)/home/loading.tsx", "utf8");
+    expect(home).toContain("data-house-rsc-fallback");
+    expect(home).toContain("min-h-[12rem]");
   });
 
   it("marks Settings and Aggregation loading as house ingress", () => {

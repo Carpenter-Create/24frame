@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   HOUSE_PERIOD_PRESETS_HOST_CLASS,
   HOUSE_PERIOD_PRESETS_PHONE_CLASS,
+  resolveHousePeriodPresetKey,
 } from "@/lib/house-period-presets";
 import {
   HOUSE_SEGMENTED_TRACK_CLASS,
@@ -24,6 +25,7 @@ describe("HousePeriodPresets craft", () => {
     expect(craft).not.toContain("flex-wrap");
     expect(src).toContain("HousePageSelect");
     expect(src).toContain("SegmentedTrack");
+    expect(src).toContain("resolveHousePeriodPresetKey");
     expect(src).toContain("SEGMENTED_TRACK_PERSIST.period");
     expect(src).toContain("({ selectedIndex })");
     expect(src).toContain("segmentedItemOn");
@@ -34,5 +36,39 @@ describe("HousePeriodPresets craft", () => {
     expect(src).not.toContain("chipAttrs");
     expect(src).not.toContain("flex-wrap");
     expect(src).not.toContain("overflow-x-auto");
+  });
+
+  it("flips the Revenue chip from the owned Home period before RSC", () => {
+    const items = [
+      { key: "all", href: "/home" },
+      { key: "ytd", href: "/home?period=ytd" },
+    ];
+    expect(
+      resolveHousePeriodPresetKey({
+        seed: "all",
+        owned: true,
+        currentHref: "/home?period=ytd",
+        nextHref: "/home",
+        items,
+      }),
+    ).toBe("ytd");
+    expect(
+      resolveHousePeriodPresetKey({
+        seed: "all",
+        owned: false,
+        currentHref: "/home?period=ytd",
+        nextHref: "/home?period=ytd",
+        items,
+      }),
+    ).toBe("all");
+    expect(
+      resolveHousePeriodPresetKey({
+        seed: "ytd",
+        owned: true,
+        currentHref: "/social",
+        nextHref: "/home",
+        items,
+      }),
+    ).toBe("ytd");
   });
 });

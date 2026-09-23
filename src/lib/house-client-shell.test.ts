@@ -9,10 +9,12 @@ import {
   HOUSE_CLIENT_SHELL,
   houseApplyCachedChild,
   houseBlankOutlet,
+  houseBlankOutletRepeats,
   houseCanIngest,
   houseClientHistoryState,
   houseExactHref,
   houseFocusBelongsToInactiveScreen,
+  houseHomePeriodHop,
   houseHrefKey,
   houseNavHop,
   housePaintedKeys,
@@ -66,7 +68,19 @@ describe("house client shell SoT", () => {
     expect(houseScreenKey("/social/u/ada/follows", "?tab=following&q=ada")).toBe(
       "/social/u/ada/follows?tab=following&q=ada",
     );
-    expect(houseScreenKey("/home", "?period=ytd")).toBe("/home?period=ytd");
+    expect(houseScreenKey("/home", "?period=ytd")).toBe("/home");
+    expect(houseScreenKey("/home", "?period=2026-09")).toBe("/home");
+    expect(houseScreenKey("/", "?period=ytd")).toBe("/");
+    expect(houseHomePeriodHop("/home", "/home?period=ytd")).toBe(true);
+    expect(houseHomePeriodHop("/home?period=ytd", "/home")).toBe(true);
+    expect(houseHomePeriodHop("/home?period=ytd", "/home?period=2026-09")).toBe(true);
+    expect(houseHomePeriodHop("/home?period=ytd", "/home?period=ytd")).toBe(false);
+    expect(houseHomePeriodHop("/home?period=ytd", "/home?period=ytd&ai=1")).toBe(false);
+    expect(houseHomePeriodHop("/home", "/home/news")).toBe(false);
+    expect(houseHomePeriodHop("/social", "/social?topic=music")).toBe(false);
+    expect(houseBlankOutletRepeats("load")).toBe(false);
+    expect(houseBlankOutletRepeats("refresh")).toBe(true);
+    expect(houseBlankOutletRepeats("none")).toBe(false);
     expect(houseHrefKey("/social/explore")).toBe("/social/explore");
     expect(houseShouldClientNavigate("/social?topic=Music", ["/social"])).toBe(true);
     expect(houseSocialHomePanelHop("/social", "/social?topic=music")).toBe(true);
@@ -516,6 +530,27 @@ describe("Social rail cache flips", () => {
     const restart = cacheStep(flip.seen, SOCIAL_ROUTES.profile, profile, flip.nodes, flip.order);
     expect(restart.displayKey).toBe(SOCIAL_ROUTES.profile);
     expect(restart.nodes[SOCIAL_ROUTES.profile]).toBe(profile);
+  });
+
+  it("keeps the mounted Home screen while a period query is still the loading fallback", () => {
+    const home = railTree("/home");
+    const booted = cacheStep(null, "/home", home, {}, []);
+    const settled = cacheStep(booted.seen, "/home", home, booted.nodes, booted.order);
+    const loading = railTree("home-loading");
+    const during = houseApplyCachedChild({
+      seen: settled.seen,
+      nextKey: "/home",
+      activeKey: "/home",
+      nextPath: "/home",
+      child: loading,
+      fallback: true,
+      nodes: settled.nodes,
+      order: settled.order,
+    });
+    expect(during.displayKey).toBe("/home");
+    expect(during.showIngress).toBe(false);
+    expect(during.nodes["/home"]).toBe(home);
+    expect(houseBlankOutlet(during.displayKey, during.showIngress, "/home", "/home")).toBe("none");
   });
 
   it("paints Home when the live tree arrives with the URL and the slot was empty", () => {

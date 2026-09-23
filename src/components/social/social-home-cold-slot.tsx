@@ -8,13 +8,13 @@ import { houseExactHref } from "@/lib/house-client-shell";
 import type { SocialCategoryLabel } from "@/lib/social-categories";
 import type { SocialHomeLane } from "@/lib/social";
 
-import { SocialForYouSkeleton, SocialHomeCenterSkeleton } from "./social-skeletons";
 import { useSocialHomeLive } from "./social-home-live";
-import { SocialHomeTabs } from "./social-home-tabs";
 
 // Cold lane/topic: the mounted Home screen stays up so the chip can
-// select in the click. The center below the topic rail paints the
-// route skeleton, then Next loads that query.
+// select in the click. Keep the live center and For You rail mounted.
+// Swapping them for SocialHomeCenterSkeleton / SocialForYouSkeleton
+// (or dropping the rail) moves the layout before the query lands.
+// Next still has to load the query; pushState alone never fetches it.
 export function SocialHomeColdSlot({
   seedLane,
   seedTopic,
@@ -31,31 +31,35 @@ export function SocialHomeColdSlot({
   const cold = live.lane !== seedLane || live.topic !== seedTopic;
 
   useEffect(() => {
-    if (!cold || !house) return;
+    if (!cold || !house) {
+      // Settled hops must be able to push this href again. A sticky
+      // guard left the next click on the same chip as a no-op.
+      pushed.current = null;
+      return;
+    }
     const nextHref = `${house.nextPathname}${house.nextSearch}`;
-    if (houseExactHref(house.href) === houseExactHref(nextHref)) return;
+    if (houseExactHref(house.href) === houseExactHref(nextHref)) {
+      pushed.current = null;
+      return;
+    }
     if (pushed.current === house.href) return;
     pushed.current = house.href;
-    router.push(house.href);
+    router.push(house.href, { scroll: false });
   }, [cold, house, router]);
 
-  if (!cold) return children;
-  return <SocialHomeCenterSkeleton topics={false} middle={<SocialHomeTabs active={seedLane} />} />;
+  return children;
 }
 
-// Desktop For You sits beside Home, outside the cold center. Lane is
-// owned client state, so the server `lane` prop stays stale for the hop.
+// Desktop For You sits beside Home. Lane is owned client state, so the
+// server `lane` prop stays stale for the hop. Leave the painted rail
+// in place until that seed catches up — nulling it or painting
+// SocialForYouSkeleton shifts the center under the selected tab.
 export function SocialHomeFollowingRail({
-  seedLane,
-  seedTopic,
   children,
 }: {
   seedLane: SocialHomeLane;
   seedTopic: SocialCategoryLabel;
   children: ReactNode;
 }) {
-  const live = useSocialHomeLive(seedLane, seedTopic);
-  if (live.lane !== "following") return null;
-  if (seedLane !== "following") return <SocialForYouSkeleton />;
   return children;
 }

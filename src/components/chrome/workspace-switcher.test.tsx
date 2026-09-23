@@ -46,6 +46,7 @@ import { WorkspaceSwitcher } from "./workspace-switcher";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "workspace-switcher.tsx"), "utf8");
+const lanes = readFileSync(join(here, "../../lib/workspace-switcher.ts"), "utf8");
 const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
 const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
 const sheetSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
@@ -188,7 +189,7 @@ describe("workspace switcher header control", () => {
     expect(src).not.toContain("workspaceSwitcherShowsSettings");
     expect(src).not.toContain("workspaceSwitcherSettingsHref");
     expect(src).toContain("workspaceSwitcherPersistLane");
-    expect(src).toContain("workspaceHome(option.mode)");
+    expect(lanes).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
     expect(src).toContain("mousedown");
     expect(src).toContain("Escape");
@@ -243,7 +244,7 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain("/education");
     expect(html).not.toContain("/account/workspace");
     expect(src).toContain("workspaceSwitcherPersistLane");
-    expect(src).toContain("workspaceHome(option.mode)");
+    expect(lanes).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
     expect(src).toContain("workspaceSwitcherSegmentLabel");
     expect(src).toContain("ArrowRight");
