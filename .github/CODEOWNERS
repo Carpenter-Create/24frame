@@ -52,3 +52,19 @@
 # Money and rights logic.
 /src/lib/stripe/            @acarpcreate
 /src/lib/agreements.ts      @acarpcreate
+
+# Chrome source of truth and the design locks that govern it.
+# Owner is the repo admin already on the wildcard (@acarpcreate). No second
+# team: a fictional @org/team would fail CODEOWNERS parse.
+/src/lib/house-sheet.ts     @acarpcreate
+/src/lib/house-page-select.ts @acarpcreate
+/src/lib/menu-surface.ts    @acarpcreate
+/src/components/ui/dialog.tsx @acarpcreate
+/src/components/chrome/house-page-select.tsx @acarpcreate
+/src/components/chrome/menu-surface.tsx @acarpcreate
+/src/components/chrome/menu-surface.test.ts @acarpcreate
+/src/components/**/menu-surface* @acarpcreate
+/src/components/**/education-drawer* @acarpcreate
+# The drawer file is an app route, so the components glob above does not match it.
+/src/app/(app)/(operator)/education/manage/education-drawer.tsx @acarpcreate
+/docs/design-locks/         @acarpcreate
