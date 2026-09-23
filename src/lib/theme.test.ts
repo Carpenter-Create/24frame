@@ -97,6 +97,20 @@ describe("theme toggle", () => {
     expect(themeToggleLabel("dark")).toBe("Switch to light mode");
   });
 
+  it("header flip exits Auto and stores the explicit mode", () => {
+    const root = fakeRoot(true);
+    const storage = fakeStorage({ [THEME_STORAGE_KEY]: "auto" });
+    vi.stubGlobal("document", { documentElement: root });
+    vi.stubGlobal("localStorage", storage);
+    const dispatchEvent = vi.fn();
+    vi.stubGlobal("window", { dispatchEvent });
+    expect(toggleDocumentTheme()).toBe("light");
+    expect(storage.data[THEME_STORAGE_KEY]).toBe("light");
+    expect(storage.data[THEME_STORAGE_KEY]).not.toBe("auto");
+    expect(root.classes.has(THEME_DARK_CLASS)).toBe(false);
+    expect(dispatchEvent).toHaveBeenCalled();
+  });
+
   it("toggleDocumentTheme still flips .dark + gc-theme", () => {
     const root = fakeRoot(false);
     const storage = fakeStorage();

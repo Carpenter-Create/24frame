@@ -21,9 +21,9 @@
 // window, never a workspace hop. Second click uses the same close
 // path as X / Escape. Expand/collapse stays overlay-scoped. Close
 // strips ?ai=1 and leaves the current path. Ask AI is header + Home
-// module only (#465). Color mode is the avatar Theme row only
-// (Adam lock 2026-09-22). No header sun/moon. One trail.
-// Desktop md+ keeps switcher · Ask · bell · avatar. The Ask
+// module only (#465). Header sun/moon sits after the bell and flips
+// light and dark, exiting Auto. One trail.
+// Desktop md+ keeps switcher · Ask · bell · sun/moon · avatar. The Ask
 // control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
@@ -114,8 +114,8 @@ export const HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS = "contents md:hidden";
 export const HOUSE_HEADER_TRAILING_AVATAR_CLASS =
   "flex size-[var(--header-avatar-size)] shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
 
-// Shared header hit. Ask AI uses this box. The sun/moon toggle is
-// not mounted — Theme is the avatar-menu door only.
+// Shared header hit. Ask AI and the sun/moon toggle use this box.
+// The toggle writes an explicit light or dark value.
 export const HOUSE_THEME_TOGGLE_CLASS =
   `${HOUSE_HEADER_TRAILING_HIT_CLASS} text-ink-3 transition-colors hover:text-ink`;
 

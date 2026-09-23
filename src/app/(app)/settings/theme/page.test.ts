@@ -50,7 +50,8 @@ describe("SettingsThemePage", () => {
     expect(html).toContain('data-settings-appearance-option="auto"');
     expect(html).toContain('data-settings-appearance-option="dark"');
     expect(html).toContain('data-settings-appearance-option="light"');
-    expect(html).toContain(APPEARANCE.systemDefault);
+    expect(html).toContain(APPEARANCE.auto);
+    expect(html).not.toContain(APPEARANCE.systemDefault);
     expect(html).toContain(APPEARANCE.dark);
     expect(html).toContain(APPEARANCE.light);
     expect(html).not.toMatch(/<h3[^>]*>Appearance<\/h3>/);

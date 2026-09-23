@@ -1,4 +1,5 @@
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
+import { PrefDrillGroup } from "@/components/settings/pref-drill-group";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { composeLocationLabel, LOCATION, type ProfileLocation } from "@/lib/location";
@@ -14,18 +15,19 @@ import {
   settingsPaneTitle,
 } from "@/lib/settings";
 
-// Preferences pane — Location drill and the notification matrix.
-// Theme is the avatar-menu door at /settings/theme, not this pane.
+// Preferences pane — Location and Theme in one PrefDrillGroup,
+// then the notification matrix (PrefControlSection grammar).
 // Speech-learning is parked off Preferences (Adam 2026-09-22).
 // The gc-speech-learning store stays; this pane does not surface it.
 // Never a You / Social / Education / Aggregation spine.
 // Course management lives on the Education operator workspace,
 // not a Preferences row. Not a CMS. Not GC Staff admin.
 //
-// Location is a Coinbase drill on phone and desktop. The muted
-// value is the composed place, or the empty placeholder.
+// Location and Theme are Coinbase drills inside the inset group.
+// The muted value is the composed place, or the empty placeholder,
+// and the stored theme label (Auto, Dark, or Light).
 // Mobile also drills to Notifications. Instant switches stay
-// on the Notifications pane.
+// on the Notifications pane. Theme is not under that matrix.
 // Desktop keeps the matrix inside SETTINGS_CONTENT_MEASURE_CLASS —
 // constrained measure, not full-bleed rows.
 
@@ -46,12 +48,7 @@ export function PreferencesSettings({
           pathname={SETTINGS.preferencesHref}
         />
         <div data-settings-pref-index="" className={SETTINGS_DRILL_LIST_CLASS}>
-          <SettingsDrillRow
-            kind="location"
-            label={LOCATION.title}
-            value={locationValue}
-            href={SETTINGS.locationHref}
-          />
+          <PrefDrillGroup locationValue={locationValue} />
           <div className={menuHostClass("phone")} data-menu-host="phone" data-menu-family="B">
             <SettingsDrillRow
               kind="notifications"

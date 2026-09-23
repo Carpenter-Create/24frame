@@ -1,4 +1,4 @@
-// Quiet selected mark for System default / Dark / Light. 16. Inline
+// Quiet selected mark for Auto / Dark / Light. 16. Inline
 // stroke — not an icon pack, not a radio, not purple.
 
 export function AppearanceCheck({

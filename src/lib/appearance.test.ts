@@ -29,7 +29,7 @@ const themeSrc = readFileSync(join(here, "theme.ts"), "utf8");
 const sheetSrc = readFileSync(join(here, "../components/chrome/account-sheet.tsx"), "utf8");
 
 describe("appearance copy", () => {
-  it("keeps System default / Dark / Light — not a page", () => {
+  it("keeps Auto / Dark / Light — not a page", () => {
     expect(APPEARANCE.title).toBe("Appearance");
     expect(APPEARANCE.title).toBe(USER_MENU.appearance);
     expect(APPEARANCE.back).toBe("Back");
@@ -44,7 +44,7 @@ describe("appearance copy", () => {
       "light",
     ]);
     expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.label)).toEqual([
-      "System default",
+      "Auto",
       "Dark",
       "Light",
     ]);
@@ -53,7 +53,10 @@ describe("appearance copy", () => {
     });
     expect(appearancePreferenceLabel("light")).toBe("Light");
     expect(appearancePreferenceLabel("dark")).toBe("Dark");
-    expect(appearancePreferenceLabel("auto")).toBe("System default");
+    expect(appearancePreferenceLabel("auto")).toBe("Auto");
+    expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.label)).not.toContain(
+      APPEARANCE.systemDefault,
+    );
     expect(APPEARANCE).not.toHaveProperty("href");
     expect(`${APPEARANCE.title} ${APPEARANCE.systemDefault}`).not.toMatch(
       /seamless|frictionless|elevate|amplify|unleash|supercharge/i,
@@ -61,16 +64,21 @@ describe("appearance copy", () => {
     expect(existsSync(join(here, "../app/(app)/account/appearance/page.tsx"))).toBe(false);
   });
 
-  it("keeps the unused Auto list off System default / Dark / Light", () => {
+  it("uses Auto on the theme face — the same word as the stored mode", () => {
     expect(APPEARANCE.auto).toBe("Auto");
     expect(APPEARANCE_OPTIONS.map((option) => option.label)).toEqual(["Light", "Dark", "Auto"]);
-    expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.label)).not.toContain("Auto");
+    expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.label)).toContain("Auto");
+    expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.kind)).toEqual(["auto", "dark", "light"]);
   });
 
   it("shares gc-theme with the avatar Theme page — no second store", () => {
     const themePage = readFileSync(join(here, "../app/(app)/settings/theme/page.tsx"), "utf8");
     const preferencesPane = readFileSync(
       join(here, "../components/settings/preferences-settings.tsx"),
+      "utf8",
+    );
+    const drillSrc = readFileSync(
+      join(here, "../components/settings/pref-drill-group.tsx"),
       "utf8",
     );
     expect(THEME_STORAGE_KEY).toBe("gc-theme");
@@ -86,9 +94,16 @@ describe("appearance copy", () => {
     expect(prefsSrc).not.toContain("THEME_STORAGE_KEY");
     expect(themePage).toContain("AppearanceThemePicker");
     expect(themePage).toContain("SETTINGS.themeHref");
+    expect(preferencesPane).toContain("PrefDrillGroup");
     expect(preferencesPane).not.toContain("AppearanceThemePicker");
     expect(preferencesPane).not.toContain("AppearanceThemeRow");
     expect(preferencesPane).not.toContain("AppearancePreferences");
+    expect(drillSrc).toContain("SETTINGS.themeHref");
+    expect(drillSrc).toContain("useThemePreference");
+    expect(drillSrc).toContain("appearancePreferenceLabel");
+    expect(drillSrc).not.toContain("AppearanceThemePicker");
+    expect(drillSrc).not.toContain("localStorage");
+    expect(drillSrc).not.toContain("THEME_STORAGE_KEY");
     expect(sheetSrc).toContain("applyDocumentThemePreference");
     expect(sheetSrc).not.toContain("THEME_STORAGE_KEY");
     expect(sheetSrc).not.toContain("localStorage");

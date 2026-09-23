@@ -16,9 +16,11 @@
 // Organization holds the company profile and Team invite (same
 // account, existing org_role). House grant/comp is staff-only on
 // /gc/clients — never a customer Settings directory.
-// Preferences holds Location and the notification matrix. Theme is not a
-// Preferences block. Adam lock 2026-09-22: Theme is an avatar-menu
-// row at /settings/theme (peer of Preferences, same gc-theme SoT).
+// Preferences holds Location, Theme, and the notification matrix.
+// Location and Theme share one PrefDrillGroup (inset SETTINGS_GROUP).
+// The Theme row drills to /settings/theme — the same picker as the
+// avatar Theme door, same gc-theme writes. Notifications stays the
+// t-heading matrix. Theme is not nested under Notifications.
 // Speech-learning is not a Preferences subsection (Adam 2026-09-22
 // follow-up). The gc-speech-learning store stays; do not invent a
 // Settings home for it. Location drills to /settings/preferences/location
@@ -53,9 +55,9 @@
 //
 // Existing /settings/agreements, /settings/refer stay Profile doors.
 // Company persist stays organizations.name.
-// Theme SoT is gc-theme. The only door is the avatar-menu Theme
-// row at /settings/theme. Header sun/moon is gone. Preferences
-// does not host Appearance. Get Help / Give feedback stay on
+// Theme SoT is gc-theme via lib/theme.ts. Avatar Theme and the
+// Preferences Theme row share /settings/theme. Header sun/moon
+// flips light and dark and exits Auto. Get Help / Give feedback stay on
 // /help — never Settings hub chrome.
 //
 // 600:881 shell — one dest-rail slot occupies the Access slot on every
@@ -85,7 +87,7 @@ export const SETTINGS = {
   securityHref: "/settings/security",
   theme: USER_MENU.theme,
   themeHref: USER_MENU.themeHref,
-  themeHelper: "Choose Light, Dark, or System default.",
+  themeHelper: "Choose Light, Dark, or Auto.",
   notificationsHref: "/settings/preferences/notifications",
   locationHref: "/settings/preferences/location",
   profileNameHref: "/settings/profile/name",
@@ -190,7 +192,7 @@ export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 // inside the group — never header pills. Light 24Frame register.
 export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
-  "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
+  "flex min-h-11 w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
 export const SETTINGS_DRILL_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 // Person rows: avatar stays leading. Identity + trailing stack on
 // phone so the row never truncates. Desktop keeps identity · action.

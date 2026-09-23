@@ -17,8 +17,7 @@
 // peer workspace pill rail.
 // Phone OS dark is not the product theme. One house SoT.
 // Trailing is search (when needed) · 24Frame AI · bell ·
-// avatar. Color mode is the avatar Theme row only (Adam lock
-// 2026-09-22). No header sun/moon.
+// sun/moon · avatar. The sun/moon flips light and dark and exits Auto.
 // Ask AI is header + Home module only (#465).
 // Craft is Elevated Mercury (reference, not a pixel clone, not
 // Nextdoor frost): one floating pill, house surface fill, hairline,

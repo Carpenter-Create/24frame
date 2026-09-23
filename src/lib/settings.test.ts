@@ -94,7 +94,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.theme).toBe(USER_MENU.theme);
     expect(SETTINGS.themeHref).toBe("/settings/theme");
     expect(SETTINGS.themeHref).toBe(USER_MENU.themeHref);
-    expect(SETTINGS.themeHelper).toBe("Choose Light, Dark, or System default.");
+    expect(SETTINGS.themeHelper).toBe("Choose Light, Dark, or Auto.");
     expect(SETTINGS.notificationsHref).toBe("/settings/preferences/notifications");
     expect(SETTINGS.locationHref).toBe("/settings/preferences/location");
     expect(SETTINGS.profileNameHref).toBe("/settings/profile/name");
@@ -376,6 +376,7 @@ describe("settings hub lock", () => {
 
   it("locks Coinbase mobile Settings drill-row tokens — one house SoT", () => {
     expect(SETTINGS_DRILL_ROW_CLASS).toContain("justify-between");
+    expect(SETTINGS_DRILL_ROW_CLASS).toContain("min-h-11");
     expect(SETTINGS_DRILL_ROW_CLASS).toContain("t-body");
     expect(SETTINGS_DRILL_VALUE_CLASS).toBe("t-body-sm text-ink-3");
     expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("truncate");

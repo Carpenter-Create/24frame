@@ -519,7 +519,8 @@ function AccountMenuBody({
 // (264 / rounded-12). One top row: Identity 48 + Close/44.
 // Inset cards — Settings + Theme, then Get Help. Log out is its
 // own inset row. Settings — Theme — Get Help.
-// Theme drills to /settings/theme. No header sun/moon.
+// Theme drills to /settings/theme — the same picker as Preferences.
+// Header sun/moon is HouseLeadChrome, not this sheet.
 // 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
 // Leftover under the last item is 24 house row air (--space-6),
