@@ -17,3 +17,4 @@ Design locks land in this directory before CoS undrafts a UI pull request.
 - [`house-overlay-dual-host-v1.md`](house-overlay-dual-host-v1.md) — overlay geometry
 - [`preferences-settings-row-grammar-lock-v1.md`](preferences-settings-row-grammar-lock-v1.md) — Preferences PrefDrillGroup
 - [`theme-sot-auto-lock-v1.md`](theme-sot-auto-lock-v1.md) — Theme Auto, one `gc-theme` store
+- [`theme-chrome-avatar-only-lock-v1.md`](theme-chrome-avatar-only-lock-v1.md) — avatar Theme drill; header sun/moon removed

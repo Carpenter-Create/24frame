@@ -94,20 +94,6 @@ function documentStorage(): ThemeStorage | null {
 
 export const THEME_PREFERENCE_EVENT = "gc-theme-preference";
 
-export function toggleDocumentTheme(): Theme {
-  // Header sun/moon. Writes light or dark — never auto — so a flip
-  // exits Auto. Same gc-theme key as the picker.
-  const next = toggleTheme(
-    themeFromRoot(document.documentElement),
-    document.documentElement,
-    documentStorage(),
-  );
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(THEME_PREFERENCE_EVENT));
-  }
-  return next;
-}
-
 export function applyDocumentThemePreference(preference: ThemePreference): Theme {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const resolved = applyThemePreference(
@@ -133,11 +119,3 @@ export function themePreferenceSnapshot(): ThemePreference {
   return preferenceFromStorage(documentStorage());
 }
 
-export const THEME_TOGGLE = {
-  toLight: "Switch to light mode",
-  toDark: "Switch to dark mode",
-} as const;
-
-export function themeToggleLabel(current: Theme): string {
-  return current === "dark" ? THEME_TOGGLE.toLight : THEME_TOGGLE.toDark;
-}
