@@ -81,8 +81,13 @@ import {
   type WorkspaceMenuOption,
   workspaceModeLabel,
 } from "@/lib/workspace-menu";
-import type { OverviewLeadPillId } from "@/lib/overview";
-import { persistWorkspaceCookie, type WorkspaceMode } from "@/lib/workspace";
+import { overviewLeadShouldNavigate, type OverviewLeadPillId } from "@/lib/overview";
+import {
+  persistWorkspaceCookie,
+  resolveWorkspaceMode,
+  workspaceHome,
+  type WorkspaceMode,
+} from "@/lib/workspace";
 
 export const WORKSPACE_SWITCHER = {
   label: USER_MENU.workspace,
@@ -379,6 +384,25 @@ export function workspaceSwitcherTriggerMarkId(
 export function workspaceSwitcherLeadMarkLetter(id: PhoneWorkspaceSwitcherId): string {
   if (id === "home") return "H";
   return WORKSPACE_SWITCHER_MARK[id];
+}
+
+/**
+ * Dest for a workspace-pill click, or null when the shell is already there.
+ * Pending chrome is not arrival — a dropped push must stay clickable.
+ * `workspace` is the cookie/clamped lane, not the optimistic active path.
+ */
+export function workspacePillClickDest(input: {
+  shellPath: string;
+  workspace: WorkspaceMode;
+  pill: { id: OverviewLeadPillId; href: string };
+  options: readonly { mode: WorkspaceMode }[];
+}): string | null {
+  const mode = resolveWorkspaceMode(input.shellPath, input.workspace);
+  if (!overviewLeadShouldNavigate(input.shellPath, mode, input.pill)) return null;
+  if (input.pill.id === "home" || input.pill.id === "co-productions") return input.pill.href;
+  const option = input.options.find((row) => row.mode === input.pill.id);
+  if (!option) return null;
+  return workspaceHome(option.mode);
 }
 
 /** Persist the workspace cookie for a lane hop. Home and Co-Productions do not write.

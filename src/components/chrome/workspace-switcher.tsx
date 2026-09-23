@@ -11,7 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { HouseLink } from "./house-link";
 import { useRouter } from "next/navigation";
-import { useHousePathname } from "./house-client-shell";
+import { useHouseClient, useHousePathname } from "./house-client-shell";
 import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
@@ -22,12 +22,11 @@ import {
   overviewLeadActiveIndex,
   overviewLeadPills,
   overviewLeadSelected,
-  overviewLeadShouldNavigate,
   overviewTriggerLabel,
   type OverviewLeadPill,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import { clampWorkspaceMode, resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { prefetchHrefList, type HouseNavClickLike } from "@/lib/house-nav-pending";
 import {
   HouseNavPendingProbe,
@@ -69,6 +68,7 @@ import {
   workspaceSwitcherSegmentTabIndex,
   workspaceSwitcherStaticClass,
   workspaceSwitcherTriggerClass,
+  workspacePillClickDest,
   workspaceSwitcherPersistLane,
 } from "@/lib/workspace-switcher";
 
@@ -90,22 +90,27 @@ function selectLeadPill(
   pill: Pick<OverviewLeadPill, "id" | "href">,
   options: readonly WorkspaceMenuOption[],
   router: ReturnType<typeof useRouter>,
-  pathname: string,
+  shellPath: string,
   isGcStaff?: boolean,
   markPending?: (href: string, event?: HouseNavClickLike) => void,
   event?: HouseNavClickLike,
+  navigateOwned?: (href: string, click?: HouseNavClickLike) => boolean,
 ) {
-  if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
-  if (pill.id === "home" || pill.id === "co-productions") {
-    markPending?.(pill.href, event);
-    router.push(pill.href);
-    return;
+  // shellPath is the owned/Next address. Pending activePath lights the
+  // pill in the click but must not swallow a retry when the push no-ops
+  // (Next already has this URL while the owned screen is elsewhere).
+  const dest = workspacePillClickDest({
+    shellPath,
+    workspace: current,
+    pill,
+    options,
+  });
+  if (!dest) return;
+  if (pill.id !== "home" && pill.id !== "co-productions") {
+    workspaceSwitcherPersistLane(pill.id, isGcStaff);
   }
-  const option = options.find((row) => row.mode === pill.id);
-  if (!option) return;
-  workspaceSwitcherPersistLane(option.mode, isGcStaff);
-  const dest = workspaceHome(option.mode);
   markPending?.(dest, event);
+  if (navigateOwned?.(dest, event)) return;
   router.push(dest);
 }
 
@@ -119,6 +124,8 @@ function WorkspaceSwitcherPills({
   isGcStaff?: boolean;
 }) {
   const router = useRouter();
+  const shellPath = useHousePathname();
+  const house = useHouseClient();
   const { activePath, markPending } = useHouseNavPending();
   const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -182,14 +189,15 @@ function WorkspaceSwitcherPills({
               className={workspaceSwitcherSegmentClass(selected)}
               onClick={(event) => {
                 selectLeadPill(
-                  routeWorkspace,
+                  current,
                   pill,
                   options,
                   router,
-                  activePath,
+                  shellPath,
                   isGcStaff,
                   markPending,
                   event,
+                  house?.navigateOwned,
                 );
               }}
               onKeyDown={(event) => onSegmentKeyDown(event, index)}
@@ -222,6 +230,7 @@ export function WorkspaceSwitcher({
   const current = clampWorkspaceMode(requestedCurrent, staffGate);
   const router = useRouter();
   const pathname = useHousePathname();
+  const house = useHouseClient();
   const { activePath, markPending } = useHouseNavPending();
   const hostRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -366,8 +375,18 @@ export function WorkspaceSwitcher({
               data-workspace-switcher-option={pill.id}
               aria-selected={selected}
               className={workspaceSwitcherOptionClass(selected)}
-              onClick={() => {
-                selectLeadPill(current, pill, options, router, pathname, staffGate);
+              onClick={(event) => {
+                selectLeadPill(
+                  current,
+                  pill,
+                  options,
+                  router,
+                  pathname,
+                  staffGate,
+                  undefined,
+                  event,
+                  house?.navigateOwned,
+                );
                 setOpen(false);
               }}
             >

@@ -19,9 +19,11 @@ import {
   HOUSE_CLIENT_SHELL,
   houseApplyCachedChild,
   houseBlankOutlet,
+  houseBlankOutletRepeats,
   houseClientHistoryState,
   houseExactHref,
   houseFocusBelongsToInactiveScreen,
+  houseHomePeriodHop,
   type HouseChildSeen,
   houseHrefKey,
   houseNavHop,
@@ -118,6 +120,7 @@ function HousePathProviderCore({
   const nextKey = houseScreenKey(nextPath, nextSearch);
   const [ownedHref, setOwnedHref] = useState<string | null>(null);
   const [seenNextHref, setSeenNextHref] = useState(nextHref);
+  const pushedPeriod = useRef<string | null>(null);
 
   const reconciled = houseReconcileOwnedHref(ownedHref, nextHref, seenNextHref);
   if (reconciled !== ownedHref) {
@@ -153,7 +156,9 @@ function HousePathProviderCore({
         });
         if (hop === "next") return false;
         if (hop === "stay") return true;
-        if (houseSocialHomePanelHop(href, next)) {
+        // Panel queries stay on the mounted screen. pushState would
+        // not fetch; the provider effect router.pushes a Home period.
+        if (houseSocialHomePanelHop(href, next) || houseHomePeriodHop(href, next)) {
           setOwnedHref(next);
           return true;
         }
@@ -170,6 +175,21 @@ function HousePathProviderCore({
     }),
     [href, nextHref, nextKey, nextPath, nextSearch, parsed.pathname, parsed.search, router, screenKey],
   );
+
+  // Owned Home period must fetch. The click only setOwnedHref so the
+  // Revenue chip can flip before RSC. Do not swap the mounted screen
+  // for home/loading.tsx while that query is in flight.
+  useEffect(() => {
+    if (!houseHomePeriodHop(nextHref, href)) {
+      pushedPeriod.current = null;
+      return;
+    }
+    // Router identity can change while the hop is still open. A second
+    // push of the same href aborts the fetch and the period never lands.
+    if (pushedPeriod.current === href) return;
+    pushedPeriod.current = href;
+    router.push(href, { scroll: false });
+  }, [href, nextHref, router]);
 
   useEffect(() => {
     const onPop = () => {
@@ -276,12 +296,15 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   useEffect(() => {
     const action = houseBlankOutlet(displayKey, showIngress, activeKey, nextKey);
     if (action === "none") return;
+    if (action === "load") {
+      // One push. An interval of the same href aborts the RSC hop,
+      // so the slot stays blank and the click looks stuck.
+      if (house?.href) router.push(house.href);
+      return;
+    }
+    if (!houseBlankOutletRepeats(action)) return;
     let kicks = 0;
     const kick = () => {
-      if (action === "load") {
-        if (house?.href) router.push(house.href);
-        return;
-      }
       kicks += 1;
       if (kicks > 1) setSettledKey(activeKey);
       router.refresh();

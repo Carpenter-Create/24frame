@@ -78,7 +78,9 @@ export function houseScreenQueryNames(pathname: string): readonly string[] {
   if (path.startsWith("/social/u/") && path.endsWith("/follows")) {
     return [SOCIAL_PROFILE_TAB_PARAM, SOCIAL_FOLLOWS_SEARCH_PARAM];
   }
-  if (path === HOME_ROOT || path === "/") return ["period"];
+  // Account Home `?period=` is panel state on the mounted /home screen,
+  // same as Social lane/topic. A separate slot painted home/loading.tsx
+  // (a short fallback) under the already-selected Revenue chip.
   return [];
 }
 
@@ -123,6 +125,31 @@ export function houseSocialHomePanelHop(currentHref: string, destHref: string): 
   const from = readSocialHomeLocation(current.search);
   const to = readSocialHomeLocation(dest.search);
   return from.lane !== to.lane || from.topic !== to.topic;
+}
+
+function housePeriodParam(search: string): string {
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  return params.get("period")?.trim() ?? "";
+}
+
+/**
+ * Account Home Revenue presets stay on the mounted /home screen.
+ * Owning the href lets the chip select in the click. Next still
+ * has to load `?period=`; pushState alone never fetches it.
+ * /home/news is a different page.
+ */
+export function houseHomePeriodHop(currentHref: string, destHref: string): boolean {
+  const current = parseHouseHref(currentHref);
+  const dest = parseHouseHref(destHref);
+  if (housePathname(current.pathname) !== HOME_ROOT) return false;
+  if (housePathname(dest.pathname) !== HOME_ROOT) return false;
+  if (houseExactHref(currentHref) === houseExactHref(destHref)) return false;
+  return housePeriodParam(current.search) !== housePeriodParam(dest.search);
+}
+
+/** Load pushes once. Repeating that href aborts the in-flight RSC hop. */
+export function houseBlankOutletRepeats(action: "none" | "refresh" | "load"): boolean {
+  return action === "refresh";
 }
 
 export function houseWorkspaceLandKey(pathname: string): string {
