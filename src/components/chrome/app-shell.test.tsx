@@ -359,7 +359,7 @@ describe("AppShell Access rail and home frame", () => {
     );
     expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
-    expect(tokens).toMatch(/--home-content-width:\s*1364px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--header-height:\s*88px;/);
@@ -425,16 +425,21 @@ describe("AppShell Access rail and home frame", () => {
     expect(health).not.toContain("data-org-switcher");
   });
 
-  it("gives Aggregation Dashboard the Education content measure", () => {
+  it("flushes Aggregation Dashboard cards to the shell gutter and keeps Education on the page cap", () => {
     navigation.pathname = "/aggregation/dashboard";
     const dashboard = renderShell();
-    const dashboardCanvas = houseMeasureMarkup(dashboard);
+    const columnAt = dashboard.indexOf('data-aggregation-shell-column=""');
+    const columnTag = dashboard.slice(
+      dashboard.lastIndexOf("<div", columnAt),
+      dashboard.indexOf(">", columnAt) + 1,
+    );
     expect(dashboard).not.toContain("data-app-home-frame");
-    expect(dashboardCanvas).toContain("mx-auto");
-    expect(dashboardCanvas).toContain("max-width:var(--page-max-width)");
-    expect(dashboardCanvas).toContain("px-[var(--chrome-gutter)]");
-    expect(dashboardCanvas).toContain("pb-24 pt-8");
-    expect(dashboardCanvas).not.toContain("access-rail-width");
+    expect(columnAt).toBeGreaterThan(-1);
+    expect(columnTag).toContain("md:pr-[var(--shell-gutter-inline-end)]");
+    expect(columnTag).toContain("md:pl-[var(--chrome-gutter)]");
+    expect(columnTag).toContain("max-md:px-[var(--chrome-gutter)]");
+    expect(columnTag).not.toContain("mx-auto");
+    expect(dashboard).not.toContain("max-width:var(--page-max-width)");
     expect(dashboard).not.toContain("ml-[var(--access-rail-width)]");
     expect(dashboard).toContain("data-app-rail");
     expect(dashboard).not.toContain('data-home-chrome=""');
@@ -443,11 +448,11 @@ describe("AppShell Access rail and home frame", () => {
     const education = renderShell();
     const educationCanvas = houseMeasureMarkup(education);
     expect(education).not.toContain("data-app-home-frame");
+    expect(education).not.toContain("data-aggregation-shell-column");
     expect(educationCanvas).toContain("mx-auto");
     expect(educationCanvas).toContain("max-width:var(--page-max-width)");
     expect(educationCanvas).toContain("px-[var(--chrome-gutter)]");
     expect(educationCanvas).toContain("pb-24 pt-8");
-    expect(dashboardCanvas).toBe(educationCanvas);
 
     expect(shellSrc).toContain('const homePage = pathname === "/" || homeChrome');
     expect(shellSrc).not.toContain('pathname === "/dashboard" || homeChrome');
@@ -487,7 +492,7 @@ describe("AppShell client mobile chrome", () => {
     expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*60px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
-    expect(tokens).toMatch(/--home-content-width:\s*1364px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/@media \(max-width:\s*767px\)/);
     expect(tokens).toMatch(/--sidebar-width:\s*0px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*0px;/);

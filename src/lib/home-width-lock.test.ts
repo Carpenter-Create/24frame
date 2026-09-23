@@ -19,27 +19,27 @@ const tokens = readFileSync("src/app/tokens.css", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 
 describe("Home width lock", () => {
-  it("stamps 32 left + 44 right + 1364 content at the 1440 frame", () => {
+  it("stamps 32 left + 32 right + 1376 content at the 1440 frame", () => {
     expect(HOME_FIGMA_FRAME_PX).toBe(1440);
     expect(HOME_LEFT_INSET_PX).toBe(32);
-    expect(HOME_RIGHT_INSET_PX).toBe(44);
-    expect(HOME_CONTENT_COLUMN_PX).toBe(1364);
+    expect(HOME_RIGHT_INSET_PX).toBe(32);
+    expect(HOME_CONTENT_COLUMN_PX).toBe(1376);
     expect(HOME_LEFT_INSET_PX + HOME_RIGHT_INSET_PX + HOME_CONTENT_COLUMN_PX).toBe(
       HOME_FIGMA_FRAME_PX,
     );
     expect(HOME_WIDTH_LOCK).toEqual({
       figmaFrame: 1440,
       leftInset: 32,
-      rightInset: 44,
-      contentColumn: 1364,
+      rightInset: 32,
+      contentColumn: 1376,
     });
     expect(stamp).toContain("32px");
-    expect(stamp).toContain("44px");
-    expect(stamp).toContain("1364px");
+    expect(stamp).not.toContain("44px");
+    expect(stamp).toContain("1376px");
     expect(stamp).toContain("1440");
     expect(stamp).toContain("--shell-gutter-inline-start");
     expect(stamp).toContain("--shell-gutter-inline-end");
-    expect(stamp).toContain("shell-desktop-horizontal-gutter-lock-v1");
+    expect(stamp).toContain("shell-desktop-horizontal-gutter-lock-v2");
     expect(stamp).not.toMatch(/1080|--page-max-width/);
     expect(stamp).not.toContain("1220px");
     expect(stamp).not.toContain("Phantom Access rail inset");
@@ -50,8 +50,8 @@ describe("Home width lock", () => {
     expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
-    expect(tokens).toMatch(/--home-content-width:\s*1364px;/);
-    expect(tokens).not.toMatch(/--home-content-width:\s*1376px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
+    expect(tokens).not.toMatch(/--home-content-width:\s*1364px;/);
     expect(tokens).not.toMatch(/--home-content-width:\s*1220px;/);
     expect(HOUSE_ACCESS_RAIL_WIDTH).toBe("var(--access-rail-width)");
     expect(HOUSE_HOME_CONTENT_WIDTH).toBe("var(--home-content-width)");

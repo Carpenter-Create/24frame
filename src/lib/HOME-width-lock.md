@@ -1,18 +1,18 @@
 # Home width lock
 
 Amended 2026-09-23. Desktop shell L/R yield to
-`docs/design-locks/shell-desktop-horizontal-gutter-lock-v1.md`
-(32 start / 44 end). Dest/Access rail stays off on Home.
+`docs/design-locks/shell-desktop-horizontal-gutter-lock-v2.md`
+(32 start / 32 end). Dest/Access rail stays off on Home.
 Phone unchanged.
 
 At the 1440 frame:
 
 | Surface | Measure |
 | --- | --- |
-| Header | Full-bleed 1440 / full viewport. Desktop shell gutters 32 / 44. |
+| Header | Full-bleed 1440 / full viewport. Desktop shell gutters 32 / 32. |
 | Left inset | 32px (`--shell-gutter-inline-start`). |
-| Right inset | 44px (`--shell-gutter-inline-end`). |
-| Home content column | 1364px (1440 − 32 − 44) |
+| Right inset | 32px (`--shell-gutter-inline-end`). |
+| Home content column | 1376px (1440 − 32 − 32) |
 | Visible dest rail | Off |
 | Phone | Unchanged (existing max-md pad) |
 

@@ -8,6 +8,7 @@ import {
   SOCIAL_CENTER_WIDTH_CLASS,
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_CONTENT_PAIR_WIDTH,
+  SOCIAL_DESKTOP_FRAME_PAD_CLASS,
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
@@ -835,27 +836,35 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_DESKTOP_MEASURE.center).toBe(720);
     expect(SOCIAL_DESKTOP_MEASURE.right).toBe(300);
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(SOCIAL_PROFILE_CENTER_CLASS);
-    // Adam 2026-09-22: left rail stays the house slot. The row is the
-    // 720 + 32 + 300 pair, centered beside that rail at lg. No
-    // justify-between stretch. No unprefixed cap (phone stays full-bleed).
+    // Lock v2: left rail stays the house slot. The row is the
+    // 720 + 32 + 300 pair. At lg it end-aligns so For You's trailing
+    // edge is the shell gutter (avatar ink). No justify-between
+    // stretch. No unprefixed cap (phone stays full-bleed).
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
-      "flex w-full items-start gap-[32px] lg:mx-auto lg:max-w-[1052px]",
+      "flex w-full items-start gap-[32px] lg:ml-auto lg:max-w-[1052px]",
     );
     expect(SOCIAL_HOME_LAYOUT_CLASS).toBe(
-      `flex w-full items-start gap-[${SOCIAL_DESKTOP_MEASURE.gutter}px] lg:mx-auto lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`,
+      `flex w-full items-start gap-[${SOCIAL_DESKTOP_MEASURE.gutter}px] lg:ml-auto lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`,
     );
     expect(SOCIAL_HOME_LAYOUT_CLASS).not.toContain("justify-between");
     expect(SOCIAL_HOME_LAYOUT_CLASS).not.toMatch(/(^|\s)mx-auto(\s|$)/);
     expect(SOCIAL_HOME_LAYOUT_CLASS).not.toMatch(/(^|\s)max-w-/);
-    expect(SOCIAL_HOME_LAYOUT_CLASS).toContain("lg:mx-auto");
+    expect(SOCIAL_HOME_LAYOUT_CLASS).toContain("lg:ml-auto");
+    expect(SOCIAL_HOME_LAYOUT_CLASS).not.toContain("lg:mx-auto");
     expect(SOCIAL_HOME_LAYOUT_CLASS).toContain(`lg:max-w-[${SOCIAL_CONTENT_PAIR_WIDTH}px]`);
     const railSlot = Number(
       readFileSync("src/app/tokens.css", "utf8").match(/--sidebar-width:\s*(\d+)px;/)?.[1],
     );
+    const shellEnd = Number(
+      readFileSync("src/app/tokens.css", "utf8").match(/--shell-gutter-inline-end:\s*(\d+)px;/)?.[1],
+    );
     expect(railSlot).toBe(256);
-    const pairOuter =
-      (1440 - railSlot - SOCIAL_DESKTOP_MEASURE.padR * 2 - SOCIAL_CONTENT_PAIR_WIDTH) / 2;
-    expect(pairOuter).toBe(50);
+    expect(shellEnd).toBe(32);
+    const leadPad = SOCIAL_DESKTOP_MEASURE.padR;
+    const canvas = 1440 - railSlot - leadPad - shellEnd;
+    expect(canvas).toBeGreaterThanOrEqual(SOCIAL_CONTENT_PAIR_WIDTH);
+    expect(SOCIAL_DESKTOP_FRAME_PAD_CLASS).toContain("md:pr-[var(--shell-gutter-inline-end)]");
+    expect(SOCIAL_DESKTOP_FRAME_PAD_CLASS).toContain("max-md:px-[var(--chrome-gutter)]");
     expect(SOCIAL_HOME_CENTER_CLASS).toBe(
       `flex min-w-0 w-full flex-1 flex-col gap-2 lg:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`,
     );

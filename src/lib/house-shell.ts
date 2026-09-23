@@ -20,8 +20,8 @@ export const HOUSE_CHROME_GUTTER = "var(--chrome-gutter)";
 
 /**
  * Desktop shell horizontal gutters.
- * docs/design-locks/shell-desktop-horizontal-gutter-lock-v1.md
- * Start 32 (viewport → logo ink). End 44 (viewport → avatar ink).
+ * docs/design-locks/shell-desktop-horizontal-gutter-lock-v2.md
+ * Start 32 (viewport → logo ink). End 32 (viewport → avatar ink).
  * Phone does not use this class.
  */
 export const HOUSE_SHELL_GUTTER_X_CLASS =
@@ -35,12 +35,21 @@ export const HOUSE_CANVAS_X_CLASS = "px-[var(--chrome-gutter)]";
 /** Dest-rail slot. Alias of `--sidebar-width` — not a second measure. */
 export const HOUSE_ACCESS_RAIL_WIDTH = "var(--access-rail-width)";
 
-/** Home canvas at 1440: 32 shell start + 44 shell end + 1364 column. */
+/** Home canvas at 1440: 32 shell start + 32 shell end + 1376 column. */
 export const HOUSE_HOME_CONTENT_WIDTH = "var(--home-content-width)";
 
 /** Home modules: shell start left · shell end right. Lead stays full-bleed. */
 export const HOUSE_HOME_RAIL_COLUMN_CLASS =
   "w-full md:ml-[var(--shell-gutter-inline-start)] md:mr-[var(--shell-gutter-inline-end)] md:w-[calc(100%-var(--shell-gutter-inline-start)-var(--shell-gutter-inline-end))]";
+
+/**
+ * Aggregation dashboard cards. Desktop trailing edge is the shell
+ * gutter so card ink lines up with the avatar. Lead side stays the
+ * dest-rail chrome gutter. Phone stays --chrome-gutter both sides.
+ * Not the Education page-max canvas.
+ */
+export const HOUSE_AGG_SHELL_COLUMN_CLASS =
+  "w-full pb-24 pt-8 max-md:pb-0 max-md:px-[var(--chrome-gutter)] md:pl-[var(--chrome-gutter)] md:pr-[var(--shell-gutter-inline-end)]";
 
 export const HOUSE_RAIL_FLOAT_CLASS =
   "fixed left-[var(--chrome-gutter)] top-[calc(var(--header-height)+var(--chrome-gutter))] z-30 hidden h-[calc(100dvh-var(--header-height)-calc(var(--chrome-gutter)*2))] flex-col md:flex";

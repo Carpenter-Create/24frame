@@ -54,7 +54,7 @@ export const OVERVIEW_MODULE_ORDER = [
 
 /** Phone stack: News is last so Needs you + AI stay above the rail.
  *  Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
- *  Home modules inset separately (32 shell start + 44 shell end → 1364 at 1440). */
+ *  Home modules inset separately (32 shell start + 32 shell end → 1376 at 1440). */
 export const OVERVIEW_PHONE_MODULE_ORDER = [
   "revenue",
   "social",
@@ -64,7 +64,7 @@ export const OVERVIEW_PHONE_MODULE_ORDER = [
   "news",
 ] as const;
 
-/** Desktop News rail measure inside the 1364 Home column.
+/** Desktop News rail measure inside the 1376 Home column.
  *  Adam 2026-09-18: 20rem → 22rem — modest news bump, left stack shrinks. */
 export const OVERVIEW_NEWS_RAIL_WIDTH = "22rem";
 

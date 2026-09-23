@@ -28,6 +28,7 @@ import {
   housePhoneShowsBottomDests,
 } from "@/lib/house-phone-shell";
 import {
+  HOUSE_AGG_SHELL_COLUMN_CLASS,
   HOUSE_CANVAS_X_CLASS,
   HOUSE_HOME_RAIL_COLUMN_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
@@ -44,7 +45,13 @@ import { isSocialStoryCreatePath } from "@/lib/social";
 import { isHomeOwnedPath, OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { QUEUE_HREF } from "@/lib/queue";
 import { TITLES_HREF } from "@/lib/title-public-id";
-import { clampWorkspaceMode, resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
+import {
+  AGGREGATION_HOME_SEGMENT,
+  aggregationPath,
+  clampWorkspaceMode,
+  resolveWorkspaceMode,
+  type WorkspaceMode,
+} from "@/lib/workspace";
 import { HousePhoneAppShell } from "./house-phone-app-shell";
 import {
   rememberAccountChromeIdentity,
@@ -74,8 +81,8 @@ type Org = { id: string; name: string };
 // pushed panes back to Settings. Hamburger stays off. Avatar 32 stays.
 // /home: no dest rail (Adam 2026-09-18). Unify-lead chrome + modules
 // only. Aggregation · Social · Education rails return off Home.
-// Home SoT (HOME-width-lock.md): desktop shell gutters 32 / 44
-// (shell-desktop-horizontal-gutter-lock-v1). Not the dest-rail slot.
+// Home SoT (HOME-width-lock.md): desktop shell gutters 32 / 32
+// (shell-desktop-horizontal-gutter-lock-v2). Not the dest-rail slot.
 // Header full-bleed. No --page-max-width.
 export function AppShell({
   chrome,
@@ -153,13 +160,15 @@ export function AppShell({
   // Titles frame can own content max-width (edge of sidebar → right edge).
   // Titles and staff Queue share that frame. Centered canvases keep
   // `--chrome-gutter`. Full-bleed Home shares `--shell-gutter-inline-*`
-  // with the header. Messages keeps `--content-inset` vertical.
+  // with the header. Aggregation dashboard cards share the trailing
+  // shell gutter (avatar ink) and are not the Education page-max.
+  // Messages keeps `--content-inset` vertical.
   const titlesBleed = pathname === TITLES_HREF || pathname === QUEUE_HREF;
   const homeChrome = overviewHidesRail(pathname);
   // Home (`/` + /home chrome) stays off --page-max-width. /home uses the
-  // shell gutter pair (32 / 44). Aggregation Dashboard uses
-  // the Education house measure — Adam 2026-09-18.
+  // shell gutter pair (32 / 32).
   const homePage = pathname === "/" || homeChrome;
+  const aggregationCards = pathname === aggregationPath(AGGREGATION_HOME_SEGMENT);
   const settingsPage = isSettingsPath(pathname);
   const helpPage = isHelpPath(pathname);
   const activityPage = isActivityPath(pathname);
@@ -340,11 +349,14 @@ export function AppShell({
                         ? HOUSE_HOME_RAIL_COLUMN_CLASS
                         : cn("w-full", HOUSE_CANVAS_X_CLASS),
                     )
-                  : cn("mx-auto w-full pb-24 pt-8 max-md:pb-0", HOUSE_CANVAS_X_CLASS)
+                  : aggregationCards
+                    ? HOUSE_AGG_SHELL_COLUMN_CLASS
+                    : cn("mx-auto w-full pb-24 pt-8 max-md:pb-0", HOUSE_CANVAS_X_CLASS)
           }
           data-app-home-frame={homePage ? "" : undefined}
+          data-aggregation-shell-column={aggregationCards ? "" : undefined}
           style={
-            socialChrome || titlesBleed || homePage
+            socialChrome || titlesBleed || homePage || aggregationCards
               ? undefined
               : { maxWidth: "var(--page-max-width)" }
           }

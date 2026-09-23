@@ -22,4 +22,5 @@ Design locks land in this directory before CoS undrafts a UI pull request.
 - [`preferences-drill-nested-slugs-lock-v1.md`](preferences-drill-nested-slugs-lock-v1.md) — Preferences drill URLs nest under `/settings/preferences/<drill>`
 - [`social-home-activity-feed-lock-v1.md`](social-home-activity-feed-lock-v1.md) — Social Home is the live activity feed at `/social`
 - [`create-story-photo-video-fb-layout-lock-v1.1.md`](create-story-photo-video-fb-layout-lock-v1.1.md) — Create story photo + video stage at `/social/stories/new`
-- [`shell-desktop-horizontal-gutter-lock-v1.md`](shell-desktop-horizontal-gutter-lock-v1.md) — desktop shell L/R 32 / 44 (Coinbase insets)
+- [`shell-desktop-horizontal-gutter-lock-v2.md`](shell-desktop-horizontal-gutter-lock-v2.md) — desktop shell L = R = 32. Supersedes v1.
+- [`shell-desktop-horizontal-gutter-lock-v1.md`](shell-desktop-horizontal-gutter-lock-v1.md) — superseded by v2. #661 shipped 32 / 44.

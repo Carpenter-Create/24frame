@@ -49,12 +49,13 @@ export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136
 // center 720 + gutter 32 + For You 300 = 1052.
 // Adam 2026-09-22: the fixed gutter between center and For You is 32.
 // Adam 2026-09-22 lock: Middle is 720. Pair max is 1052.
-// At lg the pair is that fixed width and centered in
-// the canvas beside the rail. Leftover air is outside the pair, split
-// on both sides. Do not justify-between the row. Do not pack the pair
-// to the start. Do not slide the rail inward. Do not stretch the
-// center past 720. For You stays 300. Phone is full-bleed: the pair
-// cap applies at lg, when the For You rail appears.
+// Lock v2: at lg the pair stays that fixed width and its trailing
+// edge sits on the shell gutter so For You lines up with the avatar.
+// Leftover air stays on the lead side of the pair. Do not
+// justify-between the row. Do not pack the pair to the start. Do not
+// slide the rail inward. Do not stretch the center past 720. For You
+// stays 300. Do not full-bleed the inner cards. Phone is full-bleed:
+// the pair cap applies at lg, when the For You rail appears.
 // Complete class strings below — Tailwind does not see interpolations.
 export const SOCIAL_DESKTOP_MEASURE = {
   gutter: 32,
@@ -91,17 +92,20 @@ export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
 const socialCenterMaxClass = "lg:max-w-[720px]";
 export const SOCIAL_CENTER_WIDTH_CLASS = `w-full min-w-0 ${socialCenterMaxClass}`;
-export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] py-4";
+// Phone keeps --chrome-gutter. Desktop lead stays the dest-rail
+// chrome gutter. Desktop trail is the shell gutter (avatar ink).
+export const SOCIAL_DESKTOP_FRAME_PAD_CLASS =
+  "w-full py-4 max-md:px-[var(--chrome-gutter)] md:pl-[var(--chrome-gutter)] md:pr-[var(--shell-gutter-inline-end)]";
 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-4)] pb-[var(--space-12)]";
 
 // One shell for every Social row. At lg the row is the 1052 pair,
-// centered in the canvas to the right of the fixed dest rail.
+// end-aligned so For You's trailing edge is the shell gutter.
 // Below lg there is no max-width and no auto margin: For You is
 // display:none and the center stays full-bleed.
 export const SOCIAL_HOME_LAYOUT_CLASS =
-  "flex w-full items-start gap-[32px] lg:mx-auto lg:max-w-[1052px]";
+  "flex w-full items-start gap-[32px] lg:ml-auto lg:max-w-[1052px]";
 
 // Shared center column. Home, Explore, Messages, and Profile use this
 // string — no width fork. flex-1 shrinks the center when the lg canvas

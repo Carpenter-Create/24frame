@@ -1,7 +1,7 @@
 # [GC][24Frame] LOCK — Desktop shell horizontal gutters (Coinbase) v1
 
 **Date:** 2026-09-23 (CT)  
-**Status:** **LOCKED** (Adam ask 2026-09-23 — match **Coinbase** shell L/R insets exactly; corrected: Coinbase, not Facebook) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev one PR  
+**Status:** **SUPERSEDED** by [`shell-desktop-horizontal-gutter-lock-v2.md`](shell-desktop-horizontal-gutter-lock-v2.md) (Adam amend 2026-09-23 — L = R = **32**). Historical record of the #661 **32 / 44** pair. Do not implement 32 / 44.  
 **Scope:** Desktop **shell chrome horizontal gutters only** — viewport edge → logo ink (L) and viewport edge → avatar ink (R), and **content column edges that share those gutters**. Not Soft-nav. Not Settings IA. Not phone.  
 **Evidence (Adam shots, both 2880×1800 @2× → CSS ≈ device/2):**  
 - Coinbase SoT: `/workspace/24frame-agg-ux/shell-gutter-sot-coinbase-2026-09-23.png`  

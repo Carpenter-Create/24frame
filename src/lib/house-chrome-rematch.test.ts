@@ -334,9 +334,9 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
-    expect(tokens).toMatch(/--home-content-width:\s*1364px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/--shell-gutter-inline-start:\s*32px;/);
-    expect(tokens).toMatch(/--shell-gutter-inline-end:\s*44px;/);
+    expect(tokens).toMatch(/--shell-gutter-inline-end:\s*32px;/);
     expect(HOUSE_SHELL_GUTTER_X_CLASS).toBe(
       "md:pl-[var(--shell-gutter-inline-start)] md:pr-[var(--shell-gutter-inline-end)]",
     );
