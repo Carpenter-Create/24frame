@@ -74,9 +74,9 @@ type Org = { id: string; name: string };
 // pushed panes back to Settings. Hamburger stays off. Avatar 32 stays.
 // /home: no dest rail (Adam 2026-09-18). Unify-lead chrome + modules
 // only. Aggregation · Social · Education rails return off Home.
-// Home SoT (HOME-width-lock.md): 48 left (--content-inset) + 16 right
-// (--chrome-gutter) at 1440. Not the dest-rail slot. Header full-bleed.
-// No --page-max-width.
+// Home SoT (HOME-width-lock.md): desktop shell gutters 32 / 44
+// (shell-desktop-horizontal-gutter-lock-v1). Not the dest-rail slot.
+// Header full-bleed. No --page-max-width.
 export function AppShell({
   chrome,
   email = "",
@@ -151,13 +151,13 @@ export function AppShell({
     ) : null;
   // Catalog list pages opt out of the centered width cap so the shared
   // Titles frame can own content max-width (edge of sidebar → right edge).
-  // Titles and staff Queue share that frame. Non-bleed pages share
-  // `--chrome-gutter` on the canvas x so the trailing chrome and content
-  // column share one right edge. Messages keeps `--content-inset` vertical.
+  // Titles and staff Queue share that frame. Centered canvases keep
+  // `--chrome-gutter`. Full-bleed Home shares `--shell-gutter-inline-*`
+  // with the header. Messages keeps `--content-inset` vertical.
   const titlesBleed = pathname === TITLES_HREF || pathname === QUEUE_HREF;
   const homeChrome = overviewHidesRail(pathname);
   // Home (`/` + /home chrome) stays off --page-max-width. /home uses the
-  // 48/16 house inset (HOME-width-lock.md). Aggregation Dashboard uses
+  // shell gutter pair (32 / 44). Aggregation Dashboard uses
   // the Education house measure — Adam 2026-09-18.
   const homePage = pathname === "/" || homeChrome;
   const settingsPage = isSettingsPath(pathname);

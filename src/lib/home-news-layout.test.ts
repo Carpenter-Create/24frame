@@ -70,11 +70,12 @@ function emptyHome(): string {
 
 describe("Home News layout + register lock", () => {
   it("keeps two-column desktop News and a phone stack after Aggregation", () => {
-    expect(HOME_LEFT_INSET_PX).toBe(48);
-    expect(HOME_RIGHT_INSET_PX).toBe(16);
-    expect(HOME_CONTENT_COLUMN_PX).toBe(1376);
-    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--content-inset");
-    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--chrome-gutter");
+    expect(HOME_LEFT_INSET_PX).toBe(32);
+    expect(HOME_RIGHT_INSET_PX).toBe(44);
+    expect(HOME_CONTENT_COLUMN_PX).toBe(1364);
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--shell-gutter-inline-start");
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--shell-gutter-inline-end");
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--content-inset");
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--access-rail-width");
     expect(overviewHidesRail("/home")).toBe(true);
     expect(overviewHidesRail("/home/news")).toBe(true);

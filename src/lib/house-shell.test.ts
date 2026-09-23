@@ -54,7 +54,7 @@ import {
   HOUSE_SEGMENTED_TRACK_SCROLL_CLASS,
   houseSegmentedThumbHidden,
   HOUSE_CHROME_GUTTER,
-  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_SHELL_GUTTER_X_CLASS,
   HOUSE_PHONE_TRAILING_GUTTER_CLASS,
   HOUSE_CANVAS_X_CLASS,
   HOUSE_ACCESS_RAIL_WIDTH,
@@ -151,7 +151,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
-    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1364px;/);
+    expect(tokens).toMatch(/--shell-gutter-inline-start:\s*32px;/);
+    expect(tokens).toMatch(/--shell-gutter-inline-end:\s*44px;/);
     expect(tokens).toContain("--accent-wash:");
     expect(tokens).toMatch(/Aggregation · Social · Education/);
     expect(tokens).not.toMatch(/--radius-lg:\s*14px;/);
@@ -173,13 +175,15 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(HOUSE_HEADER_SEARCH_GAP_CLASS).toBe("gap-[var(--space-4)]");
     expect(HOUSE_CHROME_GUTTER).toBe("var(--chrome-gutter)");
-    expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
+    expect(HOUSE_SHELL_GUTTER_X_CLASS).toBe(
+      "md:pl-[var(--shell-gutter-inline-start)] md:pr-[var(--shell-gutter-inline-end)]",
+    );
     expect(HOUSE_PHONE_TRAILING_GUTTER_CLASS).toBe("max-md:pr-[var(--chrome-gutter)]");
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
     expect(HOUSE_ACCESS_RAIL_WIDTH).toBe("var(--access-rail-width)");
     expect(HOUSE_HOME_CONTENT_WIDTH).toBe("var(--home-content-width)");
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toBe(
-      "w-full md:ml-[var(--content-inset)] md:mr-[var(--chrome-gutter)] md:w-[calc(100%-var(--content-inset)-var(--chrome-gutter))]",
+      "w-full md:ml-[var(--shell-gutter-inline-start)] md:mr-[var(--shell-gutter-inline-end)] md:w-[calc(100%-var(--shell-gutter-inline-start)-var(--shell-gutter-inline-end))]",
     );
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");

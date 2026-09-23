@@ -36,11 +36,11 @@
 // (agg-search-no). Logo inset does not drift when the search slot is
 // empty. Do not invent a fourth product or an Aggregation search.
 //
-// G6 chrome gutter — logo left = rail left; trailing right = canvas
-// right. Desktop uses --chrome-gutter (not --content-inset). Phone
-// left keeps --space-6; phone right uses --chrome-gutter so the
-// avatar is not flush. Collapsed icon rail still shares the same
-// left gutter.
+// Desktop shell gutters (lock v1): start 32 / end 44 via
+// HOUSE_SHELL_GUTTER_X_CLASS. Not --content-inset. Phone left keeps
+// --space-6; phone right uses --chrome-gutter so the avatar is not
+// flush. Dest rail stays on --chrome-gutter — this lock does not
+// reopen rail or soft-nav geometry.
 //
 // G9 — lead chrome stays pinned to the viewport. Mac rubber-band /
 // pull-down overscroll must not carry the header. Document/body is
@@ -49,8 +49,8 @@
 // not an Aggregation-only sticky hack. Phone follows the same pin.
 
 import {
-  HOUSE_CHROME_GUTTER_X_CLASS,
   HOUSE_HEADER_SEARCH_GAP_CLASS,
+  HOUSE_SHELL_GUTTER_X_CLASS,
   HOUSE_ICON_BUTTON_CLASS,
   HOUSE_PHONE_TRAILING_GUTTER_CLASS,
 } from "@/lib/house-shell";
@@ -67,14 +67,14 @@ export const HOUSE_LEAD_SCROLL_CLASS =
 // overflow-hidden on this row (#412).
 export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
 
-// Phone: --space-6 lead · --chrome-gutter trail. md+ uses chrome-gutter
-// both sides. Do not put overflow-hidden on this row (#412).
+// Phone: --space-6 lead · --chrome-gutter trail. md+ uses the shell
+// gutter pair (32 / 44). Do not put overflow-hidden on this row (#412).
 export const HOUSE_LEAD_PHONE_PAD_CLASS =
   `max-md:pl-[var(--space-6)] ${HOUSE_PHONE_TRAILING_GUTTER_CLASS}`;
 
 // relative: Settings phone back is absolute against this row so the
 // 24 emblem stays put.
-export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur h-[var(--header-height)] ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur h-[var(--header-height)] ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_SHELL_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 
@@ -84,7 +84,7 @@ export const HOUSE_LEAD_SEARCH_DESKTOP_CLASS = "hidden w-[240px] shrink-0 md:fle
 
 export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "w-full min-w-0 md:hidden";
 
-export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS} py-[var(--space-3)]`;
+export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_SHELL_GUTTER_X_CLASS} py-[var(--space-3)]`;
 
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
   "flex h-[var(--header-search-height)] w-full min-w-0 items-center gap-2 px-3";

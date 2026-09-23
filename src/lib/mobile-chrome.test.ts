@@ -73,7 +73,7 @@ describe("mobile chrome clock lock", () => {
   it("is consumed by the Ask Globee clock, not dest chips or the thread", () => {
     expect(leadLibSrc).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
     expect(leadLibSrc).toContain("HOUSE_PHONE_TRAILING_GUTTER_CLASS");
-    expect(leadLibSrc).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(leadLibSrc).toContain("HOUSE_SHELL_GUTTER_X_CLASS");
     expect(shellSrc).toContain("AskAiOverlayProvider");
     expect(shellSrc).not.toContain('data-app-messages-frame=""');
     expect(overlaySrc).toContain("AskGlobeeLanding");
