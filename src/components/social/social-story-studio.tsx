@@ -408,8 +408,8 @@ export function SocialStoryCompose({
   }
 
   function onPick(files: FileList | null, expected: SocialMediaKind, input: HTMLInputElement | null) {
-    if (input) input.value = "";
     const file = files?.[0];
+    if (input) input.value = "";
     if (!file) return;
     setError("");
     const kind = socialMediaKindFor(file.type);
