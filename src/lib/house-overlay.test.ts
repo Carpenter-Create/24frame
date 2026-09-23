@@ -92,7 +92,7 @@ describe("HouseOverlay dual-host lock v1", () => {
     expect(APP_SHEET_LOCK_SURFACE_CLASS).toContain("shadow-none");
     expect(APP_SHEET_LOCK_SURFACE_CLASS).toContain("env(safe-area-inset-bottom)");
     expect(src("src/components/chrome/house-overlay.tsx")).toContain("Close44");
-    expect(src("src/lib/house-sheet.ts")).not.toContain("APP_SHEET_MODAL_PROMOTE");
+    expect(src("src/lib/house-sheet.ts")).not.toContain("md:items-center");
   });
 
   it("G4 centers HouseDialog at 400 / 480 with a button footer and no sheet skin", () => {
@@ -158,6 +158,7 @@ describe("HouseOverlay dual-host lock v1", () => {
   });
 
   it("G7 rejects a fifth host and mixed chrome", () => {
+    // dual-host gate: this line is the forbidden promote, not a host.
     expect(
       overlayClassMixesHosts(
         "fixed inset-0 flex flex-col justify-end md:items-center md:justify-center",
