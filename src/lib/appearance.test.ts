@@ -104,7 +104,10 @@ describe("appearance copy", () => {
     expect(drillSrc).not.toContain("AppearanceThemePicker");
     expect(drillSrc).not.toContain("localStorage");
     expect(drillSrc).not.toContain("THEME_STORAGE_KEY");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).toContain("appearancePreferenceLabel");
+    expect(sheetSrc).toContain("USER_MENU.themeHref");
+    expect(sheetSrc).not.toContain("data-account-menu-theme-switch");
     expect(sheetSrc).not.toContain("THEME_STORAGE_KEY");
     expect(sheetSrc).not.toContain("localStorage");
     expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS");

@@ -23,6 +23,10 @@ import {
   ACCOUNT_MENU_DROPDOWN_NAME_CLASS,
   ACCOUNT_MENU_DROPDOWN_ROW_CLASS,
   ACCOUNT_MENU_DROPDOWN_ROWS_CLASS,
+  ACCOUNT_MENU_THEME_CHEVRON_CLASS,
+  ACCOUNT_MENU_THEME_LABEL_CLASS,
+  ACCOUNT_MENU_THEME_TRAILING_CLASS,
+  ACCOUNT_MENU_THEME_VALUE_CLASS,
   ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS,
   ACCOUNT_MENU_DROPDOWN_VERSION_CLASS,
   ACCOUNT_MENU_DROPDOWN_WIDTH,
@@ -240,6 +244,13 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).not.toContain("SheetGroup");
     expect(ACCOUNT_MENU_DROPDOWN_ROWS_CLASS).not.toContain("gap-");
     expect(ACCOUNT_MENU_DROPDOWN_ICON_CLASS).toBe("size-5 shrink-0");
+    expect(ACCOUNT_MENU_THEME_LABEL_CLASS).toContain("t-body");
+    expect(ACCOUNT_MENU_THEME_LABEL_CLASS).toContain("text-ink");
+    expect(ACCOUNT_MENU_THEME_VALUE_CLASS).toBe("t-body-sm text-ink-3");
+    expect(ACCOUNT_MENU_THEME_TRAILING_CLASS).toContain("gap-[var(--space-2)]");
+    expect(ACCOUNT_MENU_THEME_TRAILING_CLASS).toContain("items-center");
+    expect(ACCOUNT_MENU_THEME_CHEVRON_CLASS).toBe("size-4 shrink-0 text-ink-3");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS");
     expect(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS).toContain("text-[#c4564a]");
     expect(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS).not.toContain("text-accent");
     expect(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS).not.toContain("rounded");

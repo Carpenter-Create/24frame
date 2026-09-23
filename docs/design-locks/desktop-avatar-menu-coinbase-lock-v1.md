@@ -54,13 +54,13 @@ Phone sheet grammar on desktop (large stacked avatar + inset grouped cards) is *
 | Label | Body 0.9375rem · ink |
 | Hover / focus wash | Full-bleed row · muted `#F4F4F6` · **no** inset card radius |
 | Dividers between rows | **None** (flat list). Optional single hairline only before destructive if needed for air — prefer **no** mid-list hairlines |
-| Chevrons | **None** on these action rows (Coinbase flat). Theme may use a **trailing toggle** instead of a chevron push |
+| Chevrons | **None** on Settings · Get Help · Log out. Theme is the drill exception: stored value + CaretRight. See [`theme-chrome-avatar-only-lock-v1.md`](theme-chrome-avatar-only-lock-v1.md). Not a trailing toggle |
 | Inset muted cards / SheetGroup | **Forbidden** on desktop |
 
 ### Row inventory (24Frame desktop — same jobs, new grammar)
 
 1. **Settings** — icon gear · navigates Settings  
-2. **Theme** — icon moon/sun · trailing house toggle (or opens theme face **inside** the same MenuSurface — not a SheetGroup card)  
+2. **Theme** — icon moon/sun · stored value + chevron · drills to `/settings/theme` (same picker as Preferences). Not a trailing toggle. Not a SheetGroup card  
 3. **Get Help** — icon question/life-preserver  
 4. **Log out** — destructive: icon + label in **danger red** (Coinbase Sign out). **Not** Sporty Blue text on a tinted card  
 

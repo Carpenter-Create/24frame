@@ -16,9 +16,9 @@ import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
-import { cn } from "@/lib/cn";
-import { applyDocumentThemePreference } from "@/lib/theme";
+import { appearancePreferenceLabel } from "@/lib/appearance";
 import { useThemePreference } from "@/components/theme-toggle";
+import type { ThemePreference } from "@/lib/theme";
 import {
   AppSheetHairline,
   Close44,
@@ -45,12 +45,10 @@ import {
   ACCOUNT_MENU_DROPDOWN_ROW_CLASS,
   ACCOUNT_MENU_DROPDOWN_ROWS_CLASS,
   ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SWITCH_OFF_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SWITCH_ON_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_OFF_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_ON_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS,
+  ACCOUNT_MENU_THEME_CHEVRON_CLASS,
+  ACCOUNT_MENU_THEME_LABEL_CLASS,
+  ACCOUNT_MENU_THEME_TRAILING_CLASS,
+  ACCOUNT_MENU_THEME_VALUE_CLASS,
   ACCOUNT_MENU_DROPDOWN_VERSION_CLASS,
   ACCOUNT_MENU_DROPDOWN_WHO_CLASS,
   accountMenuDropdownAlignEnd,
@@ -284,42 +282,57 @@ function DesktopAccountMenuLink({
   );
 }
 
-function DesktopAccountMenuThemeRow() {
+function menuThemeIcon(preference: ThemePreference) {
+  return preference === "light" ? Sun : Moon;
+}
+
+function AccountThemeStoredValue({
+  attr,
+}: {
+  attr: "data-account-menu-theme-value" | "data-account-sheet-theme-value";
+}) {
   const preference = useThemePreference();
-  const dark = preference === "dark";
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={dark}
-      aria-label={USER_MENU.theme}
+    <span {...{ [attr]: "" }} className={ACCOUNT_MENU_THEME_VALUE_CLASS}>
+      {appearancePreferenceLabel(preference)}
+    </span>
+  );
+}
+
+function AccountThemeChevron() {
+  return (
+    <CaretRight
+      className={ACCOUNT_MENU_THEME_CHEVRON_CLASS}
+      weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+      aria-hidden
+    />
+  );
+}
+
+function DesktopAccountMenuThemeRow({
+  pathname,
+  onClose,
+}: {
+  pathname: string;
+  onClose: () => void;
+}) {
+  const preference = useThemePreference();
+  const href = USER_MENU.themeHref;
+  return (
+    <HouseLink
+      href={href}
       data-account-menu-row="theme"
       data-user-menu-item="theme"
-      data-account-menu-theme-switch=""
       className={ACCOUNT_MENU_DROPDOWN_ROW_CLASS}
-      onClick={() => {
-        applyDocumentThemePreference(dark ? "light" : "dark");
-      }}
+      onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
     >
-      <DesktopAccountMenuIcon icon={dark ? Sun : Moon} />
-      <span className="min-w-0 flex-1">{USER_MENU.theme}</span>
-      <span
-        aria-hidden
-        className={cn(
-          ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS,
-          dark ? ACCOUNT_MENU_DROPDOWN_SWITCH_ON_CLASS : ACCOUNT_MENU_DROPDOWN_SWITCH_OFF_CLASS,
-        )}
-      >
-        <span
-          className={cn(
-            ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_CLASS,
-            dark
-              ? ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_ON_CLASS
-              : ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_OFF_CLASS,
-          )}
-        />
+      <DesktopAccountMenuIcon icon={menuThemeIcon(preference)} />
+      <span className={ACCOUNT_MENU_THEME_LABEL_CLASS}>{USER_MENU.theme}</span>
+      <span className={ACCOUNT_MENU_THEME_TRAILING_CLASS}>
+        <AccountThemeStoredValue attr="data-account-menu-theme-value" />
+        <AccountThemeChevron />
       </span>
-    </button>
+    </HouseLink>
   );
 }
 
@@ -388,7 +401,7 @@ function DesktopAccountMenuFace({
       <div data-account-menu-rows="" className={ACCOUNT_MENU_DROPDOWN_ROWS_CLASS}>
         {ACCOUNT_SHEET_ITEMS.map((item) =>
           item.kind === "theme" ? (
-            <DesktopAccountMenuThemeRow key={item.kind} />
+            <DesktopAccountMenuThemeRow key={item.kind} pathname={pathname} onClose={onClose} />
           ) : (
             <DesktopAccountMenuLink
               key={item.kind}
@@ -428,16 +441,25 @@ function AccountMenuGroups({
           <SheetGroup key={group.id} inset groupId={group.id}>
             {group.items.map((item) => {
               const href = accountMenuItemHref(item, pathname);
+              const theme = item.kind === "theme";
               return (
                 <SheetGroupItem
                   key={item.kind}
                   inset
                   item={item.kind}
                   href={href}
+                  className={theme ? "min-h-11" : undefined}
                   onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
                 >
                   {item.label}
-                  <AccountRowChevron />
+                  {theme ? (
+                    <span className={ACCOUNT_MENU_THEME_TRAILING_CLASS}>
+                      <AccountThemeStoredValue attr="data-account-sheet-theme-value" />
+                      <AccountThemeChevron />
+                    </span>
+                  ) : (
+                    <AccountRowChevron />
+                  )}
                 </SheetGroupItem>
               );
             })}
@@ -520,7 +542,7 @@ function AccountMenuBody({
 // Inset cards — Settings + Theme, then Get Help. Log out is its
 // own inset row. Settings — Theme — Get Help.
 // Theme drills to /settings/theme — the same picker as Preferences.
-// Header sun/moon is HouseLeadChrome, not this sheet.
+// Stored Light | Dark | Auto sits beside the chevron. No toggle.
 // 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
 // Leftover under the last item is 24 house row air (--space-6),

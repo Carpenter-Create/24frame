@@ -258,12 +258,11 @@ export function AppShell({
           word+chevron. Tap opens the workspace sheet. No hamburger.
           Local dests live in HousePhoneBottomNav. Home dests are Home
           + Industry news. Trailing is search (if needed) ·
-          24Frame AI · bell · sun/moon · avatar. The sun/moon flips
-          light and dark and exits Auto.
+          24Frame AI · bell · avatar. Theme is the avatar drill.
           Ask AI is header + Home module only
           (#465). Emblem links workspace
           home; it does not open the rail. Desktop keeps switcher ·
-          Ask · bell · sun/moon · avatar. Brand sits on the full-width top, not a
+          Ask · bell · avatar. Brand sits on the full-width top, not a
           second rail chrome. Period stays on the Dashboard org row.
           No org switcher on any route. Aggregation mid-lead stays
           empty. Education mounts a quiet course/video search

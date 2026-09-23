@@ -56,8 +56,8 @@
 // Existing /settings/agreements, /settings/refer stay Profile doors.
 // Company persist stays organizations.name.
 // Theme SoT is gc-theme via lib/theme.ts. Avatar Theme and the
-// Preferences Theme row share /settings/theme. Header sun/moon
-// flips light and dark and exits Auto. Get Help / Give feedback stay on
+// Preferences Theme row share /settings/theme. Auto changes only
+// in that picker. Get Help / Give feedback stay on
 // /help — never Settings hub chrome.
 //
 // 600:881 shell — one dest-rail slot occupies the Access slot on every

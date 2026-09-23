@@ -165,19 +165,18 @@ function renderShell(
 }
 
 describe("AppShell header", () => {
-  it("keeps Ask between workspace names and the bell, then sun/moon before the avatar", () => {
+  it("keeps Ask between workspace names and the bell, then the avatar", () => {
     navigation.pathname = "/";
     const html = renderShell();
     expect(html).toContain("data-user-menu-host");
-    expect(html).toContain("data-theme-toggle");
-    expect(html).toContain("Switch to dark mode");
+    expect(html).not.toContain("data-theme-toggle");
+    expect(html).not.toContain("Switch to dark mode");
     expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-ask-assistant-header"));
     expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(html.indexOf("data-activity-bell"));
-    expect(html.indexOf("data-activity-bell")).toBeLessThan(html.indexOf("data-theme-toggle"));
-    expect(html.indexOf("data-theme-toggle")).toBeLessThan(html.indexOf("data-user-menu-host"));
+    expect(html.indexOf("data-activity-bell")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(shellSrc).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("ThemeGlyph");
-    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).not.toContain("ThemeToggle");
     expect(leadSrc).toContain("<ActivityBell");
     expect(leadSrc).toContain("<AskAssistantHeaderLink");
     expect(shellSrc).not.toContain("<ActivityBell");
@@ -276,7 +275,7 @@ describe("AppShell Home chrome", () => {
     expect(home).toContain("data-workspace-switcher");
     expect(home).toContain('data-workspace-switcher-segment="home"');
     expect(home).toContain("data-brand-emblem");
-    expect(home).toContain("data-theme-toggle");
+    expect(home).not.toContain("data-theme-toggle");
     expect(home).toContain("data-activity-bell");
     expect(home).toContain("data-user-menu-host");
     expect(home).not.toContain("data-app-rail");
@@ -831,7 +830,8 @@ describe("AppShell rail-collapse chevron", () => {
       expect(html).toContain('fill="currentColor"');
       expect(html).not.toContain("lucide-");
       expect(html).not.toContain('stroke-width="1.33"');
-      expect(html).toContain("data-theme-toggle");
+      expect(html).not.toContain("data-theme-toggle");
+      expect(html).toContain("data-user-menu-host");
       expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_ICON_CLASS);
@@ -899,7 +899,8 @@ describe("AppShell rail-collapse chevron", () => {
       expect(html).toContain('fill="currentColor"');
       expect(html).not.toContain("lucide-");
       expect(html).not.toContain('stroke-width="1.33"');
-      expect(html).toContain("data-theme-toggle");
+      expect(html).not.toContain("data-theme-toggle");
+      expect(html).toContain("data-user-menu-host");
       expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
       expect(html).toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);

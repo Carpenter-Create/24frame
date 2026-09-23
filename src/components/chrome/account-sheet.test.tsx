@@ -645,7 +645,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("type=\"radio\"");
   });
 
-  it("keeps theme off the phone sheet — Settings Preferences is the SoT", () => {
+  it("drills phone Theme to the shared picker with the stored value", () => {
     const sheet = renderSheet();
 
     expect(sheet).toContain("data-identity-block");
@@ -664,7 +664,12 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("CaretLeft");
     expect(src).not.toContain("APPEARANCE.back");
     expect(sheet).not.toContain("data-account-menu-theme-switch");
+    expect(sheet).not.toContain('role="switch"');
     expect(sheet).toContain('href="/settings/theme"');
+    expect(sheet).toContain("data-account-sheet-theme-value");
+    expect(sheet).toContain(">Light<");
+    expect(attrClass(sheet, 'data-sheet-group-item="theme"')).toContain("min-h-11");
+    expect(attrClass(sheet, 'data-sheet-group-item="settings"')).not.toContain("min-h-11");
     expect(src).not.toContain("AppearanceCheck");
     expect(src).not.toContain("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(src).not.toContain("AccountAppearanceFlyout");
@@ -809,7 +814,7 @@ describe("AccountMenuDropdown Coinbase grammar", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("paints flat rows — no inset cards, no chevrons, danger Log out, version footer", () => {
+  it("paints flat rows — chevron only on Theme, danger Log out, version footer", () => {
     const html = renderDropdown();
     const settings = html.indexOf('data-account-menu-row="settings"');
     const theme = html.indexOf('data-account-menu-row="theme"');
@@ -821,22 +826,33 @@ describe("AccountMenuDropdown Coinbase grammar", () => {
     expect(html).not.toContain("data-account-sheet-pin");
     expect(html).not.toContain("data-sheet-group");
     expect(html).not.toContain("data-account-menu-leftover");
-    expect(html).not.toContain(SHEET_GROUP_CHEVRON_CLASS);
     expect(settings).toBeGreaterThan(headRule);
     expect(theme).toBeGreaterThan(settings);
     expect(help).toBeGreaterThan(theme);
     expect(logout).toBeGreaterThan(help);
     expect(version).toBeGreaterThan(logout);
     expect(attrClass(html, 'data-account-menu-row="settings"')).toBe(ACCOUNT_MENU_DROPDOWN_ROW_CLASS);
+    expect(attrClass(html, 'data-account-menu-row="theme"')).toBe(ACCOUNT_MENU_DROPDOWN_ROW_CLASS);
     expect(attrClass(html, 'data-account-menu-row="help"')).toBe(ACCOUNT_MENU_DROPDOWN_ROW_CLASS);
     expect(attrClass(html, 'data-account-menu-row="logOut"')).toBe(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS);
     expect(attrClass(html, 'data-account-menu-row="logOut"')).toContain("text-[#c4564a]");
     expect(attrClass(html, 'data-account-menu-row="logOut"')).not.toContain("text-accent");
     expect(attrClass(html, "data-account-menu-version")).toBe(ACCOUNT_MENU_DROPDOWN_VERSION_CLASS);
     expect(html).toContain('href="/settings"');
-    expect(html).not.toContain('href="/settings/theme"');
-    expect(html).toContain('role="switch"');
-    expect(html).toContain("data-account-menu-theme-switch");
+    expect(html).toContain('href="/settings/theme"');
+    expect(html).not.toContain('role="switch"');
+    expect(html).not.toContain("data-account-menu-theme-switch");
+    const themeRow = html.slice(theme, help);
+    const settingsRow = html.slice(settings, theme);
+    const helpRow = html.slice(help, logout);
+    const logoutRow = html.slice(logout, version);
+    expect(themeRow).toContain(SHEET_GROUP_CHEVRON_CLASS);
+    expect(themeRow).toContain("data-account-menu-theme-value");
+    expect(themeRow).toContain("Light");
+    expect(themeRow).toContain("t-body");
+    expect(settingsRow).not.toContain(SHEET_GROUP_CHEVRON_CLASS);
+    expect(helpRow).not.toContain(SHEET_GROUP_CHEVRON_CLASS);
+    expect(logoutRow).not.toContain(SHEET_GROUP_CHEVRON_CLASS);
     expect(html).toContain(">v0.1.0<");
     expect(html).not.toContain("Workspace");
     expect(html).not.toContain(">Profile<");
