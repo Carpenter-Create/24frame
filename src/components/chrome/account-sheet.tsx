@@ -178,19 +178,21 @@ function AccountMenuFooter() {
 function AccountMenuLogOut({ onClose }: { onClose: () => void }) {
   return (
     <div data-account-sheet-logout-stack="" className={ACCOUNT_SHEET_LOGOUT_STACK_CLASS}>
-      <button
-        type="button"
-        data-sheet-group-item="logOut"
-        data-user-menu-item="logOut"
-        className={ACCOUNT_SHEET_LOGOUT_CLASS}
-        onClick={() => {
-          onClose();
-          void signOut();
-        }}
-      >
-        <SignOut className="size-4 shrink-0" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-        {USER_MENU.logOut}
-      </button>
+      <SheetGroup inset groupId="logOut">
+        <button
+          type="button"
+          data-sheet-group-item="logOut"
+          data-user-menu-item="logOut"
+          className={ACCOUNT_SHEET_LOGOUT_CLASS}
+          onClick={() => {
+            onClose();
+            void signOut();
+          }}
+        >
+          <SignOut className="size-4 shrink-0" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
+          {USER_MENU.logOut}
+        </button>
+      </SheetGroup>
     </div>
   );
 }
