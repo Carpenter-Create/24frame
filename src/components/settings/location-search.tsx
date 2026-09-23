@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { X } from "@phosphor-icons/react";
 
 import {
   clearProfileLocation,
@@ -10,7 +11,12 @@ import {
 } from "@/app/(app)/settings/preferences/location/actions";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
+import {
+  FORM_CONTROL_BOX_CLASS,
+  FORM_CONTROL_TEXT_CLASS,
+  HOUSE_VOICE_MIC_CLASS,
+} from "@/lib/form-control";
 import {
   composeLocationLabel,
   LOCATION,
@@ -18,11 +24,15 @@ import {
   type LocationPlace,
   type ProfileLocation,
 } from "@/lib/location";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SETTINGS_CONTENT_MEASURE_CLASS } from "@/lib/settings";
 
-// Location drill. One search field. Results are selectable places.
-// Select writes city / region / country. Remove clears all three.
-// Phone stacks the label — no truncation.
+// Location drill. One bar.
+// Empty: the bar is the search field.
+// Selected: the composed place sits in that same bar, with a trailing
+// X that clears city, region, and country and returns to search.
+// No second stacked value. No separate remove block.
+// Phone wraps the label. No ellipsis.
 
 export function LocationSearch({ initial }: { initial: ProfileLocation }) {
   const router = useRouter();
@@ -32,8 +42,10 @@ export function LocationSearch({ initial }: { initial: ProfileLocation }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [focusNonce, setFocusNonce] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const request = useRef(0);
+  const inputRef = useRef<HTMLInputElement>(null);
   const label = composeLocationLabel(location.city, location.region, location.country);
   const selectedKey =
     location.city && location.region && location.country
@@ -48,6 +60,11 @@ export function LocationSearch({ initial }: { initial: ProfileLocation }) {
       pendingRequest.current += 1;
     };
   }, []);
+
+  useEffect(() => {
+    if (focusNonce === 0 || label) return;
+    inputRef.current?.focus();
+  }, [focusNonce, label]);
 
   function onQuery(value: string) {
     setQuery(value);
@@ -100,10 +117,13 @@ export function LocationSearch({ initial }: { initial: ProfileLocation }) {
     }
     setLocation(res.location);
     onQuery("");
+    setFocusNonce((nonce) => nonce + 1);
     router.refresh();
   }
 
-  const showEmpty = query.trim().length >= LOCATION.searchMin && !searching && results.length === 0;
+  const showResults = label.length === 0 && results.length > 0;
+  const showEmpty =
+    label.length === 0 && query.trim().length >= LOCATION.searchMin && !searching && results.length === 0;
 
   return (
     <div
@@ -115,48 +135,62 @@ export function LocationSearch({ initial }: { initial: ProfileLocation }) {
           {error}
         </InlineNotice>
       ) : null}
-      <p
-        data-location-current=""
-        className={label ? "t-body break-words text-ink" : "t-body break-words text-ink-3"}
+      <div
+        data-location-bar=""
+        className={cn(
+          FORM_CONTROL_BOX_CLASS,
+          "flex items-center gap-[var(--space-2)] focus-within:border-ink-3",
+        )}
       >
-        {label || LOCATION.empty}
-      </p>
-      {label ? (
-        <Button
-          type="button"
-          variant="secondary"
-          data-location-clear=""
-          disabled={pending}
-          onClick={() => {
-            void clearLocation();
-          }}
-          className="w-full justify-start whitespace-normal text-left md:w-auto"
-        >
-          {LOCATION.clear}
-        </Button>
-      ) : null}
-      <Input
-        type="search"
-        role="combobox"
-        aria-expanded={results.length > 0}
-        aria-controls={results.length > 0 ? "location-results" : undefined}
-        aria-autocomplete="list"
-        aria-label={LOCATION.searchLabel}
-        placeholder={LOCATION.searchPlaceholder}
-        value={query}
-        disabled={pending}
-        autoComplete="off"
-        data-location-search=""
-        onChange={(event) => {
-          onQuery(event.target.value);
-        }}
-      />
+        {label ? (
+          <>
+            <span
+              data-location-value=""
+              className={cn(FORM_CONTROL_TEXT_CLASS, "min-w-0 flex-1 break-words whitespace-normal text-left text-ink")}
+            >
+              {label}
+            </span>
+            <button
+              type="button"
+              data-location-clear=""
+              aria-label={LOCATION.clear}
+              disabled={pending}
+              onClick={() => {
+                void clearLocation();
+              }}
+              className={cn(HOUSE_VOICE_MIC_CLASS, "shrink-0")}
+            >
+              <X className={PHOSPHOR_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} aria-hidden />
+            </button>
+          </>
+        ) : (
+          <Input
+            ref={inputRef}
+            type="search"
+            role="combobox"
+            aria-expanded={showResults}
+            aria-controls={showResults ? "location-results" : undefined}
+            aria-autocomplete="list"
+            aria-label={LOCATION.searchLabel}
+            placeholder={LOCATION.searchPlaceholder}
+            value={query}
+            disabled={pending}
+            autoComplete="off"
+            variant="bare"
+            data-location-search=""
+            className="min-w-0 w-full flex-1"
+            onChange={(event) => {
+              onQuery(event.target.value);
+            }}
+          />
+        )}
+      </div>
       {showEmpty ? (
         <p data-location-empty="" className="t-body-sm break-words text-ink-3">
           {LOCATION.noMatches}
         </p>
       ) : null}
-      {results.length > 0 ? (
+      {showResults ? (
         <ul id="location-results" role="listbox" aria-label={LOCATION.searchLabel} data-location-results="" className="flex flex-col">
           {results.map((place) => (
             <li key={placeKey(place)}>
@@ -169,7 +203,7 @@ export function LocationSearch({ initial }: { initial: ProfileLocation }) {
                 onClick={() => {
                   void selectPlace(place);
                 }}
-                className="flex w-full break-words py-[var(--space-3)] text-left t-body whitespace-normal text-ink"
+                className="flex w-full break-words whitespace-normal py-[var(--space-3)] text-left t-body text-ink"
               >
                 {composeLocationLabel(place.city, place.region, place.country)}
               </button>

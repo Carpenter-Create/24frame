@@ -58,11 +58,14 @@ describe("SettingsPreferencesLocationPage", () => {
     expect(html).toContain(LOCATION.helper);
     expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
     expect(html).toContain("Preferences");
+    expect(html).toContain('data-location-bar=""');
     expect(html).toContain("Austin, TX, US");
-    expect(html).toContain('data-location-search=""');
     expect(html).toContain('data-location-clear=""');
-    expect(html).toContain(LOCATION.clear);
-    expect(html).toContain(LOCATION.searchPlaceholder);
+    expect(html).toContain(`aria-label="${LOCATION.clear}"`);
+    expect(html).not.toContain(`>${LOCATION.clear}<`);
+    expect(html).not.toContain('data-location-search=""');
+    expect(html).not.toContain('data-location-current=""');
+    expect(html).not.toContain(LOCATION.searchPlaceholder);
     expect(html).not.toContain(SETTINGS.themeHelper);
     expect(html).not.toContain("Learn from typed and dictated text");
     expect(pageSrc).toContain("SettingsEditPane");
