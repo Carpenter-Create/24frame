@@ -176,7 +176,8 @@ describe("Social home", () => {
     const html = await renderHome();
     expect(html).toContain("data-social-home");
     expect(html).toContain(SOCIAL.home.title);
-    expect(html).toContain("24Frame");
+    expect(html).toContain(SOCIAL.home.subtitle);
+    expect(html).not.toContain("Posts from people you follow");
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain('data-social-home-stack="lock_topics_composer_stories_wall"');
     expect(html).toContain("data-social-create-sheet");
@@ -209,8 +210,12 @@ describe("Social home", () => {
     expect(html).not.toContain("data-social-recent-chats");
     expect(html).not.toContain("data-social-chats-empty");
     expect(html).not.toContain(SOCIAL.home.recentChats);
-    expect(html).toContain('data-social-icon="users"');
-    expect(html).toContain('data-social-icon="image"');
+    expect(html).toContain("data-social-home-activity-empty");
+    expect(html).toContain("data-social-home-activity-write");
+    expect(html).toContain("data-social-home-activity-story");
+    expect(html).toContain('href="/social/stories/new"');
+    expect(html).not.toContain("No stories yet");
+    expect(html).not.toContain("No posts yet");
     expect(html).toMatch(/data-social-home-topic="All"[^>]*data-social-home-topic-active=""/);
     expect(html).toContain('data-social-home-topic="Acting"');
     expect(html).toContain("Cinematography");
@@ -220,8 +225,9 @@ describe("Social home", () => {
     expect(html).not.toContain("data-social-home-setup");
     expect(html).not.toContain(SOCIAL.checklist.title);
     expect(html).toContain("data-social-for-you");
-    expect(html).toContain(SOCIAL.home.emptyQuiet);
+    expect(html).toContain(SOCIAL.home.empty);
     expect(html).toContain(SOCIAL.home.emptyHint);
+    expect(html).toContain(SOCIAL.home.subtitle);
     expect(html).toContain(SOCIAL.home.findPeople);
     expect(html).toContain("/social/search?intent=people");
     expect(html).not.toContain("Explore creators");

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialEmpty } from "@/components/social/social-empty";
+import { SocialHomeActivityEmpty } from "@/components/social/social-home-activity-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
@@ -188,17 +189,7 @@ async function SocialHomeCenter({
               <div data-social-empty-lenses="" className="hidden md:block">
                 <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
               </div>
-              <div className="md:hidden">
-                <SocialEmpty
-                  icon="users"
-                  title={SOCIAL.home.empty}
-                  hint={SOCIAL.home.emptyHint}
-                  action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
-                />
-              </div>
-              <div className="hidden md:block">
-                <SocialEmpty icon="image" title={SOCIAL.home.emptyQuiet} />
-              </div>
+              <SocialHomeActivityEmpty findPeople={followees.ids.length === 0} />
             </div>
           }
         />
@@ -220,7 +211,7 @@ function SocialHomeForYouLane({
         <SocialEmpty
           icon="users"
           title={SOCIAL.forYou.people}
-          hint={SOCIAL.home.emptyHint}
+          hint={SOCIAL.home.findPeopleHint}
           action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
         />
       ) : null}

@@ -60,7 +60,7 @@ export function SocialStoryViewer({
           <p className="t-body-sm text-ink-2">{socialRelativeTime(createdAt)}</p>
         </div>
         <Link
-          href={SOCIAL_ROUTES.stories}
+          href={SOCIAL_ROUTES.home}
           aria-label="Close"
           className="flex size-8 items-center justify-center text-ink-2"
         >

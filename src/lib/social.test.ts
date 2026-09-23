@@ -83,9 +83,11 @@ describe("social copy lock", () => {
     const blob = JSON.stringify({ SOCIAL, SOCIAL_ROUTES, SOCIAL_WORKSPACE });
     expect(blob).toContain(PRODUCT_NAME);
     expect(blob).toContain(SOCIAL_WORKSPACE);
-    expect(SOCIAL.home.subtitle).toContain("follow");
-    expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
-    expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(SOCIAL.home.subtitle).toBe("Activity from people you follow.");
+    expect(SOCIAL.home.empty).toBe("No activity yet");
+    expect(SOCIAL.home.emptyHint).toBe(
+      "Posts, stories, and updates from people you follow show up here.",
+    );
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
