@@ -26,6 +26,7 @@ import {
   houseHomePeriodHop,
   type HouseChildSeen,
   houseHrefKey,
+  houseMayClientOwnHop,
   houseNavHop,
   housePaintedKeys,
   housePathFromLocation,
@@ -146,6 +147,8 @@ function HousePathProviderCore({
       hasScreen: (dest: string) => houseShouldClientNavigate(dest, housePaintedKeys()),
       navigateOwned: (dest: string, event?: HouseNavClickLike) => {
         if (event && houseNavIgnorePendingClick(event)) return false;
+        // Cold create must not pushState. Next has to replace the RSC tree.
+        if (!houseMayClientOwnHop(parsed.pathname, nextPath)) return false;
         const parsedDest = parseHouseHref(dest);
         const next = housePathFromLocation(parsedDest.pathname, parsedDest.search);
         const hop = houseNavHop({

@@ -63,8 +63,12 @@ describe("SocialStoryCompose create stage", () => {
     expect(src).toContain("probeStoryRecorderMimeType");
     expect(src).toContain('lane", "stories"');
     expect(src).toContain("createSocialStory");
-    expect(src).toContain('capture="environment"');
+    expect(src).toContain("captureStoryStillFrame");
+    expect(src).toContain("openPhotoCamera");
+    expect(src).toContain("data-social-story-still-shutter");
+    expect(src).not.toContain('capture="environment"');
     expect(src).not.toContain('capture="user"');
+    expect(src).not.toMatch(/\scapture\s*=/);
     expect(src).toContain("data-social-story-photo-library");
     expect(src).toContain("data-social-story-photo-capture");
     expect(src).not.toContain("data-social-story-picker");

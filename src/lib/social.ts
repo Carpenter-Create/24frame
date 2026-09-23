@@ -556,10 +556,10 @@ export const SOCIAL = {
     mediaMissing: "Choose a video first.",
     // Design 144:1218/144:1444 also showed “up to 15 seconds”. Not an Adam lock.
     // Do not treat that note as a duration cap.
-    // Create-story lock v1.1: photo card and video card. Entry subtitle and footnote removed.
+    // Create-story lock v1.3: photo and video each have Upload (file) and Take (live camera).
     photoCard: "Create a photo story",
     videoCard: "Create a video story",
-    photoLibrary: "Choose from library",
+    photoLibrary: "Upload a photo",
     photoLibraryHint: "Stills from your camera roll",
     photoCapture: "Take a photo",
     photoCaptureHint: "Open the camera",

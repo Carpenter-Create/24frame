@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { SOCIAL_VIDEO_CONTENT_TYPES } from "./social-media";
 import {
+  captureStoryStillFrame,
   formatStoryRecorderClock,
   probeStoryRecorderMimeType,
   resolveStoryRecorderBlobType,
@@ -81,6 +82,40 @@ describe("story MediaRecorder mime probe", () => {
     expect(JSON.stringify(storyRecorderVideoConstraints("environment"))).not.toMatch(
       /width|height|aspectRatio/,
     );
+  });
+
+  it("captures a jpeg still from the live preview frame", async () => {
+    let drew = false;
+    const file = await captureStoryStillFrame(
+      { videoWidth: 2, videoHeight: 3 },
+      {
+        width: 0,
+        height: 0,
+        getContext: () => ({
+          drawImage: () => {
+            drew = true;
+          },
+        }),
+        toBlob: (callback) => callback(new Blob([new Uint8Array([1, 2])], { type: "image/jpeg" })),
+      },
+    );
+    expect(drew).toBe(true);
+    expect(file?.type).toBe("image/jpeg");
+    expect(file?.name).toBe("story.jpg");
+    expect(file?.size).toBe(2);
+    expect(
+      await captureStoryStillFrame(
+        { videoWidth: 0, videoHeight: 10 },
+        {
+          width: 0,
+          height: 0,
+          getContext: () => {
+            throw new Error("no canvas");
+          },
+          toBlob: () => undefined,
+        },
+      ),
+    ).toBeNull();
   });
 
   it("invalidates in-flight studio work after teardown or cancel", () => {

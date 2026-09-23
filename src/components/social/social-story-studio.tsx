@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import Link from "next/link";
 
+import { HouseLink } from "@/components/chrome/house-link";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialAvatar } from "./social-avatar";
 import { SocialIcon } from "./social-icon";
@@ -51,11 +51,13 @@ import {
   SOCIAL_ICON_SIZE_STORY_STUDIO,
 } from "@/lib/social-icons";
 import {
-  SOCIAL_IMAGE_CONTENT_TYPES,
   SOCIAL_IMAGE_MAX_BYTES,
   SOCIAL_VIDEO_CONTENT_TYPES,
   SOCIAL_VIDEO_MAX_BYTES,
+  readStoryInputPick,
   socialMediaKindFor,
+  storyImageAccept,
+  storyPickFile,
   type SocialMediaContentType,
   type SocialMediaItem,
   type SocialMediaKind,
@@ -70,7 +72,9 @@ import {
   storyRecorderFileName,
   storyRecorderHoldMs,
   storyRecorderVideoConstraints,
+  captureStoryStillFrame,
   storyStudioIsLive,
+  type StoryStillCanvas,
   storyStudioMirrorsPreview,
   type StoryStudioFacing,
 } from "@/lib/social-story-recorder";
@@ -125,7 +129,7 @@ export function SocialStoryCompose({
   const reviewRef = useRef<HTMLVideoElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const photoLibraryRef = useRef<HTMLInputElement>(null);
-  const photoCaptureRef = useRef<HTMLInputElement>(null);
+  const stillRef = useRef(false);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -140,12 +144,18 @@ export function SocialStoryCompose({
   const postRef = useRef(0);
 
   const [phase, setPhase] = useState<StudioPhase>("stage");
+  const [still, setStill] = useState(false);
   const [facing, setFacing] = useState<StoryStudioFacing>("user");
   const [error, setError] = useState("");
   const [clock, setClock] = useState("0:00");
   const [clip, setClip] = useState<ReviewClip | null>(null);
   const [playing, setPlaying] = useState(false);
   const [posting, setPosting] = useState(false);
+
+  function setStillMode(next: boolean) {
+    stillRef.current = next;
+    setStill(next);
+  }
 
   function clearHold() {
     if (holdTimerRef.current != null) {
@@ -212,11 +222,12 @@ export function SocialStoryCompose({
     void node.play().catch(() => undefined);
   }, [phase]);
 
-  async function acquireStream(nextFacing: StoryStudioFacing): Promise<MediaStream> {
+  async function acquireStream(nextFacing: StoryStudioFacing, audio: boolean): Promise<MediaStream> {
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error(SOCIAL.stories.unavailable);
     }
     const video = storyRecorderVideoConstraints(nextFacing);
+    if (!audio) return navigator.mediaDevices.getUserMedia({ video, audio: false });
     try {
       return await navigator.mediaDevices.getUserMedia({ video, audio: true });
     } catch {
@@ -228,7 +239,7 @@ export function SocialStoryCompose({
     stopStream(streamRef.current);
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
-    const stream = await acquireStream(nextFacing);
+    const stream = await acquireStream(nextFacing, !stillRef.current);
     if (!storyStudioIsLive(liveRef.current, live)) {
       stopStream(stream);
       return false;
@@ -246,6 +257,7 @@ export function SocialStoryCompose({
 
   async function openStudio() {
     setError("");
+    setStillMode(false);
     const probed = probeStoryRecorderMimeType(
       typeof MediaRecorder !== "undefined" ? MediaRecorder.isTypeSupported.bind(MediaRecorder) : undefined,
     );
@@ -382,9 +394,78 @@ export function SocialStoryCompose({
   function closeStudio() {
     postRef.current = nextStoryStudioLive(postRef.current);
     setPosting(false);
+    const photo = stillRef.current;
     releasePreview();
     releaseClip();
-    setPhase("video");
+    setStillMode(false);
+    setPhase(photo ? "photo" : "video");
+  }
+
+  async function openPhotoCamera() {
+    setError("");
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError(SOCIAL.stories.unavailable);
+      return;
+    }
+    setStillMode(true);
+    const live = nextStoryStudioLive(liveRef.current);
+    liveRef.current = live;
+    setPhase("preview");
+    try {
+      const opened = await attachPreview(facing, live);
+      if (!opened && storyStudioIsLive(liveRef.current, live)) {
+        setStillMode(false);
+        setPhase("photo");
+      }
+    } catch {
+      if (!storyStudioIsLive(liveRef.current, live)) return;
+      releasePreview();
+      setStillMode(false);
+      setPhase("photo");
+      setError(SOCIAL.stories.permission);
+    }
+  }
+
+  async function takeStill() {
+    const live = liveRef.current;
+    const node = videoRef.current;
+    if (!node || !stillRef.current) {
+      setError(SOCIAL.stories.photoMissing);
+      return;
+    }
+    if (node.videoWidth <= 0) {
+      await new Promise<void>((resolve) => {
+        const done = () => resolve();
+        node.addEventListener("loadeddata", done, { once: true });
+        window.setTimeout(done, 800);
+      });
+    }
+    if (!storyStudioIsLive(liveRef.current, live)) return;
+    const current = videoRef.current;
+    if (!current) {
+      setError(SOCIAL.stories.photoMissing);
+      return;
+    }
+    const file = await captureStoryStillFrame(current, document.createElement("canvas") as StoryStillCanvas);
+    if (!storyStudioIsLive(liveRef.current, live)) return;
+    if (!file) {
+      setError(SOCIAL.stories.photoMissing);
+      return;
+    }
+    releasePreview();
+    setStillMode(false);
+    if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
+    const url = URL.createObjectURL(file);
+    clipUrlRef.current = url;
+    setClip({
+      file,
+      url,
+      contentType: file.type as SocialMediaContentType,
+      kind: "image",
+    });
+    setPlaying(false);
+    setError("");
+    setPhase("review");
   }
 
   function retake() {
@@ -407,16 +488,16 @@ export function SocialStoryCompose({
     });
   }
 
-  function onPick(files: FileList | null, expected: SocialMediaKind, input: HTMLInputElement | null) {
-    if (input) input.value = "";
-    const file = files?.[0];
-    if (!file) return;
+  function onPick(expected: SocialMediaKind, input: HTMLInputElement | null) {
+    const picked = input ? readStoryInputPick(input) : null;
+    if (!picked) return;
     setError("");
-    const kind = socialMediaKindFor(file.type);
-    if (kind !== expected) {
+    const resolved = storyPickFile(picked);
+    if (!resolved || resolved.kind !== expected) {
       setError(expected === "image" ? SOCIAL.stories.photoMediaType : SOCIAL.stories.mediaType);
       return;
     }
+    const file = resolved.file;
     if (file.size <= 0) {
       setError(expected === "image" ? SOCIAL.stories.photoMissing : SOCIAL.stories.mediaMissing);
       return;
@@ -433,8 +514,8 @@ export function SocialStoryCompose({
     setClip({
       file,
       url,
-      contentType: file.type as SocialMediaContentType,
-      kind,
+      contentType: resolved.contentType,
+      kind: resolved.kind,
     });
     setPlaying(false);
     setPhase("review");
@@ -468,7 +549,7 @@ export function SocialStoryCompose({
   }
 
   const accept = SOCIAL_VIDEO_CONTENT_TYPES.join(",");
-  const photoAccept = SOCIAL_IMAGE_CONTENT_TYPES.join(",");
+  const photoAccept = storyImageAccept();
   const videoStudio =
     phase === "preview" ||
     phase === "recording" ||
@@ -479,14 +560,14 @@ export function SocialStoryCompose({
       {videoStudio ? null : (
         <>
           <aside data-social-story-rail="" className={SOCIAL_STORY_CREATE_RAIL_CLASS}>
-            <Link
+            <HouseLink
               href={SOCIAL_ROUTES.home}
               data-social-story-close=""
               aria-label={SOCIAL.stories.close}
               className={SOCIAL_STORY_CREATE_CLOSE_CLASS}
             >
               <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
-            </Link>
+            </HouseLink>
             <h2 className={SOCIAL_STORY_CREATE_TITLE_CLASS}>{SOCIAL.stories.yourStory}</h2>
             <div className={SOCIAL_STORY_CREATE_IDENTITY_CLASS}>
               <SocialAvatar name={displayName} photoUrl={photoUrl} size="sm" className="size-10" />
@@ -568,7 +649,7 @@ export function SocialStoryCompose({
                     type="button"
                     data-social-story-photo-capture=""
                     className={SOCIAL_STORY_PICKER_ROW_CLASS}
-                    onClick={() => photoCaptureRef.current?.click()}
+                    onClick={() => void openPhotoCamera()}
                   >
                     <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
                       <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
@@ -684,12 +765,12 @@ export function SocialStoryCompose({
                   <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
                   <p className="t-title text-ink">{SOCIAL.stories.posted}</p>
                   <p className="t-body-sm text-ink-2 whitespace-normal break-words">{SOCIAL.stories.postedHint}</p>
-                  <Link
+                  <HouseLink
                     href={SOCIAL_ROUTES.home}
                     className="inline-flex items-center justify-center rounded-full bg-accent px-[var(--space-6)] py-[var(--space-4)] t-body-sm font-semibold text-accent-contrast"
                   >
                     {SOCIAL.stories.viewStories}
-                  </Link>
+                  </HouseLink>
                 </div>
               </div>
             ) : null}
@@ -700,6 +781,7 @@ export function SocialStoryCompose({
       {videoStudio ? (
         <div
           data-social-story-studio={phase}
+          data-social-story-capture={still ? "photo" : "video"}
           className={SOCIAL_STORY_STUDIO_CLASS}
         >
           <div className={SOCIAL_STORY_STUDIO_STAGE_CLASS}>
@@ -799,6 +881,18 @@ export function SocialStoryCompose({
                     </button>
                   </div>
                 </>
+              ) : still ? (
+                <>
+                  <p className="t-body-sm text-band-ink/85">{SOCIAL.stories.photoCapture}</p>
+                  <button
+                    type="button"
+                    data-social-story-shutter=""
+                    data-social-story-still-shutter=""
+                    aria-label={SOCIAL.stories.photoCapture}
+                    className={SOCIAL_STORY_RECORD_CLASS}
+                    onClick={() => void takeStill()}
+                  />
+                </>
               ) : (
                 <>
                   <p className="t-body-sm text-band-ink/85">
@@ -832,36 +926,25 @@ export function SocialStoryCompose({
         </div>
       ) : null}
 
-      {phase === "video" || videoStudio ? (
+      {(phase === "video" || videoStudio) && !still ? (
         <input
           ref={fileRef}
           type="file"
           accept={accept}
           className="sr-only"
           aria-label={SOCIAL.stories.upload}
-          onChange={(e) => onPick(e.target.files, "video", fileRef.current)}
+          onChange={(e) => onPick("video", e.currentTarget)}
         />
       ) : null}
       {phase === "photo" || (phase === "review" && clip?.kind === "image") ? (
-        <>
-          <input
-            ref={photoLibraryRef}
-            type="file"
-            accept={photoAccept}
-            className="sr-only"
-            aria-label={SOCIAL.stories.photoLibrary}
-            onChange={(e) => onPick(e.target.files, "image", photoLibraryRef.current)}
-          />
-          <input
-            ref={photoCaptureRef}
-            type="file"
-            accept={photoAccept}
-            capture="environment"
-            className="sr-only"
-            aria-label={SOCIAL.stories.photoCapture}
-            onChange={(e) => onPick(e.target.files, "image", photoCaptureRef.current)}
-          />
-        </>
+        <input
+          ref={photoLibraryRef}
+          type="file"
+          accept={photoAccept}
+          className="sr-only"
+          aria-label={SOCIAL.stories.photoLibrary}
+          onChange={(e) => onPick("image", e.currentTarget)}
+        />
       ) : null}
     </div>
   );

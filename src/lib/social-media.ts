@@ -112,6 +112,60 @@ export function socialMediaKindFor(contentType: string): SocialMediaKind | null 
   return null;
 }
 
+const STORY_PICK_EXTENSIONS: Record<string, SocialMediaContentType> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  webm: "video/webm",
+};
+
+/** Library pickers often omit `file.type` or send `image/jpg`. Map those onto the house allowlist. */
+export function storyPickContentType(file: { type: string; name: string }): SocialMediaContentType | null {
+  const raw = file.type.trim().toLowerCase();
+  if (raw === "image/jpg" || raw === "image/pjpeg") return "image/jpeg";
+  if (isSocialMediaContentType(raw)) return raw;
+  if (raw !== "" && raw !== "application/octet-stream") return null;
+  const ext = file.name.split(".").pop()?.trim().toLowerCase() ?? "";
+  return STORY_PICK_EXTENSIONS[ext] ?? null;
+}
+
+export function storyImageAccept(): string {
+  return `${SOCIAL_IMAGE_CONTENT_TYPES.join(",")},.jpg,.jpeg,.png,.webp,.gif`;
+}
+
+/**
+ * Snapshot the first file, then clear the input.
+ * `FileList` is live — clearing `value` first drops the file and the pick looks dead.
+ */
+export function readStoryInputPick(input: {
+  files: { readonly length: number; [index: number]: File | undefined } | null;
+  value: string;
+}): File | null {
+  const file = input.files && input.files.length > 0 ? (input.files[0] ?? null) : null;
+  input.value = "";
+  return file;
+}
+
+export function storyPickFile(file: File): {
+  file: File;
+  contentType: SocialMediaContentType;
+  kind: SocialMediaKind;
+} | null {
+  const contentType = storyPickContentType(file);
+  if (!contentType) return null;
+  const kind = socialMediaKindFor(contentType);
+  if (!kind) return null;
+  const typed =
+    file.type === contentType
+      ? file
+      : new File([file], file.name, { type: contentType, lastModified: file.lastModified });
+  return { file: typed, contentType, kind };
+}
+
 export function socialMediaMaxBytes(kind: SocialMediaKind): number {
   return kind === "video" ? SOCIAL_VIDEO_MAX_BYTES : SOCIAL_IMAGE_MAX_BYTES;
 }

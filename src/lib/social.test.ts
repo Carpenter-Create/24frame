@@ -170,7 +170,7 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.mediaMissing).toBe("Choose a video first.");
     expect(SOCIAL.stories.photoCard).toBe("Create a photo story");
     expect(SOCIAL.stories.videoCard).toBe("Create a video story");
-    expect(SOCIAL.stories.photoLibrary).toBe("Choose from library");
+    expect(SOCIAL.stories.photoLibrary).toBe("Upload a photo");
     expect(SOCIAL.stories.photoCapture).toBe("Take a photo");
     expect(SOCIAL.stories.record).toBe("Record a video");
     expect(SOCIAL.stories.recordHint).toBe("Open in-app studio");
@@ -202,7 +202,12 @@ describe("social copy lock", () => {
     expect(storyCompose).not.toContain("HouseDialog");
     expect(storyCompose).toContain("storyStudioMirrorsPreview");
     expect(storyCompose).toContain("storyRecorderVideoConstraints");
-    expect(storyCompose).not.toContain("capture=\"user\"");
+    expect(storyCompose).toContain("HouseLink");
+    expect(storyCompose).toContain("captureStoryStillFrame");
+    expect(storyCompose).toContain("readStoryInputPick");
+    expect(storyCompose).toContain("openPhotoCamera");
+    expect(storyCompose).not.toMatch(/\scapture\s*=/);
+    expect(storyCompose).not.toContain('from "next/link"');
     expect(storyCompose).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");

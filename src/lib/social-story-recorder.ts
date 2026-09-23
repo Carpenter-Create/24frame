@@ -106,3 +106,38 @@ export function nextStoryStudioLive(current: number): number {
 export function storyStudioIsLive(current: number, started: number): boolean {
   return current === started;
 }
+
+export const STORY_STILL_CONTENT_TYPE = "image/jpeg" as const;
+
+export function storyStillFileName(): string {
+  return "story.jpg";
+}
+
+export type StoryStillCanvas = {
+  width: number;
+  height: number;
+  getContext(
+    contextId: "2d",
+  ): { drawImage: (source: unknown, dx: number, dy: number, dw: number, dh: number) => void } | null;
+  toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number): void;
+};
+
+/** One still from the live preview. Unmirrored, same as MediaRecorder. */
+export async function captureStoryStillFrame(
+  video: { videoWidth: number; videoHeight: number },
+  canvas: StoryStillCanvas,
+): Promise<File | null> {
+  const width = video.videoWidth;
+  const height = video.videoHeight;
+  if (width <= 0 || height <= 0) return null;
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) return null;
+  context.drawImage(video, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((next) => resolve(next), STORY_STILL_CONTENT_TYPE, 0.92);
+  });
+  if (!blob || blob.size <= 0) return null;
+  return new File([blob], storyStillFileName(), { type: STORY_STILL_CONTENT_TYPE });
+}
