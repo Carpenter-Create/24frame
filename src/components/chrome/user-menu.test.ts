@@ -266,16 +266,15 @@ describe("UserMenu actions", () => {
 });
 
 describe("UserMenu Mercury quiet craft", () => {
-  it("keeps the header sun/moon off HouseLeadChrome — Theme is the avatar door", () => {
+  it("mounts the header sun/moon on HouseLeadChrome — the avatar door stays a drill", () => {
     const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
     const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
     expect(shellSrc).not.toContain("ThemeToggle");
-    expect(shellSrc).not.toContain("theme-toggle");
     expect(shellSrc).not.toContain("ThemeGlyph");
     expect(menuSrc).not.toContain("ThemeToggle");
     expect(menuSrc).not.toContain("ThemeGlyph");
-    expect(leadSrc).not.toContain("ThemeToggle");
-    expect(leadSrc).not.toContain("theme-toggle");
+    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(sheetSrc).not.toContain("ThemeToggle");
     expect(leadSrc).not.toContain("data-app-header-desktop-trailing");
     expect(leadSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
     expect(sheetSrc).toContain('kind === "settings"');

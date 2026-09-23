@@ -195,5 +195,26 @@ describe("house guardrails", () => {
     expect(overlay).toContain("No Drawer for ···");
     expect(overlay).toContain("No fifth host");
     expect(overlay).toContain("Menu body absorb is a separate lock");
+
+    const rows = readFileSync(
+      "docs/design-locks/preferences-settings-row-grammar-lock-v1.md",
+      "utf8",
+    );
+    expect(rows).toContain("PrefDrillGroup");
+    expect(rows).toContain("SETTINGS_GROUP");
+    expect(rows).toContain("SettingsDrillRow");
+    expect(rows).toContain("t-body-sm");
+    expect(rows).toContain("44");
+    expect(rows).toContain("PrefControlSection");
+    expect(rows).toContain("page white");
+
+    const theme = readFileSync("docs/design-locks/theme-sot-auto-lock-v1.md", "utf8");
+    expect(theme).toContain("gc-theme");
+    expect(theme).toContain("lib/theme.ts");
+    expect(theme).toContain("Auto");
+    expect(theme).toContain("System default");
+    expect(theme).toContain("prefers-color-scheme");
+    expect(theme).toContain("exits Auto");
+    expect(theme).toContain("same** picker");
   });
 });

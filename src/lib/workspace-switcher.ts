@@ -13,8 +13,8 @@
 // Cluster gap is --space-2 on every breakpoint; phone
 // AI/bell/search hug the 16px glyph so that gap is optical,
 // not 16-in-32 vs a 32 disk. Do not cancel that hug with -mx.
-// #452 stacked AI on the bell. Color mode is the avatar Theme
-// row only (Adam lock 2026-09-22). No header sun/moon.
+// #452 stacked AI on the bell. Header sun/moon follows the bell
+// and exits Auto. The picker stays on /settings/theme.
 // Ask 24Frame AI sits immediately left of the
 // bell and opens the Mercury overlay. Ask AI is header + Home
 // module only (#465). Do not reintroduce a dest hamburger.
@@ -22,7 +22,7 @@
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
 // active ink fill, idle muted grey. Desktop trailing: pills, then
-// Ask, then bell, then avatar. Social uses the same
+// Ask, then bell, then sun/moon, then avatar. Social uses the same
 // split. Phone uses word+chevron + sheet. Do not force three
 // labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the

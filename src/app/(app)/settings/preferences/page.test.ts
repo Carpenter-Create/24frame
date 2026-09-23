@@ -66,7 +66,7 @@ describe("SettingsPreferencesPage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(false) as never);
   });
 
-  it("shows the notification matrix — Theme stays off Preferences", async () => {
+  it("shows Location and Theme in one PrefDrillGroup, then the notification matrix", async () => {
     const html = renderToStaticMarkup(await SettingsPreferencesPage());
     expect(html).toContain('data-settings-hub="preferences"');
     expect(html).toMatch(/<h1[^>]*>Preferences<\/h1>/);
@@ -76,8 +76,10 @@ describe("SettingsPreferencesPage", () => {
     expect(paneSrc).toContain("settingsPaneTitle");
     expect(paneSrc).not.toContain("SETTINGS.title");
     expect(html).toContain('data-settings-pref-index=""');
-    expect(html).not.toContain('data-settings-drill-row="theme"');
-    expect(html).not.toContain(`href="${SETTINGS.themeHref}"`);
+    expect(html).toContain('data-settings-pref-drill-group=""');
+    expect(html).toContain('data-settings-drill-row="theme"');
+    expect(html).toContain(`href="${SETTINGS.themeHref}"`);
+    expect(html).toContain(">Light<");
     expect(html).not.toContain('data-settings-section="appearance"');
     expect(html).not.toContain('data-settings-appearance=""');
     expect(html).not.toContain("System default");
@@ -128,7 +130,24 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(SETTINGS_GROUP_CLASS);
     expect(html).toContain(SETTINGS_GROUP_LIST_CLASS);
     expect(html).toContain(HOUSE_MODULE_CLASS);
-    expect(html.match(/data-settings-group=""/g)?.length).toBe(5);
+    expect(html.match(/data-settings-group=""/g)?.length).toBe(6);
+    const drillGroup = html.slice(
+      html.indexOf('data-settings-pref-drill-group=""'),
+      html.indexOf('data-menu-host="phone"'),
+    );
+    expect(drillGroup).toContain(SETTINGS_GROUP_CLASS);
+    expect(drillGroup).toContain('data-settings-drill-row="location"');
+    expect(drillGroup).toContain('data-settings-drill-row="theme"');
+    expect(drillGroup.indexOf('data-settings-drill-row="location"')).toBeLessThan(
+      drillGroup.indexOf('data-settings-drill-row="theme"'),
+    );
+    expect(drillGroup).toContain("min-h-11");
+    expect(drillGroup).toContain("t-body-sm text-ink-3");
+    expect(drillGroup).toContain("size-4");
+    expect(drillGroup).not.toContain('data-settings-drill-row="notifications"');
+    const matrix = html.slice(html.indexOf('data-settings-section="notifications"'));
+    expect(matrix).not.toContain('data-settings-drill-row="theme"');
+    expect(matrix).not.toContain('data-settings-drill-row="location"');
     expect(html.match(/data-settings-notification-section="/g)?.length).toBe(5);
     expect(html.match(/data-settings-notification-channel-head=""/g)?.length).toBe(5);
     expect(html).toContain("divide-y divide-hairline");
@@ -154,6 +173,7 @@ describe("SettingsPreferencesPage", () => {
     expect(paneSrc).not.toContain("settingsManageCoursesVisible");
     expect(paneSrc).not.toContain("AppearancePreferences");
     expect(paneSrc).not.toContain("AppearanceThemeRow");
+    expect(paneSrc).toContain("PrefDrillGroup");
     expect(paneSrc).not.toContain("AppearanceThemePicker");
     expect(paneSrc).not.toContain("SpeechLearningPreference");
     expect(paneSrc).toContain("NotificationPreferences");

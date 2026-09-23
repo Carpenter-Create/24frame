@@ -1,10 +1,8 @@
 // Theme preference copy. Lives in lib/, not JSX.
 // One SoT: gc-theme via lib/theme.ts. The avatar Theme drill
-// (/settings/theme) reads and writes that key. Do not invent a
-// second store. Theme is an avatar-menu row (Adam lock
-// 2026-09-22) — not a Preferences block, not a header sun/moon.
-// Existing kinds stay light / dark / auto. Auto is System
-// default on the Theme page.
+// and the Preferences Theme row both open /settings/theme and
+// write that key. Do not invent a second store. Face order is
+// Auto · Dark · Light. The Auto label is Auto.
 
 import {
   SETTINGS_CONTENT_MEASURE_CLASS,
@@ -24,8 +22,6 @@ export const APPEARANCE = {
   systemDefaultHelper: "We'll match your system preferences",
 } as const;
 
-// Unused Light / Dark / Auto list. Preference surfaces use
-// System default / Dark / Light.
 export const APPEARANCE_OPTIONS = [
   { kind: "light", label: APPEARANCE.light },
   { kind: "dark", label: APPEARANCE.dark },
@@ -35,7 +31,7 @@ export const APPEARANCE_OPTIONS = [
 export const APPEARANCE_FLYOUT_OPTIONS = [
   {
     kind: "auto",
-    label: APPEARANCE.systemDefault,
+    label: APPEARANCE.auto,
     helper: APPEARANCE.systemDefaultHelper,
   },
   { kind: "dark", label: APPEARANCE.dark },
@@ -55,6 +51,6 @@ export const APPEARANCE_SETTINGS_HELPER_CLASS = "t-body-sm text-ink-3";
 
 export function appearancePreferenceLabel(preference: ThemePreference): string {
   if (preference === "dark") return APPEARANCE.dark;
-  if (preference === "auto") return APPEARANCE.systemDefault;
+  if (preference === "auto") return APPEARANCE.auto;
   return APPEARANCE.light;
 }

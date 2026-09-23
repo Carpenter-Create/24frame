@@ -188,7 +188,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("search ?");
   });
 
-  it("G7 keeps trailing workspace switcher + Ask 24Frame AI + bell + avatar on all three", () => {
+  it("G7 keeps trailing workspace switcher + Ask + bell + sun/moon + avatar on all three", () => {
     for (const workspace of ["aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
       expect(html).toContain("data-app-header-trailing");
@@ -196,7 +196,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).toContain(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS);
       expect(html).toContain('data-workspace-switcher-presentation="pills"');
       expect(html).toContain("data-ask-assistant-header");
-      expect(html).not.toContain("data-theme-toggle");
+      expect(html).toContain("data-theme-toggle");
       expect(html).toContain("data-activity-bell");
       expect(html).toContain("data-user-menu-host");
       expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
@@ -206,6 +206,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
         html.indexOf("data-activity-bell"),
       );
       expect(html.indexOf("data-activity-bell")).toBeLessThan(
+        html.indexOf("data-theme-toggle"),
+      );
+      expect(html.indexOf("data-theme-toggle")).toBeLessThan(
         html.indexOf("data-user-menu-host"),
       );
       expect(html).not.toContain("lucide-");
@@ -214,8 +217,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     }
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
-    expect(leadSrc).not.toContain("ThemeToggle");
-    expect(leadSrc).not.toContain("theme-toggle");
+    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).toContain('from "@/components/theme-toggle"');
     expect(leadSrc).toContain("<ActivityBell");
     expect(leadSrc).toContain("workspace={workspace}");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);

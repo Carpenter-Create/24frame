@@ -3,8 +3,9 @@
 // identity → Settings → Theme → Get Help → Log out. Chrome may
 // differ (full-bleed sheet vs dropdown). Labels may not fork.
 // Adam lock 2026-09-22: Theme is its own avatar-menu row. It
-// drills to /settings/theme. One gc-theme SoT — not a Preferences
-// nest, not a header sun/moon, not a second store.
+// drills to /settings/theme. The Preferences Theme row uses that
+// same picker. One gc-theme SoT — not a nested theme route, not a
+// second store. Header sun/moon is the explicit light/dark flip.
 // 24Frame AI is the header sparkle only — not a menu row.
 // Workspace lives on the header switcher. One Settings hub. No
 // forked Settings.

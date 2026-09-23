@@ -15,3 +15,5 @@ Design locks land in this directory before CoS undrafts a UI pull request.
 - [`mobile-menu-family-tree-v1.md`](mobile-menu-family-tree-v1.md) — families A–D, OUT, parks
 - [`house-dual-host-primitive-audit-v1.md`](house-dual-host-primitive-audit-v1.md) — primitive rows
 - [`house-overlay-dual-host-v1.md`](house-overlay-dual-host-v1.md) — overlay geometry
+- [`preferences-settings-row-grammar-lock-v1.md`](preferences-settings-row-grammar-lock-v1.md) — Preferences PrefDrillGroup
+- [`theme-sot-auto-lock-v1.md`](theme-sot-auto-lock-v1.md) — Theme Auto, one `gc-theme` store
