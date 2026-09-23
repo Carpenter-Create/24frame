@@ -4,6 +4,7 @@ import { AccountPhotoField, AccountProfileForm } from "@/app/(app)/account/accou
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { Card, CardBody } from "@/components/ui/card";
+import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { menuHostClass } from "@/lib/menu-host";
 import {
@@ -13,7 +14,6 @@ import {
   SETTINGS_SECTION_CLASS,
   settingsPaneTitle,
 } from "@/lib/settings";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { getOrgContext } from "@/lib/supabase/context";
 import { userMenuName } from "@/lib/user-menu";
 
@@ -31,7 +31,7 @@ export async function ProfileSettings() {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
-  const photoUrl = await signedAvatarUrl(ctx.user.id);
+  const photoUrl = ACCOUNT_PHOTO_HREF;
   const name = userMenuName(ctx.user.name) ?? "";
 
   return (

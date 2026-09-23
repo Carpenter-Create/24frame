@@ -1,20 +1,28 @@
+import { Suspense } from "react";
+
 import { AggregationViewAsBanner } from "@/components/aggregation/view-as-banner";
 import { getOrgContext } from "@/lib/supabase/context";
 
-// Aggregation-only view-as banner. Lives here so Staff chrome never
-// mounts on the client product and Social never sees the session.
-export default async function AggregationLayout({
+// Sync segment. Awaiting getOrgContext here blocked child loading.tsx
+// the same way the app layout used to block Social hops. The view-as
+// banner streams in its own boundary so the page slot can paint.
+export default function AggregationLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const ctx = await getOrgContext();
   return (
     <>
-      {ctx?.aggregationViewAs ? (
-        <AggregationViewAsBanner orgName={ctx.aggregationViewAs.orgName} />
-      ) : null}
+      <Suspense fallback={null}>
+        <AggregationViewAsSlot />
+      </Suspense>
       {children}
     </>
   );
+}
+
+export async function AggregationViewAsSlot() {
+  const ctx = await getOrgContext();
+  if (!ctx?.aggregationViewAs) return null;
+  return <AggregationViewAsBanner orgName={ctx.aggregationViewAs.orgName} />;
 }

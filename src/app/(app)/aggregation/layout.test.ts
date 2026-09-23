@@ -9,7 +9,7 @@ vi.mock("@/components/aggregation/view-as-banner", () => ({
 
 import { getOrgContext } from "@/lib/supabase/context";
 
-import AggregationLayout from "./layout";
+import AggregationLayout, { AggregationViewAsSlot } from "./layout";
 
 describe("Aggregation layout view-as banner", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -18,9 +18,8 @@ describe("Aggregation layout view-as banner", () => {
     vi.mocked(getOrgContext).mockResolvedValue({
       aggregationViewAs: { orgId: "org-1", orgName: "Acme Films" },
     } as never);
-    const html = renderToStaticMarkup(await AggregationLayout({ children: "dashboard" }));
+    const html = renderToStaticMarkup(await AggregationViewAsSlot());
     expect(html).toContain("BANNER:Acme Films");
-    expect(html).toContain("dashboard");
   });
 
   it("does not paint a banner for a client session", async () => {
@@ -28,8 +27,17 @@ describe("Aggregation layout view-as banner", () => {
       isGcStaff: false,
       aggregationViewAs: null,
     } as never);
-    const html = renderToStaticMarkup(await AggregationLayout({ children: "titles" }));
+    const html = renderToStaticMarkup(await AggregationViewAsSlot());
     expect(html).not.toContain("BANNER:");
+  });
+
+  it("stays sync so child loading.tsx can paint", () => {
+    const aggregation = readFileSync("src/app/(app)/aggregation/layout.tsx", "utf8");
+    expect(aggregation).toContain("export default function AggregationLayout");
+    expect(aggregation).not.toContain("export default async function AggregationLayout");
+    expect(aggregation).toContain("<Suspense");
+    expect(aggregation).toContain("{children}");
+    const html = renderToStaticMarkup(AggregationLayout({ children: "titles" }));
     expect(html).toContain("titles");
   });
 

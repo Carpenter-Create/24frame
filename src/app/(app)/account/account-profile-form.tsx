@@ -40,6 +40,8 @@ export function AccountPhotoField({ photoUrl }: { photoUrl: string | null }) {
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropPreview, setCropPreview] = useState<string | null>(null);
   const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  const face = photoUrl && brokenSrc !== photoUrl ? photoUrl : null;
 
   function clearCrop() {
     if (cropPreview) URL.revokeObjectURL(cropPreview);
@@ -83,6 +85,7 @@ export function AccountPhotoField({ photoUrl }: { photoUrl: string | null }) {
         return;
       }
       clearCrop();
+      setBrokenSrc(null);
       router.refresh();
     } catch (cause) {
       setError(cause instanceof Error && cause.message ? cause.message : ACCOUNT_PROFILE.photoFailed);
@@ -129,9 +132,14 @@ export function AccountPhotoField({ photoUrl }: { photoUrl: string | null }) {
               beginCrop(event.dataTransfer.files[0]);
             }}
           >
-            {photoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-              <img src={photoUrl} alt={ACCOUNT_PROFILE.photoAlt} className="size-full object-cover" />
+            {face ? (
+              // eslint-disable-next-line @next/next/no-img-element -- same-origin face route; a miss hides the circle
+              <img
+                src={face}
+                alt={ACCOUNT_PROFILE.photoAlt}
+                className="size-full object-cover"
+                onError={() => setBrokenSrc(face)}
+              />
             ) : null}
           </button>
           <button

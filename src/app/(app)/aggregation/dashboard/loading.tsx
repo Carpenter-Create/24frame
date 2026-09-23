@@ -4,5 +4,9 @@ import { DashboardSkeleton } from "@/components/layout/page-skeletons";
 // wraps every Social / Education / Aggregation hop in the Aggregation
 // dashboard skeleton and makes chrome feel like a full reload.
 export default function Loading() {
-  return <DashboardSkeleton />;
+  return (
+    <div data-house-rsc-fallback="">
+      <DashboardSkeleton />
+    </div>
+  );
 }

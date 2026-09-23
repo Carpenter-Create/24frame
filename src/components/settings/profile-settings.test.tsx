@@ -4,10 +4,10 @@ import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { SETTINGS, SETTINGS_ABSENT } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { ProfileSettings } from "./profile-settings";
 
 vi.mock("next/navigation", () => ({
@@ -17,7 +17,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn(), prefetch: vi.fn(), replace: vi.fn() }),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
-vi.mock("@/lib/s3-avatars", () => ({ signedAvatarUrl: vi.fn() }));
 vi.mock("@/app/(app)/account/actions", () => ({
   saveAccountName: vi.fn(),
   uploadAccountPhoto: vi.fn(),
@@ -42,7 +41,6 @@ const src = readFileSync(join(here, "profile-settings.tsx"), "utf8");
 describe("ProfileSettings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(signedAvatarUrl).mockResolvedValue(null);
   });
 
   it("shows account identity only — no Edit public profile door", async () => {
@@ -79,6 +77,9 @@ describe("ProfileSettings", () => {
     expect(src).toContain("AccountProfileForm");
     expect(src).toContain("SettingsDrillRow");
     expect(src).toContain("AccountPhotoField");
+    expect(src).toContain("ACCOUNT_PHOTO_HREF");
+    expect(src).not.toContain("signedAvatarUrl");
+    expect(html).toContain(ACCOUNT_PHOTO_HREF);
     for (const absent of SETTINGS_ABSENT) {
       expect(html).not.toContain(absent);
     }

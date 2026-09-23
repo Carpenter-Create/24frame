@@ -22,6 +22,7 @@ import {
   houseRememberScroll,
   houseResolveDisplay,
   houseScreenKey,
+  houseSocialHomePanelHop,
   houseSyncChildSeen,
   houseShouldClientNavigate,
   houseShouldKeepAlive,
@@ -49,7 +50,11 @@ describe("house client shell SoT", () => {
 
   it("keys dests by the query params that change the painted tree", () => {
     expect(houseScreenKey("/social")).toBe("/social");
-    expect(houseScreenKey("/social", "?topic=Music")).toBe("/social?topic=Music");
+    expect(houseScreenKey("/social", "?topic=Music")).toBe("/social");
+    expect(houseScreenKey("/social", "?lane=for-you")).toBe("/social");
+    expect(houseScreenKey("/social", "?topic=music&lane=for-you")).toBe("/social");
+    expect(houseExactHref("/social?topic=music")).toBe("/social?topic=music");
+    expect(houseScreenKey("/social", "?after=abc")).toBe("/social?after=abc");
     expect(houseScreenKey("/social/explore", "?q=ada")).toBe("/social/explore?q=ada");
     expect(houseScreenKey("/social/profile", "?tab=credits")).toBe("/social/profile");
     expect(houseScreenKey("/social/profile", "?tab=activity&activity=comments")).toBe("/social/profile");
@@ -63,6 +68,12 @@ describe("house client shell SoT", () => {
     );
     expect(houseScreenKey("/home", "?period=ytd")).toBe("/home?period=ytd");
     expect(houseHrefKey("/social/explore")).toBe("/social/explore");
+    expect(houseShouldClientNavigate("/social?topic=Music", ["/social"])).toBe(true);
+    expect(houseSocialHomePanelHop("/social", "/social?topic=music")).toBe(true);
+    expect(houseSocialHomePanelHop("/social", "/social?lane=for-you")).toBe(true);
+    expect(houseSocialHomePanelHop("/social?topic=music", "/social?topic=music")).toBe(false);
+    expect(houseSocialHomePanelHop("/social?lane=for-you", "/social")).toBe(true);
+    expect(houseSocialHomePanelHop("/social/explore", "/social?topic=music")).toBe(false);
     expect(houseShouldClientNavigate("/social/profile?tab=credits", ["/social/profile"])).toBe(true);
     expect(houseShouldClientNavigate("/social/u/ada?activity=comments", ["/social/u/ada"])).toBe(true);
     expect(houseWorkspaceLandKey("/social/u/ada")).toBe("/social");

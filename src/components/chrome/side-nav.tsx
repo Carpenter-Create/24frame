@@ -2,7 +2,6 @@
 
 import { HouseLink } from "./house-link";
 import { useRouter } from "next/navigation";
-import { useHousePathname } from "./house-client-shell";
 import { useRef } from "react";
 import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { railDestinations, isSocialCreateDest, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
@@ -39,10 +38,9 @@ export function SideNav({
   workspace?: WorkspaceMode;
 }) {
   const workspace = clampWorkspaceMode(requestedWorkspace, isGcStaff);
-  const pathname = useHousePathname();
   const social = workspace === "social";
   const { activePath, markPending, pendingHref } = useSocialNavPending();
-  const pathForActive = social ? activePath : pathname;
+  const pathForActive = activePath;
 
   const router = useRouter();
   const warmed = useRef<Set<string>>(new Set());
@@ -111,13 +109,13 @@ export function SideNav({
         prefetch={social}
         onMouseEnter={social ? undefined : () => warm(item.href)}
         onFocus={social ? undefined : () => warm(item.href)}
-        onClick={social ? (event) => markPending(item.href, event) : undefined}
+        onClick={(event) => markPending(item.href, event)}
         title={collapsed ? item.label : undefined}
         aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
         data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
         className={rowClass}
       >
-        {social ? <SocialNavPendingProbe href={item.href} onPending={markPending} /> : null}
+        <SocialNavPendingProbe href={item.href} onPending={markPending} />
         {glyph}
         {label}
         {badge}

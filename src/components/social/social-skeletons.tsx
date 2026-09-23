@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Skeleton } from "@/components/layout/skeleton";
 import { HOUSE_DRAWER_HOST_CLASS, HOUSE_DRAWER_PANEL_CLASS } from "@/lib/house-overlay";
 import {
@@ -51,27 +53,36 @@ export function SocialForYouSkeleton() {
   );
 }
 
-export function SocialHomeCenterSkeleton() {
-  return (
-    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
-      <div data-social-home-topics-skeleton="" className="min-w-0">
-        <div className={SOCIAL_TOPIC_RAIL_CLASS}>
-          <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
-            {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
-              <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-24 shrink-0 rounded-full" />
-                ))}
-              </div>
-            ))}
+export function SocialHomeCenterSkeleton({
+  topics = true,
+  middle = null,
+}: {
+  topics?: boolean;
+  middle?: ReactNode;
+} = {}) {
+  const body = (
+    <>
+      {topics ? (
+        <div data-social-home-topics-skeleton="" className="min-w-0">
+          <div className={SOCIAL_TOPIC_RAIL_CLASS}>
+            <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
+              {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
+                <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-24 shrink-0 rounded-full" />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
       <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
         <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
         <Skeleton className="h-9 min-w-0 flex-1" />
       </div>
       <SocialStoriesRailSkeleton tall />
+      {middle}
       <div data-social-feed-skeleton="" className={SOCIAL_FEED_GUTTER_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
@@ -86,6 +97,12 @@ export function SocialHomeCenterSkeleton() {
           </div>
         ))}
       </div>
+    </>
+  );
+  if (!topics) return body;
+  return (
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+      {body}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { SocialHomeActivityEmpty } from "@/components/social/social-home-activit
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
+import { SocialHomeColdSlot } from "@/components/social/social-home-cold-slot";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialHomeTopics } from "@/components/social/social-home-topics";
 import {
@@ -142,58 +143,60 @@ async function SocialHomeCenter({
         <p>{SOCIAL.home.subtitle}</p>
       </div>
       <SocialHomeTopics active={topic} />
-      {profile ? (
-        <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
-      ) : null}
-      <SocialStoriesRail
-        cards={rail}
-        authors={authors}
-        faces={faces}
-        canCreate={!!profile}
-        createName={profile?.display_name}
-        createPhotoUrl={photoUrl}
-      />
-      {storiesPage.truncated ? (
-        <InlineNotice tone="info" data-social-stories-truncated="">
-          {SOCIAL.home.truncatedStories}
-        </InlineNotice>
-      ) : null}
-      {followees.truncated ? (
-        <InlineNotice tone="info" data-social-followees-truncated="">
-          {SOCIAL.home.truncatedFollowees}
-        </InlineNotice>
-      ) : null}
-      <SocialHomeTabs active={lane} />
-      {lane === "for-you" ? (
-        <SocialHomeForYouLane suggested={suggested} faces={faces} />
-      ) : (
-        <SocialFollowingWallBound
-          viewerId={ctx.user.id}
-          topic={topic}
-          cursor={
-            cursor
-              ? encodeFollowingWallCursor({ created_at: cursor.createdAt, id: cursor.id })
-              : null
-          }
-          wall={socialFollowingWallView({
-            wall,
-            authors,
-            faces,
-            groups,
-            liked,
-            media,
-            canLike: !!profile,
-          })}
-          empty={
-            <div data-social-following-empty="" className="flex flex-col gap-3">
-              <div data-social-empty-lenses="" className="hidden md:block">
-                <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
-              </div>
-              <SocialHomeActivityEmpty findPeople={followees.ids.length === 0} />
-            </div>
-          }
+      <SocialHomeColdSlot seedLane={lane} seedTopic={topic}>
+        {profile ? (
+          <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+        ) : null}
+        <SocialStoriesRail
+          cards={rail}
+          authors={authors}
+          faces={faces}
+          canCreate={!!profile}
+          createName={profile?.display_name}
+          createPhotoUrl={photoUrl}
         />
-      )}
+        {storiesPage.truncated ? (
+          <InlineNotice tone="info" data-social-stories-truncated="">
+            {SOCIAL.home.truncatedStories}
+          </InlineNotice>
+        ) : null}
+        {followees.truncated ? (
+          <InlineNotice tone="info" data-social-followees-truncated="">
+            {SOCIAL.home.truncatedFollowees}
+          </InlineNotice>
+        ) : null}
+        <SocialHomeTabs active={lane} />
+        {lane === "for-you" ? (
+          <SocialHomeForYouLane suggested={suggested} faces={faces} />
+        ) : (
+          <SocialFollowingWallBound
+            viewerId={ctx.user.id}
+            topic={topic}
+            cursor={
+              cursor
+                ? encodeFollowingWallCursor({ created_at: cursor.createdAt, id: cursor.id })
+                : null
+            }
+            wall={socialFollowingWallView({
+              wall,
+              authors,
+              faces,
+              groups,
+              liked,
+              media,
+              canLike: !!profile,
+            })}
+            empty={
+              <div data-social-following-empty="" className="flex flex-col gap-3">
+                <div data-social-empty-lenses="" className="hidden md:block">
+                  <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
+                </div>
+                <SocialHomeActivityEmpty findPeople={followees.ids.length === 0} />
+              </div>
+            }
+          />
+        )}
+      </SocialHomeColdSlot>
     </div>
   );
 }
