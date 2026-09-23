@@ -77,6 +77,9 @@ jobs:
   isolation:
     name: isolation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -107,8 +110,18 @@ jobs:
       # Applies every migration in supabase/migrations to a clean database. This is also
       # the only place the new 20260726* migrations get executed end to end — they are
       # written but deliberately not applied to any developer database.
+      # Anonymous pulls of the pinned public images return toomanyrequests
+      # on shared runners. A GITHUB_TOKEN login raises that limit. One
+      # backoff covers a single rejected pull without leaving the job red.
       - name: Start Supabase
-        run: supabase start
+        run: |
+          set -euo pipefail
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          if ! supabase start; then
+            supabase stop || true
+            sleep 30
+            supabase start
+          fi
 
       # Ordinary pgTAP only. `screener_concurrency_test.sql` needs supabase_admin
       # (dblink); the default `postgres` role is not superuser and that file must
