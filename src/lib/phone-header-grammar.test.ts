@@ -60,7 +60,7 @@ function htmlClass(html: string, attr: string): string {
 }
 
 describe("phone header grammar A — trim trailing", () => {
-  it("keeps phone trailing as search · AI · bell · sun/moon · avatar", () => {
+  it("keeps phone trailing as search · AI · bell · avatar", () => {
     expect(leadSrc).not.toContain("data-app-header-desktop-trailing");
     expect(leadSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
     expect(switcherSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
@@ -72,10 +72,10 @@ describe("phone header grammar A — trim trailing", () => {
     expect(leadSrc.indexOf("data-app-header-trailing-nav")).toBeLessThan(
       leadSrc.indexOf("<AskAssistantHeaderLink"),
     );
-    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).not.toContain("ThemeToggle");
+    expect(leadSrc).not.toContain("data-theme-toggle");
     expect(leadSrc.indexOf("<AskAssistantHeaderLink")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
-    expect(leadSrc.indexOf("<ActivityBell")).toBeLessThan(leadSrc.indexOf("<ThemeToggle />"));
-    expect(leadSrc.indexOf("<ThemeToggle />")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
+    expect(leadSrc.indexOf("<ActivityBell")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
     expect(leadSrc).toMatch(
       /data-app-header-workspace-desktop[\s\S]*<\/div>\s*<AskAssistantHeaderLink/,
     );
@@ -100,16 +100,13 @@ describe("phone header grammar A — trim trailing", () => {
     expect(aggregation).not.toContain("data-mobile-nav-trigger");
     expect(trailing).not.toContain("data-app-header-desktop-trailing");
     expect(trailing).toContain("data-ask-assistant-header");
-    expect(trailing).toContain("data-theme-toggle");
+    expect(trailing).not.toContain("data-theme-toggle");
     expect(trailing).toContain("data-activity-bell");
     expect(trailing).toContain("data-user-menu-host");
     expect(trailing.indexOf("data-ask-assistant-header")).toBeLessThan(
       trailing.indexOf("data-activity-bell"),
     );
     expect(trailing.indexOf("data-activity-bell")).toBeLessThan(
-      trailing.indexOf("data-theme-toggle"),
-    );
-    expect(trailing.indexOf("data-theme-toggle")).toBeLessThan(
       trailing.indexOf("data-user-menu-host"),
     );
     const askToBell = trailing.slice(
@@ -154,14 +151,11 @@ describe("phone header grammar A — trim trailing", () => {
     expect(social.indexOf("data-social-header-search-icon")).toBeLessThan(
       social.indexOf("data-ask-assistant-header"),
     );
-    expect(social).toContain("data-theme-toggle");
+    expect(social).not.toContain("data-theme-toggle");
     expect(social.indexOf("data-ask-assistant-header")).toBeLessThan(
       social.indexOf("data-activity-bell"),
     );
     expect(social.indexOf("data-activity-bell")).toBeLessThan(
-      social.indexOf("data-theme-toggle"),
-    );
-    expect(social.indexOf("data-theme-toggle")).toBeLessThan(
       social.indexOf("data-account-sheet-trigger"),
     );
   });

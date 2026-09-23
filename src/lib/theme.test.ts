@@ -12,10 +12,7 @@ import {
   nextTheme,
   preferenceFromStorage,
   resolveTheme,
-  THEME_TOGGLE,
   themeFromRoot,
-  themeToggleLabel,
-  toggleDocumentTheme,
   toggleTheme,
   type ThemeRoot,
   type ThemeStorage,
@@ -52,7 +49,7 @@ function fakeStorage(initial: Record<string, string> = {}): ThemeStorage & { dat
   };
 }
 
-describe("theme toggle", () => {
+describe("theme preference writes", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -90,39 +87,6 @@ describe("theme toggle", () => {
     expect(THEME_STORAGE_KEY).toBe("gc-theme");
   });
 
-  it("labels the header toggle as the destination, not the current mode", () => {
-    expect(THEME_TOGGLE.toDark).toBe("Switch to dark mode");
-    expect(THEME_TOGGLE.toLight).toBe("Switch to light mode");
-    expect(themeToggleLabel("light")).toBe("Switch to dark mode");
-    expect(themeToggleLabel("dark")).toBe("Switch to light mode");
-  });
-
-  it("header flip exits Auto and stores the explicit mode", () => {
-    const root = fakeRoot(true);
-    const storage = fakeStorage({ [THEME_STORAGE_KEY]: "auto" });
-    vi.stubGlobal("document", { documentElement: root });
-    vi.stubGlobal("localStorage", storage);
-    const dispatchEvent = vi.fn();
-    vi.stubGlobal("window", { dispatchEvent });
-    expect(toggleDocumentTheme()).toBe("light");
-    expect(storage.data[THEME_STORAGE_KEY]).toBe("light");
-    expect(storage.data[THEME_STORAGE_KEY]).not.toBe("auto");
-    expect(root.classes.has(THEME_DARK_CLASS)).toBe(false);
-    expect(dispatchEvent).toHaveBeenCalled();
-  });
-
-  it("toggleDocumentTheme still flips .dark + gc-theme", () => {
-    const root = fakeRoot(false);
-    const storage = fakeStorage();
-    vi.stubGlobal("document", { documentElement: root });
-    vi.stubGlobal("localStorage", storage);
-    expect(toggleDocumentTheme()).toBe("dark");
-    expect(root.classes.has(THEME_DARK_CLASS)).toBe(true);
-    expect(storage.data[THEME_STORAGE_KEY]).toBe("dark");
-    expect(toggleDocumentTheme()).toBe("light");
-    expect(root.classes.has(THEME_DARK_CLASS)).toBe(false);
-    expect(storage.data[THEME_STORAGE_KEY]).toBe("light");
-  });
 });
 
 describe("theme preference — Light, Dark, Auto", () => {

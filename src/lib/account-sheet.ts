@@ -16,7 +16,8 @@
 // menu and not Settings. 24Frame AI is the header
 // sparkle only — not a menu row. Workspace is
 // the header control, not this menu. Theme is the avatar-menu
-// row at /settings/theme (Adam lock 2026-09-22). Destinations
+// drill at /settings/theme (Adam lock 2026-09-22). The face is the
+// stored preference. No header sun/moon. Destinations
 // use existing routes only — not
 // /account/workspace, /account/appearance, or /account/feedback.
 // Company stays off this menu. Log out +
@@ -218,23 +219,21 @@ export const ACCOUNT_MENU_DROPDOWN_ROW_CLASS =
 // Phosphor outline at 20. Class lives here so the tsx stays off size-5.
 export const ACCOUNT_MENU_DROPDOWN_ICON_CLASS = "size-5 shrink-0";
 
+// Theme is the only desktop body row with a chevron. Settings, Get
+// Help, and Log out stay flat. Value is the stored preference.
+// docs/design-locks/theme-chrome-avatar-only-lock-v1.md
+export const ACCOUNT_MENU_THEME_LABEL_CLASS = "min-w-0 flex-1 t-body text-ink";
+
+export const ACCOUNT_MENU_THEME_TRAILING_CLASS =
+  "ml-auto flex shrink-0 items-center gap-[var(--space-2)]";
+
+export const ACCOUNT_MENU_THEME_VALUE_CLASS = "t-body-sm text-ink-3";
+
+export const ACCOUNT_MENU_THEME_CHEVRON_CLASS = "size-4 shrink-0 text-ink-3";
+
 // House danger ink — same mark as menu-surface danger. Not Sporty Blue.
 export const ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS =
   "flex min-h-11 w-full items-center gap-[var(--space-3)] px-[var(--space-4)] text-left t-body-sm text-[#c4564a] hover:bg-surface-muted focus-visible:bg-surface-muted";
-
-export const ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS =
-  "relative ml-auto inline-flex h-5 w-9 shrink-0 items-center rounded-full";
-
-export const ACCOUNT_MENU_DROPDOWN_SWITCH_ON_CLASS = "bg-accent";
-
-export const ACCOUNT_MENU_DROPDOWN_SWITCH_OFF_CLASS = "bg-ink-3/40";
-
-export const ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_CLASS =
-  "pointer-events-none inline-block size-4 rounded-full bg-surface";
-
-export const ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_ON_CLASS = "translate-x-[18px]";
-
-export const ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_OFF_CLASS = "translate-x-0.5";
 
 // Version footer. 13 secondary. 12 pad. Not a card.
 export const ACCOUNT_MENU_DROPDOWN_FOOTER_CLASS =

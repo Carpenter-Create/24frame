@@ -233,7 +233,22 @@ describe("house guardrails", () => {
     expect(theme).toContain("Auto");
     expect(theme).toContain("System default");
     expect(theme).toContain("prefers-color-scheme");
-    expect(theme).toContain("exits Auto");
+    expect(theme).toContain("theme-chrome-avatar-only-lock-v1.md");
+    expect(theme).not.toContain("exits Auto");
     expect(theme).toContain("same** picker");
+
+    const chrome = readFileSync(
+      "docs/design-locks/theme-chrome-avatar-only-lock-v1.md",
+      "utf8",
+    );
+    expect(chrome).toContain("Avatar menu Theme drill only");
+    expect(chrome).toContain("**G1.**");
+    expect(chrome).toContain("**G2.**");
+    expect(chrome).toContain("**G3.**");
+    expect(chrome).toContain("**G4.**");
+    expect(chrome).toContain("**G5.**");
+    expect(chrome).toContain("**G6.**");
+    expect(chrome).toContain("CaretRight");
+    expect(readme).toContain("theme-chrome-avatar-only-lock-v1.md");
   });
 });

@@ -36,7 +36,6 @@ import {
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 const bellSrc = readFileSync("src/components/activity/activity-bell.tsx", "utf8");
-const themeSrc = readFileSync("src/components/theme-toggle.tsx", "utf8");
 const askHeaderSrc = readFileSync("src/components/chrome/ask-assistant-header.tsx", "utf8");
 const houseAiMarkSrc = readFileSync("src/components/chrome/house-ai-mark.tsx", "utf8");
 
@@ -226,7 +225,7 @@ describe("ActivityBell", () => {
     expect(html).toContain("md:hidden");
   });
 
-  it("matches #391 chrome idle weight on the desktop bell and the header sun/moon", () => {
+  it("matches #391 chrome idle weight on the desktop bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
     // Phone header trailing is its own 24px literal. Dock is 28px.
@@ -240,14 +239,6 @@ describe("ActivityBell", () => {
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-5 shrink-0 hidden md:block");
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
-    expect(themeSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
-    expect(themeSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
-    expect(themeSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
-    expect(themeSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
-    expect(themeSrc).toContain("Sun");
-    expect(themeSrc).toContain("Moon");
-    expect(themeSrc).toContain("toggleDocumentTheme");
-    expect(themeSrc).not.toContain("PHOSPHOR_CHROME_ICON_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
     expect(bellSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
@@ -258,12 +249,9 @@ describe("ActivityBell", () => {
     expect(bellSrc).toContain('register="phone"');
     expect(bellSrc).toContain('register="desktop"');
     expect(HOUSE_PHONE_CHROME_ICON_WEIGHT).toBe("regular");
-    for (const src of [themeSrc, bellSrc]) {
-      expect(src).not.toContain('weight="fill"');
-      expect(src).not.toContain('weight="duotone"');
-      expect(src).not.toContain("strokeWidth");
-    }
-    expect(themeSrc).not.toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
+    expect(bellSrc).not.toContain('weight="fill"');
+    expect(bellSrc).not.toContain('weight="duotone"');
+    expect(bellSrc).not.toContain("strokeWidth");
     expect(bellSrc).not.toContain('"size-6');
     expect(bellSrc).not.toContain('"size-4');
   });

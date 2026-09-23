@@ -165,7 +165,8 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).not.toContain('setFace("workspace")');
     expect(sheetSrc).not.toContain("onUserMenuAppearance");
     expect(sheetSrc).not.toContain("toggleDocumentTheme");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).toContain("appearancePreferenceLabel");
     expect(sheetSrc).not.toContain("THEME_STORAGE_KEY");
     expect(sheetSrc).not.toContain("ThemeGlyph");
     expect(sheetSrc).not.toContain("ThemeToggle");
@@ -237,14 +238,18 @@ describe("UserMenu actions", () => {
     expect(sheetSrc).not.toContain("admin@ccbfg.com");
   });
 
-  it("keeps the theme picker off the avatar sheet — desktop switch uses gc-theme", () => {
+  it("keeps the theme picker off the avatar menu — Theme drills to the shared page", () => {
     expect(sheetSrc).toContain("data-account-menu-face");
     expect(sheetSrc).not.toContain("AccountSheetAppearance");
     expect(sheetSrc).not.toContain("AccountAppearanceRow");
     expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS.map");
     expect(sheetSrc).not.toContain("AppearanceCheck");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
-    expect(sheetSrc).toContain("data-account-menu-theme-switch");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("data-account-menu-theme-switch");
+    expect(sheetSrc).not.toContain('role="switch"');
+    expect(sheetSrc).toContain("appearancePreferenceLabel");
+    expect(sheetSrc).toContain("USER_MENU.themeHref");
+    expect(sheetSrc).toContain("ACCOUNT_MENU_THEME_CHEVRON_CLASS");
     expect(sheetSrc).not.toContain("CaretLeft");
     expect(sheetSrc).not.toContain("AccountBackChevron");
     expect(sheetSrc).not.toContain("APPEARANCE.back");
@@ -266,14 +271,15 @@ describe("UserMenu actions", () => {
 });
 
 describe("UserMenu Mercury quiet craft", () => {
-  it("mounts the header sun/moon on HouseLeadChrome — the avatar door stays a drill", () => {
+  it("keeps Theme off the header — the avatar door stays a drill", () => {
     const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
     const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
     expect(shellSrc).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("ThemeGlyph");
     expect(menuSrc).not.toContain("ThemeToggle");
     expect(menuSrc).not.toContain("ThemeGlyph");
-    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).not.toContain("ThemeToggle");
+    expect(leadSrc).not.toContain("data-theme-toggle");
     expect(sheetSrc).not.toContain("ThemeToggle");
     expect(leadSrc).not.toContain("data-app-header-desktop-trailing");
     expect(leadSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");

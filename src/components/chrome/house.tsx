@@ -209,6 +209,7 @@ export function SheetGroupItem({
   pressed,
   label,
   inset = false,
+  className,
 }: {
   href?: string | null;
   onClick?: () => void;
@@ -217,8 +218,10 @@ export function SheetGroupItem({
   pressed?: boolean;
   label?: string;
   inset?: boolean;
+  className?: string;
 }) {
-  const itemClass = inset ? SHEET_GROUP_INSET_ITEM_CLASS : SHEET_GROUP_ITEM_CLASS;
+  const base = inset ? SHEET_GROUP_INSET_ITEM_CLASS : SHEET_GROUP_ITEM_CLASS;
+  const itemClass = className ? cn(base, className) : base;
   if (href) {
     return (
       <HouseLink
