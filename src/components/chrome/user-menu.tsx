@@ -1,10 +1,18 @@
 "use client";
 
+import type { ComponentProps } from "react";
+
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
 import { DesktopAccountMenu, MobileAccountMenu } from "./account-sheet";
 import { IdentityPhoto } from "./house";
+import { MenuDualHost } from "./menu-dual-host";
+
+/** Family A phone host. Same sheet as MobileAccountMenu — one primitive. */
+export function PhoneAccountMenu(props: ComponentProps<typeof MobileAccountMenu>) {
+  return <MobileAccountMenu {...props} />;
+}
 
 export function onUserMenuLogOut(): void {
   void signOut();
@@ -59,9 +67,10 @@ export function UserMenu({
   photoUrl?: string | null;
 }) {
   return (
-    <>
-      <MobileAccountMenu email={email} name={name} photoUrl={photoUrl} />
-      <DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />
-    </>
+    <MenuDualHost
+      shape="slot"
+      phone={<PhoneAccountMenu email={email} name={name} photoUrl={photoUrl} />}
+      desktop={<DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />}
+    />
   );
 }

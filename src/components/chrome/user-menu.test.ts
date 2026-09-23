@@ -5,6 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { menuHostClass } from "@/lib/menu-host";
 import { USER_MENU, USER_MENU_ABSENT, USER_MENU_ACTIONS } from "@/lib/user-menu";
 
 vi.mock("next/navigation", () => ({
@@ -109,11 +110,15 @@ describe("UserMenu trigger", () => {
 
 describe("UserMenu close control", () => {
   it("opens the mobile 544:561 / 537:557 sheet and the desktop 629:795 dropdown from the avatar", () => {
-    expect(menuSrc).toContain("MobileAccountMenu");
+    expect(menuSrc).toContain("PhoneAccountMenu");
     expect(menuSrc).toContain("DesktopAccountMenu");
+    expect(menuSrc).toContain("<MenuDualHost");
+    expect(menuSrc).toContain('shape="slot"');
     expect(menuSrc).not.toContain("defaultWorkspace");
     expect(sheetSrc).toContain('data-user-menu-desktop=""');
-    expect(sheetSrc).toContain("hidden md:block");
+    expect(sheetSrc).toContain('menuHostClass("desktop")');
+    expect(menuHostClass("desktop")).toBe("hidden md:block");
+    expect(menuHostClass("phone")).toBe("md:hidden");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
     expect(sheetSrc).toContain("<AccountMenuDropdown");
     expect(sheetSrc).toContain("<AccountSheet");

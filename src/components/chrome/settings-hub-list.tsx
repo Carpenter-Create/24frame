@@ -3,6 +3,7 @@
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { cn } from "@/lib/cn";
+import { menuHostClass } from "@/lib/menu-host";
 import {
   SETTINGS,
   SETTINGS_DRILL_LIST_CLASS,
@@ -23,7 +24,9 @@ export function SettingsHubList({
     <div
       data-settings-page=""
       data-settings-hub-list=""
-      className={cn(SETTINGS_PANE_CLASS, className)}
+      data-menu-host="phone"
+      data-menu-family="B"
+      className={cn(SETTINGS_PANE_CLASS, menuHostClass("phone"), className)}
     >
       <section data-settings-section="list" className={SETTINGS_SECTION_CLASS}>
         <SettingsPageLead title={SETTINGS.title} pathname={SETTINGS.href} />

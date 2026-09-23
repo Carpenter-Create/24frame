@@ -57,6 +57,7 @@ import {
   destinationClickClosesSheet,
 } from "@/lib/account-sheet";
 import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
+import { menuHostClass } from "@/lib/menu-host";
 import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
 import { settingsLandHref } from "@/lib/settings";
 import {
@@ -81,6 +82,7 @@ function AccountMenuTrigger({
   className,
   triggerAttr,
   controlsId,
+  host,
   triggerRef,
 }: {
   email: string;
@@ -90,6 +92,7 @@ function AccountMenuTrigger({
   className: string;
   triggerAttr: "data-account-sheet-trigger" | "data-user-menu-trigger";
   controlsId: string;
+  host: "phone" | "desktop";
   triggerRef?: Ref<HTMLButtonElement>;
 }) {
   const initial = userMenuAvatarInitial(email);
@@ -101,6 +104,8 @@ function AccountMenuTrigger({
       type="button"
       {...attrs}
       ref={triggerRef}
+      data-menu-host={host}
+      data-menu-family={host === "phone" ? "A" : "desktop"}
       aria-label={ACCOUNT_SHEET.sheet}
       aria-expanded={open}
       aria-controls={controlsId}
@@ -381,7 +386,8 @@ export function MobileAccountMenu({
         onOpen={openMenu}
         triggerAttr="data-account-sheet-trigger"
         controlsId="account-sheet"
-        className={`${HOUSE_HEADER_TRAILING_AVATAR_CLASS} md:hidden`}
+        host="phone"
+        className={`${HOUSE_HEADER_TRAILING_AVATAR_CLASS} ${menuHostClass("phone")}`}
       />
       {sheet && typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet}
     </>
@@ -425,7 +431,12 @@ export function DesktopAccountMenu({
   ) : null;
 
   return (
-    <div className="hidden md:block" data-user-menu-desktop="">
+    <div
+      className={menuHostClass("desktop")}
+      data-user-menu-desktop=""
+      data-menu-host="desktop"
+      data-menu-family="desktop"
+    >
       <AccountMenuTrigger
         email={email}
         photoUrl={photoUrl}
@@ -434,6 +445,7 @@ export function DesktopAccountMenu({
         triggerRef={triggerRef}
         triggerAttr="data-user-menu-trigger"
         controlsId="account-menu-dropdown"
+        host="desktop"
         className={`${HOUSE_HEADER_TRAILING_AVATAR_CLASS} transition-colors hover:text-ink`}
       />
       {dropdown && typeof document !== "undefined"
@@ -466,6 +478,7 @@ export function AccountSheet({
       aria-label={ACCOUNT_SHEET.sheet}
       data-account-sheet=""
       data-account-menu-face="main"
+      data-menu-family="A"
       className={ACCOUNT_SHEET_HOST_CLASS}
     >
       <button
@@ -513,6 +526,7 @@ export function AccountMenuDropdown({
       aria-modal="true"
       aria-label={ACCOUNT_SHEET.sheet}
       data-user-menu-desktop-panel=""
+      data-menu-family="desktop"
       className={ACCOUNT_MENU_DROPDOWN_HOST_CLASS}
     >
       <button

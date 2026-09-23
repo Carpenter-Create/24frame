@@ -33,6 +33,7 @@ import {
   APP_SHEET_SCRIM_CLASS,
   APP_SHEET_SURFACE_CLASS,
 } from "@/lib/house-sheet";
+import { menuHostClass } from "@/lib/menu-host";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { cn } from "@/lib/cn";
 
@@ -138,6 +139,7 @@ export function HousePageSelect({
   return (
     <div
       data-house-page-select=""
+      data-menu-family="C"
       className="relative min-w-0 w-auto shrink-0"
       ref={hostRef}
       {...attrs?.host}
@@ -169,7 +171,9 @@ export function HousePageSelect({
       {open ? (
         <div
           data-house-page-select-menu=""
-          className={`${panelClass} ${HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS}`}
+          data-menu-host="desktop"
+          data-menu-family="desktop"
+          className={cn(panelClass, menuHostClass("desktop", "panel"), HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS)}
           {...attrs?.menu}
         >
           {optionsList}
@@ -275,9 +279,11 @@ function HousePageSelectSheet({
   const sheet = (
     <div
       data-house-page-select-sheet=""
+      data-menu-host="phone"
+      data-menu-family="C"
       role="dialog"
       aria-label={title}
-      className={HOUSE_PAGE_SELECT_SHEET_HOST_CLASS}
+      className={cn(HOUSE_PAGE_SELECT_SHEET_HOST_CLASS, menuHostClass("phone"))}
       {...attrs?.sheet}
     >
       <button type="button" aria-label={closeLabel} className={APP_SHEET_SCRIM_CLASS} onClick={onClose} />
