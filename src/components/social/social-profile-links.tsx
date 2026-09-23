@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   FacebookLogo,
@@ -23,7 +23,6 @@ import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_PROFILE_LINK_CLASS,
   SOCIAL_PROFILE_LINKS_CLASS,
-  SOCIAL_PROFILE_LINKS_MORE_CLASS,
   SOCIAL_PROFILE_LINKS_SHEET_CLASS,
   SOCIAL_PROFILE_LINKS_SHEET_LINK_CLASS,
 } from "@/lib/social-chrome";
@@ -31,8 +30,6 @@ import { SOCIAL_ICON_SIZE_PROFILE_LINK } from "@/lib/social-icons";
 import {
   socialProfileLinkAccessibleName,
   socialProfileLinkGlyph,
-  socialProfileLinksFace,
-  socialProfileLinksMoreLabel,
   type SocialProfileLink,
   type SocialProfileLinkGlyphName,
 } from "@/lib/social-profile-links";
@@ -157,36 +154,13 @@ export function SocialProfileLinksSheet({
 }
 
 export function SocialProfileLinkRow({ links }: { links: readonly SocialProfileLink[] }) {
-  const titleId = useId();
-  const [open, setOpen] = useState(false);
-  const { face, overflow } = socialProfileLinksFace(links);
-
   if (links.length === 0) return null;
 
   return (
     <div data-social-profile-links="" className={SOCIAL_PROFILE_LINKS_CLASS}>
-      {face.map((link) => (
+      {links.map((link) => (
         <SocialProfileFaceLink key={`${link.platform}:${link.url}`} link={link} />
       ))}
-      {overflow > 0 ? (
-        <>
-          <button
-            type="button"
-            data-social-profile-links-more=""
-            aria-label={SOCIAL.profile.links}
-            className={SOCIAL_PROFILE_LINKS_MORE_CLASS}
-            onClick={() => setOpen(true)}
-          >
-            {socialProfileLinksMoreLabel(overflow)}
-          </button>
-          <SocialProfileLinksSheet
-            links={links}
-            open={open}
-            onClose={() => setOpen(false)}
-            titleId={titleId}
-          />
-        </>
-      ) : null}
     </div>
   );
 }

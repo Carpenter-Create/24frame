@@ -7,6 +7,7 @@ import {
   SOCIAL_CATEGORY_TOPICS,
   socialCategorySlug,
   socialHomeLensHref,
+  sortByLabelAlpha,
   sortTopicsAlpha,
 } from "./social-categories";
 
@@ -36,6 +37,9 @@ describe("locked Social Home categories", () => {
       "AI filmmaking",
       "Music",
     ]);
+    expect(sortByLabelAlpha(["Music", "acting", "AI filmmaking"], (label) => label)).toEqual(
+      sortTopicsAlpha(["Music", "acting", "AI filmmaking"]),
+    );
     expect(SOCIAL_CATEGORY_TOPICS).not.toContain("Cinematographers");
     expect(SOCIAL_CATEGORY_TOPICS).not.toContain("Composers");
     expect(SOCIAL_CATEGORY_TOPICS).toHaveLength(15);

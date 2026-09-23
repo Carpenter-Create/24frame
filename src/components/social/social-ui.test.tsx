@@ -369,10 +369,13 @@ describe("Social profile public face", () => {
       withRoles.indexOf('data-social-profile-role="actor"'),
     );
     expect(withRoles.indexOf('data-social-profile-role="actor"')).toBeLessThan(
-      withRoles.indexOf('data-social-profile-role="screenwriter"'),
-    );
-    expect(withRoles.indexOf('data-social-profile-role="screenwriter"')).toBeLessThan(
       withRoles.indexOf('data-social-profile-role="investor"'),
+    );
+    expect(withRoles.indexOf('data-social-profile-role="investor"')).toBeLessThan(
+      withRoles.indexOf('data-social-profile-role="producer"'),
+    );
+    expect(withRoles.indexOf('data-social-profile-role="producer"')).toBeLessThan(
+      withRoles.indexOf('data-social-profile-role="screenwriter"'),
     );
 
     const adamDesktop = renderToStaticMarkup(
@@ -411,9 +414,21 @@ describe("Social profile public face", () => {
     expect(adamDesktop.indexOf("Founder · Investor · Music Executive")).toBeLessThan(
       adamDesktop.indexOf('data-social-profile-role="executive_producer"'),
     );
+    expect(adamDesktop.indexOf('data-social-profile-role="composer"')).toBeLessThan(
+      adamDesktop.indexOf('data-social-profile-role="executive_producer"'),
+    );
+    expect(adamDesktop.indexOf('data-social-profile-role="executive_producer"')).toBeLessThan(
+      adamDesktop.indexOf('data-social-profile-role="music_director"'),
+    );
+    expect(adamDesktop.indexOf('data-social-profile-role="music_director"')).toBeLessThan(
+      adamDesktop.indexOf('data-social-profile-role="music_supervisor"'),
+    );
+    expect(adamDesktop.indexOf('data-social-profile-role="music_supervisor"')).toBeLessThan(
+      adamDesktop.indexOf('data-social-profile-role="musician"'),
+    );
     const adamRoles = adamDesktop.slice(
       adamDesktop.indexOf("data-social-profile-roles"),
-      adamDesktop.indexOf('data-social-profile-role="music_director"') + 280,
+      adamDesktop.indexOf('data-social-profile-role="musician"') + 280,
     );
     expect(adamRoles).toContain("data-house-chip-rail");
     expect(adamRoles).toContain('data-house-chip-rail-row="0"');
@@ -686,9 +701,9 @@ describe("Social profile public face", () => {
     );
     expect(overflow).toContain('data-social-profile-link-glyph="instagram-logo"');
     expect(overflow).toContain('data-social-profile-link-glyph="youtube-logo"');
-    expect(overflow).toContain("data-social-profile-links-more");
-    expect(overflow).toContain(">+1<");
-    expect(overflow).not.toContain('data-social-profile-link-glyph="x-logo"');
+    expect(overflow).toContain('data-social-profile-link-glyph="x-logo"');
+    expect(overflow).not.toContain("data-social-profile-links-more");
+    expect(overflow).not.toContain(">+1<");
     expect(overflow).not.toContain(">instagram.com/ada<");
     expect(overflow).not.toContain(">x.com/ada<");
     expect(overflow).not.toContain("data-social-profile-links-sheet");
