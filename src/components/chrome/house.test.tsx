@@ -11,6 +11,8 @@ import {
   APP_SHEET_SURFACE_CLASS,
   CLOSE_44_CLASS,
   HOUSE_EMPTY_CLASS,
+  SHEET_GROUP_INSET_CLASS,
+  SHEET_GROUP_INSET_ITEM_CLASS,
   TEXT_ACTION_CLASS,
 } from "@/lib/house-sheet";
 import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
@@ -156,5 +158,40 @@ describe("house primitives", () => {
     expect(sameOrigin).not.toContain("?");
     expect(sameOrigin).toContain('fetchPriority="high"');
     expect(houseSrc).toContain('fetchPriority="high"');
+  });
+
+  it("puts a hairline between inset rows and leaves a one-row card bare", () => {
+    const paired = renderToStaticMarkup(
+      <SheetGroup inset groupId="preferences">
+        <SheetGroupItem inset item="settings" href="/settings">
+          Settings
+        </SheetGroupItem>
+        <SheetGroupItem inset item="theme" href="/settings/theme">
+          Theme
+        </SheetGroupItem>
+      </SheetGroup>,
+    );
+    const alone = renderToStaticMarkup(
+      <SheetGroup inset groupId="help">
+        <SheetGroupItem inset item="help" href="/help">
+          Get Help
+        </SheetGroupItem>
+      </SheetGroup>,
+    );
+
+    expect(paired).toContain("data-sheet-group-inset");
+    expect(paired).toContain('data-sheet-group-id="preferences"');
+    expect(paired).toContain(SHEET_GROUP_INSET_CLASS);
+    expect(paired).toContain(SHEET_GROUP_INSET_ITEM_CLASS);
+    expect(paired.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
+      paired.indexOf("data-sheet-group-rule"),
+    );
+    expect(paired.indexOf("data-sheet-group-rule")).toBeLessThan(
+      paired.indexOf('data-sheet-group-item="theme"'),
+    );
+    expect(paired.match(/data-sheet-group-rule/g)).toHaveLength(1);
+    expect(alone).not.toContain("data-sheet-group-rule");
+    expect(alone).toContain('data-sheet-group-id="help"');
+    expect(houseSrc).toContain("SHEET_GROUP_INSET_CLASS");
   });
 });

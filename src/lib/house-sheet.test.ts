@@ -23,6 +23,10 @@ import {
   IDENTITY_NAME_CLASS,
   SHEET_GROUP_CHEVRON_CLASS,
   SHEET_GROUP_CLASS,
+  SHEET_GROUP_INSET_CLASS,
+  SHEET_GROUP_INSET_ITEM_CLASS,
+  SHEET_GROUP_INSET_RULE_CLASS,
+  SHEET_GROUP_INSET_SHELL_CLASS,
   SHEET_GROUP_ITEM_CLASS,
   SHEET_GROUP_LABEL_CLASS,
   TEXT_ACTION_CLASS,
@@ -81,6 +85,22 @@ describe("house sheet lock", () => {
     expect(SHEET_GROUP_ITEM_CLASS).toContain("justify-between");
     expect(SHEET_GROUP_CHEVRON_CLASS).toContain("size-4");
     expect(SHEET_GROUP_CHEVRON_CLASS).toContain("text-ink-3");
+  });
+
+  it("locks the inset grouped card — rounded muted shell, padded row, leading hairline", () => {
+    expect(SHEET_GROUP_INSET_SHELL_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(SHEET_GROUP_INSET_SHELL_CLASS).toContain("bg-surface-muted");
+    expect(SHEET_GROUP_INSET_SHELL_CLASS).toContain("border-hairline");
+    expect(SHEET_GROUP_INSET_SHELL_CLASS).toContain("overflow-hidden");
+    expect(SHEET_GROUP_INSET_SHELL_CLASS).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(SHEET_GROUP_INSET_CLASS).toContain(SHEET_GROUP_INSET_SHELL_CLASS);
+    expect(SHEET_GROUP_INSET_CLASS).toContain("flex-col");
+    expect(SHEET_GROUP_INSET_CLASS).not.toContain("gap-");
+    expect(SHEET_GROUP_INSET_ITEM_CLASS.startsWith(SHEET_GROUP_ITEM_CLASS)).toBe(true);
+    expect(SHEET_GROUP_INSET_ITEM_CLASS).toContain("px-[var(--space-4)]");
+    expect(SHEET_GROUP_INSET_ITEM_CLASS).toContain("py-[var(--space-3)]");
+    expect(SHEET_GROUP_INSET_RULE_CLASS).toBe("ml-[var(--space-4)]");
+    expect(SHEET_GROUP_CLASS).not.toContain("bg-surface-muted");
   });
 
   it("locks app-sheet chrome to 543:576 — r16, pad 16/24/48, quiet scrim", () => {

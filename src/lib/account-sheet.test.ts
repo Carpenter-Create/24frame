@@ -9,6 +9,9 @@ import {
   ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS,
   ACCOUNT_MENU_DROPDOWN_GAP,
   ACCOUNT_MENU_DROPDOWN_GROUP_CLASS,
+  ACCOUNT_SHEET_GROUP_CLASS,
+  ACCOUNT_SHEET_GROUPS,
+  accountSheetGroupedRows,
   ACCOUNT_MENU_DROPDOWN_HEAD_CLASS,
   ACCOUNT_MENU_DROPDOWN_HOST_CLASS,
   ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS,
@@ -54,6 +57,23 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("workspace");
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).not.toContain("askAssistant");
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.label)).not.toContain(ASSISTANT_NAME);
+  });
+
+  it("shares one inset grouping SoT — Settings + Theme, Get Help alone", () => {
+    expect(ACCOUNT_SHEET_GROUPS.map((group) => group.id)).toEqual(["preferences", "help"]);
+    expect(ACCOUNT_SHEET_GROUPS.map((group) => [...group.kinds])).toEqual([
+      ["settings", "theme"],
+      ["help"],
+    ]);
+    const desktop = accountSheetGroupedRows(ACCOUNT_SHEET_ITEMS);
+    const phone = accountSheetGroupedRows(ACCOUNT_SHEET_PHONE_ITEMS);
+    expect(phone).toEqual(desktop);
+    expect(desktop.map((group) => group.items.map((item) => item.kind))).toEqual([
+      ["settings", "theme"],
+      ["help"],
+    ]);
+    expect(desktop.flatMap((group) => group.items.map((item) => item.kind))).not.toContain("profile");
+    expect(desktop.flatMap((group) => group.items.map((item) => item.kind))).not.toContain("logOut");
   });
 
   it("wires Theme to /settings/theme — not a Preferences nest", () => {
@@ -138,6 +158,11 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("text-accent");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("text-ink");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("bg-surface-muted");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("border-hairline");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("px-[var(--space-4)]");
+    expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toMatch(/#[0-9a-fA-F]{3,8}/);
     expect(ACCOUNT_SHEET_PIN_CLASS).toContain("gap-[var(--space-4)]");
     expect(ACCOUNT_SHEET_PIN_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_SHEET_PIN_CLASS).not.toContain("gap-[var(--space-12)]");
@@ -193,7 +218,9 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).toContain("break-words");
     expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).not.toContain("truncate");
     expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).not.toContain("ellipsis");
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toContain("gap-[var(--space-3)]");
+    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toBe(ACCOUNT_SHEET_GROUP_CLASS);
+    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toContain("gap-[var(--space-4)]");
+    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).not.toContain("gap-[var(--space-3)]");
     expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("mt-");
     expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).toContain("gap-[var(--space-4)]");

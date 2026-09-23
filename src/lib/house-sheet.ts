@@ -33,6 +33,22 @@ export const SHEET_GROUP_LABEL_CLASS =
 export const SHEET_GROUP_ITEM_CLASS =
   "flex w-full items-center justify-between text-[length:var(--text-base)] font-normal leading-6 text-ink";
 
+// Inset grouped list — Adam lock 2026-09-22. A row sits inside a
+// rounded card that floats in the sheet pad. Hairline only between
+// rows in the same card. Default SHEET_GROUP_CLASS stays the eyebrow
+// stack; callers opt in. House tokens only.
+export const SHEET_GROUP_INSET_SHELL_CLASS =
+  "overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface-muted";
+
+export const SHEET_GROUP_INSET_CLASS =
+  `flex w-full flex-col ${SHEET_GROUP_INSET_SHELL_CLASS}`;
+
+export const SHEET_GROUP_INSET_ITEM_CLASS =
+  `${SHEET_GROUP_ITEM_CLASS} px-[var(--space-4)] py-[var(--space-3)]`;
+
+// Leading inset: the rule starts at the label and runs to the card edge.
+export const SHEET_GROUP_INSET_RULE_CLASS = "ml-[var(--space-4)]";
+
 // App-sheet motion — one duration/easing for the account instance.
 // Rise from the bottom, ease-out, no bounce. Reduced
 // motion skips the slide. Do not restyle per page.

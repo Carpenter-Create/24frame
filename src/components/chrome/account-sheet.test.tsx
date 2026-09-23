@@ -39,6 +39,7 @@ import {
   APP_SHEET_SCRIM_FADE_CLASS,
   CLOSE_44_CLASS,
   SHEET_GROUP_CHEVRON_CLASS,
+  SHEET_GROUP_INSET_ITEM_CLASS,
   SHEET_GROUP_ITEM_CLASS,
 } from "@/lib/house-sheet";
 import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
@@ -325,7 +326,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain(`href="${USER_MENU.profileHref}"`);
     expect(html).toContain(USER_MENU.settings);
     expect(html).toContain(`href="${USER_MENU.settingsHref}"`);
-    expect(settingsClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(settingsClass).toBe(SHEET_GROUP_INSET_ITEM_CLASS);
+    expect(SHEET_GROUP_INSET_ITEM_CLASS.startsWith(SHEET_GROUP_ITEM_CLASS)).toBe(true);
     expect(src).toContain("<IdentityBlock");
     expect(html.indexOf("data-identity-block")).toBeLessThan(html.indexOf("data-account-sheet-rule"));
     expect(html.indexOf("data-account-sheet-rule")).toBeLessThan(html.indexOf('data-sheet-group-item="settings"'));
@@ -395,13 +397,20 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
     expect(html).toContain('data-sheet-group-item="help"');
-    expect(html).toContain("data-account-sheet-help-rule");
+    expect(html).toContain('data-sheet-group-id="preferences"');
+    expect(html).toContain('data-sheet-group-id="help"');
+    expect(html).toContain("data-sheet-group-inset");
+    expect(html).not.toContain("data-account-sheet-help-rule");
     expect(html.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
-      html.indexOf("data-account-sheet-help-rule"),
+      html.indexOf("data-sheet-group-rule"),
     );
-    expect(html.indexOf("data-account-sheet-help-rule")).toBeLessThan(
+    expect(html.indexOf("data-sheet-group-rule")).toBeLessThan(
+      html.indexOf('data-sheet-group-item="theme"'),
+    );
+    expect(html.indexOf('data-sheet-group-item="theme"')).toBeLessThan(
       html.indexOf('data-sheet-group-item="help"'),
     );
+    expect(html.match(/data-sheet-group-rule/g)).toHaveLength(1);
     expect(html).not.toContain('data-sheet-group-item="refer"');
     expect(html).not.toContain('data-sheet-group-item="feedback"');
     expect(html).toContain('data-sheet-group-item="logOut"');
@@ -426,8 +435,15 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).toContain("void signOut()");
     expect(src).toContain("settingsLandHref");
     expect(src).toContain("<SheetGroupItem");
+    expect(src).toContain("accountSheetGroupedRows");
     expect(src).not.toContain("<TextAction");
-    expect(settingsClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(settingsClass).toBe(SHEET_GROUP_INSET_ITEM_CLASS);
+    expect(settingsClass).toContain("px-[var(--space-4)]");
+    expect(settingsClass).toContain("py-[var(--space-3)]");
+    expect(attrClass(html, "data-sheet-group-inset")).toContain("rounded-[var(--radius-lg)]");
+    expect(attrClass(html, "data-sheet-group-inset")).toContain("bg-surface-muted");
+    expect(attrClass(html, "data-sheet-group-inset")).toContain("border-hairline");
+    expect(attrClass(html, "data-sheet-group-inset")).not.toContain("gap-");
     expect(html).not.toContain("data-account-menu-workspace-mode");
     expect(html).not.toContain("Aggregation");
     expect(html).not.toContain("data-account-menu-workspace-flyout");
@@ -542,7 +558,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     )).not.toContain("AppSheetHairline");
     expect(src.slice(
       src.indexOf("function AccountMenuPin"),
-      src.indexOf("function AccountMenuItems"),
+      src.indexOf("function AccountMenuGroups"),
     )).toContain("AppSheetHairline");
     expect(src).not.toContain("data-account-sheet-logout-rule");
     expect(src).toContain("data-account-sheet-footer-rule");
@@ -823,7 +839,7 @@ describe("AccountMenuDropdown 629:795", () => {
     const html = renderDropdown();
     const surfaceClass = attrClass(html, "data-user-menu-desktop-surface");
     const scrollClass = attrClass(html, "data-account-sheet-scroll");
-    const groupClass = attrClass(html, "data-sheet-group");
+    const groupsClass = attrClass(html, "data-account-sheet-groups");
     const pinClass = attrClass(html, "data-account-sheet-pin");
     const lastItem = html.indexOf('data-sheet-group-item="help"');
     const logout = html.indexOf('data-sheet-group-item="logOut"');
@@ -856,8 +872,11 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(scrollClass).toContain("shrink-0");
     expect(scrollClass).not.toContain("flex-1");
     expect(scrollClass).not.toContain("overflow-y-auto");
-    expect(groupClass).toContain("gap-[var(--space-3)]");
-    expect(groupClass).not.toContain("gap-[var(--space-6)]");
+    expect(groupsClass).toContain("gap-[var(--space-4)]");
+    expect(groupsClass).not.toContain("gap-[var(--space-3)]");
+    expect(groupsClass).not.toContain("gap-[var(--space-6)]");
+    expect(attrClass(html, "data-sheet-group-inset")).toContain("bg-surface-muted");
+    expect(attrClass(html, "data-sheet-group-inset")).not.toContain("gap-");
     expect(pinClass).toBe(ACCOUNT_MENU_DROPDOWN_PIN_CLASS);
     expect(pinClass).not.toContain("mt-");
     expect(pinClass).toContain("gap-[var(--space-4)]");
@@ -902,7 +921,10 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(html.indexOf(">Theme<")).toBeLessThan(html.indexOf("Get Help"));
     expect(html).not.toContain("Agreements");
     expect(html).toContain("Get Help");
-    expect(html).toContain("data-account-sheet-help-rule");
+    expect(html).toContain('data-sheet-group-id="preferences"');
+    expect(html).toContain('data-sheet-group-id="help"');
+    expect(html).not.toContain("data-account-sheet-help-rule");
+    expect(html.match(/data-sheet-group-rule/g)).toHaveLength(1);
     expect(html).not.toContain("Give feedback");
     expect(html).not.toContain("Refer a friend");
     expect(html).toContain("Log out");
