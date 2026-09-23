@@ -36,6 +36,43 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(chrome).toContain("-mt-[29px]");
     expect(chrome).toContain("md:-mt-[35px]");
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_EDIT_CLASS");
+    expect(chrome).toContain("Adam lock 2026-09-22");
+    expect(chrome).toContain("43px phone");
+    expect(chrome).toContain("53px desktop");
+    expect(chrome).toContain("hang the face, never the name stack");
+    expect(chrome).toContain("Name is house t-heading");
+    expect(chrome).toContain(
+      'export const SOCIAL_PROFILE_NAME_STACK_CLASS =\n  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)]";',
+    );
+    expect(chrome).toContain(
+      'export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-6)]";',
+    );
+    expect(chrome).toContain(
+      "${SOCIAL_PROFILE_NAME_STACK_CLASS} pt-[var(--space-3)]",
+    );
+    expect(chrome).toMatch(
+      /export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-heading text-ink";/,
+    );
+    expect(chrome).not.toMatch(
+      /export const SOCIAL_PROFILE_NAME_CLASS = "[^"]*t-title/,
+    );
+    expect(chrome).toContain("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
+    const ui = readFileSync("src/components/social/social-ui.tsx", "utf8");
+    const identity = ui.slice(
+      ui.indexOf("export function SocialProfileIdentity"),
+      ui.indexOf("export function SocialHighlights"),
+    );
+    const headHost = identity.slice(
+      identity.indexOf('data-social-profile-head=""'),
+      identity.indexOf("data-social-profile-avatar-hang"),
+    );
+    expect(headHost).not.toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
+    expect(
+      identity.slice(
+        identity.indexOf("data-social-profile-avatar-hang"),
+        identity.indexOf("SOCIAL_PROFILE_NAME_STACK_CLASS"),
+      ),
+    ).toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
   });
 
   it("omits the visitor band unless a real cover photo exists", () => {

@@ -9,8 +9,9 @@
 //
 // Display: phone 112px, desktop 224px, column = SOCIAL_DESKTOP_MEASURE.center, aspect 4:1.
 // Avatar lip ~40% (72 / 88 → 29 / 35). The lip is the face only.
-// Name and counts stay on the page. Crop master stays 1784×446 and
-// is never painted in the profile UI.
+// Name and @handle stay on the canvas below the cover
+// (Adam lock 2026-09-22). Do not hang the identity row.
+// Crop master stays 1784×446 and is never painted in the profile UI.
 
 import { SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
 import { SOCIAL_IMAGE_CONTENT_TYPES } from "@/lib/social-media";

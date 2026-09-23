@@ -251,7 +251,20 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-profile-cover-empty");
     expect(html).toContain("data-social-profile-cover-edit");
     expect(html).toContain("bg-accent-wash");
-    expect(html).toContain("-mt-[29px]");
+    const head = html.slice(
+      html.indexOf("data-social-profile-head"),
+      html.indexOf("data-social-profile-face"),
+    );
+    expect(head.slice(0, head.indexOf(">"))).not.toContain("-mt-[29px]");
+    const hangAt = head.indexOf("data-social-profile-avatar-hang");
+    const nameAt = head.indexOf("data-social-profile-name");
+    expect(hangAt).toBeGreaterThan(-1);
+    expect(nameAt).toBeGreaterThan(hangAt);
+    const hangOpen = head.slice(head.lastIndexOf("<", hangAt), head.indexOf(">", hangAt));
+    expect(hangOpen).toContain("-mt-[29px]");
+    expect(hangOpen).toContain("md:-mt-[35px]");
+    expect(head.slice(nameAt)).not.toContain("-mt-[29px]");
+    expect(head).not.toContain("items-end");
     expect(html).toContain("data-social-profile-avatar-edit");
     expect(html).toContain("/api/social/avatar/u1");
   });
