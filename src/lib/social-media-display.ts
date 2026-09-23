@@ -16,7 +16,7 @@ export const SOCIAL_OVERVIEW_FACE_IMAGE_SIZES = "32px";
 export function socialAvatarImageSizes(size: "sm" | "md" | "lg" | "profile"): string {
   if (size === "sm") return "36px";
   if (size === "lg") return "96px";
-  if (size === "profile") return "(max-width: 768px) 72px, 88px";
+  if (size === "profile") return "80px";
   return "48px";
 }
 

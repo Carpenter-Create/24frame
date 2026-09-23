@@ -19,7 +19,7 @@ import {
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
   SOCIAL_PROFILE_COVER_STACK_CLASS,
-  SOCIAL_PROFILE_HEAD_ON_COVER_CLASS,
+  SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_HEAD_OVERLAP_CLASS,
   SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
@@ -29,7 +29,8 @@ import {
   SOCIAL_PROFILE_LINKS_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_INSET_CLASS,
-  SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS,
+  SOCIAL_PROFILE_NAME_STACK_CLASS,
+  SOCIAL_PROFILE_STATS_LEAD_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_STORY_CARD_CLASS,
@@ -119,19 +120,17 @@ export function SocialProfileCenterSkeleton() {
       <div className={SOCIAL_PROFILE_IDENTITY_CLASS}>
         <div className={SOCIAL_PROFILE_COVER_STACK_CLASS}>
           <Skeleton className={`${SOCIAL_PROFILE_COVER_CLASS} ${SOCIAL_PROFILE_COVER_EMPTY_CLASS}`} />
-          <div className={SOCIAL_PROFILE_INSET_CLASS}>
-            <div className={SOCIAL_PROFILE_HEAD_ON_COVER_CLASS}>
-              <Skeleton
-                className={`${SOCIAL_AVATAR_PROFILE_CLASS} ${SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}`}
-              />
-              <div className={SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS}>
+          <div className={`${SOCIAL_PROFILE_INSET_CLASS} ${SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}`}>
+            <div className={SOCIAL_PROFILE_HEAD_CLASS}>
+              <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
+              <div className={SOCIAL_PROFILE_NAME_STACK_CLASS}>
                 <Skeleton className="h-7 w-40" />
                 <Skeleton className="h-3 w-24" />
               </div>
             </div>
           </div>
         </div>
-        <div className={SOCIAL_PROFILE_FACE_CLASS}>
+        <div className={`${SOCIAL_PROFILE_FACE_CLASS} ${SOCIAL_PROFILE_STATS_LEAD_CLASS}`}>
           <div className={SOCIAL_PROFILE_STATS_CLASS}>
             <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
               <Skeleton className="h-8 w-10" />

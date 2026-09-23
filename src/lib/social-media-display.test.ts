@@ -26,8 +26,8 @@ describe("social media display", () => {
     expect(socialVideoDisplaySrc("")).toBe("");
   });
 
-  it("sizes profile faces for the 72/88 disk", () => {
-    expect(socialAvatarImageSizes("profile")).toBe("(max-width: 768px) 72px, 88px");
+  it("sizes profile faces for the 80px disk", () => {
+    expect(socialAvatarImageSizes("profile")).toBe("80px");
     expect(socialAvatarImageSizes("sm")).toBe("36px");
   });
 

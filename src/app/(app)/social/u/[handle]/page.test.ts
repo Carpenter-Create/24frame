@@ -174,8 +174,8 @@ describe("Social public profile", () => {
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("Ada Lovelace");
     expect(head).not.toContain("data-social-profile-stats");
-    expect(head).not.toContain("-mt-[29px]");
-    expect(head).not.toContain("md:-mt-[35px]");
+    expect(head).not.toContain("-mt-[40px]");
+    expect(head).not.toContain("md:-mt-");
     expect(head).not.toContain("data-social-profile-avatar-hang");
     expect(head).not.toContain("h-[112px]");
     expect(html).not.toContain("data-social-profile-avatar-edit");
@@ -254,18 +254,10 @@ describe("Social public profile", () => {
       html.indexOf("data-social-profile-head"),
       html.indexOf("data-social-profile-face"),
     );
-    expect(head.slice(0, head.indexOf(">"))).not.toContain("-mt-[29px]");
-    expect(head.slice(0, head.indexOf(">"))).not.toContain("md:-mt-[35px]");
-    const hangAt = head.indexOf("data-social-profile-avatar-hang");
-    const nameAt = head.indexOf("data-social-profile-name");
-    expect(hangAt).toBeGreaterThan(-1);
-    expect(nameAt).toBeGreaterThan(hangAt);
-    const hangOpen = head.slice(head.lastIndexOf("<", hangAt), head.indexOf(">", hangAt));
-    expect(hangOpen).toContain("-mt-[29px]");
-    expect(hangOpen).toContain("md:-mt-[35px]");
-    expect(head.slice(nameAt)).not.toContain("-mt-[29px]");
-    expect(head.slice(nameAt)).not.toContain("md:-mt-[35px]");
-    expect(head).toContain("items-start");
+    expect(head).toContain("-mt-[40px]");
+    expect(head).not.toContain("md:-mt-");
+    expect(head.indexOf("data-social-avatar")).toBeLessThan(head.indexOf("data-social-profile-name"));
+    expect(head).not.toContain("data-social-profile-avatar-hang");
     expect(head).not.toContain("items-end");
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("Ada Lovelace");
