@@ -3,11 +3,15 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS } from "./house-page-select";
+import { HOUSE_PHONE_WRAP_CLASS } from "./house-phone-stack";
+import { menuLabelTruncatesOnPhone } from "./menu-host";
 
 // CI hard gate for house chrome. `pnpm test` already runs this file.
 //
 // Phone never-truncate on SoT triggers is gospel (Auditor P0, house gospel
-// 2026-09-19). APP_SHEET_MODAL_PROMOTE is not a desktop source of truth.
+// 2026-09-19). The trigger label wraps on phone and may use md:truncate.
+// A bare truncate token is not a debt pin. APP_SHEET_MODAL_PROMOTE is not
+// a desktop source of truth.
 // Elevation shadow on that promote path is not either.
 //
 // The pins below are the Auditor's open hits. This pull request does not
@@ -32,9 +36,6 @@ const PROMOTE_ELEVATION_DEBT = [
   "src/lib/house-sheet.ts",
   "src/lib/social-create-sheet.test.ts",
 ] as const;
-
-/** Auditor P0. The only trigger-label string that may still truncate. */
-const TRIGGER_LABEL_TRUNCATE_DEBT = "min-w-0 truncate";
 
 function sourceFiles(): string[] {
   const out: string[] = [];
@@ -106,18 +107,24 @@ describe("house guardrails", () => {
 
   it("phone never-truncate on SoT triggers is gospel", () => {
     const label = HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS;
-    const truncates = label.split(/\s+/).includes("truncate");
-    // Auditor P0: this SoT class still truncates. The assertion fails for
-    // every other string that still contains truncate.
-    expect(truncates).toBe(label === TRIGGER_LABEL_TRUNCATE_DEBT);
-    if (label !== TRIGGER_LABEL_TRUNCATE_DEBT) {
-      expect(label).not.toContain("truncate");
-    }
+    const tokens = label.split(/\s+/);
+    // Phone wraps. Desktop may ellipsize with md:truncate. A bare truncate
+    // token still paints on the phone and is not an allowed debt string.
+    expect(menuLabelTruncatesOnPhone(label)).toBe(false);
+    expect(label).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(tokens).toContain("md:truncate");
+    expect(tokens).not.toContain("truncate");
+    expect(menuLabelTruncatesOnPhone("min-w-0 truncate")).toBe(true);
+    expect(menuLabelTruncatesOnPhone("truncate")).toBe(true);
+    expect(menuLabelTruncatesOnPhone("max-md:truncate")).toBe(true);
 
-    const truncatingLabels = sourceFiles().filter((file) =>
-      /TRIGGER_LABEL_CLASS = [^;\n]*\btruncate\b/.test(readFileSync(file, "utf8")),
-    );
-    expect(outside(truncatingLabels, ["src/lib/house-page-select.ts"])).toEqual([]);
+    const bare = sourceFiles().filter((file) => {
+      const source = readFileSync(file, "utf8");
+      return [...source.matchAll(/TRIGGER_LABEL_CLASS\s*=\s*[^;]*;/g)].some((match) =>
+        menuLabelTruncatesOnPhone(match[0]),
+      );
+    });
+    expect(bare).toEqual([]);
   });
 
   it("keeps design locks in git before a UI pull request can cite them", () => {

@@ -5,6 +5,7 @@ import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { Card, CardBody } from "@/components/ui/card";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
+import { menuHostClass } from "@/lib/menu-host";
 import {
   SETTINGS,
   SETTINGS_DRILL_LIST_CLASS,
@@ -37,7 +38,12 @@ export async function ProfileSettings() {
     <div data-settings-page="" data-settings-hub="profile" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="profile" className={SETTINGS_SECTION_CLASS}>
         <SettingsPageLead title={settingsPaneTitle("profile")} pathname={SETTINGS.profileHref} />
-        <div data-settings-profile-index="" className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
+        <div
+          data-settings-profile-index=""
+          data-menu-host="phone"
+          data-menu-family="B"
+          className={`${menuHostClass("phone")} ${SETTINGS_DRILL_LIST_CLASS}`}
+        >
           <AccountPhotoField photoUrl={photoUrl} />
           <SettingsDrillRow
             kind="name"
@@ -53,7 +59,7 @@ export async function ProfileSettings() {
             helper={ACCOUNT_PROFILE.emailLocked}
           />
         </div>
-        <div className="hidden md:block">
+        <div className={menuHostClass("desktop")} data-menu-host="desktop" data-menu-family="desktop">
           <Card>
             <CardBody>
               <AccountProfileForm
