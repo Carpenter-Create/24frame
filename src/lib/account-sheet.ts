@@ -1,13 +1,16 @@
-// Mobile 544:561 / 537:557 and desktop 629:795 Identity menu.
+// Mobile 544:561 / 537:557 Family A sheet, and the desktop account
+// MenuSurface (docs/design-locks/desktop-avatar-menu-coinbase-lock-v1.md).
 // Copy lives here, not in JSX.
 // Identity is avatar + name + email from the same values /settings/profile
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
-// local-part name. Phone sheet and desktop 264 share one stack:
-// USER_MENU_ACTIONS (Settings — Theme — Get Help) and one grouping
-// SoT (ACCOUNT_SHEET_GROUPS). Settings + Theme share an inset card
+// local-part name. Phone and desktop share the job list
+// USER_MENU_ACTIONS (Settings — Theme — Get Help). Grammar does not.
+// Phone: ACCOUNT_SHEET_GROUPS. Settings + Theme share an inset card
 // (hairline between those rows). Get Help is its own inset card.
-// Log out sits in the same inset card, Sporty blue, outside the nav cards.
+// Phone Log out sits in the same inset card, Sporty blue, outside the nav cards.
+// Desktop: Coinbase flat rows on MenuSurface. No SheetGroup. Log out is
+// danger red. Identity is a horizontal row. Sporty Blue bar stays, full width.
 // Profile is a Settings pane, not a
 // menu row. Give feedback lives on /help/feedback, not this
 // menu and not Settings. 24Frame AI is the header
@@ -32,17 +35,12 @@
 // → footer 16. Footer → bottom 32 (sheet pad B). Not 48/48/48.
 // No hairline above Log out. 571:911 stays off. Closed sheet is
 // 544:561 / 537:557.
-// Desktop 629:795 height is relative to the stack (content hug).
-// 264 wide. Leftover last-item → Log out is 24 (house row
-// air, --space-6). The 24 adds to the stack. Not 0. Not 134.
-// No h-[Npx]. No min-h. No 522 / 570 / 672 floor. Align-end.
-// 24 pad. Tight item stack — not a tall empty sheet.
-// Log out → hairline 16. Hairline → footer 16. Footer →
-// bottom 24. Labels stay one source.
+// Desktop MenuSurface hugs the stack. 280 wide. Align-end.
+// No leftover spacer. No inset pad on the surface — rows are
+// full-bleed. No 522 / 570 / 672 floor. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { APP_SHEET_CHROME_CLASS, APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
-import { MENU_SURFACE_CONTENT_CLASS } from "@/lib/menu-surface";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
@@ -84,9 +82,9 @@ export const ACCOUNT_SHEET_ITEMS = USER_MENU_ACTIONS;
 
 export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
 
-// One grouping SoT for the phone sheet and the desktop 264.
+// Phone inset grouping SoT. Desktop does not render these cards.
 // Settings + Theme share a card. Get Help is its own card.
-// Log out uses the same inset card in the pin. It is not a nav group.
+// Phone Log out uses the same inset card in the pin. It is not a nav group.
 export const ACCOUNT_SHEET_GROUPS = [
   { id: "preferences", kinds: ["settings", "theme"] },
   { id: "help", kinds: ["help"] },
@@ -127,7 +125,7 @@ export const ACCOUNT_SHEET_STAGE_CLASS =
 export const ACCOUNT_SHEET_SCROLL_CLASS =
   "flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain";
 
-// 16 between inset cards. Same stack on phone and the 264.
+// 16 between phone inset cards.
 // Not the old 12 flat-row gap. Not 24 section air.
 // Rows inside a card use the house inset group (no gap; hairline only).
 export const ACCOUNT_SHEET_GROUPS_CLASS =
@@ -167,24 +165,16 @@ export const ACCOUNT_SHEET_FOOTER_CLASS =
 
 export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 
-// 629:795 — 264. Height is relative to the stack (h-auto hug).
-// Leftover last-item → Log out is 24 (house --space-6). The
-// 24 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
-// min-h. NOT 522. NOT 570. NOT 672. NOT 384. Align-end to the
-// avatar (right edge flush). 8px (--space-2) under the trigger.
-// Not a 90% sheet. Surface chrome is MenuSurface. Tight Settings / Theme / Get Help stack.
-// No leftover grow. Pin Log out,
-// hairline, footer as siblings. Hairline only under Log out.
-// Log out → hairline 16. Hairline → footer 16. Do not hug the
-// rule. Pin gap is not (Log out+rule) → footer. Footer →
-// bottom 24. padT 28 (4 bar + 24 air).
-// Not a tall right takeover. Close killed — dismiss on outside click
-// / avatar. Stacked identity. No ellipsis. Half-bar is 132×4 = 50% of 264.
+// Desktop account MenuSurface — Coinbase grammar
+// (docs/design-locks/desktop-avatar-menu-coinbase-lock-v1.md).
+// 280 wide. Radius 12. White surface. Hairline edge. No shadow.
+// Sporty Blue bar is 4px and the full panel width, in flow, so the
+// radius clip on the surface cuts it flush. Not the shared half-bar.
+// Head pad 16 under that bar. Rows are full-bleed (no surface inset).
+// Align-end to the avatar. 8px under the trigger. Content hug.
 // The surface is portaled to body, so top/right are measured from the
-// trigger — not --header-height / --content-inset, which sat the 264
-// a full avatar-width left (menu right = avatar left).
-export const ACCOUNT_MENU_DROPDOWN_WIDTH = 264;
-export const ACCOUNT_MENU_DROPDOWN_LEFTOVER = 24;
+// trigger — not --header-height / --content-inset.
+export const ACCOUNT_MENU_DROPDOWN_WIDTH = 280;
 
 export const ACCOUNT_MENU_DROPDOWN_HOST_CLASS = "fixed inset-0 z-50";
 
@@ -194,10 +184,64 @@ export const ACCOUNT_MENU_DROPDOWN_ALIGN = "end" as const;
 
 export const ACCOUNT_MENU_DROPDOWN_GAP = "var(--space-2)" as const;
 
-// MenuSurface content chrome (radius 12, hairline, no shadow).
-// 264 hug and align-end stay on this instance. Menu rows stay here.
 export const ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS =
-  `${MENU_SURFACE_CONTENT_CLASS} absolute z-10 flex h-auto w-[264px] flex-col overflow-hidden`;
+  "absolute z-10 flex h-auto w-[280px] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface shadow-none";
+
+// In-flow 4px Sporty Blue. Full width. Parent overflow + radius clips it.
+export const ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS = "h-[4px] w-full shrink-0 bg-accent";
+
+// Horizontal identity. Avatar 40. Gap 12. Pad 16 under the bar.
+export const ACCOUNT_MENU_DROPDOWN_HEAD_CLASS =
+  "flex w-full items-center gap-[var(--space-3)] p-[var(--space-4)]";
+
+export const ACCOUNT_MENU_DROPDOWN_AVATAR_CLASS = "size-10 text-[length:var(--text-sm)]";
+
+export const ACCOUNT_MENU_DROPDOWN_WHO_CLASS = "flex min-w-0 flex-1 flex-col items-start";
+
+// 17 / medium / ink. One line; ellipsis only when the 280 overflows.
+export const ACCOUNT_MENU_DROPDOWN_NAME_CLASS =
+  "w-full truncate text-[length:var(--text-base)] font-medium leading-6 text-ink";
+
+// 13 secondary. One line.
+export const ACCOUNT_MENU_DROPDOWN_EMAIL_CLASS =
+  "w-full truncate text-[length:var(--text-xs)] leading-4 text-ink-2";
+
+export const ACCOUNT_MENU_DROPDOWN_MANAGE_CLASS =
+  "text-[length:var(--text-xs)] leading-4 text-accent";
+
+// Flat list. No card gap. No inset radius.
+export const ACCOUNT_MENU_DROPDOWN_ROWS_CLASS = "flex w-full shrink-0 flex-col";
+
+export const ACCOUNT_MENU_DROPDOWN_ROW_CLASS =
+  "flex min-h-11 w-full items-center gap-[var(--space-3)] px-[var(--space-4)] text-left t-body-sm text-ink hover:bg-surface-muted focus-visible:bg-surface-muted";
+
+// Phosphor outline at 20. Class lives here so the tsx stays off size-5.
+export const ACCOUNT_MENU_DROPDOWN_ICON_CLASS = "size-5 shrink-0";
+
+// House danger ink — same mark as menu-surface danger. Not Sporty Blue.
+export const ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS =
+  "flex min-h-11 w-full items-center gap-[var(--space-3)] px-[var(--space-4)] text-left t-body-sm text-[#c4564a] hover:bg-surface-muted focus-visible:bg-surface-muted";
+
+export const ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS =
+  "relative ml-auto inline-flex h-5 w-9 shrink-0 items-center rounded-full";
+
+export const ACCOUNT_MENU_DROPDOWN_SWITCH_ON_CLASS = "bg-accent";
+
+export const ACCOUNT_MENU_DROPDOWN_SWITCH_OFF_CLASS = "bg-ink-3/40";
+
+export const ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_CLASS =
+  "pointer-events-none inline-block size-4 rounded-full bg-surface";
+
+export const ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_ON_CLASS = "translate-x-[18px]";
+
+export const ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_OFF_CLASS = "translate-x-0.5";
+
+// Version footer. 13 secondary. 12 pad. Not a card.
+export const ACCOUNT_MENU_DROPDOWN_FOOTER_CLASS =
+  "px-[var(--space-4)] pb-[var(--space-3)] pt-[var(--space-3)]";
+
+export const ACCOUNT_MENU_DROPDOWN_VERSION_CLASS =
+  "text-[length:var(--text-xs)] leading-4 text-ink-2";
 
 export type AccountMenuDropdownAlign = {
   top: string;
@@ -213,29 +257,6 @@ export function accountMenuDropdownAlignEnd(
     right: `${viewportWidth - trigger.right}px`,
   };
 }
-
-export const ACCOUNT_MENU_DROPDOWN_HEAD_CLASS = "flex w-full flex-col items-start";
-
-export const ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS =
-  "flex min-w-0 w-full flex-col items-start gap-[var(--space-2)] break-words";
-
-export const ACCOUNT_MENU_DROPDOWN_STAGE_CLASS =
-  "flex w-full shrink-0 flex-col gap-[var(--space-6)]";
-
-export const ACCOUNT_MENU_DROPDOWN_GROUP_CLASS = ACCOUNT_SHEET_GROUP_CLASS;
-
-// Desktop pin — Log out → hairline 16. Hairline → footer 16.
-// Leftover last-item → Log out is 24 house row air, not
-// leftover grow, not a packed 24 list row. Pin is not the item
-// group. Pin gap is not (Log out+rule) → footer.
-export const ACCOUNT_MENU_DROPDOWN_PIN_CLASS =
-  "flex w-full shrink-0 flex-col gap-[var(--space-4)]";
-
-export const ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS = "flex w-full shrink-0 flex-col";
-
-// House row air — --space-6 is 24. Adds to the hug stack.
-// Not h-[24px]. Not leftover grow. Not a 570 / 672 floor.
-export const ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS = ACCOUNT_SHEET_LEFTOVER_CLASS;
 
 export type AccountSheetIdentity = {
   avatarInitial: string;

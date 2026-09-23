@@ -153,8 +153,15 @@ describe("HouseOverlay dual-host lock v1", () => {
     expect(MENU_SURFACE_CONTENT_CLASS).toContain("shadow-none");
     expect(MENU_SURFACE_ITEM_CLASS).toContain("min-h-[44px]");
     expect(MENU_SURFACE_CONTENT_CLASS).not.toContain("rounded-[var(--radius)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain(MENU_SURFACE_CONTENT_CLASS);
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("w-[264px]");
+    // Account desktop face is MenuSurface chrome at the Coinbase 280.
+    // Full-bleed rows — not the shared MenuSurface inset pad, not 264.
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("rounded-[12px]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("border-hairline");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("bg-surface");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("shadow-none");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("w-[280px]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("w-[264px]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("p-[var(--space-2)]");
     expect(menuSurfaceContentClass("sparse")).toContain("w-max");
     expect(menuSurfaceContentClass("sparse")).not.toContain("17.5rem");
     expect(src("src/components/chrome/menu-surface.tsx")).not.toContain("HouseDrawer");

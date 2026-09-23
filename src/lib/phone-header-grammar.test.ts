@@ -257,8 +257,9 @@ describe("phone header grammar A — trim trailing", () => {
       sheet.indexOf('data-sheet-group-item="help"'),
     );
     expect(sheet).not.toContain("data-account-menu-appearance-mode");
+    expect(sheet).not.toContain("data-account-menu-theme-switch");
+    expect(sheet).toContain("data-sheet-group-inset");
     expect(sheetSrc).not.toContain("AccountSheetAppearance");
-    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
     expect(sheetSrc).not.toContain("/account/appearance");
 
     const dropdown = renderToStaticMarkup(
@@ -268,19 +269,21 @@ describe("phone header grammar A — trim trailing", () => {
         onClose: () => undefined,
       }),
     );
-    expect(dropdown).not.toContain('data-sheet-group-item="profile"');
-    expect(dropdown).toContain('data-sheet-group-item="settings"');
-    expect(dropdown).toContain('data-sheet-group-item="theme"');
-    expect(dropdown).not.toContain('data-sheet-group-item="askAssistant"');
-    expect(dropdown).not.toContain('data-sheet-group-item="appearance"');
-    expect(dropdown).toContain('data-sheet-group-item="help"');
+    expect(dropdown).not.toContain("data-sheet-group");
+    expect(dropdown).toContain('data-account-menu-row="settings"');
+    expect(dropdown).toContain('data-account-menu-row="theme"');
+    expect(dropdown).not.toContain('data-account-menu-row="askAssistant"');
+    expect(dropdown).not.toContain('data-account-menu-row="appearance"');
+    expect(dropdown).toContain('data-account-menu-row="help"');
     expect(dropdown).toContain(USER_MENU.theme);
     expect(dropdown).toContain(USER_MENU.help);
-    expect(dropdown.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
-      dropdown.indexOf('data-sheet-group-item="theme"'),
+    expect(dropdown).toContain("w-full");
+    expect(dropdown).toContain("h-[4px]");
+    expect(dropdown.indexOf('data-account-menu-row="settings"')).toBeLessThan(
+      dropdown.indexOf('data-account-menu-row="theme"'),
     );
-    expect(dropdown.indexOf('data-sheet-group-item="theme"')).toBeLessThan(
-      dropdown.indexOf('data-sheet-group-item="help"'),
+    expect(dropdown.indexOf('data-account-menu-row="theme"')).toBeLessThan(
+      dropdown.indexOf('data-account-menu-row="help"'),
     );
     expect(dropdown).not.toContain(ASSISTANT_NAME);
     expect(dropdown).not.toContain(USER_MENU.appearance);

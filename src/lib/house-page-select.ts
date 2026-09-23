@@ -5,17 +5,20 @@
 // Licensing / Clients status lenses. Do not invent a second grammar —
 // never a StatusFilter chip fork or a wrapping Home period row.
 
+import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
 import { HOUSE_PERIOD_SELECTED_CLASS } from "@/lib/house-shell";
 import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
+import { menuHostClass } from "@/lib/menu-host";
 
 export const HOUSE_PAGE_SELECT_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
-export const HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS = "max-md:hidden";
+export const HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS = menuHostClass("desktop", "panel");
 
 export const HOUSE_PAGE_SELECT_TRIGGER_CLASS =
   "group flex min-w-[10rem] items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink max-md:min-w-0 max-md:flex-none max-md:justify-end max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-0";
 
-export const HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS = "min-w-0 truncate";
+export const HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS =
+  `${HOUSE_PHONE_WRAP_CLASS} md:truncate`;
 
 export const HOUSE_PAGE_SELECT_CHEVRON_CLASS =
   "size-4 shrink-0 text-ink-3 transition-opacity";
@@ -34,7 +37,8 @@ export const HOUSE_PAGE_SELECT_OPTION_CLASS =
 
 export const HOUSE_PAGE_SELECT_OPTION_SELECTED_CLASS = HOUSE_PERIOD_SELECTED_CLASS;
 
-export const HOUSE_PAGE_SELECT_OPTION_LABEL_CLASS = "min-w-0 flex-1 text-left";
+export const HOUSE_PAGE_SELECT_OPTION_LABEL_CLASS =
+  `min-w-0 flex-1 text-left ${HOUSE_PHONE_WRAP_CLASS}`;
 
 export const HOUSE_PAGE_SELECT_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
 

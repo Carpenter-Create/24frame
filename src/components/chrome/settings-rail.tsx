@@ -27,7 +27,12 @@ export function SettingsRail() {
   const section = settingsHubSection(usePathname());
 
   return (
-    <nav data-settings-rail-nav="" className={SETTINGS_RAIL_NAV_CLASS}>
+    <nav
+      data-settings-rail-nav=""
+      data-menu-host="desktop"
+      data-menu-family="desktop"
+      className={SETTINGS_RAIL_NAV_CLASS}
+    >
       <p data-settings-rail-title="" className={HOUSE_RAIL_TITLE_CLASS}>
         {SETTINGS.title}
       </p>

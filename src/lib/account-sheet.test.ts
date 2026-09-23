@@ -5,21 +5,26 @@ import { APP_SHEET_HOST_CLASS, APP_SHEET_RISE_CLASS } from "@/lib/house-sheet";
 import { ASSISTANT_NAME } from "@/lib/product";
 import * as accountSheet from "./account-sheet";
 import {
+  ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS,
   ACCOUNT_MENU_DROPDOWN_ALIGN,
+  ACCOUNT_MENU_DROPDOWN_AVATAR_CLASS,
   ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS,
+  ACCOUNT_MENU_DROPDOWN_EMAIL_CLASS,
+  ACCOUNT_MENU_DROPDOWN_FOOTER_CLASS,
   ACCOUNT_MENU_DROPDOWN_GAP,
-  ACCOUNT_MENU_DROPDOWN_GROUP_CLASS,
   ACCOUNT_SHEET_GROUP_CLASS,
   ACCOUNT_SHEET_GROUPS,
   accountSheetGroupedRows,
   ACCOUNT_MENU_DROPDOWN_HEAD_CLASS,
   ACCOUNT_MENU_DROPDOWN_HOST_CLASS,
-  ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS,
-  ACCOUNT_MENU_DROPDOWN_LEFTOVER,
-  ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS,
-  ACCOUNT_MENU_DROPDOWN_PIN_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS,
+  ACCOUNT_MENU_DROPDOWN_ICON_CLASS,
+  ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS,
+  ACCOUNT_MENU_DROPDOWN_MANAGE_CLASS,
+  ACCOUNT_MENU_DROPDOWN_NAME_CLASS,
+  ACCOUNT_MENU_DROPDOWN_ROW_CLASS,
+  ACCOUNT_MENU_DROPDOWN_ROWS_CLASS,
   ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS,
+  ACCOUNT_MENU_DROPDOWN_VERSION_CLASS,
   ACCOUNT_MENU_DROPDOWN_WIDTH,
   accountMenuDropdownAlignEnd,
   ACCOUNT_SHEET,
@@ -146,8 +151,7 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overscroll-contain");
     expect(ACCOUNT_SHEET_LEFTOVER).toBe(24);
-    expect(ACCOUNT_SHEET_LEFTOVER).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER);
-    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
+    expect(ACCOUNT_SHEET_LEFTOVER).toBe(24);
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("h-[var(--space-6)]");
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("h-[var(--space-12)]");
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("shrink-0");
@@ -174,15 +178,16 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_LOGOUT_STACK_CLASS).not.toContain("hairline");
   });
 
-  it("locks the 629:795 desktop dropdown to a 264 content hug — leftover 24", () => {
-    expect(ACCOUNT_MENU_DROPDOWN_WIDTH).toBe(264);
+  it("locks the desktop MenuSurface to Coinbase grammar — 280, full blue bar, flat rows", () => {
+    expect(ACCOUNT_MENU_DROPDOWN_WIDTH).toBe(280);
     expect(ACCOUNT_MENU_DROPDOWN_HOST_CLASS).toBe("fixed inset-0 z-50");
     expect(ACCOUNT_MENU_DROPDOWN_HOST_CLASS).not.toContain("justify-end");
     expect(ACCOUNT_MENU_DROPDOWN_HOST_CLASS).not.toContain("h-dvh");
     expect(ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS).toBe("absolute inset-0");
     expect(ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS).not.toContain("bg-ink");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("h-auto");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("w-[264px]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("w-[280px]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("w-[264px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toMatch(/h-\[\d+px\]/);
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("min-h");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("h-[522px]");
@@ -195,56 +200,55 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("w-[384px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("rounded-[12px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("border-hairline");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("bg-surface");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("shadow-none");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toMatch(/shadow-(?:sm|md|lg)|elevation/);
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("p-[var(--space-2)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("px-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pb-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pt-[calc(4px+var(--space-6))]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("gap-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("px-[var(--space-4)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pb-[var(--space-4)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("gap-[var(--space-4)]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("px-");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pb-");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pt-");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("p-[var(--space-2)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("overflow-hidden");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("top-[calc(var(--header-height)+var(--space-2))]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("right-[var(--content-inset)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("--header-height");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("--content-inset");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS.split(" ")).not.toContain("p-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("w-[277px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("h-[90dvh]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("md:w-[390px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("app-sheet-rise");
-    expect(ACCOUNT_MENU_DROPDOWN_HEAD_CLASS).toContain("flex-col");
-    expect(ACCOUNT_MENU_DROPDOWN_HEAD_CLASS).not.toContain("justify-between");
-    expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).toContain("flex-col");
-    expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).toContain("break-words");
-    expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).not.toContain("truncate");
-    expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).not.toContain("ellipsis");
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toBe(ACCOUNT_SHEET_GROUP_CLASS);
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toContain("gap-[var(--space-4)]");
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).not.toContain("gap-[var(--space-3)]");
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).not.toContain("gap-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("mt-");
-    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).toContain("gap-[var(--space-4)]");
-    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("gap-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("gap-[var(--space-12)]");
-    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("hairline");
-    expect(ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS).toContain("shrink-0");
-    expect(ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS).not.toContain("flex-1");
-    expect(ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS).not.toContain("min-h-[var(--space-12)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS).not.toContain("overflow-y-auto");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("h-[48px]");
+    expect(ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS).toContain("h-[4px]");
+    expect(ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS).toContain("w-full");
+    expect(ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS).toContain("bg-accent");
+    expect(ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS).not.toContain("w-1/2");
+    expect(ACCOUNT_MENU_DROPDOWN_HEAD_CLASS).toContain("items-center");
+    expect(ACCOUNT_MENU_DROPDOWN_HEAD_CLASS).toContain("gap-[var(--space-3)]");
+    expect(ACCOUNT_MENU_DROPDOWN_HEAD_CLASS).toContain("p-[var(--space-4)]");
+    expect(ACCOUNT_MENU_DROPDOWN_HEAD_CLASS).not.toContain("flex-col");
+    expect(ACCOUNT_MENU_DROPDOWN_AVATAR_CLASS).toContain("size-10");
+    expect(ACCOUNT_MENU_DROPDOWN_AVATAR_CLASS).not.toContain("size-14");
+    expect(ACCOUNT_MENU_DROPDOWN_NAME_CLASS).toContain("text-[length:var(--text-base)]");
+    expect(ACCOUNT_MENU_DROPDOWN_NAME_CLASS).toContain("font-medium");
+    expect(ACCOUNT_MENU_DROPDOWN_NAME_CLASS).toContain("text-ink");
+    expect(ACCOUNT_MENU_DROPDOWN_NAME_CLASS).toContain("truncate");
+    expect(ACCOUNT_MENU_DROPDOWN_EMAIL_CLASS).toContain("text-[length:var(--text-xs)]");
+    expect(ACCOUNT_MENU_DROPDOWN_EMAIL_CLASS).toContain("text-ink-2");
+    expect(ACCOUNT_MENU_DROPDOWN_MANAGE_CLASS).toContain("text-accent");
+    expect(USER_MENU.manageAccount).toBe("Manage account");
+    expect(USER_MENU.profileHref).toBe("/settings/profile");
+    expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).toContain("min-h-11");
+    expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).toContain("px-[var(--space-4)]");
+    expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).toContain("gap-[var(--space-3)]");
+    expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).toContain("hover:bg-surface-muted");
+    expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).not.toContain("rounded");
+    expect(ACCOUNT_MENU_DROPDOWN_ROW_CLASS).not.toContain("SheetGroup");
+    expect(ACCOUNT_MENU_DROPDOWN_ROWS_CLASS).not.toContain("gap-");
+    expect(ACCOUNT_MENU_DROPDOWN_ICON_CLASS).toBe("size-5 shrink-0");
+    expect(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS).toContain("text-[#c4564a]");
+    expect(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS).not.toContain("text-accent");
+    expect(ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS).not.toContain("rounded");
+    expect(ACCOUNT_MENU_DROPDOWN_FOOTER_CLASS).toContain("pb-[var(--space-3)]");
+    expect(ACCOUNT_MENU_DROPDOWN_VERSION_CLASS).toContain("text-[length:var(--text-xs)]");
+    expect(ACCOUNT_MENU_DROPDOWN_VERSION_CLASS).toContain("text-ink-2");
+    expect(ACCOUNT_SHEET_GROUP_CLASS).toContain("gap-[var(--space-4)]");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_DROPDOWN_HEIGHT");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER).toBe(24);
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).toContain("h-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("h-[var(--space-12)]");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).toContain("shrink-0");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toMatch(/h-\[\d+px\]/);
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("h-[48px]");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("min-h");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("flex-1");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("min-h-[134px]");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_DROPDOWN_LEFTOVER");
   });
 
   it("keeps theme off the avatar menu — Settings Preferences is the SoT", () => {

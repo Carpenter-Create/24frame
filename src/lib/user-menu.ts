@@ -18,8 +18,9 @@
 // /account/appearance, /settings/appearance,
 // /settings/preferences/theme, or /account/feedback.
 // Legal is parked. Do not invent Phone, Job, Notifications,
-// Privacy, Manage account, or a name derived from the email
-// local-part.
+// Privacy, or a name derived from the email local-part.
+// Desktop identity link (Coinbase lock): Manage account → Profile.
+// That link is not a body row. The phone sheet does not show it.
 
 import { version as APP_VERSION } from "../../package.json";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
@@ -28,6 +29,7 @@ export const USER_MENU = {
   workspace: "Workspace",
   profile: "Profile",
   profileHref: "/settings/profile",
+  manageAccount: "Manage account",
   settings: "Settings",
   settingsHref: "/settings",
   theme: "Theme",

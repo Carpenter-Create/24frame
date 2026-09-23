@@ -4,6 +4,7 @@ import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { composeLocationLabel, LOCATION, type ProfileLocation } from "@/lib/location";
 import type { NotificationPrefs } from "@/lib/notification-prefs";
 import { NOTIFICATION_PREFS } from "@/lib/notification-prefs";
+import { menuHostClass } from "@/lib/menu-host";
 import {
   SETTINGS,
   SETTINGS_CONTENT_MEASURE_CLASS,
@@ -51,7 +52,7 @@ export function PreferencesSettings({
             value={locationValue}
             href={SETTINGS.locationHref}
           />
-          <div className="md:hidden">
+          <div className={menuHostClass("phone")} data-menu-host="phone" data-menu-family="B">
             <SettingsDrillRow
               kind="notifications"
               label={NOTIFICATION_PREFS.title}
@@ -61,7 +62,7 @@ export function PreferencesSettings({
         </div>
         <div
           data-settings-pref-desktop=""
-          className={`hidden md:block ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
+          className={`${menuHostClass("desktop")} ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
         >
           <NotificationPreferences initialPrefs={prefs} />
         </div>
