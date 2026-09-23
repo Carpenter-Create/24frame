@@ -555,9 +555,10 @@ describe("client /titles catalog", () => {
 
     expect(html).toContain('placeholder="Search titles..."');
     expect(html).toContain("data-titles-catalog-search");
-    const search = html.slice(html.indexOf("data-titles-catalog-search"));
-    expect(search).toContain("Search titles...");
-    expect(search).not.toContain("max-md:hidden");
+    const searchAt = html.indexOf("data-titles-catalog-search");
+    const searchOpen = html.slice(html.lastIndexOf("<", searchAt), html.indexOf(">", searchAt) + 1);
+    expect(html.slice(searchAt)).toContain("Search titles...");
+    expect(searchOpen).not.toContain("max-md:hidden");
     expect(html).not.toContain("⌘K");
     expect(html).not.toContain("CommandK");
   });

@@ -7,10 +7,10 @@
 
 import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
 import { HOUSE_PERIOD_SELECTED_CLASS } from "@/lib/house-shell";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { menuHostClass } from "@/lib/menu-host";
 
-export const HOUSE_PAGE_SELECT_SHEET_HOST_CLASS =
-  `fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end ${menuHostClass("phone")}`;
+export const HOUSE_PAGE_SELECT_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS = menuHostClass("desktop", "panel");
 

@@ -23,11 +23,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 describe("menu surface chrome lock", () => {
   it("keeps one content / item / separator register", () => {
     expect(MENU_SURFACE_CONTENT_CLASS).toBe(
-      "rounded-[var(--radius)] p-[var(--space-2)]",
+      "rounded-[12px] border border-hairline bg-surface p-[var(--space-2)] shadow-none",
     );
     expect(MENU_SURFACE_CONTENT_CLASS).not.toContain("17.5rem");
     expect(MENU_SURFACE_ITEM_CLASS).toBe(
-      "rounded-[var(--radius-sm)] px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-2",
+      "min-h-[44px] rounded-[var(--radius-sm)] px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-2",
     );
     expect(MENU_SURFACE_SEPARATOR_CLASS).toBe("my-[var(--space-2)]");
     expect(MENU_SURFACE_ITEM_DANGER_CLASS).toBe(
@@ -101,7 +101,6 @@ describe("menu surface chrome lock", () => {
     expect(houseSheet).not.toContain("THREAD_POPOVER_ITEM_CLASS");
     expect(houseSheet).not.toContain("THREAD_POPOVER_DELETE_CLASS");
     expect(houseSheet).not.toContain("rounded-[12px]");
-    expect(houseSheet).not.toContain("shadow-none");
     expect(houseSheet).not.toContain("min-w-[17.5rem]");
     expect(house).not.toContain("THREAD_POPOVER_CONTENT_CLASS");
     expect(house).not.toContain("DropdownMenuPrimitive");

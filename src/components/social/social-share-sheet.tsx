@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { HouseDialogFrame, useHouseDesktop } from "@/components/chrome/house-overlay";
 import { SocialIcon } from "@/components/social/social-icon";
 import { SOCIAL, socialProfilePublicUrl } from "@/lib/social";
 import {
@@ -71,6 +72,7 @@ export function SocialShareSheet({
   onClose: () => void;
 }) {
   const titleId = useId();
+  const desktop = useHouseDesktop();
   const [copied, setCopied] = useState(false);
   const url = socialProfilePublicUrl(handle);
 
@@ -98,15 +100,8 @@ export function SocialShareSheet({
 
   if (!open) return null;
 
-  const sheet = (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      data-social-share-sheet=""
-      data-social-share-url={url}
-      className={SOCIAL_SHARE_SHEET_HOST_CLASS}
-    >
+  const shareInner = (
+    <>
       <div className={SOCIAL_SHARE_SHEET_WASH_CLASS} />
       <div className={SOCIAL_SHARE_SHEET_CHROME_CLASS}>
         <button
@@ -183,6 +178,32 @@ export function SocialShareSheet({
           </button>
         </div>
       </div>
+    </>
+  );
+
+  const sheet = desktop ? (
+    <HouseDialogFrame
+      size="form"
+      label={SOCIAL.profile.shareProfile}
+      titleId={titleId}
+      onClose={dismiss}
+      closeLabel={SOCIAL.profile.shareClose}
+    >
+      <div data-social-share-sheet="" data-social-share-url={url} data-house-overlay-host="house-dialog">
+        {shareInner}
+      </div>
+    </HouseDialogFrame>
+  ) : (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      data-social-share-sheet=""
+      data-social-share-url={url}
+      data-house-overlay-host="app-sheet"
+      className={SOCIAL_SHARE_SHEET_HOST_CLASS}
+    >
+      {shareInner}
     </div>
   );
 

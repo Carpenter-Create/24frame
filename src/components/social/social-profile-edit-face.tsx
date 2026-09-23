@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { HouseLink } from "@/components/chrome/house-link";
+import { HouseDrawerFrame, useHouseDesktop } from "@/components/chrome/house-overlay";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
   SOCIAL_PROFILE_BIO_DONE_CLASS,
@@ -35,13 +36,13 @@ export function SocialProfileEditFace({
   };
   children: ReactNode;
 }) {
+  const desktop = useHouseDesktop();
   const hostAttr = { [`data-social-profile-${face}`]: "" };
   const headerAttr = { [`data-social-profile-${face}-header`]: "" };
   const backAttr = { [`data-social-profile-${face}-back`]: "" };
 
-  return (
-    <div {...hostAttr} className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
-      <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
+  const body = (
+    <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
         <header {...headerAttr} className={SOCIAL_PROFILE_EDIT_HEADER_CLASS}>
           {onBack ? (
             <button
@@ -75,7 +76,22 @@ export function SocialProfileEditFace({
           )}
         </header>
         <div className={SOCIAL_PROFILE_EDIT_BODY_CLASS}>{children}</div>
-      </div>
+    </div>
+  );
+
+  if (desktop) {
+    return (
+      <HouseDrawerFrame label={title} onClose={onBack ?? (() => undefined)} closeLabel={SOCIAL.profile.back}>
+        <div {...hostAttr} data-house-overlay-host="house-drawer">
+          {body}
+        </div>
+      </HouseDrawerFrame>
+    );
+  }
+
+  return (
+    <div {...hostAttr} data-house-overlay-host="app-sheet" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
+      {body}
     </div>
   );
 }

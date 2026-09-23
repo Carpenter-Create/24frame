@@ -6,8 +6,9 @@
 // Density: ≤2 items hug content (sparse overflow). 3+ keep the 17.5rem
 // account/thread panel. Do not bake 17.5rem into every instance.
 
+// HouseOverlay dual-host lock v1 G6 — anchor hug, radius 12, hairline, no shadow.
 export const MENU_SURFACE_CONTENT_CLASS =
-  "rounded-[var(--radius)] p-[var(--space-2)]";
+  "rounded-[12px] border border-hairline bg-surface p-[var(--space-2)] shadow-none";
 
 export const MENU_SURFACE_CONTENT_SPARSE_CLASS = "w-max min-w-max";
 
@@ -16,7 +17,7 @@ export const MENU_SURFACE_CONTENT_PANEL_CLASS = "min-w-[17.5rem]";
 export const MENU_SURFACE_SPARSE_ITEM_MAX = 2;
 
 export const MENU_SURFACE_ITEM_CLASS =
-  "rounded-[var(--radius-sm)] px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-2";
+  "min-h-[44px] rounded-[var(--radius-sm)] px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-2";
 
 export const MENU_SURFACE_SEPARATOR_CLASS = "my-[var(--space-2)]";
 

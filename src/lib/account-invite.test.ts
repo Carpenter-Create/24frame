@@ -70,7 +70,8 @@ describe("account invite SoT", () => {
     expect(teamForm).not.toContain("TEAM_LIST_HEADER_CLASS");
     expect(teamForm).toContain("<Dialog");
     expect(teamForm).toContain("DialogFooter");
-    expect(teamForm).toContain('presentation="sheet"');
+    expect(teamForm).not.toContain('presentation="sheet"');
+    expect(teamForm).toContain('size="md"');
     expect(teamForm).toContain("SETTINGS_DIALOG_LABEL_CLASS");
     expect(teamForm).toContain("SETTINGS_DIALOG_GROUP_CLASS");
     expect(teamForm).toContain("SETTINGS_DIALOG_ERROR_CLASS");

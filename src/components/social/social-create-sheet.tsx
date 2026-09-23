@@ -12,9 +12,12 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 
 import { Close44 } from "@/components/chrome/house";
+import { useHouseDesktop } from "@/components/chrome/house-overlay";
 import { SocialCreateMediaTile } from "@/components/social/social-create-media";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
+  SOCIAL_CREATE_SHEET_DESKTOP_HOST_CLASS,
+  SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS,
   SOCIAL_CREATE_SHEET_HEAD_CLASS,
   SOCIAL_CREATE_SHEET_HOST_CLASS,
   SOCIAL_CREATE_SHEET_PRESENTATION,
@@ -97,6 +100,7 @@ export function SocialCreateSheet({
   defaultOpen?: boolean;
 }) {
   const titleId = useId();
+  const desktop = useHouseDesktop();
   const [open, setOpen] = useState(defaultOpen);
 
   useEffect(() => {
@@ -127,32 +131,62 @@ export function SocialCreateSheet({
     },
   });
 
-  const sheet = open ? (
-    <div
-      data-social-create-sheet=""
-      data-social-create-sheet-presentation={SOCIAL_CREATE_SHEET_PRESENTATION}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className={SOCIAL_CREATE_SHEET_HOST_CLASS}
-    >
-      <button
-        type="button"
-        aria-label={SOCIAL.create.close}
-        className={SOCIAL_CREATE_SHEET_SCRIM_CLASS}
-        onClick={close}
-      />
-      <div className={SOCIAL_CREATE_SHEET_SURFACE_CLASS}>
-        <div className={SOCIAL_CREATE_SHEET_HEAD_CLASS}>
-          <Close44 label={SOCIAL.create.close} onClick={close} />
-          <h2 id={titleId} className={SOCIAL_CREATE_SHEET_TITLE_CLASS}>
-            {SOCIAL.create.title}
-          </h2>
-          <span className="size-[44px] shrink-0" aria-hidden />
-        </div>
-        <SocialCreateTiles onPick={close} />
-      </div>
+  const head = (
+    <div className={SOCIAL_CREATE_SHEET_HEAD_CLASS}>
+      <Close44 label={SOCIAL.create.close} onClick={close} />
+      <h2 id={titleId} className={SOCIAL_CREATE_SHEET_TITLE_CLASS}>
+        {SOCIAL.create.title}
+      </h2>
+      <span className="size-[44px] shrink-0" aria-hidden />
     </div>
+  );
+  const tiles = <SocialCreateTiles onPick={close} />;
+  const sheet = open ? (
+    desktop ? (
+      <div
+        data-social-create-sheet=""
+        data-social-create-sheet-presentation={SOCIAL_CREATE_SHEET_PRESENTATION}
+        data-house-overlay-host="house-dialog"
+        className={SOCIAL_CREATE_SHEET_DESKTOP_HOST_CLASS}
+      >
+        <button
+          type="button"
+          aria-label={SOCIAL.create.close}
+          className={SOCIAL_CREATE_SHEET_SCRIM_CLASS}
+          onClick={close}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          className={SOCIAL_CREATE_SHEET_DESKTOP_SURFACE_CLASS}
+        >
+          {head}
+          {tiles}
+        </div>
+      </div>
+    ) : (
+      <div
+        data-social-create-sheet=""
+        data-social-create-sheet-presentation={SOCIAL_CREATE_SHEET_PRESENTATION}
+        data-house-overlay-host="app-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className={SOCIAL_CREATE_SHEET_HOST_CLASS}
+      >
+        <button
+          type="button"
+          aria-label={SOCIAL.create.close}
+          className={SOCIAL_CREATE_SHEET_SCRIM_CLASS}
+          onClick={close}
+        />
+        <div className={SOCIAL_CREATE_SHEET_SURFACE_CLASS}>
+          {head}
+          {tiles}
+        </div>
+      </div>
+    )
   ) : null;
 
   return (

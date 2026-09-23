@@ -4,11 +4,14 @@ import { describe, expect, it } from "vitest";
 import {
   DIALOG_BODY_CLASS,
   DIALOG_FOOTER_CLASS,
-  DIALOG_HEADER_CLASS,
   DIALOG_PANEL_CLASS,
-  DIALOG_SHEET_CLASS,
   DIALOG_SIZES,
+  HOUSE_DIALOG_HEADER_CLASS,
 } from "./dialog";
+import {
+  HOUSE_DIALOG_CONFIRM_CLASS,
+  HOUSE_DIALOG_FORM_CLASS,
+} from "@/lib/house-overlay";
 
 const src = readFileSync("src/components/ui/dialog.tsx", "utf8");
 const titles = readFileSync(
@@ -18,25 +21,38 @@ const titles = readFileSync(
 const header = readFileSync("src/components/chrome/messages-app-header.tsx", "utf8");
 
 describe("dialog confirm grammar", () => {
-  it("hugs content — m-auto without h-fit stretches into a tall empty panel", () => {
+  it("is HouseDialog — centered, hairline, no shadow, confirm 400 / form 480", () => {
     expect(DIALOG_PANEL_CLASS).toContain("m-auto");
     expect(DIALOG_PANEL_CLASS).toContain("h-fit");
+    expect(DIALOG_PANEL_CLASS).toContain("max-h-[80vh]");
     expect(DIALOG_PANEL_CLASS).toContain("overflow-visible");
-    expect(DIALOG_PANEL_CLASS).toContain("backdrop:bg-black/40");
-    expect(DIALOG_PANEL_CLASS).toContain("backdrop:backdrop-blur-sm");
-    expect(DIALOG_BODY_CLASS).toBe("px-5 py-3");
-    expect(DIALOG_HEADER_CLASS).toContain("py-3");
+    expect(DIALOG_PANEL_CLASS).toContain("rounded-[16px]");
+    expect(DIALOG_PANEL_CLASS).toContain("border-hairline");
+    expect(DIALOG_PANEL_CLASS).toContain("p-[var(--space-6)]");
+    expect(DIALOG_PANEL_CLASS).toContain("shadow-none");
+    expect(DIALOG_PANEL_CLASS).toContain("backdrop:bg-ink/40");
+    expect(DIALOG_PANEL_CLASS).not.toContain("backdrop-blur");
+    expect(DIALOG_PANEL_CLASS).not.toContain("shadow-[var(--elevation)]");
+    expect(DIALOG_BODY_CLASS).toBe("pt-[var(--space-4)]");
+    expect(HOUSE_DIALOG_HEADER_CLASS).toContain("border-hairline");
     expect(DIALOG_FOOTER_CLASS).toBe(
       "mt-[var(--space-3)] flex justify-end gap-[var(--space-2)]",
     );
-    expect(DIALOG_FOOTER_CLASS).not.toContain("space-4");
-    expect(DIALOG_SIZES.sm).toBe("w-[min(92vw,22rem)]");
+    expect(DIALOG_SIZES.sm).toBe(HOUSE_DIALOG_CONFIRM_CLASS);
+    expect(DIALOG_SIZES.md).toBe(HOUSE_DIALOG_FORM_CLASS);
+    expect(DIALOG_SIZES.sm).toContain("400px");
+    expect(DIALOG_SIZES.md).toContain("480px");
     expect(src).toContain("export function DialogFooter");
+    expect(src).toContain("export { Dialog as HouseDialog }");
+    expect(src).not.toContain("22rem");
+    expect(src).not.toContain("32rem");
     expect(src).toContain("data-dialog-size");
-    expect(src).toContain("data-dialog-presentation");
-    expect(DIALOG_SHEET_CLASS).toContain("max-md:mt-auto");
-    expect(DIALOG_SHEET_CLASS).toContain("max-md:rounded-b-none");
-    expect(DIALOG_SHEET_CLASS).not.toContain("bg-ink");
+    expect(src).toContain('data-house-overlay-host="house-dialog"');
+    expect(src).toContain("AppSheetFrame");
+    expect(src).toContain('size !== "xl" && "max-md:hidden"');
+    expect(src).not.toContain("DIALOG_SHEET_CLASS");
+    expect(src).not.toContain("presentation");
+    expect(src).not.toContain("max-md:mt-auto");
   });
 
   it("puts confirm footers on DialogFooter + Button, not a Titles-only height hack", () => {

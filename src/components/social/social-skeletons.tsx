@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/layout/skeleton";
+import { HOUSE_DRAWER_HOST_CLASS, HOUSE_DRAWER_PANEL_CLASS } from "@/lib/house-overlay";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_AVATAR_SM_CLASS,
@@ -202,18 +203,33 @@ export function SocialFollowsSkeleton() {
   );
 }
 
-export function SocialProfileEditSkeleton() {
+function profileEditSkeletonBody() {
   return (
-    <div data-social-profile-edit-skeleton="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
-      <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
-        <Skeleton className="h-14 w-full" />
-        <div className="flex flex-col items-center gap-4 px-4 pt-6">
-          <Skeleton className="size-[88px] rounded-full" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-48 w-full rounded-[16px]" />
-        </div>
+    <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
+      <Skeleton className="h-14 w-full" />
+      <div className="flex flex-col items-center gap-4 px-4 pt-6">
+        <Skeleton className="size-[88px] rounded-full" />
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-48 w-full rounded-[16px]" />
       </div>
     </div>
+  );
+}
+
+export function SocialProfileEditSkeleton() {
+  return (
+    <>
+      <div
+        data-social-profile-edit-skeleton=""
+        data-house-overlay-host="app-sheet"
+        className={SOCIAL_PROFILE_EDIT_HOST_CLASS}
+      >
+        {profileEditSkeletonBody()}
+      </div>
+      <div data-house-overlay-host="house-drawer" className={HOUSE_DRAWER_HOST_CLASS}>
+        <aside className={HOUSE_DRAWER_PANEL_CLASS}>{profileEditSkeletonBody()}</aside>
+      </div>
+    </>
   );
 }
 

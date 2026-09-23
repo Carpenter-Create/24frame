@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import Link from "next/link";
 
 import { Close44 } from "@/components/chrome/house";
+import { HouseDialogFrame, HouseOverlayHead, useHouseDesktop } from "@/components/chrome/house-overlay";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Textarea } from "@/components/ui/textarea";
 import { SocialAvatar } from "@/components/social/social-avatar";
@@ -91,6 +92,7 @@ export function SocialCommentThread({
   variant?: "sheet" | "page";
 }) {
   const titleId = useId();
+  const desktop = useHouseDesktop();
   const [comments, setComments] = useState<SocialCommentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -296,8 +298,31 @@ export function SocialCommentThread({
     );
   }
 
+  if (desktop && onClose) {
+    return (
+      <HouseDialogFrame
+        size="form"
+        titleId={titleId}
+        label={SOCIAL.post.commentsTitle}
+        onClose={onClose}
+        closeLabel={SOCIAL.create.close}
+      >
+        <div data-social-comment-thread="">
+          <HouseOverlayHead
+            title={SOCIAL.post.commentsTitle}
+            titleId={titleId}
+            closeLabel={SOCIAL.create.close}
+            onClose={onClose}
+          />
+          {list}
+          {composer}
+        </div>
+      </HouseDialogFrame>
+    );
+  }
+
   return (
-    <div data-social-comment-thread="" className={SOCIAL_COMMENT_SHEET_HOST_CLASS} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+    <div data-social-comment-thread="" data-house-overlay-host="app-sheet" className={SOCIAL_COMMENT_SHEET_HOST_CLASS} role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <button type="button" className={SOCIAL_COMMENT_SHEET_SCRIM_CLASS} aria-label={SOCIAL.create.close} onClick={onClose} />
       <div className={SOCIAL_COMMENT_SHEET_SURFACE_CLASS}>
         <div className="flex h-14 shrink-0 items-center justify-between px-2">

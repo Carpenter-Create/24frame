@@ -40,7 +40,7 @@
 // full-bleed. No 522 / 570 / 672 floor. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
-import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_CHROME_CLASS, APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
@@ -100,16 +100,13 @@ export function accountSheetGroupedRows(items: readonly UserMenuAction[]) {
   }));
 }
 
-// 544:561 / 537:557 — sides 24, bottom 32 (sheet pad B). 32 clear
-// under the 4px half-bar (padT 36 = 4+32) so the bar does not eat
-// the top air. Height from the stack (h-auto hug). max-h-[90dvh]
-// is the overflow ceiling — not a forced 90% floor. Leftover
-// above Log out is 24 house air, shrink-0. Identity 48 + Close/44
-// one row. Desktop 629:795 hug does not use this surface.
+// Phone account sheet uses AppSheet chrome (pad 16, radius 16, 90vh,
+// no shadow). Hug stays h-auto. The stage/pin stack is the menu body.
+// Desktop 629:795 hug does not use this surface.
 export const ACCOUNT_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const ACCOUNT_SHEET_SURFACE_CLASS =
-  "account-sheet-surface relative z-10 flex h-auto max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-8)] pt-[calc(4px+var(--space-8))] app-sheet-rise";
+  `${APP_SHEET_CHROME_CLASS} account-sheet-surface relative z-10 h-auto overflow-hidden`;
 
 export const ACCOUNT_SHEET_HEAD_CLASS =
   "flex min-h-12 w-full shrink-0 items-center justify-between";

@@ -110,7 +110,7 @@ describe("LegalEntitiesSection list rows", () => {
     expect(html).not.toContain(LEGAL_ENTITIES.addRow);
   });
 
-  it("keeps add as a tucked row — mobile drills in, desktop mutates in house Dialog", () => {
+  it("keeps add as a tucked row — phone AppSheet, desktop HouseDrawer", () => {
     const src = readFileSync("src/components/settings/legal-entities-section.tsx", "utf8");
     expect(src).toContain('cta="entity-add"');
     expect(src).toContain("LEGAL_ENTITIES.addHref");
@@ -119,7 +119,9 @@ describe("LegalEntitiesSection list rows", () => {
     expect(src).toContain("SettingsDrillRow");
     expect(src).toContain("SettingsGroupList");
     expect(src).toContain("LegalEntityEditor");
-    expect(src).toContain("<Dialog");
+    expect(src).toContain("HouseDrawerFrame");
+    expect(src).toContain("AppSheetFrame");
+    expect(src).not.toContain("<Dialog");
     expect(src).toContain("entityMetaLine");
     expect(src).not.toContain("<Button");
     expect(src).not.toContain("ENTITY_LIST_HEADER_CLASS");

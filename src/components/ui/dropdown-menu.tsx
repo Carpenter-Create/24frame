@@ -18,10 +18,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         align={align}
         sideOffset={sideOffset}
-        className={cn(
-          "z-50 min-w-[200px] rounded-[var(--radius-sm)] border border-hairline bg-surface p-1 shadow-[var(--elevation)]",
-          className,
-        )}
+        className={cn("z-50", className)}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>

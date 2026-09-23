@@ -17,7 +17,8 @@ import {
 } from "@phosphor-icons/react";
 
 import { AppSheetHead, AppSheetSurface, Close44 } from "@/components/chrome/house";
-import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
+import { HouseDialogFrame, HouseOverlayHead, HouseScrim, useHouseDesktop } from "@/components/chrome/house-overlay";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SOCIAL } from "@/lib/social";
 import {
@@ -117,16 +118,41 @@ export function SocialProfileLinksSheet({
     };
   }, [open, onClose]);
 
+  const desktop = useHouseDesktop();
   if (!open) return null;
 
-  const sheet = (
-    <div data-social-profile-links-sheet="" className={APP_SHEET_HOST_CLASS}>
-      <button
-        type="button"
-        aria-label={SOCIAL.profile.shareClose}
-        className={APP_SHEET_SCRIM_CLASS}
-        onClick={onClose}
-      />
+  const list = (
+        <div
+          data-social-profile-links-sheet-list=""
+          className={SOCIAL_PROFILE_LINKS_SHEET_CLASS}
+        >
+          {links.map((link) => (
+            <SocialProfileSheetLink key={`${link.platform}:${link.url}`} link={link} />
+          ))}
+        </div>
+  );
+
+  const sheet = desktop ? (
+    <HouseDialogFrame
+      size="form"
+      titleId={titleId}
+      label={SOCIAL.profile.links}
+      onClose={onClose}
+      closeLabel={SOCIAL.profile.shareClose}
+    >
+      <div data-social-profile-links-sheet="">
+        <HouseOverlayHead
+          title={SOCIAL.profile.links}
+          titleId={titleId}
+          closeLabel={SOCIAL.profile.shareClose}
+          onClose={onClose}
+        />
+        {list}
+      </div>
+    </HouseDialogFrame>
+  ) : (
+    <div data-social-profile-links-sheet="" data-house-overlay-host="app-sheet" className={APP_SHEET_HOST_CLASS}>
+      <HouseScrim label={SOCIAL.profile.shareClose} onClose={onClose} />
       <AppSheetSurface
         role="dialog"
         aria-modal="true"
@@ -138,14 +164,7 @@ export function SocialProfileLinksSheet({
           </h2>
           <Close44 label={SOCIAL.profile.shareClose} onClick={onClose} />
         </AppSheetHead>
-        <div
-          data-social-profile-links-sheet-list=""
-          className={SOCIAL_PROFILE_LINKS_SHEET_CLASS}
-        >
-          {links.map((link) => (
-            <SocialProfileSheetLink key={`${link.platform}:${link.url}`} link={link} />
-          ))}
-        </div>
+        {list}
       </AppSheetSurface>
     </div>
   );
