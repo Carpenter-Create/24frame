@@ -75,10 +75,14 @@ describe("SettingsRail", () => {
     const agreements = renderToStaticMarkup(<SettingsRail />);
     expect(agreements).toMatch(/data-settings-rail-item="profile"[^>]*aria-current="page"/);
 
-    navigation.pathname = "/settings/theme";
+    navigation.pathname = "/settings/preferences/theme";
     const theme = renderToStaticMarkup(<SettingsRail />);
-    expect(theme).not.toContain('aria-current="page"');
-    expect(theme).not.toContain(HOUSE_RAIL_ACTIVE_CLASS);
+    expect(theme).toMatch(
+      /data-settings-rail-item="preferences"[^>]*aria-current="page"/,
+    );
+    expect(theme).not.toMatch(
+      /data-settings-rail-item="profile"[^>]*aria-current="page"/,
+    );
 
     navigation.pathname = "/settings/security";
     const security = renderToStaticMarkup(<SettingsRail />);

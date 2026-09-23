@@ -18,8 +18,8 @@
 // /gc/clients — never a customer Settings directory.
 // Preferences holds Location, Theme, and the notification matrix.
 // Location and Theme share one PrefDrillGroup (inset SETTINGS_GROUP).
-// The Theme row drills to /settings/theme — the same picker as the
-// avatar Theme door, same gc-theme writes. Notifications stays the
+// The Theme row drills to /settings/preferences/theme — the same picker
+// as the avatar Theme door, same gc-theme writes. Notifications stays the
 // t-heading matrix. Theme is not nested under Notifications.
 // Speech-learning is not a Preferences subsection (Adam 2026-09-22
 // follow-up). The gc-speech-learning store stays; do not invent a
@@ -33,7 +33,9 @@
 // workspace prefs may appear as optional subsections only —
 // never as a You / Social / Education / Aggregation spine.
 //
-// Canonical paths only (hard-cut — no users yet, no redirects):
+// Canonical paths. Retired workspace-spine doors stay a hard-cut
+// (404, no redirect table). Flat /settings/theme permanently
+// redirects to the nested Theme page listed below:
 //   /settings → hub (mobile list) / Profile pane (desktop)
 //   /settings/profile
 //   /settings/profile/name
@@ -44,11 +46,12 @@
 //   /settings/preferences
 //   /settings/preferences/location
 //   /settings/preferences/notifications
-//   /settings/theme
+//   /settings/preferences/theme
 //   /settings/security
-// Retired /settings/you|social|education|aggregation, ?section=
-// aliases, and /settings/preferences/theme are gone. Dead paths
-// 404. Do not add a redirect table.
+// Retired /settings/you|social|education|aggregation and ?section=
+// aliases are gone. Those dead paths 404. Do not add a redirect
+// table for them. Flat /settings/theme permanently redirects to
+// /settings/preferences/theme (preferences-drill-nested-slugs-lock-v1).
 //
 // Account menu Settings always opens the hub. settingsLandHref is
 // /settings from every workspace — no context land that swaps the
@@ -57,7 +60,7 @@
 // Existing /settings/agreements, /settings/refer stay Profile doors.
 // Company persist stays organizations.name.
 // Theme SoT is gc-theme via lib/theme.ts. Avatar Theme and the
-// Preferences Theme row share /settings/theme. Auto changes only
+// Preferences Theme row share /settings/preferences/theme. Auto changes only
 // in that picker. Get Help / Give feedback stay on
 // /help — never Settings hub chrome.
 //
@@ -354,10 +357,6 @@ export function settingsHubHasInAppReferrer(
 }
 
 function pathSection(pathname: string): SettingsHubSection | null {
-  // Theme is an avatar door, not a hub section. Do not wash Profile.
-  if (pathname === SETTINGS.themeHref || pathname.startsWith(`${SETTINGS.themeHref}/`)) {
-    return null;
-  }
   if (
     pathname === SETTINGS.organizationHref
     || pathname.startsWith(`${SETTINGS.organizationHref}/`)
@@ -379,7 +378,7 @@ function pathSection(pathname: string): SettingsHubSection | null {
   return "profile";
 }
 
-/** Hub section from the path. Profile doors (agreements / refer) wash Profile. Theme washes none. */
+/** Hub section from the path. Profile doors (agreements / refer) wash Profile. Theme washes Preferences. */
 export function settingsHubSection(pathname: string | null | undefined): SettingsHubSection | null {
   if (!pathname) return "profile";
   return pathSection(pathname);
@@ -390,7 +389,7 @@ export function settingsPaneTitle(section: SettingsHubSection): string {
   return SETTINGS_HUB_LABELS[section];
 }
 
-/** Active follows the hub section. Theme and other non-hub paths wash nothing. */
+/** Active follows the hub section. Theme washes Preferences. */
 export function settingsRailActive(
   kind: SettingsRailKind,
   section: SettingsHubSection | null,

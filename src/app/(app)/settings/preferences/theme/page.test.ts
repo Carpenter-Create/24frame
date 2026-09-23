@@ -37,15 +37,15 @@ describe("SettingsThemePage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
   });
 
-  it("is a Theme edit pane with the picker only — peer of Preferences", async () => {
+  it("is a Preferences Theme edit pane — nested href, back to Preferences", async () => {
     const html = renderToStaticMarkup(await SettingsThemePage());
     expect(html).toContain('data-settings-edit-pane=""');
-    expect(html).not.toContain('data-settings-hub="preferences"');
+    expect(html).toContain('data-settings-hub="preferences"');
     expect(html).toMatch(/<h1[^>]*>Theme<\/h1>/);
     expect(html).toContain(SETTINGS.themeHelper);
-    expect(html).toContain(`href="${SETTINGS.href}"`);
-    expect(html).toContain("Settings");
-    expect(html).not.toContain(`href="${SETTINGS.preferencesHref}"`);
+    expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
+    expect(html).toContain(">Preferences<");
+    expect(html).not.toMatch(/href="\/settings"/);
     expect(html).toContain('data-settings-appearance=""');
     expect(html).toContain('data-settings-appearance-option="auto"');
     expect(html).toContain('data-settings-appearance-option="dark"');
@@ -58,9 +58,11 @@ describe("SettingsThemePage", () => {
     expect(html).not.toContain("data-settings-notification-matrix");
     expect(pageSrc).toContain("AppearanceThemePicker");
     expect(pageSrc).toContain("SettingsEditPane");
+    expect(pageSrc).toContain('hub="preferences"');
     expect(pageSrc).not.toContain("AppearancePreferences");
     expect(pageSrc).not.toContain("NotificationPreferences");
-    expect(SETTINGS.themeHref).toBe("/settings/theme");
+    expect(pageSrc).not.toContain("permanentRedirect");
+    expect(SETTINGS.themeHref).toBe("/settings/preferences/theme");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

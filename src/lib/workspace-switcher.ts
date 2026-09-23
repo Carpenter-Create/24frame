@@ -14,7 +14,7 @@
 // AI/bell/search hug the 16px glyph so that gap is optical,
 // not 16-in-32 vs a 32 disk. Do not cancel that hug with -mx.
 // #452 stacked AI on the bell. Theme is the avatar drill to
-// /settings/theme. No header glyph writes gc-theme.
+// /settings/preferences/theme. No header glyph writes gc-theme.
 // Ask 24Frame AI sits immediately left of the
 // bell and opens the Mercury overlay. Ask AI is header + Home
 // module only (#465). Do not reintroduce a dest hamburger.

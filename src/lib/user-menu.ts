@@ -2,10 +2,10 @@
 // Apple door — phone sheet and desktop 264 share one stack:
 // identity → Settings → Theme → Get Help → Log out. Chrome may
 // differ (full-bleed sheet vs dropdown). Labels may not fork.
-// Adam lock 2026-09-22: Theme is its own avatar-menu row. It
-// drills to /settings/theme. The Preferences Theme row uses that
-// same picker. One gc-theme SoT — not a nested theme route, not a
-// second store. No header sun/moon. Auto changes only in the picker.
+// Adam lock 2026-09-22, path amended 2026-09-23: Theme is its own
+// avatar-menu row. It drills to /settings/preferences/theme. The
+// Preferences Theme row uses that same picker. One gc-theme SoT —
+// not a second store. No header sun/moon. Auto changes only in the picker.
 // 24Frame AI is the header sparkle only — not a menu row.
 // Workspace lives on the header switcher. One Settings hub. No
 // forked Settings.
@@ -16,8 +16,8 @@
 // is the avatar-menu footer door — /help. Give feedback lives on
 // /help/feedback, not Settings. Company stays off this menu. Do
 // not invent /account/workspace, /settings/workspace,
-// /account/appearance, /settings/appearance,
-// /settings/preferences/theme, or /account/feedback.
+// /account/appearance, /settings/appearance, or /account/feedback.
+// Theme is /settings/preferences/theme — not a flat /settings/theme twin.
 // Legal is parked. Do not invent Phone, Job, Notifications,
 // Privacy, or a name derived from the email local-part.
 // Desktop identity link (Coinbase lock): Manage account → Profile.
@@ -34,7 +34,7 @@ export const USER_MENU = {
   settings: "Settings",
   settingsHref: "/settings",
   theme: "Theme",
-  themeHref: "/settings/theme",
+  themeHref: "/settings/preferences/theme",
   agreements: "Agreements",
   agreementsHref: "/settings/agreements",
   appearance: "Appearance",

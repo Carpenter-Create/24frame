@@ -11,7 +11,7 @@
 **Theme chrome = Avatar menu Theme drill only** (plus Preferences Theme row, already locked).
 
 1. **Remove** the header sun/moon Theme control entirely (desktop + phone headers).  
-2. **Avatar → Theme** is a **drill row** (not a toggle): label **Theme** · value = stored `Light` \| `Dark` \| `Auto` · trailing chevron → **same** picker as Preferences Theme (`/settings/theme` / `AppearanceThemePicker`).  
+2. **Avatar → Theme** is a **drill row** (not a toggle): label **Theme** · value = stored `Light` \| `Dark` \| `Auto` · trailing chevron → **same** picker as Preferences Theme (`/settings/preferences/theme` / `AppearanceThemePicker`).  
 3. **Preferences → Theme** PrefDrillGroup row **stays**. One `gc-theme` store (`lib/theme.ts`).  
 4. Header flip / “exit Auto” behavior **dies with the header control**. Auto changes **only** via the shared picker.
 
@@ -50,7 +50,7 @@ Shared grammar with Preferences Theme drill (Coinbase horizontal):
 | Value | Stored preference only: **`Light`** · **`Dark`** · **`Auto`** · `t-body-sm` · ink-3 |
 | Trailing | Value + CaretRight **16** ink-3 · gap **8** · `items-center` |
 | Hit | Min height **44** · full-row press |
-| Opens | Same Theme face / `AppearanceThemePicker` as Preferences (`/settings/theme` or in-menu nested face that is the **same component**) |
+| Opens | Same Theme face / `AppearanceThemePicker` as Preferences (`/settings/preferences/theme` or in-menu nested face that is the **same component**) |
 
 ### Desktop (`MenuSurface` account face)
 
@@ -115,6 +115,10 @@ Other body rows (Settings · Get Help · Log out) stay flat **without** chevrons
 
 CoS seeds: `docs/design-locks/theme-chrome-avatar-only-lock-v1.md`  
 Box draft: `/workspace/24frame-agg-ux/theme-chrome-avatar-only-lock-v1.md`
+
+## Path amend
+
+`preferences-drill-nested-slugs-lock-v1.md` (2026-09-23): Theme href is `/settings/preferences/theme`.
 
 ## Supersedes (chrome only)
 
