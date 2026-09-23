@@ -1,12 +1,11 @@
 import {
   SOCIAL_CREATE_KIND_PARAM,
   SOCIAL_FOLLOWS_SEARCH_PARAM,
-  SOCIAL_HOME_LANE_PARAM,
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
 } from "@/lib/social";
-import { SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
 import { SOCIAL_FOLLOWING_WALL_CURSOR_PARAM } from "@/lib/social-home-bounds";
+import { readSocialHomeLocation } from "@/lib/social-home-location";
 import { EDUCATION_ROOT, HOME_ROOT, SOCIAL_ROOT, STAFF_ROOT } from "@/lib/workspace";
 
 // House client-shell SoT.
@@ -25,6 +24,9 @@ export const HOUSE_CLIENT_SHELL = {
   screenActiveAttr: "data-house-screen-active",
   scrollAttr: "data-house-lead-scroll",
 } as const;
+
+/** Blank outlet recovery. Retries until a slot or ingress paints. */
+export const HOUSE_BLANK_OUTLET_RETRY_MS = 50;
 
 const HOUSE_EXACT_SCREENS = new Set<string>([
   SOCIAL_ROUTES.home,
@@ -57,7 +59,11 @@ export function houseShouldKeepAlive(pathname: string): boolean {
 export function houseScreenQueryNames(pathname: string): readonly string[] {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname || "/";
   if (path === SOCIAL_ROUTES.home) {
-    return [SOCIAL_CATEGORY_PARAM, SOCIAL_HOME_LANE_PARAM, SOCIAL_FOLLOWING_WALL_CURSOR_PARAM];
+    // Lane and topic are client panel state on the mounted Home screen,
+    // same as profile ?tab=. A separate cache slot waited on
+    // SocialHomeCenter before the chip could show selected. Cursor
+    // still splits the slot.
+    return [SOCIAL_FOLLOWING_WALL_CURSOR_PARAM];
   }
   if (path === SOCIAL_ROUTES.explore || path === SOCIAL_ROUTES.search) {
     return ["q"];
@@ -101,6 +107,22 @@ export function houseScreenKey(pathname: string, search = ""): string {
 export function houseHrefKey(href: string): string {
   const url = new URL(href, "https://24frame.local");
   return houseScreenKey(url.pathname, url.search);
+}
+
+/**
+ * Home lane/topic stay on the mounted Home screen. Owning the href
+ * lets the chip select in the click. Next still has to load the query;
+ * pushState alone never fetches it.
+ */
+export function houseSocialHomePanelHop(currentHref: string, destHref: string): boolean {
+  const current = parseHouseHref(currentHref);
+  const dest = parseHouseHref(destHref);
+  if (housePathname(current.pathname) !== SOCIAL_ROUTES.home) return false;
+  if (housePathname(dest.pathname) !== SOCIAL_ROUTES.home) return false;
+  if (houseExactHref(currentHref) === houseExactHref(destHref)) return false;
+  const from = readSocialHomeLocation(current.search);
+  const to = readSocialHomeLocation(dest.search);
+  return from.lane !== to.lane || from.topic !== to.topic;
 }
 
 export function houseWorkspaceLandKey(pathname: string): string {

@@ -8,7 +8,24 @@ const navigation = vi.hoisted(() => ({ pathname: "/settings/profile" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
 }));
+
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 
 import {
   SETTINGS,
@@ -46,7 +63,11 @@ describe("SettingsRail", () => {
     expect(html).not.toContain('href="/education"');
     expect(html).toContain('aria-current="page"');
     expect(html).toContain(HOUSE_RAIL_ACTIVE_CLASS);
-    expect(src).toContain("settingsHubSection(usePathname())");
+    expect(src).toContain("settingsHubSection(activePath)");
+    expect(src).toContain("useHouseNavPending");
+    expect(src).toContain("markPending(item.href, event)");
+    expect(src).toContain("HouseNavPendingProbe");
+    expect(src).not.toContain('usePathname');
     expect(src).not.toContain("persistWorkspaceCookie");
     expect(src).not.toContain("availableWorkspaceOptions");
     expect(src).not.toContain("ChevronLeft");

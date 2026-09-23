@@ -27,8 +27,8 @@ import {
   type OverviewLeadPill,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import { clampWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
-import { prefetchHrefList } from "@/lib/house-nav-pending";
+import { clampWorkspaceMode, resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { prefetchHrefList, type HouseNavClickLike } from "@/lib/house-nav-pending";
 import {
   HouseNavPendingProbe,
   useHouseNavPending,
@@ -92,16 +92,21 @@ function selectLeadPill(
   router: ReturnType<typeof useRouter>,
   pathname: string,
   isGcStaff?: boolean,
+  markPending?: (href: string, event?: HouseNavClickLike) => void,
+  event?: HouseNavClickLike,
 ) {
   if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
   if (pill.id === "home" || pill.id === "co-productions") {
+    markPending?.(pill.href, event);
     router.push(pill.href);
     return;
   }
   const option = options.find((row) => row.mode === pill.id);
   if (!option) return;
   workspaceSwitcherPersistLane(option.mode, isGcStaff);
-  router.push(workspaceHome(option.mode));
+  const dest = workspaceHome(option.mode);
+  markPending?.(dest, event);
+  router.push(dest);
 }
 
 function WorkspaceSwitcherPills({
@@ -114,12 +119,13 @@ function WorkspaceSwitcherPills({
   isGcStaff?: boolean;
 }) {
   const router = useRouter();
-  const pathname = useHousePathname();
+  const { activePath, markPending } = useHouseNavPending();
   const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
+  const routeWorkspace = resolveWorkspaceMode(activePath, current);
+  const label = overviewTriggerLabel(activePath, workspaceSwitcherSegmentLabel(current));
   const canSwitch = pills.length > 1;
-  const routeIndex = overviewLeadActiveIndex(pathname, current, pills);
+  const routeIndex = overviewLeadActiveIndex(activePath, routeWorkspace, pills);
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -174,8 +180,17 @@ function WorkspaceSwitcherPills({
               aria-selected={selected}
               tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
               className={workspaceSwitcherSegmentClass(selected)}
-              onClick={() => {
-                selectLeadPill(current, pill, options, router, pathname, isGcStaff);
+              onClick={(event) => {
+                selectLeadPill(
+                  routeWorkspace,
+                  pill,
+                  options,
+                  router,
+                  activePath,
+                  isGcStaff,
+                  markPending,
+                  event,
+                );
               }}
               onKeyDown={(event) => onSegmentKeyDown(event, index)}
             >

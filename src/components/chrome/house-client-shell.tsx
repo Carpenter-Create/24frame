@@ -15,6 +15,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
+  HOUSE_BLANK_OUTLET_RETRY_MS,
   HOUSE_CLIENT_SHELL,
   houseApplyCachedChild,
   houseBlankOutlet,
@@ -31,6 +32,7 @@ import {
   houseRememberScroll,
   houseScreenKey,
   houseShouldClientNavigate,
+  houseSocialHomePanelHop,
   houseSyncPainted,
   parseHouseHref,
 } from "@/lib/house-client-shell";
@@ -151,6 +153,10 @@ function HousePathProviderCore({
         });
         if (hop === "next") return false;
         if (hop === "stay") return true;
+        if (houseSocialHomePanelHop(href, next)) {
+          setOwnedHref(next);
+          return true;
+        }
         if (hop === "refresh-next") {
           setOwnedHref(null);
           router.refresh();
@@ -224,16 +230,17 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   const nextKey = house?.nextKey ?? houseScreenKey(nextPath, house?.nextSearch ?? "");
   const [store, setStore] = useState<ScreenStore>(EMPTY_STORE);
   const scrollRef = useRef<string | null>(null);
-  const refreshSent = useRef<string | null>(null);
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
-  const [acceptKey, setAcceptKey] = useState<string | null>(null);
   const [registryBound, setRegistryBound] = useState(false);
 
   // `houseApplyCachedChild` decides staleness from the committed guard
   // on this render. setState is only the record for the next pass.
   const [childSeen, setChildSeen] = useState<HouseChildSeen | null>(null);
-  const acceptStale = acceptKey === activeKey && activeKey === nextKey;
+  // A blank outlet revalidates first. The next kick treats an unchanged
+  // tree as this URL's screen so the retry does not run forever.
+  const [settledKey, setSettledKey] = useState<string | null>(null);
+  const acceptStale = settledKey === activeKey && activeKey === nextKey;
   const applied = houseApplyCachedChild({
     seen: childSeen,
     nextKey,
@@ -246,8 +253,8 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
     acceptStale,
   });
   if (applied.seen !== childSeen) setChildSeen(applied.seen);
-  if (acceptKey !== null && (!acceptStale || applied.displayKey !== null || applied.showIngress)) {
-    setAcceptKey(null);
+  if (settledKey !== null && (applied.displayKey !== null || applied.showIngress || !acceptStale)) {
+    setSettledKey(null);
   }
   const nextStore: ScreenStore =
     applied.nodes === store.nodes && applied.order === store.order
@@ -269,26 +276,19 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   useEffect(() => {
     const action = houseBlankOutlet(displayKey, showIngress, activeKey, nextKey);
     if (action === "none") return;
-    if (action === "load") {
-      const token = `load:${activeKey}`;
-      if (refreshSent.current === token) return;
-      refreshSent.current = token;
-      if (house?.href) router.push(house.href);
-      return;
-    }
-    const refreshTimer = window.setTimeout(() => {
-      if (refreshSent.current === activeKey) return;
-      refreshSent.current = activeKey;
+    let kicks = 0;
+    const kick = () => {
+      if (action === "load") {
+        if (house?.href) router.push(house.href);
+        return;
+      }
+      kicks += 1;
+      if (kicks > 1) setSettledKey(activeKey);
       router.refresh();
-    }, 100);
-    const acceptTimer = window.setTimeout(() => {
-      refreshSent.current = `accept:${activeKey}`;
-      setAcceptKey(activeKey);
-    }, 200);
-    return () => {
-      window.clearTimeout(refreshTimer);
-      window.clearTimeout(acceptTimer);
     };
+    kick();
+    const retry = window.setInterval(kick, HOUSE_BLANK_OUTLET_RETRY_MS);
+    return () => window.clearInterval(retry);
   }, [activeKey, displayKey, house?.href, nextKey, router, showIngress]);
 
   useEffect(() => {
