@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { SOCIAL } from "@/lib/social";
@@ -28,6 +29,9 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
   signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
+vi.mock("@/lib/s3-education", () => ({
+  signedEducationCoverUrls: vi.fn(async () => new Map()),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn().mockResolvedValue({
@@ -108,7 +112,9 @@ describe("Social Explore", () => {
     expect(src).toContain("SocialDesktopForYouSlot");
     expect(src).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(src).not.toContain("SocialForYouRail");
-    expect(src).not.toContain("signSocialForYouCourseCovers");
+    expect(src).toContain('from "@/components/social/social-for-you-covers"');
+    expect(src).toContain("signCourseCovers={signSocialForYouCourseCovers}");
+    expect(src).toContain('export const runtime = "nodejs"');
     expect(src).not.toContain("SocialLensRow");
     expect(src).not.toContain("SocialSuggestedPeople");
     expect(src).not.toContain("loadSuggestedPeople");
@@ -204,5 +210,45 @@ describe("Social Explore", () => {
     expect(html).not.toContain("data-social-profile-play");
     expect(html).not.toContain("data-social-for-you-people");
     expect(html).not.toContain("data-social-person-row");
+  });
+
+  it("paints the signed For You course cover through the shared signer", async () => {
+    const course = {
+      id: "c-stewardship",
+      slug: "the-stewardship-of-music",
+      title: "The Stewardship of Music",
+      description: null,
+      cover_key: "covers/stewardship.jpg",
+      is_flagship_free: false,
+      price_cents: null,
+      catalog_code: "EDU-MUSIC",
+      status: "published" as const,
+      position: 1,
+      instructor_id: null,
+      created_at: "2026-09-01T12:00:00.000Z",
+    };
+    const coverUrl = "https://cover.example/stewardship.jpg";
+    vi.mocked(signedEducationCoverUrls).mockResolvedValueOnce(new Map([[course.id, coverUrl]]));
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "courses") {
+          const chain = emptyQuery();
+          chain.range = vi.fn(async () => ({ data: [course], error: null }));
+          return chain;
+        }
+        return emptyQuery();
+      }),
+    } as never);
+
+    const html = await renderServerMarkup(
+      await SocialExplorePage({ searchParams: Promise.resolve({}) }),
+    );
+
+    expect(signedEducationCoverUrls).toHaveBeenCalledWith([course]);
+    expect(html).toContain("data-social-latest-course");
+    expect(html).toContain(`src="${coverUrl}"`);
+    expect(html).toContain('data-course-cover-tone="photo"');
+    expect(html).toContain(course.title);
+    expect(html).not.toContain("data-course-cover-orb");
   });
 });
