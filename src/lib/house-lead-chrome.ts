@@ -36,7 +36,7 @@
 // (agg-search-no). Logo inset does not drift when the search slot is
 // empty. Do not invent a fourth product or an Aggregation search.
 //
-// Desktop shell gutters (lock v1): start 32 / end 44 via
+// Desktop shell gutters (lock v2): start 32 / end 32 via
 // HOUSE_SHELL_GUTTER_X_CLASS. Not --content-inset. Phone left keeps
 // --space-6; phone right uses --chrome-gutter so the avatar is not
 // flush. Dest rail stays on --chrome-gutter — this lock does not
@@ -68,7 +68,7 @@ export const HOUSE_LEAD_SCROLL_CLASS =
 export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
 
 // Phone: --space-6 lead · --chrome-gutter trail. md+ uses the shell
-// gutter pair (32 / 44). Do not put overflow-hidden on this row (#412).
+// gutter pair (32 / 32). Do not put overflow-hidden on this row (#412).
 export const HOUSE_LEAD_PHONE_PAD_CLASS =
   `max-md:pl-[var(--space-6)] ${HOUSE_PHONE_TRAILING_GUTTER_CLASS}`;
 

@@ -125,19 +125,19 @@
   /* Alias of --sidebar-width. Not a second slot. Home does not use
      this as a canvas inset. Phone zeros the slot below. */
   --access-rail-width: var(--sidebar-width);
-  /* Home canvas at 1440: 32 shell start + 44 shell end + 1364
+  /* Home canvas at 1440: 32 shell start + 32 shell end + 1376
      column. Not the dest-rail slot. Not --page-max-width.
-     Shell pair: docs/design-locks/shell-desktop-horizontal-gutter-lock-v1.md */
-  --home-content-width: 1364px;
+     Shell pair: docs/design-locks/shell-desktop-horizontal-gutter-lock-v2.md */
+  --home-content-width: 1376px;
   /* Phone trail, dest-rail inset, centered canvas pad. Same value
      both sides. Not the desktop shell L/R pair. Not --content-inset
      (page reading measure). */
   --chrome-gutter: 16px;
   /* Desktop shell horizontal gutters. Viewport → logo ink 32.
-     Viewport → avatar ink 44. Full-bleed columns that share the
-     shell use the same pair. Not rounded to 48. */
+     Viewport → avatar ink 32. Same number both sides. Full-bleed
+     columns that share the shell use the same pair. Not 44. Not 48. */
   --shell-gutter-inline-start: 32px;
-  --shell-gutter-inline-end: 44px;
+  --shell-gutter-inline-end: 32px;
   --content-inset: 48px;
   --content-inset-tablet: 32px;
   --page-max-width: 67.5rem;   /* 1080px — the single centered page cap */
