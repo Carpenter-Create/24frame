@@ -89,7 +89,9 @@ describe("appearance copy", () => {
     expect(preferencesPane).not.toContain("AppearanceThemePicker");
     expect(preferencesPane).not.toContain("AppearanceThemeRow");
     expect(preferencesPane).not.toContain("AppearancePreferences");
-    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("THEME_STORAGE_KEY");
+    expect(sheetSrc).not.toContain("localStorage");
     expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS");
     expect(existsSync(join(here, "../app/(app)/settings/appearance/page.tsx"))).toBe(false);
     expect(existsSync(join(here, "../app/(app)/settings/preferences/theme/page.tsx"))).toBe(false);

@@ -10,31 +10,49 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { CaretRight, SignOut } from "@phosphor-icons/react";
+import { CaretRight, Gear, Moon, Question, SignOut, Sun } from "@phosphor-icons/react";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
+import { cn } from "@/lib/cn";
+import { applyDocumentThemePreference } from "@/lib/theme";
+import { useThemePreference } from "@/components/theme-toggle";
 import {
   AppSheetHairline,
   Close44,
+  IdentityAvatar,
   IdentityBlock,
   IdentityPhoto,
   SheetGroup,
   SheetGroupItem,
 } from "./house";
+import { HouseLink } from "./house-link";
 import {
+  ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS,
   ACCOUNT_MENU_DROPDOWN_ALIGN,
+  ACCOUNT_MENU_DROPDOWN_AVATAR_CLASS,
   ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS,
+  ACCOUNT_MENU_DROPDOWN_EMAIL_CLASS,
+  ACCOUNT_MENU_DROPDOWN_FOOTER_CLASS,
   ACCOUNT_MENU_DROPDOWN_HEAD_CLASS,
   ACCOUNT_MENU_DROPDOWN_HOST_CLASS,
-  ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS,
-  ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS,
-  ACCOUNT_MENU_DROPDOWN_PIN_CLASS,
-  ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS,
-  ACCOUNT_MENU_DROPDOWN_STAGE_CLASS,
+  ACCOUNT_MENU_DROPDOWN_ICON_CLASS,
+  ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS,
+  ACCOUNT_MENU_DROPDOWN_MANAGE_CLASS,
+  ACCOUNT_MENU_DROPDOWN_NAME_CLASS,
+  ACCOUNT_MENU_DROPDOWN_ROW_CLASS,
+  ACCOUNT_MENU_DROPDOWN_ROWS_CLASS,
   ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS,
+  ACCOUNT_MENU_DROPDOWN_SWITCH_OFF_CLASS,
+  ACCOUNT_MENU_DROPDOWN_SWITCH_ON_CLASS,
+  ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_CLASS,
+  ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_OFF_CLASS,
+  ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_ON_CLASS,
+  ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS,
+  ACCOUNT_MENU_DROPDOWN_VERSION_CLASS,
+  ACCOUNT_MENU_DROPDOWN_WHO_CLASS,
   accountMenuDropdownAlignEnd,
   type AccountMenuDropdownAlign,
   ACCOUNT_SHEET,
@@ -223,6 +241,177 @@ function accountMenuItemHref(item: UserMenuAction, pathname: string): string {
   return item.href;
 }
 
+function DesktopAccountMenuIcon({
+  icon: Glyph,
+}: {
+  icon: typeof Gear;
+}) {
+  return (
+    <Glyph
+      className={ACCOUNT_MENU_DROPDOWN_ICON_CLASS}
+      weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+      aria-hidden
+    />
+  );
+}
+
+function DesktopAccountMenuLink({
+  item,
+  label,
+  href,
+  pathname,
+  onClose,
+  icon,
+}: {
+  item: UserMenuAction["kind"];
+  label: string;
+  href: string;
+  pathname: string;
+  onClose: () => void;
+  icon: typeof Gear;
+}) {
+  return (
+    <HouseLink
+      href={href}
+      data-account-menu-row={item}
+      data-user-menu-item={item}
+      className={ACCOUNT_MENU_DROPDOWN_ROW_CLASS}
+      onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
+    >
+      <DesktopAccountMenuIcon icon={icon} />
+      {label}
+    </HouseLink>
+  );
+}
+
+function DesktopAccountMenuThemeRow() {
+  const preference = useThemePreference();
+  const dark = preference === "dark";
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={dark}
+      aria-label={USER_MENU.theme}
+      data-account-menu-row="theme"
+      data-user-menu-item="theme"
+      data-account-menu-theme-switch=""
+      className={ACCOUNT_MENU_DROPDOWN_ROW_CLASS}
+      onClick={() => {
+        applyDocumentThemePreference(dark ? "light" : "dark");
+      }}
+    >
+      <DesktopAccountMenuIcon icon={dark ? Sun : Moon} />
+      <span className="min-w-0 flex-1">{USER_MENU.theme}</span>
+      <span
+        aria-hidden
+        className={cn(
+          ACCOUNT_MENU_DROPDOWN_SWITCH_TRACK_CLASS,
+          dark ? ACCOUNT_MENU_DROPDOWN_SWITCH_ON_CLASS : ACCOUNT_MENU_DROPDOWN_SWITCH_OFF_CLASS,
+        )}
+      >
+        <span
+          className={cn(
+            ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_CLASS,
+            dark
+              ? ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_ON_CLASS
+              : ACCOUNT_MENU_DROPDOWN_SWITCH_THUMB_OFF_CLASS,
+          )}
+        />
+      </span>
+    </button>
+  );
+}
+
+function DesktopLogOutRow({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      type="button"
+      data-account-menu-row="logOut"
+      data-user-menu-item="logOut"
+      className={ACCOUNT_MENU_DROPDOWN_LOGOUT_CLASS}
+      onClick={() => {
+        onClose();
+        void signOut();
+      }}
+    >
+      <DesktopAccountMenuIcon icon={SignOut} />
+      {USER_MENU.logOut}
+    </button>
+  );
+}
+
+function DesktopAccountMenuFace({
+  email,
+  name,
+  photoUrl,
+  pathname,
+  onClose,
+}: {
+  email: string;
+  name?: string | null;
+  photoUrl?: string | null;
+  pathname: string;
+  onClose: () => void;
+}) {
+  const identity = accountSheetIdentity(email, name, photoUrl);
+  const settingsHref = settingsLandHref(pathname);
+  return (
+    <>
+      <div data-account-menu-accent="" className={ACCOUNT_MENU_DROPDOWN_ACCENT_CLASS} />
+      <div data-account-menu-head="" className={ACCOUNT_MENU_DROPDOWN_HEAD_CLASS}>
+        <IdentityAvatar
+          avatarInitial={identity.avatarInitial}
+          photoUrl={identity.photoUrl}
+          className={ACCOUNT_MENU_DROPDOWN_AVATAR_CLASS}
+        />
+        <div className={ACCOUNT_MENU_DROPDOWN_WHO_CLASS}>
+          <p data-identity-name="" className={ACCOUNT_MENU_DROPDOWN_NAME_CLASS}>
+            {identity.name}
+          </p>
+          <p data-identity-email="" className={ACCOUNT_MENU_DROPDOWN_EMAIL_CLASS}>
+            {identity.email}
+          </p>
+          <HouseLink
+            href={USER_MENU.profileHref}
+            data-account-menu-manage=""
+            className={ACCOUNT_MENU_DROPDOWN_MANAGE_CLASS}
+            onClick={
+              destinationClickClosesSheet(pathname, USER_MENU.profileHref) ? onClose : undefined
+            }
+          >
+            {USER_MENU.manageAccount}
+          </HouseLink>
+        </div>
+      </div>
+      <AppSheetHairline data-account-menu-head-rule="" />
+      <div data-account-menu-rows="" className={ACCOUNT_MENU_DROPDOWN_ROWS_CLASS}>
+        {ACCOUNT_SHEET_ITEMS.map((item) =>
+          item.kind === "theme" ? (
+            <DesktopAccountMenuThemeRow key={item.kind} />
+          ) : (
+            <DesktopAccountMenuLink
+              key={item.kind}
+              item={item.kind}
+              label={item.label}
+              href={item.kind === "settings" ? settingsHref : item.href}
+              pathname={pathname}
+              onClose={onClose}
+              icon={item.kind === "settings" ? Gear : Question}
+            />
+          ),
+        )}
+        <DesktopLogOutRow onClose={onClose} />
+      </div>
+      <div data-account-menu-footer="" className={ACCOUNT_MENU_DROPDOWN_FOOTER_CLASS}>
+        <p data-account-menu-version="" className={ACCOUNT_MENU_DROPDOWN_VERSION_CLASS}>
+          {userMenuVersion()}
+        </p>
+      </div>
+    </>
+  );
+}
+
 function AccountMenuGroups({
   pathname,
   onClose,
@@ -275,39 +464,24 @@ function AccountMenuBody({
   variant: "sheet" | "dropdown";
 }) {
   const identity = accountSheetIdentity(email, name, photoUrl);
-  const stacked = variant === "dropdown";
+  if (variant === "dropdown") {
+    return (
+      <DesktopAccountMenuFace
+        email={email}
+        name={name}
+        photoUrl={photoUrl}
+        pathname={pathname}
+        onClose={onClose}
+      />
+    );
+  }
   const items = (
     <AccountMenuGroups
       pathname={pathname}
       onClose={onClose}
-      items={stacked ? ACCOUNT_SHEET_ITEMS : ACCOUNT_SHEET_PHONE_ITEMS}
+      items={ACCOUNT_SHEET_PHONE_ITEMS}
     />
   );
-
-  if (stacked) {
-    return (
-      <>
-        <MenuSurfaceAccent />
-        <div data-account-menu-stage="" className={ACCOUNT_MENU_DROPDOWN_STAGE_CLASS}>
-          <div data-account-sheet-head="" className={ACCOUNT_MENU_DROPDOWN_HEAD_CLASS}>
-            <IdentityBlock
-              avatarInitial={identity.avatarInitial}
-              photoUrl={identity.photoUrl}
-              name={identity.name}
-              email={identity.email}
-              className={ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS}
-            />
-          </div>
-          <AppSheetHairline data-account-sheet-rule="" />
-          <div data-account-sheet-scroll="" className={ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS}>
-            {items}
-          </div>
-        </div>
-        <div data-account-menu-leftover="" className={ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS} />
-        <AccountMenuPin onClose={onClose} className={ACCOUNT_MENU_DROPDOWN_PIN_CLASS} />
-      </>
-    );
-  }
 
   return (
     <>
@@ -394,18 +568,12 @@ export function MobileAccountMenu({
   );
 }
 
-// Desktop 629:795 — same destinations as mobile (Settings,
-// Theme, Get Help). 264. Height is
-// relative to the stack (h-auto hug). Leftover last-item →
-// Log out is 24 (house --space-6). The 24 adds to the stack.
-// Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672
-// floor. Align-end to the avatar (right edge flush). 8px under
-// the trigger. Close killed. Stacked identity. 24 pad.
-// Inset Settings + Theme, then Get Help. No leftover grow. Pin
-// Log out, hairline, footer as siblings.
-// Hairline only under Log out. Log out → hairline 16. Hairline →
-// footer 16. Do not hug the rule. Footer → bottom 24. Not a 90%
-// sheet. Not a tall right takeover.
+// Desktop account MenuSurface. Coinbase grammar in
+// docs/design-locks/desktop-avatar-menu-coinbase-lock-v1.md.
+// 280. Radius 12. Full-width Sporty Blue bar, 4px. Horizontal
+// identity. Flat rows. Danger Log out. The sheet above stays
+// Family A. Close killed. Align-end. 8px under the
+// trigger. Content hug. Not a 90% sheet.
 export function DesktopAccountMenu({
   email,
   name,

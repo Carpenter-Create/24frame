@@ -122,7 +122,7 @@ describe("UserMenu close control", () => {
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
     expect(sheetSrc).toContain("<AccountMenuDropdown");
     expect(sheetSrc).toContain("<AccountSheet");
-    expect(sheetSrc).toContain("629:795");
+    expect(sheetSrc).toContain("desktop-avatar-menu-coinbase-lock-v1.md");
     expect(sheetSrc).toContain("537:557");
     expect(menuSrc).not.toContain("data-account-sheet-close");
     expect(menuSrc).not.toContain("data-mobile-nav-sheet");
@@ -165,6 +165,8 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).not.toContain('setFace("workspace")');
     expect(sheetSrc).not.toContain("onUserMenuAppearance");
     expect(sheetSrc).not.toContain("toggleDocumentTheme");
+    expect(sheetSrc).toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("THEME_STORAGE_KEY");
     expect(sheetSrc).not.toContain("ThemeGlyph");
     expect(sheetSrc).not.toContain("ThemeToggle");
     expect(sheetSrc).not.toContain("/account/appearance");
@@ -235,13 +237,14 @@ describe("UserMenu actions", () => {
     expect(sheetSrc).not.toContain("admin@ccbfg.com");
   });
 
-  it("keeps the theme picker off the avatar sheet — Theme drills to /settings/theme", () => {
+  it("keeps the theme picker off the avatar sheet — desktop switch uses gc-theme", () => {
     expect(sheetSrc).toContain("data-account-menu-face");
     expect(sheetSrc).not.toContain("AccountSheetAppearance");
     expect(sheetSrc).not.toContain("AccountAppearanceRow");
     expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS.map");
     expect(sheetSrc).not.toContain("AppearanceCheck");
-    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).toContain("applyDocumentThemePreference");
+    expect(sheetSrc).toContain("data-account-menu-theme-switch");
     expect(sheetSrc).not.toContain("CaretLeft");
     expect(sheetSrc).not.toContain("AccountBackChevron");
     expect(sheetSrc).not.toContain("APPEARANCE.back");
