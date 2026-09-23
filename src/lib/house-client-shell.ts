@@ -1,4 +1,3 @@
-import { SOCIAL_ACTIVITY_PILL_PARAM } from "@/lib/social-activity";
 import {
   SOCIAL_CREATE_KIND_PARAM,
   SOCIAL_FOLLOWS_SEARCH_PARAM,
@@ -64,8 +63,11 @@ export function houseScreenQueryNames(pathname: string): readonly string[] {
     return ["q"];
   }
   if (path === SOCIAL_ROUTES.create) return [SOCIAL_CREATE_KIND_PARAM];
+  // Own profile and /social/u/[handle] keep ?tab= and ?activity= in the
+  // address bar, but those params are client panel state on one mounted
+  // screen. A new cache slot would RSC-remount the face and rails.
   if (path === SOCIAL_ROUTES.profile || /^\/social\/u\/[^/]+$/.test(path)) {
-    return [SOCIAL_PROFILE_TAB_PARAM, SOCIAL_ACTIVITY_PILL_PARAM];
+    return [];
   }
   if (path.startsWith("/social/u/") && path.endsWith("/follows")) {
     return [SOCIAL_PROFILE_TAB_PARAM, SOCIAL_FOLLOWS_SEARCH_PARAM];
@@ -74,8 +76,18 @@ export function houseScreenQueryNames(pathname: string): readonly string[] {
   return [];
 }
 
+function housePathname(pathname: string): string {
+  return pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname || "/";
+}
+
+/** Path plus the raw query. Stay / owned-href equality uses this, not the screen key. */
+export function houseExactHref(href: string): string {
+  const { pathname, search } = parseHouseHref(href);
+  return `${housePathname(pathname)}${search}`;
+}
+
 export function houseScreenKey(pathname: string, search = ""): string {
-  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname || "/";
+  const path = housePathname(pathname);
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const picked = new URLSearchParams();
   for (const name of houseScreenQueryNames(path)) {
@@ -124,17 +136,24 @@ export function houseShouldClientNavigate(
 export type HouseNavHop = "stay" | "owned" | "refresh-next" | "next";
 
 /**
- * Dock tap while a warm hop has the App Router pathname stuck on the
- * previous screen. A cached dest switches in place. An uncached dest
- * whose Next pathname already matches must refresh — a plain Link
- * click is a no-op. Otherwise Next navigates.
+ * Exact href decides stay. Same screen key with a different href
+ * (profile ?tab= or activity pill) pushStates on the mounted screen.
+ * A different cached screen is owned. An uncached dest whose Next
+ * address already matches must refresh — a plain Link click is a no-op.
+ * Otherwise Next navigates.
  */
 export function houseNavHop(input: {
   cached: boolean;
+  /** Exact href match with the address the shell is showing. */
   ownedIsDest: boolean;
+  /** Exact href match with the Next address. */
   nextIsDest: boolean;
+  /** Dest shares the active screen key. */
+  sameScreen?: boolean;
 }): HouseNavHop {
-  if (input.cached) return input.ownedIsDest ? "stay" : "owned";
+  if (input.ownedIsDest) return "stay";
+  if (input.sameScreen) return "owned";
+  if (input.cached) return "owned";
   if (input.nextIsDest && !input.ownedIsDest) return "refresh-next";
   return "next";
 }
@@ -164,8 +183,11 @@ export function houseReconcileOwnedHref(
   previousNextHref: string,
 ): string | null {
   if (!ownedHref) return null;
-  if (houseHrefKey(ownedHref) === houseHrefKey(nextHref)) return null;
-  if (houseHrefKey(nextHref) !== houseHrefKey(previousNextHref)) return null;
+  // Caught up to the exact address, including a profile tab query.
+  // Screen-key equality is not enough: ?tab= must stay owned until Next
+  // actually shows that href, or the client panel snaps back.
+  if (houseExactHref(ownedHref) === houseExactHref(nextHref)) return null;
+  if (houseExactHref(nextHref) !== houseExactHref(previousNextHref)) return null;
   return ownedHref;
 }
 

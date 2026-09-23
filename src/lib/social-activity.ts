@@ -3,6 +3,8 @@ import {
   SOCIAL,
   SOCIAL_PROFILE_DEFAULT_TAB,
   SOCIAL_PROFILE_TAB_PARAM,
+  parseSocialProfileTab,
+  resolveSocialProfileTab,
   socialProfileTabHref,
   type SocialProfileTab,
 } from "@/lib/social";
@@ -92,6 +94,54 @@ export function socialProfileTabSearch(
     [SOCIAL_PROFILE_TAB_PARAM]: SOCIAL_PROFILE_DEFAULT_TAB,
     [SOCIAL_ACTIVITY_PILL_PARAM]: activity,
   };
+}
+
+export function readSocialProfileLocation(search: string): {
+  tab: SocialProfileTab;
+  activity: SocialActivityPill;
+} {
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  return {
+    tab: parseSocialProfileTab(params.get(SOCIAL_PROFILE_TAB_PARAM)),
+    activity: parseSocialActivityPill(params.get(SOCIAL_ACTIVITY_PILL_PARAM)),
+  };
+}
+
+/**
+ * Owned house search wins so a ?tab= pushState swaps the panel.
+ * Before the shell owns the address, an empty Next search is the
+ * Suspense fallback — keep the RSC seed so a deep link paints the right tab.
+ */
+export function resolveSocialProfileLocation(input: {
+  owned: boolean;
+  search: string;
+  nextSearch: string;
+  seedTab: SocialProfileTab;
+  seedActivity: SocialActivityPill;
+  tabs?: readonly SocialProfileTab[];
+}): { tab: SocialProfileTab; activity: SocialActivityPill } {
+  const source = input.owned ? input.search : input.nextSearch.length > 0 ? input.nextSearch : null;
+  const read =
+    source === null
+      ? { tab: input.seedTab, activity: input.seedActivity }
+      : readSocialProfileLocation(source);
+  return {
+    tab: resolveSocialProfileTab(read.tab, input.tabs),
+    activity: read.activity,
+  };
+}
+
+/** Ids for the Images and Videos pills. Both come from the Posts page. */
+export function socialActivityMediaPostIds(
+  posts: readonly { id: string; media: unknown }[],
+): { imageIds: string[]; videoIds: string[] } {
+  const imageIds: string[] = [];
+  const videoIds: string[] = [];
+  for (const post of posts) {
+    if (socialPostMatchesActivityMedia(post.media, "images")) imageIds.push(post.id);
+    if (socialPostMatchesActivityMedia(post.media, "videos")) videoIds.push(post.id);
+  }
+  return { imageIds, videoIds };
 }
 
 /** Image-only / video-only. Mixed rolls stay on the Posts pill. */

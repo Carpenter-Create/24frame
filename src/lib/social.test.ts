@@ -679,12 +679,15 @@ describe("social writes stay on the live spine", () => {
     expect(groupPost).not.toContain("signedSocialMedia");
     const own = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
     const pub = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    const panels = readFileSync("src/components/social/social-profile-tab-panels.tsx", "utf8");
     expect(own).toContain("loadAuthorActivityPosts");
-    expect(own).toContain("SocialActivityHistory");
+    expect(own).toContain("SocialProfileTabPanels");
+    expect(panels).toContain("SocialActivityHistory");
     expect(own).not.toContain("SocialAuthorHistory");
     expect(own).toContain("isLegacySocialProfilePostsTab");
     expect(pub).toContain("loadAuthorActivityPosts");
-    expect(pub).toContain("SocialActivityHistory");
+    expect(pub).toContain("SocialProfileTabPanels");
+    expect(panels).toContain("SocialActivityHistory");
     expect(pub).not.toContain("SocialAuthorHistory");
     expect(pub).toContain("isLegacySocialProfilePostsTab");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
