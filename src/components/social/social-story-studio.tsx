@@ -4,15 +4,34 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import Link from "next/link";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { SocialAvatar } from "./social-avatar";
 import { SocialIcon } from "./social-icon";
 import {
   createSocialStory,
   presignSocialMediaUpload,
 } from "@/app/(app)/social/actions";
 import {
-  SOCIAL_STORY_PICKER_CLASS,
+  SOCIAL_STORY_CREATE_BACK_CLASS,
+  SOCIAL_STORY_CREATE_CARDS_CLASS,
+  SOCIAL_STORY_CREATE_CLOSE_CLASS,
+  SOCIAL_STORY_CREATE_HOST_CLASS,
+  SOCIAL_STORY_CREATE_ICON_WELL_CLASS,
+  SOCIAL_STORY_CREATE_IDENTITY_CLASS,
+  SOCIAL_STORY_CREATE_LABEL_CLASS,
+  SOCIAL_STORY_CREATE_NAME_CLASS,
+  SOCIAL_STORY_CREATE_RAIL_CLASS,
+  SOCIAL_STORY_CREATE_SECONDARY_CLASS,
+  SOCIAL_STORY_CREATE_SECONDARY_COLUMN_CLASS,
+  SOCIAL_STORY_CREATE_STAGE_CLASS,
+  SOCIAL_STORY_CREATE_TITLE_CLASS,
+  SOCIAL_STORY_PHOTO_CARD_CLASS,
   SOCIAL_STORY_PICKER_ROW_CLASS,
   SOCIAL_STORY_PICKER_WELL_CLASS,
+  SOCIAL_STORY_SHARE_ACTIONS_CLASS,
+  SOCIAL_STORY_SHARE_POST_CLASS,
+  SOCIAL_STORY_SHARE_PREVIEW_CLASS,
+  SOCIAL_STORY_SHARE_RETAKE_CLASS,
+  SOCIAL_STORY_VIDEO_CARD_CLASS,
   SOCIAL_STORY_POSTED_CLASS,
   SOCIAL_STORY_REC_PILL_CLASS,
   SOCIAL_STORY_RECORD_CLASS,
@@ -26,17 +45,20 @@ import {
   socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
 import {
-  SOCIAL_ICON_SIZE_STORY_FOOTNOTE,
   SOCIAL_ICON_SIZE_STORY_PICKER,
-  SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE,
   SOCIAL_ICON_SIZE_STORY_PLAY,
   SOCIAL_ICON_SIZE_STORY_POSTED,
   SOCIAL_ICON_SIZE_STORY_STUDIO,
 } from "@/lib/social-icons";
 import {
+  SOCIAL_IMAGE_CONTENT_TYPES,
+  SOCIAL_IMAGE_MAX_BYTES,
   SOCIAL_VIDEO_CONTENT_TYPES,
   SOCIAL_VIDEO_MAX_BYTES,
+  socialMediaKindFor,
+  type SocialMediaContentType,
   type SocialMediaItem,
+  type SocialMediaKind,
   type SocialVideoContentType,
 } from "@/lib/social-media";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
@@ -53,19 +75,20 @@ import {
   type StoryStudioFacing,
 } from "@/lib/social-story-recorder";
 
-type StudioPhase = "picker" | "preview" | "recording" | "review" | "posted";
+type StudioPhase = "stage" | "photo" | "video" | "preview" | "recording" | "review" | "posted";
 
 type ReviewClip = {
   file: File;
   url: string;
-  contentType: SocialVideoContentType;
+  contentType: SocialMediaContentType;
+  kind: SocialMediaKind;
 };
 
 function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
 }
 
-async function uploadStoryVideo(file: File): Promise<{ item?: SocialMediaItem; error?: string }> {
+async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; error?: string }> {
   const body = new FormData();
   body.set("content_type", file.type);
   body.set("byte_length", String(file.size));
@@ -80,19 +103,29 @@ async function uploadStoryVideo(file: File): Promise<{ item?: SocialMediaItem; e
     body: file,
   });
   if (!put.ok) return { error: SOCIAL.home.uploadFailed };
+  const kind = socialMediaKindFor(file.type);
+  if (kind !== "image" && kind !== "video") return { error: SOCIAL.home.uploadFailed };
   return {
     item: {
-      kind: "video",
+      kind,
       key: signed.key,
-      contentType: signed.contentType as SocialVideoContentType,
+      contentType: signed.contentType as SocialMediaContentType,
     },
   };
 }
 
-export function SocialStoryCompose() {
+export function SocialStoryCompose({
+  displayName = SOCIAL.stories.you,
+  photoUrl = null,
+}: {
+  displayName?: string;
+  photoUrl?: string | null;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reviewRef = useRef<HTMLVideoElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const photoLibraryRef = useRef<HTMLInputElement>(null);
+  const photoCaptureRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -106,7 +139,7 @@ export function SocialStoryCompose() {
   const liveRef = useRef(0);
   const postRef = useRef(0);
 
-  const [phase, setPhase] = useState<StudioPhase>("picker");
+  const [phase, setPhase] = useState<StudioPhase>("stage");
   const [facing, setFacing] = useState<StoryStudioFacing>("user");
   const [error, setError] = useState("");
   const [clock, setClock] = useState("0:00");
@@ -227,12 +260,12 @@ export function SocialStoryCompose() {
     try {
       const opened = await attachPreview(facing, live);
       if (!opened && storyStudioIsLive(liveRef.current, live)) {
-        setPhase("picker");
+        setPhase("video");
       }
     } catch {
       if (!storyStudioIsLive(liveRef.current, live)) return;
       releasePreview();
-      setPhase("picker");
+      setPhase("video");
       setError(SOCIAL.stories.permission);
     }
   }
@@ -305,7 +338,7 @@ export function SocialStoryCompose() {
       if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
       const url = URL.createObjectURL(file);
       clipUrlRef.current = url;
-      setClip({ file, url, contentType });
+      setClip({ file, url, contentType, kind: "video" });
       setPlaying(false);
       setPhase("review");
     };
@@ -351,39 +384,45 @@ export function SocialStoryCompose() {
     setPosting(false);
     releasePreview();
     releaseClip();
-    setPhase("picker");
+    setPhase("video");
   }
 
   function retake() {
     if (posting) return;
+    const image = clip?.kind === "image";
     postRef.current = nextStoryStudioLive(postRef.current);
     releaseClip();
     setError("");
+    if (image) {
+      setPhase("photo");
+      return;
+    }
     setPhase("preview");
     if (streamRef.current) return;
     const live = liveRef.current;
     void attachPreview(facing, live).catch(() => {
       if (!storyStudioIsLive(liveRef.current, live)) return;
       setError(SOCIAL.stories.permission);
-      setPhase("picker");
+      setPhase("video");
     });
   }
 
-  async function onPick(files: FileList | null) {
+  function onPick(files: FileList | null, expected: SocialMediaKind, input: HTMLInputElement | null) {
+    if (input) input.value = "";
     const file = files?.[0];
-    if (fileRef.current) fileRef.current.value = "";
     if (!file) return;
     setError("");
-    const type = file.type as SocialVideoContentType;
-    if (!(SOCIAL_VIDEO_CONTENT_TYPES as readonly string[]).includes(type)) {
-      setError(SOCIAL.stories.mediaType);
+    const kind = socialMediaKindFor(file.type);
+    if (kind !== expected) {
+      setError(expected === "image" ? SOCIAL.stories.photoMediaType : SOCIAL.stories.mediaType);
       return;
     }
     if (file.size <= 0) {
-      setError(SOCIAL.stories.mediaMissing);
+      setError(expected === "image" ? SOCIAL.stories.photoMissing : SOCIAL.stories.mediaMissing);
       return;
     }
-    if (file.size > SOCIAL_VIDEO_MAX_BYTES) {
+    const max = expected === "image" ? SOCIAL_IMAGE_MAX_BYTES : SOCIAL_VIDEO_MAX_BYTES;
+    if (file.size > max) {
       setError(SOCIAL.home.mediaTooLarge);
       return;
     }
@@ -391,7 +430,12 @@ export function SocialStoryCompose() {
     if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
     const url = URL.createObjectURL(file);
     clipUrlRef.current = url;
-    setClip({ file, url, contentType: type });
+    setClip({
+      file,
+      url,
+      contentType: file.type as SocialMediaContentType,
+      kind,
+    });
     setPlaying(false);
     setPhase("review");
   }
@@ -402,7 +446,7 @@ export function SocialStoryCompose() {
     postRef.current = postId;
     setError("");
     setPosting(true);
-    const uploaded = await uploadStoryVideo(clip.file);
+    const uploaded = await uploadStoryMedia(clip.file);
     if (!storyStudioIsLive(postRef.current, postId)) return;
     if (uploaded.error || !uploaded.item) {
       setPosting(false);
@@ -424,80 +468,236 @@ export function SocialStoryCompose() {
   }
 
   const accept = SOCIAL_VIDEO_CONTENT_TYPES.join(",");
+  const photoAccept = SOCIAL_IMAGE_CONTENT_TYPES.join(",");
+  const videoStudio =
+    phase === "preview" ||
+    phase === "recording" ||
+    (phase === "review" && clip?.kind === "video");
 
   return (
-    <div data-social-story-compose="">
-      {phase === "picker" ? (
-        <div
-          data-social-story-form=""
-          data-social-story-picker=""
-          className={SOCIAL_STORY_PICKER_CLASS}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h2 className="t-body font-semibold text-ink">{SOCIAL.stories.createCta}</h2>
-              <p className="t-body-sm text-ink-2">{SOCIAL.stories.pickerHint}</p>
-            </div>
+    <div data-social-story-compose="" className={videoStudio ? undefined : SOCIAL_STORY_CREATE_HOST_CLASS}>
+      {videoStudio ? null : (
+        <>
+          <aside data-social-story-rail="" className={SOCIAL_STORY_CREATE_RAIL_CLASS}>
             <Link
               href={SOCIAL_ROUTES.home}
-              data-social-story-picker-close=""
+              data-social-story-close=""
               aria-label={SOCIAL.stories.close}
-              className="flex size-8 items-center justify-center rounded-full bg-surface-muted text-ink-2"
+              className={SOCIAL_STORY_CREATE_CLOSE_CLASS}
             >
-              <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE} />
+              <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
             </Link>
+            <h2 className={SOCIAL_STORY_CREATE_TITLE_CLASS}>{SOCIAL.stories.yourStory}</h2>
+            <div className={SOCIAL_STORY_CREATE_IDENTITY_CLASS}>
+              <SocialAvatar name={displayName} photoUrl={photoUrl} size="sm" className="size-10" />
+              <p className={SOCIAL_STORY_CREATE_NAME_CLASS}>{displayName}</p>
+            </div>
+          </aside>
+          <div
+            data-social-story-stage=""
+            data-social-story-face={phase}
+            className={SOCIAL_STORY_CREATE_STAGE_CLASS}
+          >
+            {phase === "stage" ? (
+              <div className={SOCIAL_STORY_CREATE_CARDS_CLASS}>
+                <button
+                  type="button"
+                  data-social-story-photo=""
+                  className={SOCIAL_STORY_PHOTO_CARD_CLASS}
+                  onClick={() => {
+                    setError("");
+                    setPhase("photo");
+                  }}
+                >
+                  <span className={SOCIAL_STORY_CREATE_ICON_WELL_CLASS}>
+                    <SocialIcon name="image" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                  </span>
+                  <span className={SOCIAL_STORY_CREATE_LABEL_CLASS}>{SOCIAL.stories.photoCard}</span>
+                </button>
+                <button
+                  type="button"
+                  data-social-story-video=""
+                  className={SOCIAL_STORY_VIDEO_CARD_CLASS}
+                  onClick={() => {
+                    setError("");
+                    setPhase("video");
+                  }}
+                >
+                  <span className={SOCIAL_STORY_CREATE_ICON_WELL_CLASS}>
+                    <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                  </span>
+                  <span className={SOCIAL_STORY_CREATE_LABEL_CLASS}>{SOCIAL.stories.videoCard}</span>
+                </button>
+              </div>
+            ) : null}
+
+            {phase === "photo" ? (
+              <div className={SOCIAL_STORY_CREATE_SECONDARY_CLASS}>
+                <div className={SOCIAL_STORY_CREATE_SECONDARY_COLUMN_CLASS}>
+                  <button
+                    type="button"
+                    data-social-story-back=""
+                    className={SOCIAL_STORY_CREATE_BACK_CLASS}
+                    onClick={() => {
+                      setError("");
+                      setPhase("stage");
+                    }}
+                  >
+                    {SOCIAL.stories.back}
+                  </button>
+                  <h2 className="t-heading text-ink">{SOCIAL.stories.photoCard}</h2>
+                  <button
+                    type="button"
+                    data-social-story-photo-library=""
+                    className={SOCIAL_STORY_PICKER_ROW_CLASS}
+                    onClick={() => photoLibraryRef.current?.click()}
+                  >
+                    <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+                      <SocialIcon name="image" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block t-body font-semibold text-ink whitespace-normal break-words">
+                        {SOCIAL.stories.photoLibrary}
+                      </span>
+                      <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
+                        {SOCIAL.stories.photoLibraryHint}
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    data-social-story-photo-capture=""
+                    className={SOCIAL_STORY_PICKER_ROW_CLASS}
+                    onClick={() => photoCaptureRef.current?.click()}
+                  >
+                    <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+                      <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block t-body font-semibold text-ink whitespace-normal break-words">
+                        {SOCIAL.stories.photoCapture}
+                      </span>
+                      <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
+                        {SOCIAL.stories.photoCaptureHint}
+                      </span>
+                    </span>
+                  </button>
+                  {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+                </div>
+              </div>
+            ) : null}
+
+            {phase === "video" ? (
+              <div className={SOCIAL_STORY_CREATE_SECONDARY_CLASS}>
+                <div className={SOCIAL_STORY_CREATE_SECONDARY_COLUMN_CLASS}>
+                  <button
+                    type="button"
+                    data-social-story-back=""
+                    className={SOCIAL_STORY_CREATE_BACK_CLASS}
+                    onClick={() => {
+                      setError("");
+                      setPhase("stage");
+                    }}
+                  >
+                    {SOCIAL.stories.back}
+                  </button>
+                  <h2 className="t-heading text-ink">{SOCIAL.stories.videoCard}</h2>
+                  <button
+                    type="button"
+                    data-social-story-record=""
+                    className={SOCIAL_STORY_PICKER_ROW_CLASS}
+                    onClick={() => void openStudio()}
+                  >
+                    <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+                      <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block t-body font-semibold text-ink whitespace-normal break-words">
+                        {SOCIAL.stories.record}
+                      </span>
+                      <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
+                        {SOCIAL.stories.recordHint}
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    data-social-story-upload=""
+                    className={SOCIAL_STORY_PICKER_ROW_CLASS}
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+                      <SocialIcon name="upload-simple" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block t-body font-semibold text-ink whitespace-normal break-words">
+                        {SOCIAL.stories.upload}
+                      </span>
+                      <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
+                        {SOCIAL.stories.uploadHint}
+                      </span>
+                    </span>
+                  </button>
+                  {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+                </div>
+              </div>
+            ) : null}
+
+            {phase === "review" && clip?.kind === "image" ? (
+              <div className={SOCIAL_STORY_CREATE_SECONDARY_CLASS}>
+                <div className={SOCIAL_STORY_CREATE_SECONDARY_COLUMN_CLASS}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- local blob before the story share */}
+                  <img
+                    data-social-story-photo-preview=""
+                    src={clip.url}
+                    alt={SOCIAL.stories.photoCard}
+                    className={SOCIAL_STORY_SHARE_PREVIEW_CLASS}
+                  />
+                  <div className={SOCIAL_STORY_SHARE_ACTIONS_CLASS}>
+                    <button
+                      type="button"
+                      data-social-story-retake=""
+                      disabled={posting}
+                      className={SOCIAL_STORY_SHARE_RETAKE_CLASS}
+                      onClick={retake}
+                    >
+                      {SOCIAL.stories.retake}
+                    </button>
+                    <button
+                      type="button"
+                      data-social-story-post=""
+                      disabled={posting}
+                      className={SOCIAL_STORY_SHARE_POST_CLASS}
+                      onClick={() => void postClip()}
+                    >
+                      {posting ? SOCIAL.stories.posting : SOCIAL.stories.post}
+                    </button>
+                  </div>
+                  {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+                </div>
+              </div>
+            ) : null}
+
+            {phase === "posted" ? (
+              <div className="flex flex-1 items-center justify-center p-[var(--space-4)]">
+                <div data-social-story-posted="" className={SOCIAL_STORY_POSTED_CLASS}>
+                  <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
+                  <p className="t-title text-ink">{SOCIAL.stories.posted}</p>
+                  <p className="t-body-sm text-ink-2 whitespace-normal break-words">{SOCIAL.stories.postedHint}</p>
+                  <Link
+                    href={SOCIAL_ROUTES.home}
+                    className="inline-flex items-center justify-center rounded-full bg-accent px-[var(--space-6)] py-[var(--space-4)] t-body-sm font-semibold text-accent-contrast"
+                  >
+                    {SOCIAL.stories.viewStories}
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </div>
-          <button
-            type="button"
-            data-social-story-record=""
-            className={SOCIAL_STORY_PICKER_ROW_CLASS}
-            onClick={() => void openStudio()}
-          >
-            <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
-              <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
-            </span>
-            <span className="min-w-0">
-              <span className="block t-body font-semibold text-ink">{SOCIAL.stories.record}</span>
-              <span className="block t-body-sm text-ink-2">{SOCIAL.stories.recordHint}</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            data-social-story-upload=""
-            className={SOCIAL_STORY_PICKER_ROW_CLASS}
-            onClick={() => fileRef.current?.click()}
-          >
-            <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
-              <SocialIcon name="upload-simple" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
-            </span>
-            <span className="min-w-0">
-              <span className="block t-body font-semibold text-ink">{SOCIAL.stories.upload}</span>
-              <span className="block t-body-sm text-ink-2">{SOCIAL.stories.uploadHint}</span>
-            </span>
-          </button>
-          <p className="flex items-center justify-center gap-1.5 t-label text-ink-3">
-            <SocialIcon name="warning-circle" size={SOCIAL_ICON_SIZE_STORY_FOOTNOTE} />
-            {SOCIAL.stories.footnote}
-          </p>
-          {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-        </div>
-      ) : null}
+        </>
+      )}
 
-      {phase === "posted" ? (
-        <div data-social-story-posted="" className={SOCIAL_STORY_POSTED_CLASS}>
-          <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
-          <p className="t-title text-ink">{SOCIAL.stories.posted}</p>
-          <p className="t-body-sm text-ink-2">{SOCIAL.stories.postedHint}</p>
-          <Link
-            href={SOCIAL_ROUTES.home}
-            className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 t-body-sm font-semibold text-accent-contrast"
-          >
-            {SOCIAL.stories.viewStories}
-          </Link>
-        </div>
-      ) : null}
-
-      {phase === "preview" || phase === "recording" || phase === "review" ? (
+      {videoStudio ? (
         <div
           data-social-story-studio={phase}
           className={SOCIAL_STORY_STUDIO_CLASS}
@@ -632,14 +832,37 @@ export function SocialStoryCompose() {
         </div>
       ) : null}
 
-      <input
-        ref={fileRef}
-        type="file"
-        accept={accept}
-        className="sr-only"
-        aria-label={SOCIAL.stories.upload}
-        onChange={(e) => void onPick(e.target.files)}
-      />
+      {phase === "video" || videoStudio ? (
+        <input
+          ref={fileRef}
+          type="file"
+          accept={accept}
+          className="sr-only"
+          aria-label={SOCIAL.stories.upload}
+          onChange={(e) => onPick(e.target.files, "video", fileRef.current)}
+        />
+      ) : null}
+      {phase === "photo" || (phase === "review" && clip?.kind === "image") ? (
+        <>
+          <input
+            ref={photoLibraryRef}
+            type="file"
+            accept={photoAccept}
+            className="sr-only"
+            aria-label={SOCIAL.stories.photoLibrary}
+            onChange={(e) => onPick(e.target.files, "image", photoLibraryRef.current)}
+          />
+          <input
+            ref={photoCaptureRef}
+            type="file"
+            accept={photoAccept}
+            capture="environment"
+            className="sr-only"
+            aria-label={SOCIAL.stories.photoCapture}
+            onChange={(e) => onPick(e.target.files, "image", photoCaptureRef.current)}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

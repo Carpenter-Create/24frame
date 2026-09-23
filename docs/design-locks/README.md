@@ -21,3 +21,4 @@ Design locks land in this directory before CoS undrafts a UI pull request.
 - [`theme-chrome-avatar-only-lock-v1.md`](theme-chrome-avatar-only-lock-v1.md) — avatar Theme drill; header sun/moon removed
 - [`preferences-drill-nested-slugs-lock-v1.md`](preferences-drill-nested-slugs-lock-v1.md) — Preferences drill URLs nest under `/settings/preferences/<drill>`
 - [`social-home-activity-feed-lock-v1.md`](social-home-activity-feed-lock-v1.md) — Social Home is the live activity feed at `/social`
+- [`create-story-photo-video-fb-layout-lock-v1.1.md`](create-story-photo-video-fb-layout-lock-v1.1.md) — Create story photo + video stage at `/social/stories/new`

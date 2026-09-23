@@ -604,7 +604,8 @@ describe("AppShell /activity account chrome", () => {
     }
     expect(shellSrc).toContain("isAccountChromeNoRailPath");
     expect(shellSrc).toContain("homeChrome || accountChromeNoRail");
-    expect(shellSrc).toContain("{hideProductRail ? null : (");
+    expect(shellSrc).toContain("const hideDestRail = hideProductRail || storyCreateStage");
+    expect(shellSrc).toContain("{hideDestRail ? null : (");
     expect(shellSrc).toContain("settingsPage ? (");
     expect(shellSrc).toContain("<SettingsRail />");
     expect(shellSrc).not.toContain("activityPage ? (\n              <SettingsRail");
@@ -1172,6 +1173,19 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("h-dvh");
     expect(html).toContain("overflow-hidden");
     expect(html).toContain("overflow-y-auto");
+  });
+
+  it("drops the Social dest-rail on the create-story stage and keeps the house lead", () => {
+    navigation.pathname = "/social/stories/new";
+    const html = renderShell();
+    expect(html).toContain("data-social-workspace");
+    expect(html).toContain("data-house-lead");
+    expect(html).toContain("data-social-header-search");
+    expect(html).not.toContain("data-social-rail");
+    expect(html).not.toContain("data-app-rail");
+    expect(html).toContain("--sidebar-width:0px");
+    expect(html).toContain("flex min-h-full w-full flex-col");
+    expect(html).not.toContain("data-house-phone-bottom-nav");
   });
 
   it("paints one dest-rail width on every workspace that shows the rail", () => {

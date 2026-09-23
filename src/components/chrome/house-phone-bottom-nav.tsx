@@ -37,6 +37,7 @@ import {
   createSocialTabBarScrollTracker,
   stepSocialTabBarScroll,
 } from "@/lib/social-tab-bar-scroll";
+import { isSocialStoryCreatePath } from "@/lib/social";
 import { clampWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 
 // Prior Social float: hide on scroll-down, show on scroll-up.
@@ -94,12 +95,14 @@ export function HousePhoneBottomNav({
   const router = useRouter();
   const { activePath, markPending } = useHouseNavPending();
   const hidden = useHousePhoneBottomNavHidden(pathname);
-  const visible = housePhoneShowsBottomDests({
-    workspace,
-    homeOwned,
-    accountChrome,
-    coProductions,
-  });
+  const visible =
+    !isSocialStoryCreatePath(pathname) &&
+    housePhoneShowsBottomDests({
+      workspace,
+      homeOwned,
+      accountChrome,
+      coProductions,
+    });
   const items = housePhoneDockDestinations({ isGcStaff, workspace, homeOwned });
   const destWorkspace = homeOwned ? "aggregation" : workspace;
 

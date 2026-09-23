@@ -165,7 +165,7 @@ describe("posts.media persist shape", () => {
     });
   });
 
-  it("rejects image kinds on the stories lane and keeps posts open to stills", () => {
+  it("accepts one still or one video on the stories lane and keeps posts open to stills", () => {
     const storyImage = {
       kind: "image" as const,
       key: `stories/${USER}/${OBJECT}.jpg`,
@@ -181,45 +181,54 @@ describe("posts.media persist shape", () => {
       key: `posts/${USER}/${OBJECT}.jpg`,
       contentType: "image/jpeg" as const,
     };
-    expect(mediaItemsForInsert([storyImage], USER, "stories")).toEqual({ ok: false, error: "type" });
+    expect(mediaItemsForInsert([storyImage], USER, "stories")).toEqual({ ok: true, items: [storyImage] });
     expect(
       mediaItemsForInsert(
         [{ ...storyImage, key: `stories/${USER}/${OBJECT}.png`, contentType: "image/png" }],
         USER,
         "stories",
       ),
-    ).toEqual({ ok: false, error: "type" });
+    ).toEqual({
+      ok: true,
+      items: [{ ...storyImage, key: `stories/${USER}/${OBJECT}.png`, contentType: "image/png" }],
+    });
     expect(
       mediaItemsForInsert(
         [{ ...storyImage, key: `stories/${USER}/${OBJECT}.webp`, contentType: "image/webp" }],
         USER,
         "stories",
       ),
-    ).toEqual({ ok: false, error: "type" });
+    ).toEqual({
+      ok: true,
+      items: [{ ...storyImage, key: `stories/${USER}/${OBJECT}.webp`, contentType: "image/webp" }],
+    });
     expect(
       mediaItemsForInsert(
         [{ ...storyImage, key: `stories/${USER}/${OBJECT}.gif`, contentType: "image/gif" }],
         USER,
         "stories",
       ),
-    ).toEqual({ ok: false, error: "type" });
+    ).toEqual({
+      ok: true,
+      items: [{ ...storyImage, key: `stories/${USER}/${OBJECT}.gif`, contentType: "image/gif" }],
+    });
     expect(mediaItemsForInsert([storyVideo], USER, "stories")).toEqual({ ok: true, items: [storyVideo] });
     expect(mediaItemsForInsert([postImage], USER)).toEqual({ ok: true, items: [postImage] });
-    expect(validateMediaUpload({ contentType: "image/jpeg", byteLength: 12, lane: "stories" })).toEqual({
-      ok: false,
-      error: "type",
+    expect(validateMediaUpload({ contentType: "image/jpeg", byteLength: 12, lane: "stories" })).toMatchObject({
+      ok: true,
+      kind: "image",
     });
-    expect(validateMediaUpload({ contentType: "image/png", byteLength: 12, lane: "stories" })).toEqual({
-      ok: false,
-      error: "type",
+    expect(validateMediaUpload({ contentType: "image/png", byteLength: 12, lane: "stories" })).toMatchObject({
+      ok: true,
+      kind: "image",
     });
-    expect(validateMediaUpload({ contentType: "image/webp", byteLength: 12, lane: "stories" })).toEqual({
-      ok: false,
-      error: "type",
+    expect(validateMediaUpload({ contentType: "image/webp", byteLength: 12, lane: "stories" })).toMatchObject({
+      ok: true,
+      kind: "image",
     });
-    expect(validateMediaUpload({ contentType: "image/gif", byteLength: 12, lane: "stories" })).toEqual({
-      ok: false,
-      error: "type",
+    expect(validateMediaUpload({ contentType: "image/gif", byteLength: 12, lane: "stories" })).toMatchObject({
+      ok: true,
+      kind: "image",
     });
     expect(validateMediaUpload({ contentType: "video/mp4", byteLength: 12, lane: "stories" })).toMatchObject({
       ok: true,

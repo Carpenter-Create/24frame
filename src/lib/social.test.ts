@@ -24,6 +24,7 @@ import {
   profileInsertRow,
   quietDmAddError,
   SOCIAL,
+  isSocialStoryCreatePath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
@@ -155,6 +156,10 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.create).toBe("/social/create");
       expect(SOCIAL_ROUTES.stories).toBe("/social/stories");
       expect(SOCIAL_ROUTES.storiesNew).toBe("/social/stories/new");
+    expect(isSocialStoryCreatePath(SOCIAL_ROUTES.storiesNew)).toBe(true);
+    expect(isSocialStoryCreatePath(`${SOCIAL_ROUTES.storiesNew}/`)).toBe(true);
+    expect(isSocialStoryCreatePath(SOCIAL_ROUTES.home)).toBe(false);
+    expect(isSocialStoryCreatePath(SOCIAL_ROUTES.stories)).toBe(false);
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
     expect(SOCIAL.stories.reply).toBe("Reply quietly…");
@@ -163,11 +168,16 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.attach).toBe("Add video");
     expect(SOCIAL.stories.mediaType).toBe("Use a video (MP4, QuickTime, WebM).");
     expect(SOCIAL.stories.mediaMissing).toBe("Choose a video first.");
-    expect(SOCIAL.stories.pickerHint).toBe("Video only");
+    expect(SOCIAL.stories.photoCard).toBe("Create a photo story");
+    expect(SOCIAL.stories.videoCard).toBe("Create a video story");
+    expect(SOCIAL.stories.photoLibrary).toBe("Choose from library");
+    expect(SOCIAL.stories.photoCapture).toBe("Take a photo");
     expect(SOCIAL.stories.record).toBe("Record a video");
     expect(SOCIAL.stories.recordHint).toBe("Open in-app studio");
     expect(SOCIAL.stories.upload).toBe("Upload a video");
-    expect(SOCIAL.stories.footnote).toBe("No photo story · No text story");
+    expect(JSON.stringify(SOCIAL.stories)).not.toContain("Video only");
+    expect(JSON.stringify(SOCIAL.stories)).not.toContain("No photo story");
+    expect(JSON.stringify(SOCIAL.stories)).not.toContain("No text story");
     expect(SOCIAL.stories.studioTitle).toBe("Story studio");
     expect(SOCIAL.stories.holdOrTap).toBe("Hold or tap to record");
     expect(SOCIAL.stories.post).toBe("Post");
@@ -181,9 +191,15 @@ describe("social copy lock", () => {
     expect(storyCompose).toContain("getUserMedia");
     expect(storyCompose).toContain("MediaRecorder");
     expect(storyCompose).toContain("probeStoryRecorderMimeType");
+    expect(storyCompose).toContain("data-social-story-photo");
+    expect(storyCompose).toContain("data-social-story-video");
     expect(storyCompose).toContain("data-social-story-record");
     expect(storyCompose).toContain("data-social-story-upload");
     expect(storyCompose).toContain("data-social-story-studio");
+    expect(storyCompose).toContain('href={SOCIAL_ROUTES.home}');
+    expect(storyCompose).not.toContain("pickerHint");
+    expect(storyCompose).not.toContain("footnote");
+    expect(storyCompose).not.toContain("HouseDialog");
     expect(storyCompose).toContain("storyStudioMirrorsPreview");
     expect(storyCompose).toContain("storyRecorderVideoConstraints");
     expect(storyCompose).not.toContain("capture=\"user\"");

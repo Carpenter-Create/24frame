@@ -659,14 +659,71 @@ export const SOCIAL_CREATE_WELL_CLASS =
 export const SOCIAL_CREATE_AVATAR_CLASS =
   "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body-sm font-semibold text-ink-2 md:size-12";
 
-export const SOCIAL_STORY_PICKER_CLASS =
-  "flex w-full max-w-[420px] flex-col gap-4 rounded-[24px] border border-hairline bg-surface p-6";
-
 export const SOCIAL_STORY_PICKER_ROW_CLASS =
   "flex w-full items-center gap-4 rounded-[16px] border border-hairline bg-surface p-4 text-left";
 
 export const SOCIAL_STORY_PICKER_WELL_CLASS =
   "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink";
+
+// Create-story stage. Lock v1.1. House tokens only. No drop shadow.
+// Rail ~320. Stage muted. Two cards. Phone stacks.
+export const SOCIAL_STORY_CREATE_HOST_CLASS =
+  "flex min-h-full flex-1 flex-col bg-surface md:min-h-full md:flex-row";
+
+export const SOCIAL_STORY_CREATE_RAIL_CLASS =
+  "flex w-full shrink-0 flex-col border-hairline bg-surface p-[var(--space-4)] md:w-[320px] md:border-r";
+
+export const SOCIAL_STORY_CREATE_CLOSE_CLASS =
+  "flex size-10 items-center justify-center rounded-full text-ink";
+
+export const SOCIAL_STORY_CREATE_TITLE_CLASS = "t-heading mt-[var(--space-4)] text-ink";
+
+export const SOCIAL_STORY_CREATE_IDENTITY_CLASS =
+  "mt-[var(--space-6)] flex items-center gap-[var(--space-3)]";
+
+export const SOCIAL_STORY_CREATE_NAME_CLASS =
+  "t-body min-w-0 text-ink whitespace-normal break-words";
+
+export const SOCIAL_STORY_CREATE_STAGE_CLASS =
+  "flex min-h-[70vh] flex-1 flex-col bg-surface-muted md:min-h-full";
+
+export const SOCIAL_STORY_CREATE_CARDS_CLASS =
+  "flex flex-1 flex-col items-stretch justify-center gap-[var(--space-4)] p-[var(--space-4)] md:flex-row md:items-center md:justify-center md:gap-[var(--space-6)]";
+
+export const SOCIAL_STORY_CREATE_CARD_CLASS =
+  "flex w-full min-h-[200px] flex-col items-center justify-center gap-[var(--space-4)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-6)] text-center md:h-[420px] md:w-[280px] md:min-w-[220px] md:max-w-[280px] md:shrink-0";
+
+export const SOCIAL_STORY_PHOTO_CARD_CLASS =
+  `${SOCIAL_STORY_CREATE_CARD_CLASS} bg-gradient-to-b from-accent to-ink text-accent-contrast`;
+
+export const SOCIAL_STORY_VIDEO_CARD_CLASS =
+  `${SOCIAL_STORY_CREATE_CARD_CLASS} bg-gradient-to-b from-ink to-ink-2 text-accent-contrast`;
+
+export const SOCIAL_STORY_CREATE_ICON_WELL_CLASS =
+  "flex size-14 shrink-0 items-center justify-center rounded-full bg-surface text-ink";
+
+export const SOCIAL_STORY_CREATE_LABEL_CLASS =
+  "t-body-sm max-w-full whitespace-normal break-words text-center text-accent-contrast";
+
+export const SOCIAL_STORY_CREATE_SECONDARY_CLASS =
+  "flex flex-1 flex-col items-center justify-center p-[var(--space-4)]";
+
+export const SOCIAL_STORY_CREATE_SECONDARY_COLUMN_CLASS =
+  "flex w-full max-w-[480px] flex-col gap-[var(--space-4)]";
+
+export const SOCIAL_STORY_CREATE_BACK_CLASS = "self-start t-body text-ink";
+
+export const SOCIAL_STORY_SHARE_ACTIONS_CLASS =
+  "flex flex-wrap items-center justify-center gap-[var(--space-4)]";
+
+export const SOCIAL_STORY_SHARE_RETAKE_CLASS =
+  "inline-flex items-center justify-center rounded-full border border-hairline bg-surface px-[var(--space-6)] py-[var(--space-4)] t-body-sm font-semibold text-ink";
+
+export const SOCIAL_STORY_SHARE_POST_CLASS =
+  "inline-flex items-center justify-center rounded-full bg-accent px-[var(--space-6)] py-[var(--space-4)] t-body-sm font-semibold text-accent-contrast";
+
+export const SOCIAL_STORY_SHARE_PREVIEW_CLASS =
+  "max-h-[420px] w-full rounded-[var(--radius-lg)] object-contain";
 
 export const SOCIAL_STORY_STUDIO_CLASS =
   "fixed inset-0 z-50 flex bg-band text-band-ink md:items-center md:justify-center";

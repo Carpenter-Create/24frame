@@ -40,6 +40,7 @@ import {
   SOCIAL_RAIL_PANEL_CLASS,
 } from "@/lib/social-chrome";
 import { isCoProductionsPath } from "@/lib/co-productions";
+import { isSocialStoryCreatePath } from "@/lib/social";
 import { isHomeOwnedPath, OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { QUEUE_HREF } from "@/lib/queue";
 import { TITLES_HREF } from "@/lib/title-public-id";
@@ -168,16 +169,22 @@ export function AppShell({
   // slot. Home / Co-Productions still hide via overviewHidesRail.
   const accountChromeNoRail = isAccountChromeNoRailPath(pathname);
   const hideProductRail = homeChrome || accountChromeNoRail;
+  // Create-story lock v1.1: dedicated stage. House lead stays.
+  // Social dest-rail does not sit beside the Your story rail.
+  const storyCreateStage = isSocialStoryCreatePath(pathname);
+  const hideDestRail = hideProductRail || storyCreateStage;
   const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
   const homeOwned = isHomeOwnedPath(pathname);
   const coProductions = isCoProductionsPath(pathname);
   const accountChrome = settingsPage || helpPage || activityPage;
-  const phoneDestDock = housePhoneShowsBottomDests({
-    workspace,
-    homeOwned,
-    accountChrome,
-    coProductions,
-  });
+  const phoneDestDock =
+    !storyCreateStage &&
+    housePhoneShowsBottomDests({
+      workspace,
+      homeOwned,
+      accountChrome,
+      coProductions,
+    });
   const phoneDestPad = phoneDestDock ? HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS : undefined;
 
   useEffect(() => {
@@ -193,7 +200,7 @@ export function AppShell({
     });
   };
 
-  const collapseWidthStyle = hideProductRail
+  const collapseWidthStyle = hideDestRail
     ? ({
         "--sidebar-width": OVERVIEW_RAIL_OFF_WIDTH,
         "--sidebar-width-collapsed": OVERVIEW_RAIL_OFF_WIDTH,
@@ -220,7 +227,7 @@ export function AppShell({
       data-activity-chrome={activityPage ? "" : undefined}
       style={collapseWidthStyle}
     >
-      {hideProductRail ? null : (
+      {hideDestRail ? null : (
         <aside
           className={cn(
             HOUSE_RAIL_FLOAT_CLASS,
@@ -320,7 +327,9 @@ export function AppShell({
       >
         <div
           className={
-            socialChrome
+            storyCreateStage
+              ? "flex min-h-full w-full flex-col"
+              : socialChrome
               ? SOCIAL_DESKTOP_FRAME_PAD_CLASS
               : titlesBleed
                 ? "w-full pb-24 max-md:pb-0"

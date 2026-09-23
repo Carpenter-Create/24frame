@@ -15,6 +15,7 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "users",
   "warning-circle",
   "camera",
+  "video-camera",
   "caret-left",
   "caret-right",
   "x",
