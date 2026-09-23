@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, type ComponentProps, type ReactNode } from "react";
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { HouseLink } from "./house-link";
 import { X } from "@phosphor-icons/react";
 
@@ -19,6 +26,9 @@ import {
   IDENTITY_EMAIL_CLASS,
   IDENTITY_NAME_CLASS,
   SHEET_GROUP_CLASS,
+  SHEET_GROUP_INSET_CLASS,
+  SHEET_GROUP_INSET_ITEM_CLASS,
+  SHEET_GROUP_INSET_RULE_CLASS,
   SHEET_GROUP_ITEM_CLASS,
   SHEET_GROUP_LABEL_CLASS,
   TEXT_ACTION_CLASS,
@@ -146,24 +156,47 @@ export function IdentityBlock({
   );
 }
 
-// 543:570 Group — eyebrow then rows.
+// 543:570 Group — eyebrow then rows. inset opts into the grouped card:
+// hairline between rows, no eyebrow gap. Account phone + desktop share it.
 export function SheetGroup({
   label,
   children,
   className,
+  inset = false,
+  groupId,
 }: {
   label?: string;
   children: ReactNode;
   className?: string;
+  inset?: boolean;
+  groupId?: string;
 }) {
+  const rows = Children.toArray(children).filter((child) => isValidElement(child));
   return (
-    <div data-sheet-group="" className={cn(SHEET_GROUP_CLASS, className)}>
+    <div
+      data-sheet-group=""
+      data-sheet-group-id={groupId}
+      data-sheet-group-inset={inset ? "" : undefined}
+      className={cn(inset ? SHEET_GROUP_INSET_CLASS : SHEET_GROUP_CLASS, className)}
+    >
       {label ? (
         <p data-sheet-group-label="" className={SHEET_GROUP_LABEL_CLASS}>
           {label}
         </p>
       ) : null}
-      {children}
+      {inset
+        ? rows.map((row, index) => (
+            <Fragment key={row.key ?? index}>
+              {index > 0 ? (
+                <AppSheetHairline
+                  data-sheet-group-rule=""
+                  className={SHEET_GROUP_INSET_RULE_CLASS}
+                />
+              ) : null}
+              {row}
+            </Fragment>
+          ))
+        : children}
     </div>
   );
 }
@@ -175,6 +208,7 @@ export function SheetGroupItem({
   item,
   pressed,
   label,
+  inset = false,
 }: {
   href?: string | null;
   onClick?: () => void;
@@ -182,14 +216,16 @@ export function SheetGroupItem({
   item?: string;
   pressed?: boolean;
   label?: string;
+  inset?: boolean;
 }) {
+  const itemClass = inset ? SHEET_GROUP_INSET_ITEM_CLASS : SHEET_GROUP_ITEM_CLASS;
   if (href) {
     return (
       <HouseLink
         href={href}
         onClick={onClick}
         data-sheet-group-item={item}
-        className={SHEET_GROUP_ITEM_CLASS}
+        className={itemClass}
         aria-label={label}
       >
         {children}
@@ -201,7 +237,7 @@ export function SheetGroupItem({
       <button
         type="button"
         data-sheet-group-item={item}
-        className={SHEET_GROUP_ITEM_CLASS}
+        className={itemClass}
         aria-label={label}
         aria-pressed={pressed}
         onClick={onClick}
@@ -211,7 +247,7 @@ export function SheetGroupItem({
     );
   }
   return (
-    <p data-sheet-group-item={item} className={SHEET_GROUP_ITEM_CLASS}>
+    <p data-sheet-group-item={item} className={itemClass}>
       {children}
     </p>
   );

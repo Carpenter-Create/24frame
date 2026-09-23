@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Fragment,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -28,7 +27,6 @@ import {
 import {
   ACCOUNT_MENU_DROPDOWN_ALIGN,
   ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS,
-  ACCOUNT_MENU_DROPDOWN_GROUP_CLASS,
   ACCOUNT_MENU_DROPDOWN_HEAD_CLASS,
   ACCOUNT_MENU_DROPDOWN_HOST_CLASS,
   ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS,
@@ -43,6 +41,7 @@ import {
   ACCOUNT_SHEET_FOOTER_CLASS,
   ACCOUNT_SHEET_GROUP_CLASS,
   ACCOUNT_SHEET_HEAD_CLASS,
+  accountSheetGroupedRows,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
   ACCOUNT_SHEET_PHONE_ITEMS,
@@ -217,7 +216,7 @@ function accountMenuItemHref(item: UserMenuAction, pathname: string): string {
   return item.href;
 }
 
-function AccountMenuItems({
+function AccountMenuGroups({
   pathname,
   onClose,
   items,
@@ -227,30 +226,29 @@ function AccountMenuItems({
   items: readonly UserMenuAction[];
 }) {
   return (
-    <>
-      {items.map((item, index) => {
-        const previous = items[index - 1];
-        const helpRule =
-          item.kind === "help" && previous && previous.kind !== "help" ? (
-            <AppSheetHairline data-account-sheet-help-rule="" />
-          ) : null;
-        const href = accountMenuItemHref(item, pathname);
-
-        return (
-          <Fragment key={item.kind}>
-            {helpRule}
-            <SheetGroupItem
-              item={item.kind}
-              href={href}
-              onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
-            >
-              {item.label}
-              <AccountRowChevron />
-            </SheetGroupItem>
-          </Fragment>
-        );
-      })}
-    </>
+    <div data-account-sheet-groups="" className={ACCOUNT_SHEET_GROUP_CLASS}>
+      {accountSheetGroupedRows(items).map((group) =>
+        group.items.length === 0 ? null : (
+          <SheetGroup key={group.id} inset groupId={group.id}>
+            {group.items.map((item) => {
+              const href = accountMenuItemHref(item, pathname);
+              return (
+                <SheetGroupItem
+                  key={item.kind}
+                  inset
+                  item={item.kind}
+                  href={href}
+                  onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
+                >
+                  {item.label}
+                  <AccountRowChevron />
+                </SheetGroupItem>
+              );
+            })}
+          </SheetGroup>
+        ),
+      )}
+    </div>
   );
 }
 
@@ -272,7 +270,7 @@ function AccountMenuBody({
   const identity = accountSheetIdentity(email, name, photoUrl);
   const stacked = variant === "dropdown";
   const items = (
-    <AccountMenuItems
+    <AccountMenuGroups
       pathname={pathname}
       onClose={onClose}
       items={stacked ? ACCOUNT_SHEET_ITEMS : ACCOUNT_SHEET_PHONE_ITEMS}
@@ -295,7 +293,7 @@ function AccountMenuBody({
           </div>
           <AppSheetHairline data-account-sheet-rule="" />
           <div data-account-sheet-scroll="" className={ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS}>
-            <SheetGroup className={ACCOUNT_MENU_DROPDOWN_GROUP_CLASS}>{items}</SheetGroup>
+            {items}
           </div>
         </div>
         <div data-account-menu-leftover="" className={ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS} />
@@ -323,7 +321,7 @@ function AccountMenuBody({
         </div>
         <AppSheetHairline data-account-sheet-rule="" />
         <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
-          <SheetGroup className={ACCOUNT_SHEET_GROUP_CLASS}>{items}</SheetGroup>
+          {items}
         </div>
       </div>
       <div data-account-sheet-leftover="" className={ACCOUNT_SHEET_LEFTOVER_CLASS} />
@@ -338,7 +336,8 @@ function AccountMenuBody({
 // (h-auto), slides up. Same sheet craft — not a new mini language.
 // Do not restyle to the desktop leftover dropdown chrome
 // (264 / rounded-12). One top row: Identity 48 + Close/44.
-// Hairline — phone items. Settings — Theme — Get Help.
+// Inset cards — Settings + Theme, then Get Help. Log out is its
+// own inset row. Settings — Theme — Get Help.
 // Theme drills to /settings/theme. No header sun/moon.
 // 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
@@ -394,7 +393,7 @@ export function MobileAccountMenu({
 // Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672
 // floor. Align-end to the avatar (right edge flush). 8px under
 // the trigger. Close killed. Stacked identity. 24 pad.
-// Tight Settings / Theme / Get Help. No leftover grow. Pin
+// Inset Settings + Theme, then Get Help. No leftover grow. Pin
 // Log out, hairline, footer as siblings.
 // Hairline only under Log out. Log out → hairline 16. Hairline →
 // footer 16. Do not hug the rule. Footer → bottom 24. Not a 90%

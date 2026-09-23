@@ -4,7 +4,10 @@
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Phone sheet and desktop 264 share one stack:
-// USER_MENU_ACTIONS (Settings — Theme — Get Help). Hairline before Get Help.
+// USER_MENU_ACTIONS (Settings — Theme — Get Help) and one grouping
+// SoT (ACCOUNT_SHEET_GROUPS). Settings + Theme share an inset card
+// (hairline between those rows). Get Help is its own inset card.
+// Log out is its own inset row, Sporty blue, outside the nav cards.
 // Profile is a Settings pane, not a
 // menu row. Give feedback lives on /help/feedback, not this
 // menu and not Settings. 24Frame AI is the header
@@ -38,13 +41,14 @@
 // bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
-import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_HOST_CLASS, SHEET_GROUP_INSET_SHELL_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
   USER_MENU_PHONE_ACTIONS,
   userMenuAvatarInitial,
   userMenuName,
+  type UserMenuAction,
 } from "@/lib/user-menu";
 
 export const ACCOUNT_SHEET = {
@@ -79,6 +83,24 @@ export const ACCOUNT_SHEET_ITEMS = USER_MENU_ACTIONS;
 
 export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
 
+// One grouping SoT for the phone sheet and the desktop 264.
+// Settings + Theme share a card. Get Help is its own card.
+// Log out is not a group — it stays the accent inset row in the pin.
+export const ACCOUNT_SHEET_GROUPS = [
+  { id: "preferences", kinds: ["settings", "theme"] },
+  { id: "help", kinds: ["help"] },
+] as const;
+
+export function accountSheetGroupedRows(items: readonly UserMenuAction[]) {
+  return ACCOUNT_SHEET_GROUPS.map((group) => ({
+    id: group.id,
+    items: group.kinds.flatMap((kind) => {
+      const item = items.find((row) => row.kind === kind);
+      return item ? [item] : [];
+    }),
+  }));
+}
+
 // 544:561 / 537:557 — sides 24, bottom 32 (sheet pad B). 32 clear
 // under the 4px half-bar (padT 36 = 4+32) so the bar does not eat
 // the top air. Height from the stack (h-auto hug). max-h-[90dvh]
@@ -107,10 +129,13 @@ export const ACCOUNT_SHEET_STAGE_CLASS =
 export const ACCOUNT_SHEET_SCROLL_CLASS =
   "flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain";
 
-// Apple density — 12 between Settings / hairline / Get Help.
-// Not 24 section air. Same class on phone and the 264.
-export const ACCOUNT_SHEET_GROUP_CLASS =
-  "flex w-full flex-col items-start gap-[var(--space-3)]";
+// 16 between inset cards. Same stack on phone and the 264.
+// Not the old 12 flat-row gap. Not 24 section air.
+// Rows inside a card use the house inset group (no gap; hairline only).
+export const ACCOUNT_SHEET_GROUPS_CLASS =
+  "flex w-full flex-col gap-[var(--space-4)]";
+
+export const ACCOUNT_SHEET_GROUP_CLASS = ACCOUNT_SHEET_GROUPS_CLASS;
 
 // House row air — --space-6 is 24. Adds to the hug stack.
 // Not h-[24px]. Not leftover grow. Same air as desktop leftover.
@@ -119,8 +144,10 @@ export const ACCOUNT_SHEET_LEFTOVER = 24;
 export const ACCOUNT_SHEET_LEFTOVER_CLASS =
   "h-[var(--space-6)] w-full shrink-0";
 
+// Own inset row — same card shell as the nav groups, Sporty blue label.
+// Not a chevron destination. Not inside the nav cards.
 export const ACCOUNT_SHEET_LOGOUT_CLASS =
-  "flex items-center gap-[var(--space-2)] text-[length:var(--text-base)] font-normal leading-6 text-accent";
+  `flex w-full items-center gap-[var(--space-2)] ${SHEET_GROUP_INSET_SHELL_CLASS} px-[var(--space-4)] py-[var(--space-3)] text-[length:var(--text-base)] font-normal leading-6 text-accent`;
 
 // Mobile pin — Log out, hairline, footer are siblings. Log out →
 // hairline 16. Hairline → footer 16. Footer → bottom 32 (sheet
