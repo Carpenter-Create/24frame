@@ -85,12 +85,13 @@ describe("account sheet lock", () => {
     expect(desktop.flatMap((group) => group.items.map((item) => item.kind))).not.toContain("logOut");
   });
 
-  it("wires Theme to /settings/theme — not a Preferences nest", () => {
+  it("wires Theme to /settings/preferences/theme — the Preferences nest", () => {
     const hrefs = ACCOUNT_SHEET_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []));
     expect(hrefs).toEqual([USER_MENU.settingsHref, USER_MENU.themeHref, USER_MENU.helpHref]);
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
     expect(hrefs).not.toContain("/account/appearance");
-    expect(hrefs).not.toContain("/settings/preferences/theme");
+    expect(hrefs).toContain("/settings/preferences/theme");
+    expect(hrefs).not.toContain("/settings/theme");
     expect(hrefs).not.toContain("/settings/appearance");
     expect(ACCOUNT_SHEET_PHONE_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []))).toEqual([
       USER_MENU.settingsHref,

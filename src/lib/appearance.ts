@@ -1,6 +1,6 @@
 // Theme preference copy. Lives in lib/, not JSX.
 // One SoT: gc-theme via lib/theme.ts. The avatar Theme drill
-// and the Preferences Theme row both open /settings/theme and
+// and the Preferences Theme row both open /settings/preferences/theme and
 // write that key. Do not invent a second store. Face order is
 // Auto · Dark · Light. The Auto label is Auto.
 

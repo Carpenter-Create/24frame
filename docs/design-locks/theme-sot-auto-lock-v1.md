@@ -25,6 +25,8 @@ Auto follows `prefers-color-scheme`. When the OS scheme changes, Auto re-resolve
 
 The avatar Theme drill and the Preferences Theme row open the **same** picker component and the **same** writes (`applyDocumentThemePreference` → `gc-theme`).
 
+Preferences Theme opens the nested Theme page `/settings/preferences/theme`. Avatar Theme uses that same page. Path grammar: [`preferences-drill-nested-slugs-lock-v1.md`](preferences-drill-nested-slugs-lock-v1.md).
+
 Header sun/moon is removed. Theme chrome is the avatar Theme drill and the Preferences Theme row. Auto changes only in the shared picker. See [`theme-chrome-avatar-only-lock-v1.md`](theme-chrome-avatar-only-lock-v1.md).
 
 ## OUT

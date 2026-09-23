@@ -72,7 +72,10 @@ describe("appearance copy", () => {
   });
 
   it("shares gc-theme with the avatar Theme page — no second store", () => {
-    const themePage = readFileSync(join(here, "../app/(app)/settings/theme/page.tsx"), "utf8");
+    const themePage = readFileSync(
+      join(here, "../app/(app)/settings/preferences/theme/page.tsx"),
+      "utf8",
+    );
     const preferencesPane = readFileSync(
       join(here, "../components/settings/preferences-settings.tsx"),
       "utf8",
@@ -116,8 +119,9 @@ describe("appearance copy", () => {
     expect(sheetSrc).not.toContain("localStorage");
     expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS");
     expect(existsSync(join(here, "../app/(app)/settings/appearance/page.tsx"))).toBe(false);
-    expect(existsSync(join(here, "../app/(app)/settings/preferences/theme/page.tsx"))).toBe(false);
-    expect(existsSync(join(here, "../app/(app)/settings/theme/page.tsx"))).toBe(true);
+    expect(existsSync(join(here, "../app/(app)/settings/preferences/theme/page.tsx"))).toBe(true);
+    expect(existsSync(join(here, "../app/(app)/settings/theme/page.tsx"))).toBe(false);
+    expect(existsSync(join(here, "../app/(app)/settings/theme/[[...slug]]/page.tsx"))).toBe(true);
   });
 
   it("sections Appearance on the house muted module — selected reads on gray", () => {
