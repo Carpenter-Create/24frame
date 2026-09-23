@@ -90,8 +90,14 @@ describe("SocialStoryCompose create stage", () => {
       `${SOCIAL_STORY_STUDIO_PREVIEW_CLASS} ${SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS}`,
     );
     expect(socialStoryStudioPreviewClass(false)).toBe(SOCIAL_STORY_STUDIO_PREVIEW_CLASS);
-    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("object-contain");
-    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).not.toContain("object-cover");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("absolute inset-0");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("object-cover");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).not.toContain("object-contain");
+    expect(src).not.toContain("SOCIAL_STORY_STUDIO_RING_CLASS");
+    expect(src).toContain('phase === "recording" ? clock');
+    const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+    expect(chrome).not.toContain("SOCIAL_STORY_STUDIO_RING_CLASS");
+    expect(chrome).not.toContain("size-[280px]");
     expect(SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS).toBe("-scale-x-100");
     expect(SOCIAL_STORY_STUDIO_REVIEW_CLASS).toContain("object-cover");
     expect(SOCIAL_STORY_STUDIO_REVIEW_CLASS).not.toContain("scale-x");

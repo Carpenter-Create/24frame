@@ -40,7 +40,6 @@ import {
   SOCIAL_STORY_STUDIO_CLASS,
   SOCIAL_STORY_STUDIO_ICON_CLASS,
   SOCIAL_STORY_STUDIO_REVIEW_CLASS,
-  SOCIAL_STORY_STUDIO_RING_CLASS,
   SOCIAL_STORY_STUDIO_STAGE_CLASS,
   socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
@@ -921,7 +920,6 @@ export function SocialStoryCompose({
                 className={socialStoryStudioPreviewClass(storyStudioMirrorsPreview(facing))}
               />
             )}
-            {phase !== "review" ? <div className={SOCIAL_STORY_STUDIO_RING_CLASS} aria-hidden /> : null}
 
             <div className={SOCIAL_STORY_STUDIO_CHROME_CLASS}>
               <button

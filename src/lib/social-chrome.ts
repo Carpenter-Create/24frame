@@ -735,10 +735,10 @@ export const SOCIAL_STORY_STUDIO_CLASS =
 export const SOCIAL_STORY_STUDIO_STAGE_CLASS =
   "relative flex h-full w-full flex-col overflow-hidden bg-band md:h-[746px] md:max-h-[90dvh] md:w-[420px] md:rounded-[16px] md:border md:border-band-ink/20";
 
-// Live preview: contain, not cover. Cover on a tall stage + landscape camera
-// stream crops to a center strip (extreme zoom). Review/viewer stay cover.
+// Lock v1.4: rectangular full-bleed viewfinder. Cover fills the stage pane.
+// No face ring and no oval crop. Review stays cover as well.
 export const SOCIAL_STORY_STUDIO_PREVIEW_CLASS =
-  "absolute inset-0 size-full object-contain";
+  "absolute inset-0 size-full object-cover";
 
 export const SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS = "-scale-x-100";
 
@@ -756,9 +756,6 @@ export const SOCIAL_STORY_STUDIO_CHROME_CLASS =
 
 export const SOCIAL_STORY_STUDIO_ICON_CLASS =
   "flex size-10 items-center justify-center rounded-full bg-band-ink/12 text-band-ink";
-
-export const SOCIAL_STORY_STUDIO_RING_CLASS =
-  "pointer-events-none absolute left-1/2 top-[calc(50%-40px)] size-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-band-ink/25 border-t-accent md:size-[240px]";
 
 export const SOCIAL_STORY_RECORD_CLASS =
   "flex size-20 items-center justify-center rounded-full border-[3px] border-band-ink bg-accent text-accent-contrast";

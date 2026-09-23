@@ -556,7 +556,8 @@ export const SOCIAL = {
     mediaMissing: "Choose a video first.",
     // Design 144:1218/144:1444 also showed “up to 15 seconds”. Not an Adam lock.
     // Do not treat that note as a duration cap.
-    // Create-story lock v1.3: photo and video each have Upload (file) and Take (live camera).
+    // Create-story lock v1.4: photo and video each have Upload (file) and Take (live camera).
+    // Live Take/Record is a rectangular full-bleed viewfinder. No face ring.
     photoCard: "Create a photo story",
     videoCard: "Create a video story",
     photoLibrary: "Upload a photo",
