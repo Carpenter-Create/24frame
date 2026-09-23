@@ -754,6 +754,38 @@ export function socialStoryStudioPreviewClass(mirrored: boolean): string {
 export const SOCIAL_STORY_STUDIO_CHROME_CLASS =
   "absolute inset-x-0 top-0 z-10 flex h-14 items-center justify-between bg-band/35 p-4";
 
+// Lock v1.5 camera face. 48 bar, 16 inset, safe-area. Ink is band-ink on the feed.
+export const SOCIAL_STORY_CAMERA_TOP_CLASS =
+  "absolute inset-x-0 top-0 z-10 px-4 pt-[env(safe-area-inset-top,0px)]";
+
+export const SOCIAL_STORY_CAMERA_TOP_ROW_CLASS =
+  "grid h-12 grid-cols-3 items-center";
+
+export const SOCIAL_STORY_CAMERA_HIT_CLASS =
+  "flex size-11 items-center justify-center text-band-ink";
+
+export const SOCIAL_STORY_CAMERA_BOTTOM_CLASS =
+  "absolute inset-x-0 bottom-0 z-10 flex flex-col gap-4 pb-[env(safe-area-inset-bottom,0px)]";
+
+export const SOCIAL_STORY_CAPTURE_ROW_CLASS =
+  "grid grid-cols-3 items-center px-4";
+
+export const SOCIAL_STORY_SHUTTER_CLASS =
+  "flex size-[72px] items-center justify-center justify-self-center rounded-full border-4 border-band-ink";
+
+export function socialStoryShutterFillClass(recording: boolean): string {
+  return recording ? "size-14 rounded-full bg-accent" : "size-14 rounded-full bg-band-ink";
+}
+
+export const SOCIAL_STORY_GALLERY_CLASS =
+  "flex size-12 items-center justify-center justify-self-start overflow-hidden rounded-[8px] bg-band-ink/12 text-band-ink";
+
+export const SOCIAL_STORY_MODE_RAIL_CLASS =
+  "flex h-12 items-center justify-center";
+
+export const SOCIAL_STORY_MODE_LABEL_CLASS =
+  "t-body-sm font-semibold text-accent underline underline-offset-8";
+
 export const SOCIAL_STORY_STUDIO_ICON_CLASS =
   "flex size-10 items-center justify-center rounded-full bg-band-ink/12 text-band-ink";
 

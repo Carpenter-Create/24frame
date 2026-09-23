@@ -21,7 +21,8 @@ Design locks land in this directory before CoS undrafts a UI pull request.
 - [`theme-chrome-avatar-only-lock-v1.md`](theme-chrome-avatar-only-lock-v1.md) — avatar Theme drill; header sun/moon removed
 - [`preferences-drill-nested-slugs-lock-v1.md`](preferences-drill-nested-slugs-lock-v1.md) — Preferences drill URLs nest under `/settings/preferences/<drill>`
 - [`social-home-activity-feed-lock-v1.md`](social-home-activity-feed-lock-v1.md) — Social Home is the live activity feed at `/social`
-- [`create-story-photo-video-fb-layout-lock-v1.4.md`](create-story-photo-video-fb-layout-lock-v1.4.md) — Create story stage at `/social/stories/new`. Photo and video each have Upload (file) and Take (live camera). Live Take/Record is a rectangular full-bleed viewfinder. Supersedes v1.3 viewfinder geometry.
-- [`create-story-photo-video-fb-layout-lock-v1.3.md`](create-story-photo-video-fb-layout-lock-v1.3.md) — superseded by v1.4 for the live viewfinder. Media-path grammar retained.
+- [`create-story-photo-video-fb-layout-lock-v1.5.md`](create-story-photo-video-fb-layout-lock-v1.5.md) — Create story stage at `/social/stories/new`. Photo and video each have Upload (file) and Take (live camera). Camera face is a rectangular full-bleed viewfinder plus Stories chrome (close, flash, shutter, gallery, flip, STORY). Supersedes v1.4.
+- [`create-story-photo-video-fb-layout-lock-v1.4.md`](create-story-photo-video-fb-layout-lock-v1.4.md) — superseded by v1.5 for camera-face chrome. Rectangular full-bleed viewfinder retained.
+- [`create-story-photo-video-fb-layout-lock-v1.3.md`](create-story-photo-video-fb-layout-lock-v1.3.md) — media-path grammar retained. Superseded by v1.4 for the live viewfinder.
 - [`shell-desktop-horizontal-gutter-lock-v2.md`](shell-desktop-horizontal-gutter-lock-v2.md) — desktop shell L = R = 32. Supersedes v1.
 - [`shell-desktop-horizontal-gutter-lock-v1.md`](shell-desktop-horizontal-gutter-lock-v1.md) — superseded by v2. #661 shipped 32 / 44.

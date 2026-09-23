@@ -159,6 +159,39 @@ export function storyReviewArmMs(): number {
   return 400;
 }
 
+type StoryTorchTrack = {
+  getCapabilities?: () => object;
+  applyConstraints?: (constraints: MediaTrackConstraints) => Promise<void>;
+};
+
+/** Hide flash when the live track cannot torch. A dead control is forbidden. */
+export function storyCameraSupportsTorch(track: StoryTorchTrack | null | undefined): boolean {
+  if (!track?.getCapabilities) return false;
+  try {
+    const caps = track.getCapabilities() as { torch?: boolean };
+    return caps.torch === true;
+  } catch {
+    return false;
+  }
+}
+
+export async function setStoryCameraTorch(
+  track: StoryTorchTrack | null | undefined,
+  on: boolean,
+): Promise<boolean> {
+  if (!track?.applyConstraints || !storyCameraSupportsTorch(track)) return false;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: on }] } as unknown as MediaTrackConstraints);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function storyVideoInputCount(devices: ReadonlyArray<{ kind: string }>): number {
+  return devices.filter((device) => device.kind === "videoinput").length;
+}
+
 /** Detached bytes. The review element must not be the upload body. */
 export async function cloneStoryUploadFile(file: File): Promise<File> {
   const bytes = await file.arrayBuffer();

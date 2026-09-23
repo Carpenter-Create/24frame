@@ -180,6 +180,8 @@ describe("social copy lock", () => {
     expect(JSON.stringify(SOCIAL.stories)).not.toContain("No text story");
     expect(SOCIAL.stories.studioTitle).toBe("Story studio");
     expect(SOCIAL.stories.holdOrTap).toBe("Hold or tap to record");
+    expect(SOCIAL.stories.flash).toBe("Flash");
+    expect(SOCIAL.stories.cameraMode).toBe("STORY");
     expect(SOCIAL.stories.post).toBe("Post");
     expect(SOCIAL.stories.posted).toBe("Story posted");
     expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/photo or video/i);

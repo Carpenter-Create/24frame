@@ -15,9 +15,12 @@ import {
   bindStoryReviewVideo,
   storyRecorderStopFlushMs,
   storyRecorderTimesliceMs,
+  setStoryCameraTorch,
+  storyCameraSupportsTorch,
   storyReviewArmMs,
   storyReviewFrameSeconds,
   storyReviewMediaSrc,
+  storyVideoInputCount,
   nextStoryStudioLive,
   storyRecorderVideoConstraints,
   storyStudioIsLive,
@@ -137,6 +140,41 @@ describe("story MediaRecorder mime probe", () => {
     const sealStart = studio.indexOf("function sealRecording");
     const sealEnd = studio.indexOf("function stopRecording");
     expect(studio.slice(sealStart, sealEnd)).not.toContain('setPhase("preview")');
+  });
+
+  it("shows flash only when the track can torch, and counts cameras", async () => {
+    expect(storyCameraSupportsTorch(null)).toBe(false);
+    expect(storyCameraSupportsTorch({})).toBe(false);
+    expect(storyCameraSupportsTorch({ getCapabilities: () => ({}) })).toBe(false);
+    expect(storyCameraSupportsTorch({ getCapabilities: () => ({ torch: false }) })).toBe(false);
+    expect(
+      storyCameraSupportsTorch({
+        getCapabilities: () => {
+          throw new Error("unsupported");
+        },
+      }),
+    ).toBe(false);
+    const capable = { getCapabilities: () => ({ torch: true }) };
+    expect(storyCameraSupportsTorch(capable)).toBe(true);
+    expect(await setStoryCameraTorch(capable, true)).toBe(false);
+    let lit = false;
+    expect(
+      await setStoryCameraTorch(
+        {
+          getCapabilities: () => ({ torch: true }),
+          applyConstraints: async () => {
+            lit = true;
+          },
+        },
+        true,
+      ),
+    ).toBe(true);
+    expect(lit).toBe(true);
+    expect(storyVideoInputCount([{ kind: "audioinput" }])).toBe(0);
+    expect(storyVideoInputCount([{ kind: "videoinput" }])).toBe(1);
+    expect(
+      storyVideoInputCount([{ kind: "videoinput" }, { kind: "videoinput" }, { kind: "audioinput" }]),
+    ).toBe(2);
   });
 
   it("binds the recorded blob and clears the live camera provider", () => {

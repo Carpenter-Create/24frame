@@ -32,15 +32,22 @@ import {
   SOCIAL_STORY_SHARE_PREVIEW_CLASS,
   SOCIAL_STORY_SHARE_RETAKE_CLASS,
   SOCIAL_STORY_VIDEO_CARD_CLASS,
+  SOCIAL_STORY_CAMERA_BOTTOM_CLASS,
+  SOCIAL_STORY_CAMERA_HIT_CLASS,
+  SOCIAL_STORY_CAMERA_TOP_CLASS,
+  SOCIAL_STORY_CAMERA_TOP_ROW_CLASS,
+  SOCIAL_STORY_CAPTURE_ROW_CLASS,
+  SOCIAL_STORY_GALLERY_CLASS,
+  SOCIAL_STORY_MODE_LABEL_CLASS,
+  SOCIAL_STORY_MODE_RAIL_CLASS,
   SOCIAL_STORY_POSTED_CLASS,
-  SOCIAL_STORY_REC_PILL_CLASS,
-  SOCIAL_STORY_RECORD_CLASS,
-  SOCIAL_STORY_STOP_CLASS,
+  SOCIAL_STORY_SHUTTER_CLASS,
   SOCIAL_STORY_STUDIO_CHROME_CLASS,
   SOCIAL_STORY_STUDIO_CLASS,
   SOCIAL_STORY_STUDIO_ICON_CLASS,
   SOCIAL_STORY_STUDIO_REVIEW_CLASS,
   SOCIAL_STORY_STUDIO_STAGE_CLASS,
+  socialStoryShutterFillClass,
   socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
 import {
@@ -77,7 +84,10 @@ import {
   storyReviewArmMs,
   storyReviewFrameSeconds,
   storyReviewMediaSrc,
+  setStoryCameraTorch,
+  storyCameraSupportsTorch,
   storyRecorderVideoConstraints,
+  storyVideoInputCount,
   captureStoryStillFrame,
   storyStudioIsLive,
   type StoryStillCanvas,
@@ -164,6 +174,9 @@ export function SocialStoryCompose({
   const [clip, setClip] = useState<ReviewClip | null>(null);
   const [playing, setPlaying] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchReady, setTorchReady] = useState(false);
+  const [canFlip, setCanFlip] = useState(true);
 
   function setStillMode(next: boolean) {
     stillRef.current = next;
@@ -276,7 +289,44 @@ export function SocialStoryCompose({
       node.playsInline = true;
       await node.play().catch(() => undefined);
     }
+    await refreshCameraChrome();
     return true;
+  }
+
+  async function refreshCameraChrome() {
+    const track = streamRef.current?.getVideoTracks()[0];
+    setTorchReady(storyCameraSupportsTorch(track));
+    setTorchOn(false);
+    if (!navigator.mediaDevices?.enumerateDevices) return;
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      setCanFlip(storyVideoInputCount(devices) !== 1);
+    } catch {
+      setCanFlip(true);
+    }
+  }
+
+  async function toggleTorch() {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!storyCameraSupportsTorch(track)) {
+      setTorchReady(false);
+      setTorchOn(false);
+      return;
+    }
+    const next = !torchOn;
+    const lit = await setStoryCameraTorch(track, next);
+    if (!lit) {
+      setTorchReady(false);
+      setTorchOn(false);
+      return;
+    }
+    setTorchOn(next);
+  }
+
+  function openRoll() {
+    if (recordingRef.current) return;
+    if (stillRef.current) photoLibraryRef.current?.click();
+    else fileRef.current?.click();
   }
 
   async function openStudio() {
@@ -921,40 +971,52 @@ export function SocialStoryCompose({
               />
             )}
 
-            <div className={SOCIAL_STORY_STUDIO_CHROME_CLASS}>
-              <button
-                type="button"
-                aria-label={SOCIAL.stories.close}
-                className={SOCIAL_STORY_STUDIO_ICON_CLASS}
-                disabled={posting}
-                onClick={closeStudio}
-              >
-                <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
-              </button>
-              <p className="t-body-sm font-semibold text-band-ink">
-                {phase === "recording" ? clock : phase === "review" ? SOCIAL.stories.review : SOCIAL.stories.studioTitle}
-              </p>
-              {phase === "review" ? (
-                <span className="size-10" />
-              ) : (
+            {phase === "review" ? (
+              <div className={SOCIAL_STORY_STUDIO_CHROME_CLASS}>
                 <button
                   type="button"
-                  aria-label={SOCIAL.stories.flipCamera}
+                  aria-label={SOCIAL.stories.close}
                   className={SOCIAL_STORY_STUDIO_ICON_CLASS}
-                  disabled={phase === "recording"}
-                  onClick={() => void flipCamera()}
+                  disabled={posting}
+                  onClick={closeStudio}
                 >
-                  <SocialIcon name="camera-rotate" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
+                  <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
                 </button>
-              )}
-            </div>
-
-            {phase === "recording" ? (
-              <div data-social-story-rec="" className={SOCIAL_STORY_REC_PILL_CLASS}>
-                <span className="size-1.5 rounded-full bg-accent-contrast" />
-                {SOCIAL.stories.rec}
+                <p className="t-body-sm font-semibold text-band-ink">{SOCIAL.stories.review}</p>
+                <span className="size-10" />
               </div>
-            ) : null}
+            ) : (
+              <div className={SOCIAL_STORY_CAMERA_TOP_CLASS}>
+                <div className={SOCIAL_STORY_CAMERA_TOP_ROW_CLASS}>
+                <button
+                  type="button"
+                  data-social-story-camera-close=""
+                  aria-label={SOCIAL.stories.close}
+                  className={SOCIAL_STORY_CAMERA_HIT_CLASS}
+                  onClick={closeStudio}
+                >
+                  <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
+                </button>
+                <p className="text-center t-body-sm font-semibold text-band-ink">
+                  {phase === "recording" ? clock : null}
+                </p>
+                {torchReady ? (
+                  <button
+                    type="button"
+                    data-social-story-flash=""
+                    aria-label={SOCIAL.stories.flash}
+                    aria-pressed={torchOn}
+                    className={`${SOCIAL_STORY_CAMERA_HIT_CLASS} justify-self-end`}
+                    onClick={() => void toggleTorch()}
+                  >
+                    <SocialIcon name="lightning" active={torchOn} size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
+                  </button>
+                ) : (
+                  <span className={SOCIAL_STORY_CAMERA_HIT_CLASS} aria-hidden />
+                )}
+                </div>
+              </div>
+            )}
 
             {phase === "review" && !playing ? (
               <button
@@ -968,72 +1030,91 @@ export function SocialStoryCompose({
               </button>
             ) : null}
 
-            <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-center gap-4 bg-gradient-to-t from-band/80 to-transparent px-6 pb-10 pt-6">
-              {phase === "review" ? (
-                <>
-                  <p className="t-label text-band-ink/50">{SOCIAL.stories.trimLater}</p>
-                  <div className="flex items-center justify-center gap-4">
-                    <button
-                      type="button"
-                      data-social-story-retake=""
-                      disabled={posting}
-                      className="inline-flex items-center justify-center rounded-full border border-band-ink/35 bg-band-ink/12 px-6 py-3.5 t-body-sm font-semibold text-band-ink"
-                      onClick={retake}
-                    >
-                      {SOCIAL.stories.retake}
-                    </button>
-                    <button
-                      type="button"
-                      data-social-story-post=""
-                      disabled={posting}
-                      className="inline-flex items-center justify-center rounded-full bg-accent px-8 py-3.5 t-body-sm font-semibold text-accent-contrast"
-                      onClick={() => void postClip()}
-                    >
-                      {posting ? SOCIAL.stories.posting : SOCIAL.stories.post}
-                    </button>
-                  </div>
-                </>
-              ) : still ? (
-                <>
-                  <p className="t-body-sm text-band-ink/85">{SOCIAL.stories.photoCapture}</p>
+            {phase === "review" ? (
+              <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-center gap-4 bg-gradient-to-t from-band/80 to-transparent px-6 pb-10 pt-6">
+                <p className="t-label text-band-ink/50">{SOCIAL.stories.trimLater}</p>
+                <div className="flex items-center justify-center gap-4">
                   <button
                     type="button"
-                    data-social-story-shutter=""
-                    data-social-story-still-shutter=""
-                    aria-label={SOCIAL.stories.photoCapture}
-                    className={SOCIAL_STORY_RECORD_CLASS}
-                    onClick={() => void takeStill()}
-                  />
-                </>
-              ) : (
-                <>
-                  <p className="t-body-sm text-band-ink/85">
-                    {phase === "recording" ? SOCIAL.stories.recording : SOCIAL.stories.holdOrTap}
-                  </p>
-                  <button
-                    type="button"
-                    data-social-story-shutter=""
-                    aria-label={phase === "recording" ? SOCIAL.stories.recording : SOCIAL.stories.holdOrTap}
-                    className={SOCIAL_STORY_RECORD_CLASS}
-                    onPointerDown={onRecordPointerDown}
-                    onPointerUp={onRecordPointerUp}
-                    onPointerCancel={onRecordPointerUp}
+                    data-social-story-retake=""
+                    disabled={posting}
+                    className="inline-flex items-center justify-center rounded-full border border-band-ink/35 bg-band-ink/12 px-6 py-3.5 t-body-sm font-semibold text-band-ink"
+                    onClick={retake}
                   >
-                    {phase === "recording" ? <span className={SOCIAL_STORY_STOP_CLASS} /> : null}
+                    {SOCIAL.stories.retake}
                   </button>
-                  {phase === "preview" ? (
+                  <button
+                    type="button"
+                    data-social-story-post=""
+                    disabled={posting}
+                    className="inline-flex items-center justify-center rounded-full bg-accent px-8 py-3.5 t-body-sm font-semibold text-accent-contrast"
+                    onClick={() => void postClip()}
+                  >
+                    {posting ? SOCIAL.stories.posting : SOCIAL.stories.post}
+                  </button>
+                </div>
+                {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+              </div>
+            ) : (
+              <div className={SOCIAL_STORY_CAMERA_BOTTOM_CLASS}>
+                {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+                <div className={SOCIAL_STORY_CAPTURE_ROW_CLASS}>
+                  <button
+                    type="button"
+                    data-social-story-gallery=""
+                    aria-label={still ? SOCIAL.stories.photoLibrary : SOCIAL.stories.upload}
+                    className={SOCIAL_STORY_GALLERY_CLASS}
+                    disabled={phase === "recording"}
+                    onClick={openRoll}
+                  >
+                    <SocialIcon name="image" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                  </button>
+                  {still ? (
                     <button
                       type="button"
-                      className="t-label text-band-ink/55"
-                      onClick={() => fileRef.current?.click()}
+                      data-social-story-shutter=""
+                      data-social-story-still-shutter=""
+                      aria-label={SOCIAL.stories.photoCapture}
+                      className={SOCIAL_STORY_SHUTTER_CLASS}
+                      onClick={() => void takeStill()}
                     >
-                      {SOCIAL.stories.uploadFromRoll}
+                      <span className={socialStoryShutterFillClass(false)} />
                     </button>
-                  ) : null}
-                </>
-              )}
-              {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-            </div>
+                  ) : (
+                    <button
+                      type="button"
+                      data-social-story-shutter=""
+                      aria-label={phase === "recording" ? SOCIAL.stories.recording : SOCIAL.stories.holdOrTap}
+                      className={SOCIAL_STORY_SHUTTER_CLASS}
+                      onPointerDown={onRecordPointerDown}
+                      onPointerUp={onRecordPointerUp}
+                      onPointerCancel={onRecordPointerUp}
+                    >
+                      <span className={socialStoryShutterFillClass(phase === "recording")} />
+                    </button>
+                  )}
+                  {canFlip ? (
+                    <button
+                      type="button"
+                      data-social-story-flip=""
+                      aria-label={SOCIAL.stories.flipCamera}
+                      className={`${SOCIAL_STORY_CAMERA_HIT_CLASS} justify-self-end`}
+                      disabled={phase === "recording"}
+                      onClick={() => void flipCamera()}
+                    >
+                      <SocialIcon name="camera-rotate" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
+                    </button>
+                  ) : (
+                    <span className={SOCIAL_STORY_CAMERA_HIT_CLASS} aria-hidden />
+                  )}
+                </div>
+                <div className={SOCIAL_STORY_MODE_RAIL_CLASS}>
+                  <p data-social-story-mode="" className={SOCIAL_STORY_MODE_LABEL_CLASS}>
+                    {SOCIAL.stories.cameraMode}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : null}
@@ -1048,7 +1129,7 @@ export function SocialStoryCompose({
           onChange={(e) => onPick("video", e.currentTarget)}
         />
       ) : null}
-      {phase === "photo" || (phase === "review" && clip?.kind === "image") ? (
+      {phase === "photo" || still || (phase === "review" && clip?.kind === "image") ? (
         <input
           ref={photoLibraryRef}
           type="file"
