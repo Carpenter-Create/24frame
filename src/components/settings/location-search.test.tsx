@@ -15,26 +15,39 @@ vi.mock("@/app/(app)/settings/preferences/location/actions", () => ({
 }));
 
 describe("LocationSearch", () => {
-  it("shows the composed place and a remove control", () => {
+  it("sits the composed place in the search bar with a trailing clear", () => {
     const html = renderToStaticMarkup(
       createElement(LocationSearch, {
         initial: { city: "Austin", region: "TX", country: "US" },
       }),
     );
-    expect(html).toContain('data-location-current=""');
-    expect(html).toContain("Austin, TX, US");
-    expect(html).toContain('data-location-clear=""');
-    expect(html).toContain(LOCATION.clear);
-    expect(html).toContain('data-location-search=""');
+    const bar = html.indexOf('data-location-bar=""');
+    const value = html.indexOf('data-location-value=""');
+    const label = html.indexOf("Austin, TX, US");
+    const clear = html.indexOf('data-location-clear=""');
+    expect(bar).toBeGreaterThan(-1);
+    expect(value).toBeGreaterThan(bar);
+    expect(label).toBeGreaterThan(value);
+    expect(clear).toBeGreaterThan(label);
+    expect(html).toContain(`aria-label="${LOCATION.clear}"`);
+    expect(html).not.toContain(`>${LOCATION.clear}<`);
+    expect(html).not.toContain('data-location-search=""');
+    expect(html).not.toContain('data-location-current=""');
     expect(html).not.toContain("truncate");
+    expect(html).toContain("break-words");
   });
 
-  it("shows the empty placeholder and no remove control", () => {
+  it("is an empty search field with no clear and no stacked value", () => {
     const html = renderToStaticMarkup(
       createElement(LocationSearch, { initial: EMPTY_PROFILE_LOCATION }),
     );
-    expect(html).toContain(LOCATION.empty);
-    expect(html).not.toContain('data-location-clear=""');
+    expect(html).toContain('data-location-bar=""');
+    expect(html).toContain('data-location-search=""');
+    expect(html).toContain(LOCATION.searchPlaceholder);
     expect(html).toContain(LOCATION.searchLabel);
+    expect(html).not.toContain('data-location-clear=""');
+    expect(html).not.toContain('data-location-value=""');
+    expect(html).not.toContain(LOCATION.empty);
+    expect(html).not.toContain("truncate");
   });
 });
