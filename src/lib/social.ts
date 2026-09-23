@@ -53,6 +53,11 @@ export const SOCIAL_ROUTES = {
   post: "/social/p",
 } as const;
 
+export function isSocialStoryCreatePath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  return path === SOCIAL_ROUTES.storiesNew;
+}
+
 /** Header Search people discovery. Not a dock tab. Not Explore. */
 export const SOCIAL_SEARCH_INTENT_PARAM = "intent";
 export const SOCIAL_SEARCH_PEOPLE_INTENT = "people";
@@ -551,12 +556,20 @@ export const SOCIAL = {
     mediaMissing: "Choose a video first.",
     // Design 144:1218/144:1444 also showed “up to 15 seconds”. Not an Adam lock.
     // Do not treat that note as a duration cap.
-    pickerHint: "Video only",
+    // Create-story lock v1.1: photo card and video card. Entry subtitle and footnote removed.
+    photoCard: "Create a photo story",
+    videoCard: "Create a video story",
+    photoLibrary: "Choose from library",
+    photoLibraryHint: "Stills from your camera roll",
+    photoCapture: "Take a photo",
+    photoCaptureHint: "Open the camera",
+    photoMediaType: "Use a photo (JPEG, PNG, WebP, GIF).",
+    photoMissing: "Choose a photo first.",
+    back: "Back",
     record: "Record a video",
     recordHint: "Open in-app studio",
     upload: "Upload a video",
     uploadHint: "Choose from camera roll",
-    footnote: "No photo story · No text story",
     studioTitle: "Story studio",
     holdOrTap: "Hold or tap to record",
     uploadFromRoll: "Or upload from camera roll",

@@ -384,9 +384,6 @@ export async function createSocialStory(formData: FormData): Promise<ActionResul
   const media = mediaItemsForInsert(formData.get("media"), user.id, "stories");
   if (!media.ok) return { error: socialMediaRuleMessage(media.error, "stories") };
   if (media.items.length === 0) return { error: SOCIAL.stories.empty };
-  if (media.items.some((item) => item.kind !== "video")) {
-    return { error: SOCIAL.stories.mediaType };
-  }
 
   const { error } = await supabase.from("stories").insert(
     storyInsertRow({ authorId: user.id, body, media: media.items }),

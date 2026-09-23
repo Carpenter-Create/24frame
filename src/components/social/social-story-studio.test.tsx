@@ -3,32 +3,57 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { SocialStoryCompose } from "./social-story-studio";
-import { SOCIAL } from "@/lib/social";
+import { housePhoneForbidsTruncate } from "@/lib/house-phone-stack";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   SOCIAL_FIGMA_STORY_PICKER,
   SOCIAL_FIGMA_STORY_STUDIO,
-  SOCIAL_STORY_PICKER_CLASS,
+  SOCIAL_STORY_CREATE_RAIL_CLASS,
+  SOCIAL_STORY_PHOTO_CARD_CLASS,
+  SOCIAL_STORY_VIDEO_CARD_CLASS,
   SOCIAL_STORY_STUDIO_PREVIEW_CLASS,
   SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS,
   SOCIAL_STORY_STUDIO_REVIEW_CLASS,
   socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
 
-describe("SocialStoryCompose picker", () => {
-  it("opens Record as in-app studio and keeps Upload as the file picker", () => {
-    const html = renderToStaticMarkup(<SocialStoryCompose />);
-    expect(html).toContain("data-social-story-picker");
-    expect(html).toContain("data-social-story-record");
-    expect(html).toContain("data-social-story-upload");
-    expect(html).toContain(SOCIAL.stories.createCta);
-    expect(html).toContain(SOCIAL.stories.pickerHint);
-    expect(html).toContain(SOCIAL.stories.record);
-    expect(html).toContain(SOCIAL.stories.recordHint);
-    expect(html).toContain(SOCIAL.stories.upload);
-    expect(html).toContain(SOCIAL.stories.footnote);
-    expect(html).toContain(SOCIAL_STORY_PICKER_CLASS);
+describe("SocialStoryCompose create stage", () => {
+  it("opens on two media cards and keeps Record and Upload off the first face", () => {
+    const html = renderToStaticMarkup(<SocialStoryCompose displayName="Ada Lovelace" />);
+    expect(html).toContain("data-social-story-rail");
+    expect(html).toContain("data-social-story-stage");
+    expect(html).toContain('data-social-story-face="stage"');
+    expect(html).toContain("data-social-story-photo");
+    expect(html).toContain("data-social-story-video");
+    expect(html).toContain(SOCIAL.stories.yourStory);
+    expect(html).toContain(SOCIAL.stories.photoCard);
+    expect(html).toContain(SOCIAL.stories.videoCard);
+    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain(`href="${SOCIAL_ROUTES.home}"`);
+    expect(html).toContain(SOCIAL_STORY_CREATE_RAIL_CLASS);
+    expect(html).toContain(SOCIAL_STORY_PHOTO_CARD_CLASS);
+    expect(html).toContain(SOCIAL_STORY_VIDEO_CARD_CLASS);
+    expect(html).toContain("md:w-[320px]");
+    expect(html).toContain("md:h-[420px]");
+    expect(html).toContain("min-h-[200px]");
+    expect(html).toContain("from-accent");
+    expect(html).toContain("from-ink");
+    expect(html).not.toContain("shadow");
+    expect(html).not.toContain("data-social-story-picker");
+    expect(html).not.toContain("data-social-story-record");
+    expect(html).not.toContain("data-social-story-upload");
+    expect(html).not.toContain("data-social-story-photo-library");
+    expect(html).not.toContain("Video only");
+    expect(html).not.toContain("No photo story");
+    expect(html).not.toContain("No text story");
+    expect(html).not.toContain("Create a text story");
     expect(html).not.toContain("data-social-story-studio");
-    expect(html).not.toContain(SOCIAL.home.photoKind);
+    expect(html).not.toContain("HouseDialog");
+    expect(html).not.toContain("#1877F2");
+    expect(html).not.toContain("#1769FF");
+    expect(housePhoneForbidsTruncate(html)).toBe(true);
+    expect((html.match(/data-social-story-photo=/g) ?? []).length).toBe(1);
+    expect((html.match(/data-social-story-video=/g) ?? []).length).toBe(1);
   });
 
   it("keeps MediaRecorder as the Record path and never uses OS capture", () => {
@@ -38,8 +63,13 @@ describe("SocialStoryCompose picker", () => {
     expect(src).toContain("probeStoryRecorderMimeType");
     expect(src).toContain('lane", "stories"');
     expect(src).toContain("createSocialStory");
-    expect(src).not.toContain("capture=");
+    expect(src).toContain('capture="environment"');
     expect(src).not.toContain('capture="user"');
+    expect(src).toContain("data-social-story-photo-library");
+    expect(src).toContain("data-social-story-photo-capture");
+    expect(src).not.toContain("data-social-story-picker");
+    expect(src).not.toContain("pickerHint");
+    expect(src).not.toContain("footnote");
     expect(src).not.toContain("15");
     expect(src).toContain('data-social-story-studio={phase}');
     expect(src).toContain("storyStudioIsLive");

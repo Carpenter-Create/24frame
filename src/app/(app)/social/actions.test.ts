@@ -747,7 +747,7 @@ describe("social actions", () => {
     expect(presignSocialMediaPut).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`, "image/jpeg");
   });
 
-  it("rejects image kinds on story create and stories-lane presign", async () => {
+  it("accepts a still on story create and stories-lane presign", async () => {
     const author = "11111111-1111-4111-8111-111111111111";
     const object = "22222222-2222-4222-8222-222222222222";
     vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
@@ -759,16 +759,28 @@ describe("social actions", () => {
         { kind: "image", key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" },
       ]),
     );
-    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.mediaType });
-    expect(inserts).toEqual([]);
+    expect(await createSocialStory(form)).toEqual({});
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0]).toMatchObject({
+      table: "stories",
+      row: {
+        media: [{ kind: "image", key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" }],
+      },
+    });
 
     vi.spyOn(crypto, "randomUUID").mockReturnValue(object);
+    vi.mocked(presignSocialMediaPut).mockResolvedValue("https://s3.example/put");
     const imageSign = new FormData();
     imageSign.set("content_type", "image/jpeg");
     imageSign.set("byte_length", "1200");
     imageSign.set("lane", "stories");
-    expect(await presignSocialMediaUpload(imageSign)).toEqual({ error: SOCIAL.stories.mediaType });
-    expect(presignSocialMediaPut).not.toHaveBeenCalled();
+    expect(await presignSocialMediaUpload(imageSign)).toEqual({
+      key: `stories/${author}/${object}.jpg`,
+      url: "https://s3.example/put",
+      kind: "image",
+      contentType: "image/jpeg",
+    });
+    expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.jpg`, "image/jpeg");
 
     vi.mocked(presignSocialMediaPut).mockResolvedValue("https://s3.example/put");
     const videoSign = new FormData();

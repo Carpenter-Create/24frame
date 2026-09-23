@@ -539,9 +539,7 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     const socialStoryNew = renderToStaticMarkup(
       createElement(HousePhoneBottomNav, { workspace: "social" }),
     );
-    expect(socialStoryNew).not.toMatch(
-      /<a[^>]+href="\/social"[^>]*aria-current="page"/,
-    );
+    expect(socialStoryNew).not.toContain("data-house-phone-bottom-nav");
   });
 
   it("mounts one HousePhoneAppShell on every workspace and keeps Social off a second float", () => {

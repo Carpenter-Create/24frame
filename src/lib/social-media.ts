@@ -6,7 +6,8 @@ import { isSocialMuxId, SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
 // Stills go to 24frame-media-source-prod. Social Video + Go live store
 // Mux playback ids on the same author-bound key. Never title film keys,
 // never S3_BUCKET / gc-content-assets, never avatars/.
-// Stories stay on the 24frame-media-* stories lane; create is video-only.
+// Stories stay on the 24frame-media-* stories lane. One still or one video.
+// Mux playback stays on posts.
 // Copy for these codes lives in SOCIAL.home / SOCIAL.stories.
 
 export type SocialMediaRuleError =
@@ -244,10 +245,6 @@ export function mediaItemsForInsert(
         return { ok: false, error: "type" };
       }
     }
-    // Stories create is video-only. Posts still accept stills.
-    if (lane === "stories" && item.data.kind !== "video") {
-      return { ok: false, error: "type" };
-    }
     items.push(item.data);
   }
   return { ok: true, items };
@@ -265,9 +262,6 @@ export function validateMediaUpload(input: {
   }
   const kind = socialMediaKindFor(input.contentType);
   if (!kind) return { ok: false, error: "type" };
-  if (input.lane === "stories" && kind !== "video") {
-    return { ok: false, error: "type" };
-  }
   if (!Number.isFinite(input.byteLength) || input.byteLength <= 0) {
     return { ok: false, error: "missing" };
   }
