@@ -12,6 +12,11 @@ import {
   SETTINGS_DRILL_LEADING_BODY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_LABEL_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS,
   SETTINGS_GROUP_CLASS,
   SETTINGS_GROUP_LABEL_CLASS,
   SETTINGS_GROUP_LIST_CLASS,
@@ -29,6 +34,11 @@ import {
 // stay accent doors — no fake face. Phone stacks identity · action.
 // Action rows (Add / Invite) use accent and live inside the group.
 // Edit pane: page-lead back, title, helper, single control.
+// layout="value-trail" is the PrefDrillGroup horizontal drill
+// (label left, value + chevron trailing). It does not apply when
+// leading, badge, or helper is set — those stay on the stacked copy.
+
+export type SettingsDrillLayout = "value-trail";
 
 export type SettingsDrillCta =
   | "company-edit"
@@ -62,6 +72,7 @@ export function SettingsDrillRow({
   onClick,
   tone = "default",
   cta,
+  layout,
 }: {
   label: string;
   value?: string;
@@ -76,6 +87,7 @@ export function SettingsDrillRow({
   onClick?: () => void;
   tone?: "default" | "accent";
   cta?: SettingsDrillCta;
+  layout?: SettingsDrillLayout;
 }) {
   const hasHref = Boolean(href) && !readOnly;
   const hasClick = Boolean(onClick) && !readOnly;
@@ -88,6 +100,31 @@ export function SettingsDrillRow({
     ...drillCtaProps(cta),
     ...(itemAttr ? { [itemAttr]: kind } : {}),
   };
+  const chevron = canOpen ? (
+    <CaretRight
+      className={SETTINGS_DRILL_CHEVRON_CLASS}
+      weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+    />
+  ) : null;
+  // Horizontal value trail only for plain label/value drills.
+  // Leading, badge, and helper rows keep the stacked copy.
+  const valueTrail =
+    layout === "value-trail" && !leading && !helper && !badge ? (
+      <span data-settings-drill-value-trail="" className={SETTINGS_DRILL_VALUE_TRAIL_CLASS}>
+        <span data-settings-drill-value-copy="" className={SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS}>
+          <span className={SETTINGS_DRILL_VALUE_TRAIL_LABEL_CLASS}>{label}</span>
+          {value ? (
+            <span className={SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS}>{value}</span>
+          ) : null}
+        </span>
+        {trailing || chevron ? (
+          <span data-settings-drill-chevron="" className={SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS}>
+            {trailing}
+            {chevron}
+          </span>
+        ) : null}
+      </span>
+    ) : null;
   const copy = (
     <span className={SETTINGS_DRILL_COPY_CLASS}>
       {badge ? (
@@ -106,15 +143,10 @@ export function SettingsDrillRow({
     trailing || canOpen ? (
       <span className="flex shrink-0 items-center gap-[var(--space-3)]">
         {trailing}
-        {canOpen ? (
-          <CaretRight
-            className={SETTINGS_DRILL_CHEVRON_CLASS}
-            weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-          />
-        ) : null}
+        {chevron}
       </span>
     ) : null;
-  const identity = (
+  const identity = valueTrail ?? (
     <>
       {copy}
       {actions}

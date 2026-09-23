@@ -18,6 +18,8 @@ import {
 import {
   SETTINGS,
   SETTINGS_CONTENT_MEASURE_CLASS,
+  SETTINGS_DRILL_COPY_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_CLASS,
   SETTINGS_GROUP_CLASS,
   SETTINGS_GROUP_LABEL_CLASS,
   SETTINGS_GROUP_LIST_CLASS,
@@ -96,8 +98,16 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain("md:hidden");
     expect(html).toContain("hidden md:block");
     expect(html).toContain('data-settings-pref-desktop=""');
+    expect(html).toContain('data-settings-pref-column=""');
     expect(html).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
     expect(paneSrc).toContain("SETTINGS_CONTENT_MEASURE_CLASS");
+    const columnAt = html.indexOf('data-settings-pref-column=""');
+    const drillAt = html.indexOf('data-settings-pref-drill-group=""');
+    const wrapAt = html.indexOf('data-settings-notification-wrap=""');
+    expect(columnAt).toBeGreaterThan(-1);
+    expect(columnAt).toBeLessThan(drillAt);
+    expect(drillAt).toBeLessThan(wrapAt);
+    expect(html.slice(columnAt, drillAt)).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
     expect(paneSrc).toContain("constrained measure");
     expect(html).not.toContain(SETTINGS.themeHelper);
     expect(html).toContain('data-settings-section="notifications"');
@@ -142,8 +152,14 @@ describe("SettingsPreferencesPage", () => {
       drillGroup.indexOf('data-settings-drill-row="theme"'),
     );
     expect(drillGroup).toContain("min-h-11");
-    expect(drillGroup).toContain("t-body-sm text-ink-3");
+    expect(drillGroup).toContain("t-body-sm");
+    expect(drillGroup).toContain("text-ink-3");
     expect(drillGroup).toContain("size-4");
+    expect(drillGroup).toContain(SETTINGS_DRILL_VALUE_TRAIL_CLASS);
+    expect(drillGroup).toContain("md:flex-nowrap");
+    expect(drillGroup).toContain("items-center");
+    expect(drillGroup).not.toContain(SETTINGS_DRILL_COPY_CLASS);
+    expect(drillGroup).not.toContain("truncate");
     expect(drillGroup).not.toContain('data-settings-drill-row="notifications"');
     const matrix = html.slice(html.indexOf('data-settings-section="notifications"'));
     expect(matrix).not.toContain('data-settings-drill-row="theme"');

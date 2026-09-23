@@ -9,6 +9,7 @@ import {
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_TITLE_CLASS,
 } from "./house-shell";
+import { menuLabelTruncatesOnPhone } from "./menu-host";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
@@ -27,9 +28,15 @@ import {
   SETTINGS_DIALOG_LABEL_CLASS,
   SETTINGS_DRILL_ACCENT_CLASS,
   SETTINGS_DRILL_CHEVRON_CLASS,
+  SETTINGS_DRILL_COPY_CLASS,
   SETTINGS_DRILL_LEADING_BODY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_LABEL_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS,
   SETTINGS_GROUP_CLASS,
   SETTINGS_GROUP_LABEL_CLASS,
   SETTINGS_GROUP_LIST_CLASS,
@@ -391,7 +398,36 @@ describe("settings hub lock", () => {
     expect(SETTINGS_GROUP_LABEL_CLASS).toBe(SETTINGS_SECTION_LABEL_CLASS);
     expect(SETTINGS_GROUP_LABEL_CLASS).toBe("t-label text-ink-3");
     expect(SETTINGS_GROUP_STACK_CLASS).toContain("gap-[var(--space-2)]");
-    expect(SETTINGS_GROUP_LIST_CLASS).toContain("divide-y");
+    expect(SETTINGS_GROUP_LIST_CLASS).toBe(
+      "flex list-none flex-col divide-y divide-hairline",
+    );
+    expect(SETTINGS_GROUP_LIST_CLASS).not.toContain("gap-");
+    expect(SETTINGS_GROUP_LIST_CLASS).not.toContain("space-y");
+    expect(SETTINGS_GROUP_CLASS).not.toMatch(/\bpy-/);
+    expect(SETTINGS_GROUP_CLASS).not.toContain("gap-");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CLASS).toBe(
+      "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-2)]",
+    );
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CLASS).not.toContain("items-start");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CLASS).not.toContain("self-start");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CLASS).not.toContain("flex-col");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS).toContain("flex-wrap");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS).toContain("items-center");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS).toContain("md:flex-nowrap");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS).toContain("gap-x-[var(--space-4)]");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS).toContain("gap-y-[var(--space-1)]");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS).not.toContain("flex-col");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_LABEL_CLASS).toContain("whitespace-nowrap");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS).toContain("t-body-sm");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS).toContain("text-ink-3");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS).toContain("max-w-full");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS).not.toContain("truncate");
+    expect(menuLabelTruncatesOnPhone(SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS)).toBe(false);
+    expect(menuLabelTruncatesOnPhone(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS)).toBe(false);
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS).toContain("items-center");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS).not.toContain("self-start");
+    expect(SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS).not.toContain("items-start");
+    expect(SETTINGS_DRILL_COPY_CLASS).toContain("flex-col");
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
     expect(settingsSrc).toContain("Shared SoT for");
     expect(settingsSrc).toContain("Rights Holder / Legal Entities");

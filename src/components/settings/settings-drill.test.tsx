@@ -6,9 +6,13 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
   SETTINGS,
   SETTINGS_DRILL_ACCENT_CLASS,
+  SETTINGS_DRILL_COPY_CLASS,
   SETTINGS_DRILL_LEADING_BODY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS,
+  SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS,
   SETTINGS_EDIT_HELPER_CLASS,
   SETTINGS_GROUP_CLASS,
   SETTINGS_GROUP_LABEL_CLASS,
@@ -37,7 +41,36 @@ describe("SettingsDrillRow", () => {
     expect(html).toContain(`href="${SETTINGS.themeHref}"`);
     expect(html).toContain(SETTINGS_DRILL_ROW_CLASS);
     expect(html).toContain(SETTINGS_DRILL_VALUE_CLASS);
+    expect(html).toContain(SETTINGS_DRILL_COPY_CLASS);
+    expect(html).not.toContain("data-settings-drill-value-trail");
     expect(html).not.toContain("data-settings-drill-readonly");
+  });
+
+  it("trails the value with the chevron on a PrefDrillGroup value drill", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsDrillRow, {
+        kind: "location",
+        label: "Location",
+        value: "Dallas, TX, US",
+        href: "/settings/preferences/location",
+        layout: "value-trail",
+      }),
+    );
+    expect(html).toContain('data-settings-drill-row="location"');
+    expect(html).toContain(SETTINGS_DRILL_ROW_CLASS);
+    expect(html).toContain(SETTINGS_DRILL_VALUE_TRAIL_CLASS);
+    expect(html).toContain(SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS);
+    expect(html).toContain(SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS);
+    expect(html).toContain(">Dallas, TX, US<");
+    expect(html).not.toContain(SETTINGS_DRILL_COPY_CLASS);
+    expect(html).not.toContain("truncate");
+    expect(html).not.toContain("self-start");
+    expect(html).not.toContain("items-start");
+    const copyAt = html.indexOf('data-settings-drill-value-copy=""');
+    const chevronAt = html.indexOf('data-settings-drill-chevron=""');
+    expect(copyAt).toBeGreaterThan(-1);
+    expect(chevronAt).toBeGreaterThan(copyAt);
+    expect(html.indexOf(">Location<")).toBeLessThan(html.indexOf(">Dallas, TX, US<"));
   });
 
   it("drops the chevron on a read-only row — no fake drill-in", () => {
@@ -100,8 +133,27 @@ describe("SettingsDrillRow", () => {
     expect(html).toContain("data-settings-drill-leading");
     expect(html).toContain("data-identity-avatar");
     expect(html).toContain(SETTINGS_DRILL_LEADING_BODY_CLASS);
+    expect(html).toContain(SETTINGS_DRILL_COPY_CLASS);
+    expect(html).not.toContain("data-settings-drill-value-trail");
     expect(html.indexOf("data-settings-drill-leading")).toBeLessThan(html.indexOf("Ada"));
     expect(html.indexOf("Ada")).toBeLessThan(html.indexOf("Account owner · Accepted"));
+  });
+
+  it("keeps person rows stacked when a value trail is requested", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsDrillRow, {
+        kind: "team-u1",
+        label: "Ada",
+        value: "Account owner · Accepted",
+        readOnly: true,
+        layout: "value-trail",
+        leading: createElement("span", { "data-identity-avatar": "" }, "AD"),
+      }),
+    );
+    expect(html).toContain("data-settings-drill-leading");
+    expect(html).toContain(SETTINGS_DRILL_LEADING_BODY_CLASS);
+    expect(html).toContain(SETTINGS_DRILL_COPY_CLASS);
+    expect(html).not.toContain("data-settings-drill-value-trail");
   });
 
   it("renders an accent action row for tucked Add / Invite", () => {

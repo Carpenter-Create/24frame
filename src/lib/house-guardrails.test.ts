@@ -208,6 +208,25 @@ describe("house guardrails", () => {
     expect(rows).toContain("PrefControlSection");
     expect(rows).toContain("page white");
 
+    expect(readme).toContain("preferences-settings-row-grammar-lock-v2.md");
+    expect(readme).toContain("Supersedes v1 geometry only");
+    const rowsV2 = readFileSync(
+      "docs/design-locks/preferences-settings-row-grammar-lock-v2.md",
+      "utf8",
+    );
+    expect(rowsV2).toContain("Coinbase horizontal");
+    expect(rowsV2).toContain("items-center");
+    expect(rowsV2).toContain("Supersedes (geometry only)");
+    expect(rowsV2).toContain("theme-sot-auto-lock-v1.md");
+    expect(rowsV2).toContain("G1.");
+    expect(rowsV2).toContain("G2.");
+    expect(rowsV2).toContain("G3.");
+    expect(rowsV2).toContain("G4.");
+    expect(rowsV2).toContain("G5.");
+    expect(rowsV2).toContain("G6.");
+    expect(rowsV2).toContain("G7.");
+    expect(rowsV2).toContain("never truncate");
+
     const theme = readFileSync("docs/design-locks/theme-sot-auto-lock-v1.md", "utf8");
     expect(theme).toContain("gc-theme");
     expect(theme).toContain("lib/theme.ts");
