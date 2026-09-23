@@ -910,7 +910,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(explore).toContain("SocialForYouSkeleton");
     expect(explore).not.toContain("SocialForYouRail");
     expect(explore).not.toContain("loadSuggestedPeople");
-    expect(explore).not.toContain("signSocialForYouCourseCovers");
+    expect(explore).toContain("signSocialForYouCourseCovers");
     expect(explore).not.toContain("signedEducationCoverUrls");
     expect(messages).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(messages).toContain("SOCIAL_HOME_CENTER_CLASS");

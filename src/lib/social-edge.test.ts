@@ -71,13 +71,13 @@ describe("Social Edge media proxies", () => {
 });
 
 describe("Social Edge vs Node runtime lock", () => {
-  it("edges public profile, Explore, follows, and the handle redirect", () => {
+  it("edges public profile, follows, search, and the handle redirect", () => {
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const explore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
     const search = readFileSync("src/app/(app)/social/search/page.tsx", "utf8");
     const follows = readFileSync("src/app/(app)/social/u/[handle]/follows/page.tsx", "utf8");
     const members = readFileSync("src/app/(app)/social/members/[handle]/page.tsx", "utf8");
-    for (const src of [publicProfile, explore, search, follows, members]) {
+    for (const src of [publicProfile, search, follows, members]) {
       expect(src).toContain('export const runtime = "edge"');
       expect(src).not.toContain("@/lib/s3-avatars");
       expect(src).not.toContain("@/lib/s3-social-media");
@@ -87,6 +87,19 @@ describe("Social Edge vs Node runtime lock", () => {
       expect(src).not.toContain("@aws-sdk");
       expect(src).not.toContain("MUX_TOKEN_SECRET");
     }
+    // Education cover signing is node-only. Explore uses the shared signer.
+    expect(explore).toContain('export const runtime = "nodejs"');
+    expect(explore).toContain("signSocialForYouCourseCovers");
+    expect(explore).not.toContain('export const runtime = "edge"');
+    expect(explore).not.toContain("@/lib/s3-avatars");
+    expect(explore).not.toContain("@/lib/s3-social-media");
+    expect(explore).not.toContain("@/lib/s3-education");
+    expect(explore).not.toContain("@/lib/social-mux-server");
+    expect(explore).not.toContain("signedAvatarUrl");
+    expect(explore).not.toContain("signedSocialMedia");
+    expect(explore).not.toContain("signedEducationCoverUrls");
+    expect(explore).not.toContain("@aws-sdk");
+    expect(explore).not.toContain("MUX_TOKEN_SECRET");
     expect(publicProfile).toContain("socialAvatarHref");
     expect(publicProfile).toContain("socialMediaProxiesByPostId");
     expect(publicProfile).toContain("loadCachedSocialProfileByHandle");
