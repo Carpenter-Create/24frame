@@ -23,13 +23,14 @@ import {
 // Course management lives on the Education operator workspace,
 // not a Preferences row. Not a CMS. Not GC Staff admin.
 //
-// Location and Theme are Coinbase drills inside the inset group.
-// The muted value is the composed place, or the empty placeholder,
-// and the stored theme label (Auto, Dark, or Light).
+// Location and Theme are Coinbase horizontal drills inside the
+// inset group. The muted value is the composed place, or the empty
+// placeholder, and the stored theme label (Auto, Dark, or Light).
 // Mobile also drills to Notifications. Instant switches stay
 // on the Notifications pane. Theme is not under that matrix.
-// Desktop keeps the matrix inside SETTINGS_CONTENT_MEASURE_CLASS —
-// constrained measure, not full-bleed rows.
+// PrefDrillGroup and the Notifications matrix share one
+// SETTINGS_CONTENT_MEASURE_CLASS — constrained measure, not
+// full-bleed rows. Same left and right edges.
 
 export function PreferencesSettings({
   prefs,
@@ -47,21 +48,26 @@ export function PreferencesSettings({
           title={settingsPaneTitle("preferences")}
           pathname={SETTINGS.preferencesHref}
         />
-        <div data-settings-pref-index="" className={SETTINGS_DRILL_LIST_CLASS}>
-          <PrefDrillGroup locationValue={locationValue} />
-          <div className={menuHostClass("phone")} data-menu-host="phone" data-menu-family="B">
-            <SettingsDrillRow
-              kind="notifications"
-              label={NOTIFICATION_PREFS.title}
-              href={SETTINGS.notificationsHref}
-            />
-          </div>
-        </div>
         <div
-          data-settings-pref-desktop=""
-          className={`${menuHostClass("desktop")} ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
+          data-settings-pref-column=""
+          className={`${SETTINGS_CONTENT_MEASURE_CLASS} flex flex-col gap-[var(--space-6)]`}
         >
-          <NotificationPreferences initialPrefs={prefs} />
+          <div data-settings-pref-index="" className={SETTINGS_DRILL_LIST_CLASS}>
+            <PrefDrillGroup locationValue={locationValue} />
+            <div className={menuHostClass("phone")} data-menu-host="phone" data-menu-family="B">
+              <SettingsDrillRow
+                kind="notifications"
+                label={NOTIFICATION_PREFS.title}
+                href={SETTINGS.notificationsHref}
+              />
+            </div>
+          </div>
+          <div
+            data-settings-pref-desktop=""
+            className={`${menuHostClass("desktop")} ${SETTINGS_SECTION_CLASS}`}
+          >
+            <NotificationPreferences initialPrefs={prefs} />
+          </div>
         </div>
       </section>
     </div>

@@ -26,9 +26,10 @@
 // Settings home for it. Location drills to /settings/preferences/location
 // and persists profiles.location_city, location_region, and
 // location_country. Mobile Preferences drills to Location and Notifications.
-// Desktop shows the Location row and keeps the matrix inside
+// Desktop shows the Location row and the matrix inside one
 // SETTINGS_CONTENT_MEASURE_CLASS — a constrained measure, not full-bleed rows
-// across the rail-to-edge span. Leftover
+// across the rail-to-edge span. PrefDrillGroup and the Notifications
+// card share that measure so their right edges match. Leftover
 // workspace prefs may appear as optional subsections only —
 // never as a You / Social / Education / Aggregation spine.
 //
@@ -193,12 +194,31 @@ export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
   "flex min-h-11 w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
+// Default copy for hub, Help, Profile, and person rows: label over
+// value. PrefDrillGroup value drills do not use this — see
+// SETTINGS_DRILL_VALUE_TRAIL_* (row-grammar lock v2).
 export const SETTINGS_DRILL_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 // Person rows: avatar stays leading. Identity + trailing stack on
 // phone so the row never truncates. Desktop keeps identity · action.
 export const SETTINGS_DRILL_LEADING_BODY_CLASS =
   "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)] md:flex-row md:items-center md:justify-between md:gap-[var(--space-4)]";
 export const SETTINGS_DRILL_VALUE_CLASS = "t-body-sm text-ink-3";
+// PrefDrillGroup Coinbase horizontal drill (lock v2). One row:
+// label left, value trailing, chevron in the auto column centered
+// on the full copy height (items-center — never the label line alone).
+// Phone: flex-wrap + shrink-0 moves the value under the label only
+// when it cannot share the line; max-w-full wraps the value, no
+// ellipsis. Desktop stays one row (md:flex-nowrap). Do not point
+// person rows (leading) or hub Family B here.
+export const SETTINGS_DRILL_VALUE_TRAIL_CLASS =
+  "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-2)]";
+export const SETTINGS_DRILL_VALUE_TRAIL_COPY_CLASS =
+  "flex min-w-0 flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[var(--space-1)] md:flex-nowrap";
+export const SETTINGS_DRILL_VALUE_TRAIL_LABEL_CLASS = "shrink-0 whitespace-nowrap";
+export const SETTINGS_DRILL_VALUE_TRAIL_TEXT_CLASS =
+  "t-body-sm max-w-full shrink-0 text-ink-3 [overflow-wrap:anywhere] md:min-w-0 md:shrink md:text-right";
+export const SETTINGS_DRILL_VALUE_TRAIL_CHEVRON_CLASS =
+  "flex shrink-0 items-center gap-[var(--space-2)]";
 export const SETTINGS_DRILL_ACCENT_CLASS = "text-accent";
 export const SETTINGS_DRILL_CHEVRON_CLASS = `${SETTINGS_RAIL_CHEVRON_CLASS} text-ink-3`;
 
@@ -210,6 +230,9 @@ export const SETTINGS_GROUP_STACK_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const SETTINGS_GROUP_LABEL_CLASS = SETTINGS_SECTION_LABEL_CLASS;
 export const SETTINGS_GROUP_CLASS =
   `${HOUSE_MODULE_CLASS} overflow-hidden px-[var(--space-4)]`;
+// Hairline between rows only. No gap and no extra margin. Row pad is
+// SETTINGS_DRILL_ROW_CLASS py (space-3 / 12). This list adds no
+// vertical pad of its own.
 export const SETTINGS_GROUP_LIST_CLASS =
   "flex list-none flex-col divide-y divide-hairline";
 

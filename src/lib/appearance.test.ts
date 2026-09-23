@@ -101,6 +101,10 @@ describe("appearance copy", () => {
     expect(drillSrc).toContain("SETTINGS.themeHref");
     expect(drillSrc).toContain("useThemePreference");
     expect(drillSrc).toContain("appearancePreferenceLabel");
+    expect(drillSrc).toContain("appearancePreferenceLabel(preference)");
+    expect(drillSrc).toContain('layout="value-trail"');
+    expect(drillSrc).not.toContain("resolveTheme");
+    expect(drillSrc).not.toContain("useTheme(");
     expect(drillSrc).not.toContain("AppearanceThemePicker");
     expect(drillSrc).not.toContain("localStorage");
     expect(drillSrc).not.toContain("THEME_STORAGE_KEY");
