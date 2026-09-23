@@ -20,6 +20,10 @@ import {
   storyReviewArmMs,
   storyReviewFrameSeconds,
   storyReviewMediaSrc,
+  prepareStoryUploadFile,
+  storyUploadContentType,
+  storyUploadNotice,
+  storyUploadSignal,
   storyVideoInputCount,
   nextStoryStudioLive,
   storyRecorderVideoConstraints,
@@ -97,7 +101,7 @@ describe("story MediaRecorder mime probe", () => {
 
   it("seals one playable blob and a detached upload body for WebKit", async () => {
     expect(storyRecorderTimesliceMs()).toBeNull();
-    expect(storyRecorderStopFlushMs()).toBeGreaterThan(0);
+    expect(storyRecorderStopFlushMs()).toBe(250);
     expect(storyReviewFrameSeconds()).toBeGreaterThan(0);
     expect(storyReviewFrameSeconds()).toBeLessThan(1);
     expect(storyReviewMediaSrc("blob:https://24frame.local/clip")).toBe(
@@ -119,6 +123,12 @@ describe("story MediaRecorder mime probe", () => {
     expect(studio).toContain("cloneStoryUploadFile");
     expect(studio).toContain("storyRecorderStopFlushMs()");
     expect(studio).toContain("stopStream(streamRef.current)");
+    expect(studio).toContain("releaseLiveCamera()");
+    expect(studio).not.toContain("AbortSignal.timeout");
+    expect(studio).toContain('body.set("lane", "stories")');
+    expect(studio).toContain('body.set("byte_length", String(prepared.size))');
+    expect(studio).toContain("if (signed.error) return { error: signed.error }");
+    expect(readFileSync("src/lib/social-story-recorder.ts", "utf8")).not.toContain("AbortSignal.timeout");
     expect(studio).toContain('key="story-review"');
     expect(studio).toContain('key="story-live"');
     expect(studio).toContain("onClick={playReview}");
@@ -137,9 +147,46 @@ describe("story MediaRecorder mime probe", () => {
     const postBlock = studio.slice(postStart, postEnd);
     expect(postBlock.indexOf("clip.file.size")).toBeLessThan(postBlock.indexOf("setPosting(true)"));
     expect(postBlock).toContain("SOCIAL.stories.mediaMissing");
+    expect(postBlock).toContain('storyUploadNotice("read")');
+    expect(postBlock).toContain('storyUploadNotice("missing")');
     const sealStart = studio.indexOf("function sealRecording");
     const sealEnd = studio.indexOf("function stopRecording");
-    expect(studio.slice(sealStart, sealEnd)).not.toContain('setPhase("preview")');
+    const sealBlock = studio.slice(sealStart, sealEnd);
+    expect(sealBlock.indexOf("releaseLiveCamera()")).toBeLessThan(sealBlock.lastIndexOf('setPhase("review")'));
+    expect(sealBlock).not.toContain('setPhase("preview")');
+  });
+
+  it("keeps the story upload type exact and splits store errors", () => {
+    expect(storyUploadContentType("video/mp4")).toBe("video/mp4");
+    expect(storyUploadContentType("video/webm")).toBe("video/webm");
+    expect(storyUploadContentType("video/quicktime")).toBe("video/quicktime");
+    expect(storyUploadContentType("video/mp4;codecs=avc1.42E01E,mp4a.40.2")).toBe("video/mp4");
+    expect(storyUploadContentType("video/ogg")).toBeNull();
+    const exact = new File([new Uint8Array([1, 2, 3])], "story.mp4", { type: "video/mp4" });
+    const kept = prepareStoryUploadFile(exact);
+    expect(kept).toBe(exact);
+    const suffixed = new File([new Uint8Array([4, 5])], "clip.mp4", {
+      type: "video/mp4;codecs=avc1",
+    });
+    const normalized = prepareStoryUploadFile(suffixed);
+    expect(normalized).not.toBe("type");
+    if (normalized instanceof File) {
+      expect(normalized.type).toBe("video/mp4");
+      expect(normalized.size).toBe(suffixed.size);
+    }
+    expect(prepareStoryUploadFile(new File([], "empty.mp4", { type: "video/mp4" }))).toBe("missing");
+    expect(prepareStoryUploadFile(new File([new Uint8Array([1])], "notes.txt", { type: "text/plain" }))).toBe(
+      "type",
+    );
+    expect(storyUploadNotice("missing")).toBe("Choose a video first.");
+    expect(storyUploadNotice("type")).toBe("Use a video (MP4, QuickTime, WebM).");
+    expect(storyUploadNotice("read")).toBe("That file cannot be attached.");
+    expect(storyUploadNotice("store")).toBe("The file could not be stored.");
+    expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("read"));
+    expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("missing"));
+    const pending = storyUploadSignal(60_000);
+    expect(pending.signal).toBeInstanceOf(AbortSignal);
+    expect(() => pending.cancel()).not.toThrow();
   });
 
   it("shows flash only when the track can torch, and counts cameras", async () => {

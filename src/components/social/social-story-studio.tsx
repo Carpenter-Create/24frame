@@ -84,9 +84,13 @@ import {
   storyReviewArmMs,
   storyReviewFrameSeconds,
   storyReviewMediaSrc,
+  prepareStoryUploadFile,
   setStoryCameraTorch,
   storyCameraSupportsTorch,
   storyRecorderVideoConstraints,
+  storyUploadNotice,
+  storyUploadSignal,
+  storyUploadTimeoutMs,
   storyVideoInputCount,
   captureStoryStillFrame,
   storyStudioIsLive,
@@ -109,35 +113,46 @@ function stopStream(stream: MediaStream | null) {
 }
 
 async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; error?: string }> {
+  const prepared = prepareStoryUploadFile(file);
+  if (prepared === "missing") return { error: storyUploadNotice("missing") };
+  if (prepared === "type") return { error: storyUploadNotice("type") };
   const body = new FormData();
-  body.set("content_type", file.type);
-  body.set("byte_length", String(file.size));
+  body.set("content_type", prepared.type);
+  body.set("byte_length", String(prepared.size));
   body.set("lane", "stories");
-  const signed = await presignSocialMediaUpload(body);
-  if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
-    return { error: signed.error ?? SOCIAL.home.uploadFailed };
-  }
-  let put: Response;
+  let signed: Awaited<ReturnType<typeof presignSocialMediaUpload>>;
   try {
-    put = await fetch(signed.url, {
+    signed = await presignSocialMediaUpload(body);
+  } catch {
+    return { error: storyUploadNotice("store") };
+  }
+  if (signed.error) return { error: signed.error };
+  if (!signed.url || !signed.key || !signed.kind || !signed.contentType) {
+    return { error: storyUploadNotice("store") };
+  }
+  const pending = storyUploadSignal(storyUploadTimeoutMs());
+  try {
+    const put = await fetch(signed.url, {
       method: "PUT",
       headers: { "Content-Type": signed.contentType },
-      body: file,
-      signal: AbortSignal.timeout(120_000),
+      body: prepared,
+      signal: pending.signal,
     });
+    if (!put.ok) return { error: storyUploadNotice("store") };
+    const kind = socialMediaKindFor(prepared.type);
+    if (kind !== "image" && kind !== "video") return { error: storyUploadNotice("type") };
+    return {
+      item: {
+        kind,
+        key: signed.key,
+        contentType: signed.contentType as SocialMediaContentType,
+      },
+    };
   } catch {
-    return { error: SOCIAL.home.uploadFailed };
+    return { error: storyUploadNotice("store") };
+  } finally {
+    pending.cancel();
   }
-  if (!put.ok) return { error: SOCIAL.home.uploadFailed };
-  const kind = socialMediaKindFor(file.type);
-  if (kind !== "image" && kind !== "video") return { error: SOCIAL.home.uploadFailed };
-  return {
-    item: {
-      kind,
-      key: signed.key,
-      contentType: signed.contentType as SocialMediaContentType,
-    },
-  };
 }
 
 export function SocialStoryCompose({
@@ -421,6 +436,28 @@ export function SocialStoryCompose({
     setPhase("recording");
   }
 
+  function releaseLiveCamera() {
+    const recorder = recorderRef.current;
+    const recorderStream = recorder?.stream ?? null;
+    if (recorder && recorder.state === "inactive") {
+      recorder.ondataavailable = null;
+      recorder.onstop = null;
+      recorderRef.current = null;
+    }
+    const node = videoRef.current;
+    if (node) {
+      try {
+        node.pause();
+      } catch {
+        // The live element may already be paused.
+      }
+      node.srcObject = null;
+    }
+    stopStream(recorderStream);
+    stopStream(streamRef.current);
+    streamRef.current = null;
+  }
+
   function sealRecording(live: number) {
     if (!storyStudioIsLive(liveRef.current, live)) return;
     const contentType = resolveStoryRecorderBlobType(
@@ -429,9 +466,7 @@ export function SocialStoryCompose({
     );
     const blob = new Blob(chunksRef.current, { type: contentType });
     if (blob.size <= 0) {
-      stopStream(streamRef.current);
-      streamRef.current = null;
-      if (videoRef.current) videoRef.current.srcObject = null;
+      releaseLiveCamera();
       setError(SOCIAL.stories.mediaMissing);
       setPhase("video");
       return;
@@ -440,18 +475,15 @@ export function SocialStoryCompose({
     try {
       file = new File([blob], storyRecorderFileName(contentType), { type: contentType });
     } catch {
-      stopStream(streamRef.current);
-      streamRef.current = null;
-      if (videoRef.current) videoRef.current.srcObject = null;
-      setError(SOCIAL.home.uploadFailed);
+      releaseLiveCamera();
+      setError(storyUploadNotice("read"));
       setPhase("video");
       return;
     }
     // Release the camera before the review element mounts. iOS will not
-    // paint a second video while the capture track is still live.
-    stopStream(streamRef.current);
-    streamRef.current = null;
-    if (videoRef.current) videoRef.current.srcObject = null;
+    // paint a second video while the capture track is still live, and the
+    // green indicator stays on until the element drops the stream.
+    releaseLiveCamera();
     if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
     const url = URL.createObjectURL(file);
     clipUrlRef.current = url;
@@ -663,9 +695,16 @@ export function SocialStoryCompose({
       reviewNode.load();
     }
     try {
-      const body = await cloneStoryUploadFile(clip.file);
+      let body: File;
+      try {
+        body = await cloneStoryUploadFile(clip.file);
+      } catch {
+        setError(storyUploadNotice("read"));
+        restoreReviewPlayback(objectUrl);
+        return;
+      }
       if (body.size <= 0) {
-        setError(SOCIAL.stories.mediaMissing);
+        setError(storyUploadNotice("missing"));
         restoreReviewPlayback(objectUrl);
         return;
       }
@@ -690,7 +729,7 @@ export function SocialStoryCompose({
       setPhase("posted");
     } catch {
       if (!storyStudioIsLive(postRef.current, postId)) return;
-      setError(SOCIAL.home.uploadFailed);
+      setError(storyUploadNotice("store"));
       restoreReviewPlayback(objectUrl);
     } finally {
       if (storyStudioIsLive(postRef.current, postId)) setPosting(false);

@@ -1,3 +1,4 @@
+import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_VIDEO_CONTENT_TYPES,
   type SocialVideoContentType,
@@ -120,7 +121,7 @@ export function storyRecorderTimesliceMs(): number | null {
 
 /** WebKit can deliver the last dataavailable after onstop. */
 export function storyRecorderStopFlushMs(): number {
-  return 50;
+  return 250;
 }
 
 /** A hair past zero makes WebKit paint a frame before play. Seek only. */
@@ -190,6 +191,46 @@ export async function setStoryCameraTorch(
 
 export function storyVideoInputCount(devices: ReadonlyArray<{ kind: string }>): number {
   return devices.filter((device) => device.kind === "videoinput").length;
+}
+
+/** House video type with no codecs suffix. Null when the base type is not allowlisted. */
+export function storyUploadContentType(raw: string): SocialVideoContentType | null {
+  return storyRecorderContentType(raw);
+}
+
+export function prepareStoryUploadFile(file: File): File | "missing" | "type" {
+  if (file.size <= 0) return "missing";
+  const type = storyUploadContentType(file.type);
+  if (!type) return "type";
+  if (file.type === type) return file;
+  return new File([file], file.name || storyRecorderFileName(type), {
+    type,
+    lastModified: file.lastModified,
+  });
+}
+
+export function storyUploadNotice(reason: "missing" | "type" | "read" | "store"): string {
+  if (reason === "missing") return SOCIAL.stories.mediaMissing;
+  if (reason === "type") return SOCIAL.stories.mediaType;
+  if (reason === "read") return SOCIAL.home.mediaForbidden;
+  return SOCIAL.home.uploadFailed;
+}
+
+/** Timer via AbortController. Do not call the static timeout helper — older Safari throws. */
+export function storyUploadSignal(timeoutMs: number): { signal?: AbortSignal; cancel: () => void } {
+  if (typeof AbortController === "undefined") return { cancel() {} };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return {
+    signal: controller.signal,
+    cancel() {
+      clearTimeout(timer);
+    },
+  };
+}
+
+export function storyUploadTimeoutMs(): number {
+  return 120_000;
 }
 
 /** Detached bytes. The review element must not be the upload body. */
