@@ -8,9 +8,8 @@
 // it is not the primary size. 1784×446 is the canonical target.
 //
 // Display: phone 112px, desktop 224px, column = SOCIAL_DESKTOP_MEASURE.center, aspect 4:1.
-// Avatar lip ~40% (72 / 88 → 29 / 35). The lip is the face only.
-// Name and @handle stay on the canvas below the cover
-// (Adam lock 2026-09-22). Do not hang the identity row.
+// Design lock v1: avatar 80, lip 40 (exactly half). Same on phone and desktop.
+// The lip is the face only. Name and counts stay on the canvas under the avatar.
 // Crop master stays 1784×446 and is never painted in the profile UI.
 
 import { SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
@@ -30,17 +29,16 @@ export const SOCIAL_PROFILE_COVER_LOCK_A = {
   coverFitHeight: 396,
   /** Legacy cover-fit also accepted by LinkedIn — not the primary size. */
   coverFitWidth: 396 * 4,
-  avatarHangRatio: 0.4,
-  avatarSizeMobile: 72,
-  avatarSizeDesktop: 88,
+  /** Design lock v1 — one disk on phone and desktop. */
+  avatarSize: 80,
+  /** Exactly half the avatar. */
+  avatarLipRatio: 0.5,
 } as const;
 
-export const SOCIAL_PROFILE_COVER_HANG_MOBILE_PX = Math.round(
-  SOCIAL_PROFILE_COVER_LOCK_A.avatarSizeMobile * SOCIAL_PROFILE_COVER_LOCK_A.avatarHangRatio,
-);
+export const SOCIAL_PROFILE_AVATAR_SIZE_PX = SOCIAL_PROFILE_COVER_LOCK_A.avatarSize;
 
-export const SOCIAL_PROFILE_COVER_HANG_DESKTOP_PX = Math.round(
-  SOCIAL_PROFILE_COVER_LOCK_A.avatarSizeDesktop * SOCIAL_PROFILE_COVER_LOCK_A.avatarHangRatio,
+export const SOCIAL_PROFILE_AVATAR_LIP_PX = Math.round(
+  SOCIAL_PROFILE_AVATAR_SIZE_PX * SOCIAL_PROFILE_COVER_LOCK_A.avatarLipRatio,
 );
 
 export const SOCIAL_PROFILE_COVER_ACCEPT = SOCIAL_IMAGE_CONTENT_TYPES.join(",");

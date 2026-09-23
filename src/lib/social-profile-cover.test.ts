@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
+import { SOCIAL_AVATAR_PROFILE_CLASS, SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
 import { SOCIAL_PROFILE_COVER_IMAGE_SIZES, SOCIAL_POST_IMAGE_SIZES } from "@/lib/social-media-display";
 import {
-  SOCIAL_PROFILE_COVER_HANG_DESKTOP_PX,
-  SOCIAL_PROFILE_COVER_HANG_MOBILE_PX,
+  SOCIAL_PROFILE_AVATAR_LIP_PX,
+  SOCIAL_PROFILE_AVATAR_SIZE_PX,
   SOCIAL_PROFILE_COVER_LOCK_A,
   socialProfileCoverPhoto,
   socialProfileRendersCoverBand,
@@ -24,8 +24,9 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(SOCIAL_PROFILE_COVER_LOCK_A.masterHeight).toBe(446);
     expect(SOCIAL_PROFILE_COVER_LOCK_A.coverFitWidth).toBe(1584);
     expect(SOCIAL_PROFILE_COVER_LOCK_A.coverFitHeight).toBe(396);
-    expect(SOCIAL_PROFILE_COVER_HANG_MOBILE_PX).toBe(29);
-    expect(SOCIAL_PROFILE_COVER_HANG_DESKTOP_PX).toBe(35);
+    expect(SOCIAL_PROFILE_AVATAR_SIZE_PX).toBe(80);
+    expect(SOCIAL_PROFILE_AVATAR_LIP_PX).toBe(40);
+    expect(SOCIAL_PROFILE_COVER_LOCK_A.avatarLipRatio).toBe(0.5);
   });
 
   it("keeps chrome tokens aligned with the numeric lock", () => {
@@ -33,46 +34,40 @@ describe("SOCIAL_PROFILE_COVER_LOCK_A", () => {
     expect(chrome).toContain("h-[112px]");
     expect(chrome).toContain("md:h-[224px]");
     expect(chrome).toContain("bg-accent-wash");
-    expect(chrome).toContain("-mt-[29px]");
-    expect(chrome).toContain("md:-mt-[35px]");
+    expect(chrome).toContain(`-mt-[${SOCIAL_PROFILE_AVATAR_LIP_PX}px]`);
+    expect(chrome).not.toContain("md:-mt-");
+    expect(SOCIAL_AVATAR_PROFILE_CLASS).toContain("size-20");
+    expect(SOCIAL_AVATAR_PROFILE_CLASS).not.toContain("size-[72px]");
+    expect(SOCIAL_AVATAR_PROFILE_CLASS).not.toContain("md:size-[88px]");
     expect(chrome).toContain("SOCIAL_PROFILE_COVER_EDIT_CLASS");
-    expect(chrome).toContain("Adam lock 2026-09-22");
-    expect(chrome).toContain("43px phone");
-    expect(chrome).toContain("53px desktop");
-    expect(chrome).toContain("hang the face, never the name stack");
+    expect(chrome).toContain("Design lock v1");
+    expect(chrome).toContain("Phone and desktop share this stack");
     expect(chrome).toContain("Name is house t-heading");
+    expect(chrome).toContain("mt-[var(--space-3)]");
+    expect(chrome).toContain("gap-[var(--space-2)]");
     expect(chrome).toContain(
-      'export const SOCIAL_PROFILE_NAME_STACK_CLASS =\n  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)]";',
+      'export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col";',
     );
+    expect(chrome).not.toContain("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
+    expect(chrome).not.toContain("SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS");
     expect(chrome).toContain(
-      'export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-[var(--space-6)]";',
-    );
-    expect(chrome).toContain(
-      "${SOCIAL_PROFILE_NAME_STACK_CLASS} pt-[var(--space-3)]",
-    );
-    expect(chrome).toMatch(
-      /export const SOCIAL_PROFILE_NAME_CLASS = "min-w-0 break-words t-heading text-ink";/,
+      "export const SOCIAL_PROFILE_NAME_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-heading text-ink`;",
     );
     expect(chrome).not.toMatch(
       /export const SOCIAL_PROFILE_NAME_CLASS = "[^"]*t-title/,
     );
-    expect(chrome).toContain("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
     const ui = readFileSync("src/components/social/social-ui.tsx", "utf8");
     const identity = ui.slice(
       ui.indexOf("export function SocialProfileIdentity"),
       ui.indexOf("export function SocialHighlights"),
     );
+    expect(identity).not.toContain("data-social-profile-avatar-hang");
     const headHost = identity.slice(
       identity.indexOf('data-social-profile-head=""'),
-      identity.indexOf("data-social-profile-avatar-hang"),
+      identity.indexOf("data-social-profile-name"),
     );
-    expect(headHost).not.toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
-    expect(
-      identity.slice(
-        identity.indexOf("data-social-profile-avatar-hang"),
-        identity.indexOf("SOCIAL_PROFILE_NAME_STACK_CLASS"),
-      ),
-    ).toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
+    expect(headHost).toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
+    expect(headHost).toContain("SOCIAL_PROFILE_HEAD_CLASS");
   });
 
   it("omits the visitor band unless a real cover photo exists", () => {

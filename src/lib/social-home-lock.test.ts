@@ -19,10 +19,10 @@ import {
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_HANDLE_CLASS,
+  SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_NAME_STACK_CLASS,
-  SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS,
 } from "./social-chrome";
 import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
@@ -741,7 +741,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("inline-flex items-start gap-x-[var(--space-4)]");
     expect(chrome).not.toContain("max-w-xs");
     expect(chrome).not.toContain("grid w-full grid-cols-3");
-    expect(chrome).toContain("items-end");
+    expect(SOCIAL_PROFILE_HEAD_CLASS).toContain("flex-col");
+    expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("items-end");
     expect(empty).toContain("SocialProfilePostsEmpty");
     expect(empty).toContain("SOCIAL_PROFILE_POSTS_EMPTY_CLASS");
     expect(profile).not.toContain("SOCIAL.profile.sharePost");
@@ -779,17 +780,18 @@ describe("Social Home miss list v1 P0 lock", () => {
       homeSkeleton.indexOf("export function SocialProfileSkeleton"),
     );
     expect(profileCenterSkeleton).not.toContain("SOCIAL_PROFILE_META_CLASS");
-    expect(profileCenterSkeleton).toContain("SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS");
+    expect(profileCenterSkeleton).toContain("SOCIAL_PROFILE_NAME_STACK_CLASS");
+    expect(profileCenterSkeleton).not.toContain("SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS");
+    expect(profileCenterSkeleton).not.toContain("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
     expect(profileCenterSkeleton).not.toContain("gap-[var(--space-1)]");
-    const skeletonHeadRow = profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_ON_COVER_CLASS");
+    const skeletonOverlap = profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
+    const skeletonHead = profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS");
     const skeletonNameBar = profileCenterSkeleton.indexOf("h-7 w-40");
     const skeletonAvatar = profileCenterSkeleton.indexOf("SOCIAL_AVATAR_PROFILE_CLASS");
-    const skeletonHang = profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
-    expect(skeletonHeadRow).toBeGreaterThan(-1);
-    expect(skeletonHeadRow).toBeLessThan(skeletonNameBar);
-    expect(skeletonAvatar).toBeGreaterThan(skeletonHeadRow);
-    expect(skeletonHang).toBeGreaterThan(skeletonAvatar);
-    expect(skeletonHang).toBeLessThan(skeletonNameBar);
+    expect(skeletonOverlap).toBeGreaterThan(-1);
+    expect(skeletonOverlap).toBeLessThan(skeletonAvatar);
+    expect(skeletonHead).toBeGreaterThan(skeletonOverlap);
+    expect(skeletonAvatar).toBeLessThan(skeletonNameBar);
     expect(profileCenterSkeleton.slice(skeletonNameBar)).not.toContain(
       "SOCIAL_PROFILE_HEAD_OVERLAP_CLASS",
     );
@@ -797,7 +799,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(skeletonNameBar).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_STATS_CLASS"),
     );
-    expect(skeletonHeadRow).toBeLessThan(
+    expect(skeletonHead).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_ACTIONS_CLASS"),
     );
     expect(
@@ -865,14 +867,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("Instagram: one centered profile stack");
     expect(chrome).not.toContain("Facebook: side air / gutters");
     expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("flex-col");
-    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toBe(
-      "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)]",
-    );
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("mt-[var(--space-3)]");
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).toContain("w-full");
+    expect(SOCIAL_PROFILE_NAME_STACK_CLASS).not.toContain("flex-1");
     expect(SOCIAL_PROFILE_NAME_STACK_CLASS).not.toContain("--space-1");
-    expect(SOCIAL_PROFILE_NAME_STACK_ON_COVER_CLASS).toBe(
-      `${SOCIAL_PROFILE_NAME_STACK_CLASS} pt-[var(--space-3)]`,
-    );
-    expect(SOCIAL_PROFILE_IDENTITY_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
+    expect(SOCIAL_PROFILE_IDENTITY_CLASS).toBe("flex flex-col");
     expect(SOCIAL_PROFILE_NAME_CLASS).toContain("t-heading");
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("t-title");
     expect(SOCIAL_PROFILE_NAME_CLASS).not.toMatch(/md:|max-md:|text-\[/);

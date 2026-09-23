@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { SOCIAL_PROFILE_ACTIONS_CLASS } from "@/lib/social-chrome";
 import {
   SocialCreateSkeleton,
   SocialDmsSkeleton,
@@ -87,7 +88,7 @@ describe("Social loading skeletons", () => {
       profile.indexOf("rounded-full"),
     );
     expect(profile.indexOf("data-social-profile-links-skeleton")).toBeLessThan(
-      profile.indexOf("mt-[var(--space-3)]"),
+      profile.indexOf(SOCIAL_PROFILE_ACTIONS_CLASS),
     );
     expect(profile).not.toContain("size-6");
     expect(profile).toContain("mt-[var(--space-3)]");
