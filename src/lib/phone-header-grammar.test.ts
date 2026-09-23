@@ -168,7 +168,9 @@ describe("phone header grammar A — trim trailing", () => {
     );
     expect(HOUSE_LEAD_CHROME_CLASS).toContain(HOUSE_PHONE_TRAILING_GUTTER_CLASS);
     expect(HOUSE_LEAD_CHROME_CLASS).toContain("max-md:pl-[var(--space-6)]");
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:px-[var(--chrome-gutter)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:pl-[var(--shell-gutter-inline-start)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:pr-[var(--shell-gutter-inline-end)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("md:px-[var(--chrome-gutter)]");
     expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("px-[var(--space-6)]");
     expect(leadLib).toContain("HOUSE_PHONE_TRAILING_GUTTER_CLASS");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");

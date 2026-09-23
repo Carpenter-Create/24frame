@@ -37,7 +37,7 @@ import {
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
-  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_SHELL_GUTTER_X_CLASS,
   HOUSE_CANVAS_X_CLASS,
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
@@ -334,15 +334,20 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--sidebar-width:\s*256px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*var\(--sidebar-width\);/);
-    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
-    expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
+    expect(tokens).toMatch(/--home-content-width:\s*1364px;/);
+    expect(tokens).toMatch(/--shell-gutter-inline-start:\s*32px;/);
+    expect(tokens).toMatch(/--shell-gutter-inline-end:\s*44px;/);
+    expect(HOUSE_SHELL_GUTTER_X_CLASS).toBe(
+      "md:pl-[var(--shell-gutter-inline-start)] md:pr-[var(--shell-gutter-inline-end)]",
+    );
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("top-[calc(var(--header-height)+var(--chrome-gutter))]");
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain(
       "h-[calc(100dvh-var(--header-height)-calc(var(--chrome-gutter)*2))]",
     );
-    expect(leadLib).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(leadLib).toContain("HOUSE_SHELL_GUTTER_X_CLASS");
+    expect(leadLib).not.toContain("md:px-[var(--chrome-gutter)]");
     expect(leadLib).not.toContain("md:px-[var(--content-inset)]");
     expect(lead).not.toContain("md:px-[var(--content-inset)]");
     expect(lead).not.toContain("md:pl-5");
