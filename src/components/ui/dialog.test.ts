@@ -43,6 +43,9 @@ describe("dialog confirm grammar", () => {
     expect(DIALOG_SIZES.sm).toContain("400px");
     expect(DIALOG_SIZES.md).toContain("480px");
     expect(src).toContain("export function DialogFooter");
+    expect(src).toContain("export { Dialog as HouseDialog }");
+    expect(src).not.toContain("22rem");
+    expect(src).not.toContain("32rem");
     expect(src).toContain("data-dialog-size");
     expect(src).toContain('data-house-overlay-host="house-dialog"');
     expect(src).toContain("AppSheetFrame");

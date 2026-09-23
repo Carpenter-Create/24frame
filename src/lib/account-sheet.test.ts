@@ -110,7 +110,7 @@ describe("account sheet lock", () => {
     }
   });
 
-  it("locks the 544:561 / 537:557 surface: 32 clear under the bar, 32 bottom, sides 24", () => {
+  it("locks the phone account surface to shared AppSheet chrome — pad 16, hug", () => {
     expect(ACCOUNT_SHEET_HOST_CLASS).toBe(APP_SHEET_HOST_CLASS);
     expect(ACCOUNT_SHEET_HOST_CLASS).toContain("justify-end");
     expect(ACCOUNT_SHEET_HOST_CLASS).toContain("flex-col");
@@ -121,14 +121,15 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain(APP_SHEET_RISE_CLASS);
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("h-auto");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("max-h-[90dvh]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS.split(" ")).not.toContain("h-[90dvh]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("px-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("max-h-[90vh]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("p-[var(--space-4)]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("rounded-t-[16px]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("shadow-none");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("gap-[var(--space-6)]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("pb-[var(--space-8)]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("px-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("pb-[var(--space-8)]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("pb-[var(--space-12)]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("pt-[calc(4px+var(--space-8))]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS.split(" ")).not.toContain("p-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("pt-[calc(4px+var(--space-8))]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("app-sheet-rise");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("md:w-[390px]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("w-[264px]");
@@ -196,9 +197,10 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("border-hairline");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("shadow-none");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toMatch(/shadow-(?:sm|md|lg)|elevation/);
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("px-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("pb-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("pt-[calc(4px+var(--space-6))]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("p-[var(--space-2)]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("px-[var(--space-6)]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pb-[var(--space-6)]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pt-[calc(4px+var(--space-6))]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("px-[var(--space-4)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("pb-[var(--space-4)]");

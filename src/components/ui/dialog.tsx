@@ -122,3 +122,5 @@ export function Dialog({
     </>
   );
 }
+
+export { Dialog as HouseDialog };

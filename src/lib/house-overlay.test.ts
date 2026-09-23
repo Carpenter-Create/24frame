@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "./house-sheet";
+import { ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS, ACCOUNT_SHEET_SURFACE_CLASS } from "./account-sheet";
+import { APP_SHEET_CHROME_CLASS, APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "./house-sheet";
 import { HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS } from "./house-page-select";
 import { MENU_SURFACE_CONTENT_CLASS, MENU_SURFACE_ITEM_CLASS, menuSurfaceContentClass } from "./menu-surface";
 import { SOCIAL_COMMENT_SHEET_SURFACE_CLASS, SOCIAL_PROFILE_EDIT_HOST_CLASS } from "./social-chrome";
@@ -93,6 +94,9 @@ describe("HouseOverlay dual-host lock v1", () => {
     expect(APP_SHEET_LOCK_SURFACE_CLASS).toContain("env(safe-area-inset-bottom)");
     expect(src("src/components/chrome/house-overlay.tsx")).toContain("Close44");
     expect(src("src/lib/house-sheet.ts")).not.toContain("md:items-center");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain(APP_SHEET_CHROME_CLASS);
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("px-[var(--space-6)]");
+    expect(APP_SHEET_SCRIM_CLASS).not.toContain("bg-ink/24");
   });
 
   it("G4 centers HouseDialog at 400 / 480 with a button footer and no sheet skin", () => {
@@ -148,6 +152,9 @@ describe("HouseOverlay dual-host lock v1", () => {
     expect(MENU_SURFACE_CONTENT_CLASS).toContain("border-hairline");
     expect(MENU_SURFACE_CONTENT_CLASS).toContain("shadow-none");
     expect(MENU_SURFACE_ITEM_CLASS).toContain("min-h-[44px]");
+    expect(MENU_SURFACE_CONTENT_CLASS).not.toContain("rounded-[var(--radius)]");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain(MENU_SURFACE_CONTENT_CLASS);
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("w-[264px]");
     expect(menuSurfaceContentClass("sparse")).toContain("w-max");
     expect(menuSurfaceContentClass("sparse")).not.toContain("17.5rem");
     expect(src("src/components/chrome/menu-surface.tsx")).not.toContain("HouseDrawer");

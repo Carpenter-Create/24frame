@@ -41,7 +41,8 @@
 // bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
-import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_CHROME_CLASS, APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
+import { MENU_SURFACE_CONTENT_CLASS } from "@/lib/menu-surface";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
@@ -101,16 +102,13 @@ export function accountSheetGroupedRows(items: readonly UserMenuAction[]) {
   }));
 }
 
-// 544:561 / 537:557 — sides 24, bottom 32 (sheet pad B). 32 clear
-// under the 4px half-bar (padT 36 = 4+32) so the bar does not eat
-// the top air. Height from the stack (h-auto hug). max-h-[90dvh]
-// is the overflow ceiling — not a forced 90% floor. Leftover
-// above Log out is 24 house air, shrink-0. Identity 48 + Close/44
-// one row. Desktop 629:795 hug does not use this surface.
+// Phone account sheet uses AppSheet chrome (pad 16, radius 16, 90vh,
+// no shadow). Hug stays h-auto. The stage/pin stack is the menu body.
+// Desktop 629:795 hug does not use this surface.
 export const ACCOUNT_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const ACCOUNT_SHEET_SURFACE_CLASS =
-  "account-sheet-surface relative z-10 flex h-auto max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-8)] pt-[calc(4px+var(--space-8))] app-sheet-rise";
+  `${APP_SHEET_CHROME_CLASS} account-sheet-surface relative z-10 h-auto overflow-hidden`;
 
 export const ACCOUNT_SHEET_HEAD_CLASS =
   "flex min-h-12 w-full shrink-0 items-center justify-between";
@@ -174,7 +172,7 @@ export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 // 24 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
 // min-h. NOT 522. NOT 570. NOT 672. NOT 384. Align-end to the
 // avatar (right edge flush). 8px (--space-2) under the trigger.
-// Not a 90% sheet. 24 pad. Tight Settings / Theme / Get Help stack.
+// Not a 90% sheet. Surface chrome is MenuSurface. Tight Settings / Theme / Get Help stack.
 // No leftover grow. Pin Log out,
 // hairline, footer as siblings. Hairline only under Log out.
 // Log out → hairline 16. Hairline → footer 16. Do not hug the
@@ -196,8 +194,10 @@ export const ACCOUNT_MENU_DROPDOWN_ALIGN = "end" as const;
 
 export const ACCOUNT_MENU_DROPDOWN_GAP = "var(--space-2)" as const;
 
+// MenuSurface content chrome (radius 12, hairline, no shadow).
+// 264 hug and align-end stay on this instance. Menu rows stay here.
 export const ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS =
-  "absolute z-10 flex h-auto w-[264px] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface px-[var(--space-6)] pb-[var(--space-6)] pt-[calc(4px+var(--space-6))] shadow-none";
+  `${MENU_SURFACE_CONTENT_CLASS} absolute z-10 flex h-auto w-[264px] flex-col overflow-hidden`;
 
 export type AccountMenuDropdownAlign = {
   top: string;

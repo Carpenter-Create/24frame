@@ -101,7 +101,7 @@ describe("house sheet lock", () => {
     expect(SHEET_GROUP_CLASS).not.toContain("bg-surface-muted");
   });
 
-  it("locks app-sheet chrome to 543:576 — r16, pad 16/24/48, quiet scrim", () => {
+  it("locks app-sheet chrome to radius 16, pad 16, max 90vh, scrim 40%", () => {
     expect(APP_SHEET_HOST_CLASS).toBe(
       "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden",
     );
@@ -113,6 +113,9 @@ describe("house sheet lock", () => {
     expect(APP_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(APP_SHEET_SURFACE_CLASS).toContain("rounded-t-[16px]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("p-[var(--space-4)]");
+    expect(APP_SHEET_SURFACE_CLASS).not.toContain("px-[var(--space-6)]");
+    expect(APP_SHEET_SURFACE_CLASS).not.toContain("pb-[var(--space-12)]");
+    expect(APP_SHEET_SCRIM_CLASS).not.toContain("bg-ink/24");
     expect(APP_SHEET_SURFACE_CLASS).toContain("max-h-[90vh]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("shadow-none");
     expect(APP_SHEET_SURFACE_CLASS).toContain("env(safe-area-inset-bottom)");

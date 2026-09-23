@@ -63,8 +63,16 @@ export const APP_SHEET_SCRIM_FADE_CLASS = "app-sheet-scrim-fade";
 export const APP_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
 
+// Pad 16. Safe-area sits in the bottom pad. Radius 16, max 90vh, no shadow.
+// Gap between children is the sheet stack; it is not a second pad.
+export const APP_SHEET_PAD_CLASS =
+  "p-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
+
+export const APP_SHEET_CHROME_CLASS =
+  `flex w-full max-h-[90vh] flex-col rounded-t-[16px] bg-surface ${APP_SHEET_PAD_CLASS} shadow-none app-sheet-rise`;
+
 export const APP_SHEET_SURFACE_CLASS =
-  "flex w-full max-h-[90vh] flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface p-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))] shadow-none app-sheet-rise";
+  `${APP_SHEET_CHROME_CLASS} gap-[var(--space-6)]`;
 
 export const APP_SHEET_HEAD_CLASS = "flex h-14 shrink-0 items-center";
 
