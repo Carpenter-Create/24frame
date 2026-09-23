@@ -67,6 +67,7 @@ import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   formatStoryRecorderClock,
   nextStoryStudioLive,
+  bindStoryReviewVideo,
   cloneStoryUploadFile,
   probeStoryRecorderMimeType,
   resolveStoryRecorderBlobType,
@@ -74,6 +75,7 @@ import {
   storyRecorderHoldMs,
   storyRecorderStopFlushMs,
   storyRecorderTimesliceMs,
+  storyReviewArmMs,
   storyReviewFrameSeconds,
   storyReviewMediaSrc,
   storyRecorderVideoConstraints,
@@ -153,6 +155,7 @@ export function SocialStoryCompose({
   const clipUrlRef = useRef<string | null>(null);
   const liveRef = useRef(0);
   const postRef = useRef(0);
+  const reviewArmRef = useRef(0);
 
   const [phase, setPhase] = useState<StudioPhase>("stage");
   const [still, setStill] = useState(false);
@@ -223,6 +226,17 @@ export function SocialStoryCompose({
   }, []);
 
   useEffect(() => {
+    if (phase === "review") {
+      stopStream(streamRef.current);
+      streamRef.current = null;
+      const liveNode = videoRef.current;
+      if (liveNode) {
+        liveNode.pause();
+        liveNode.srcObject = null;
+      }
+      if (clip?.kind === "video" && clip.url) bindStoryReviewVideo(reviewRef.current, clip.url);
+      return;
+    }
     const node = videoRef.current;
     const stream = streamRef.current;
     if (!node || !stream) return;
@@ -231,7 +245,7 @@ export function SocialStoryCompose({
     node.muted = true;
     node.playsInline = true;
     void node.play().catch(() => undefined);
-  }, [phase]);
+  }, [phase, clip]);
 
   async function acquireStream(nextFacing: StoryStudioFacing, audio: boolean): Promise<MediaStream> {
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -366,16 +380,22 @@ export function SocialStoryCompose({
     );
     const blob = new Blob(chunksRef.current, { type: contentType });
     if (blob.size <= 0) {
+      stopStream(streamRef.current);
+      streamRef.current = null;
+      if (videoRef.current) videoRef.current.srcObject = null;
       setError(SOCIAL.stories.mediaMissing);
-      setPhase("preview");
+      setPhase("video");
       return;
     }
     let file: File;
     try {
       file = new File([blob], storyRecorderFileName(contentType), { type: contentType });
     } catch {
+      stopStream(streamRef.current);
+      streamRef.current = null;
+      if (videoRef.current) videoRef.current.srcObject = null;
       setError(SOCIAL.home.uploadFailed);
-      setPhase("preview");
+      setPhase("video");
       return;
     }
     // Release the camera before the review element mounts. iOS will not
@@ -389,6 +409,7 @@ export function SocialStoryCompose({
     setClip({ file, url, contentType, kind: "video" });
     setPlaying(false);
     setError("");
+    reviewArmRef.current = Date.now();
     setPhase("review");
   }
 
@@ -496,11 +517,13 @@ export function SocialStoryCompose({
     });
     setPlaying(false);
     setError("");
+    reviewArmRef.current = Date.now();
     setPhase("review");
   }
 
   function retake() {
     if (posting) return;
+    if (Date.now() - reviewArmRef.current < storyReviewArmMs()) return;
     const image = clip?.kind === "image";
     postRef.current = nextStoryStudioLive(postRef.current);
     releaseClip();
@@ -549,21 +572,35 @@ export function SocialStoryCompose({
       kind: resolved.kind,
     });
     setPlaying(false);
+    reviewArmRef.current = Date.now();
     setPhase("review");
   }
 
   function restoreReviewPlayback(objectUrl: string) {
+    bindStoryReviewVideo(reviewRef.current, objectUrl);
+  }
+
+  function playReview() {
+    const url = clipUrlRef.current;
     const node = reviewRef.current;
-    if (!node) return;
-    node.muted = true;
-    node.playsInline = true;
-    node.preload = "auto";
-    node.src = storyReviewMediaSrc(objectUrl);
-    node.load();
+    if (!url || !node) {
+      setError(SOCIAL.stories.mediaMissing);
+      return;
+    }
+    bindStoryReviewVideo(node, url);
+    node.muted = false;
+    void node.play().catch(() => {
+      setError(SOCIAL.stories.mediaMissing);
+    });
   }
 
   async function postClip() {
-    if (!clip || posting) return;
+    if (posting) return;
+    if (Date.now() - reviewArmRef.current < storyReviewArmMs()) return;
+    if (!clip?.file || clip.file.size <= 0) {
+      setError(SOCIAL.stories.mediaMissing);
+      return;
+    }
     const postId = nextStoryStudioLive(postRef.current);
     postRef.current = postId;
     const objectUrl = clip.url;
@@ -572,11 +609,17 @@ export function SocialStoryCompose({
     const reviewNode = reviewRef.current;
     if (reviewNode) {
       reviewNode.pause();
+      reviewNode.srcObject = null;
       reviewNode.removeAttribute("src");
       reviewNode.load();
     }
     try {
       const body = await cloneStoryUploadFile(clip.file);
+      if (body.size <= 0) {
+        setError(SOCIAL.stories.mediaMissing);
+        restoreReviewPlayback(objectUrl);
+        return;
+      }
       const uploaded = await uploadStoryMedia(body);
       if (!storyStudioIsLive(postRef.current, postId)) return;
       if (uploaded.error || !uploaded.item) {
@@ -844,6 +887,7 @@ export function SocialStoryCompose({
           <div className={SOCIAL_STORY_STUDIO_STAGE_CLASS}>
             {phase === "review" && clip ? (
               <video
+                key="story-review"
                 ref={reviewRef}
                 data-social-story-video=""
                 src={storyReviewMediaSrc(clip.url)}
@@ -867,6 +911,7 @@ export function SocialStoryCompose({
               />
             ) : (
               <video
+                key="story-live"
                 ref={videoRef}
                 data-social-story-preview=""
                 data-social-story-preview-facing={facing}
@@ -919,12 +964,7 @@ export function SocialStoryCompose({
                 data-social-story-play=""
                 aria-label={SOCIAL.stories.play}
                 className="absolute left-1/2 top-1/2 z-10 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-band-ink/20 text-band-ink"
-                onClick={() => {
-                  const node = reviewRef.current;
-                  if (!node) return;
-                  node.muted = false;
-                  void node.play();
-                }}
+                onClick={playReview}
               >
                 <SocialIcon name="play" size={SOCIAL_ICON_SIZE_STORY_PLAY} />
               </button>

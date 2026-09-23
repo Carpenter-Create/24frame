@@ -12,8 +12,10 @@ import {
   cloneStoryUploadFile,
   storyRecorderFileName,
   storyRecorderHoldMs,
+  bindStoryReviewVideo,
   storyRecorderStopFlushMs,
   storyRecorderTimesliceMs,
+  storyReviewArmMs,
   storyReviewFrameSeconds,
   storyReviewMediaSrc,
   nextStoryStudioLive,
@@ -96,11 +98,12 @@ describe("story MediaRecorder mime probe", () => {
     expect(storyReviewFrameSeconds()).toBeGreaterThan(0);
     expect(storyReviewFrameSeconds()).toBeLessThan(1);
     expect(storyReviewMediaSrc("blob:https://24frame.local/clip")).toBe(
-      "blob:https://24frame.local/clip#t=0.001",
+      "blob:https://24frame.local/clip",
     );
     expect(storyReviewMediaSrc("blob:https://24frame.local/clip#t=0.001")).toBe(
-      "blob:https://24frame.local/clip#t=0.001",
+      "blob:https://24frame.local/clip",
     );
+    expect(storyReviewArmMs()).toBeGreaterThan(0);
     const source = new File([new Uint8Array([9, 8, 7, 6])], "story.mp4", { type: "video/mp4" });
     const copy = await cloneStoryUploadFile(source);
     expect(copy).not.toBe(source);
@@ -113,6 +116,51 @@ describe("story MediaRecorder mime probe", () => {
     expect(studio).toContain("cloneStoryUploadFile");
     expect(studio).toContain("storyRecorderStopFlushMs()");
     expect(studio).toContain("stopStream(streamRef.current)");
+    expect(studio).toContain('key="story-review"');
+    expect(studio).toContain('key="story-live"');
+    expect(studio).toContain("onClick={playReview}");
+    const playStart = studio.indexOf("function playReview");
+    const playEnd = studio.indexOf("async function postClip");
+    const playBlock = studio.slice(playStart, playEnd);
+    expect(playBlock).toContain("bindStoryReviewVideo");
+    expect(playBlock).not.toContain("attachPreview");
+    expect(playBlock).not.toContain("getUserMedia");
+    expect(playBlock).not.toContain('setPhase("preview")');
+    const retakeStart = studio.indexOf("function retake");
+    const retakeEnd = studio.indexOf("function onPick");
+    expect(studio.slice(retakeStart, retakeEnd)).toContain("storyReviewArmMs()");
+    const postStart = studio.indexOf("async function postClip");
+    const postEnd = studio.indexOf("const accept = ");
+    const postBlock = studio.slice(postStart, postEnd);
+    expect(postBlock.indexOf("clip.file.size")).toBeLessThan(postBlock.indexOf("setPosting(true)"));
+    expect(postBlock).toContain("SOCIAL.stories.mediaMissing");
+    const sealStart = studio.indexOf("function sealRecording");
+    const sealEnd = studio.indexOf("function stopRecording");
+    expect(studio.slice(sealStart, sealEnd)).not.toContain('setPhase("preview")');
+  });
+
+  it("binds the recorded blob and clears the live camera provider", () => {
+    const node = {
+      srcObject: { kind: "camera" } as unknown,
+      src: "about:blank",
+      muted: false,
+      playsInline: false,
+      preload: "none",
+      loads: 0,
+      load() {
+        this.loads += 1;
+      },
+    };
+    bindStoryReviewVideo(node, "blob:https://24frame.local/clip#t=0.001");
+    expect(node.srcObject).toBeNull();
+    expect(node.src).toBe("blob:https://24frame.local/clip");
+    expect(node.loads).toBe(1);
+    expect(node.muted).toBe(true);
+    expect(node.playsInline).toBe(true);
+    expect(node.preload).toBe("auto");
+    bindStoryReviewVideo(null, "blob:https://24frame.local/clip");
+    bindStoryReviewVideo(node, "");
+    expect(node.loads).toBe(1);
   });
 
   it("captures a jpeg still from the live preview frame", async () => {

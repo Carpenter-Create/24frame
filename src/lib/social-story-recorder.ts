@@ -21,6 +21,11 @@ import {
 //   that blob can sit forever while the <video> still holds it.
 // - Stop the camera before the review element mounts. iOS has one capture
 //   pipeline; a live track plus a blob video paints blank.
+// - Review must be a different element from the live preview. WebKit prefers
+//   srcObject (the camera) over src, so a reused <video> stays black and
+//   play() resumes the camera instead of the recorded blob.
+// - Do not put a media fragment on the blob URL. WebKit can refuse to load
+//   blob:#t= and the stage stays blank. Seek after loadeddata instead.
 // - Copy the file bytes before PUT. Safari will not finish reading a blob
 //   that is the review video’s src.
 // - onstop can beat the last dataavailable. Seal the file after a short flush.
@@ -118,14 +123,40 @@ export function storyRecorderStopFlushMs(): number {
   return 50;
 }
 
-/** A hair past zero makes WebKit paint a frame before play. */
+/** A hair past zero makes WebKit paint a frame before play. Seek only. */
 export function storyReviewFrameSeconds(): number {
   return 0.001;
 }
 
+/** Blob URL with no media fragment. WebKit will not load blob:#t=. */
 export function storyReviewMediaSrc(objectUrl: string): string {
-  if (!objectUrl || objectUrl.includes("#")) return objectUrl;
-  return `${objectUrl}#t=${storyReviewFrameSeconds()}`;
+  const hash = objectUrl.indexOf("#");
+  return hash === -1 ? objectUrl : objectUrl.slice(0, hash);
+}
+
+export type StoryReviewVideo = {
+  srcObject: unknown;
+  src: string;
+  muted: boolean;
+  playsInline: boolean;
+  preload: string;
+  load: () => void;
+};
+
+/** Camera stream loses. The recorded object URL becomes the media provider. */
+export function bindStoryReviewVideo(node: StoryReviewVideo | null, objectUrl: string): void {
+  if (!node || !objectUrl) return;
+  node.srcObject = null;
+  node.muted = true;
+  node.playsInline = true;
+  node.preload = "auto";
+  node.src = storyReviewMediaSrc(objectUrl);
+  node.load();
+}
+
+/** Ignore the stop-gesture click that lands on Retake or Post after review mounts. */
+export function storyReviewArmMs(): number {
+  return 400;
 }
 
 /** Detached bytes. The review element must not be the upload body. */
