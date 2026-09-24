@@ -9,9 +9,9 @@ import { getAuthUser } from "@/lib/supabase/auth";
 export const runtime = "nodejs";
 
 // Node signer for Edge Social reads. Session required. A non-forbidden
-// key is not enough. Sign only after ownership (posts lane), or a story
-// the caller could select (self or follow, and expires_at still ahead),
-// or an active post / published cover or welcome the session can read.
+// key is not a grant. Sign only when the key is attached to a row this
+// session can select: post media, or a non-expired story visible under
+// stories_select (self or follow, expires_at still ahead).
 // Successful 302 is private max-age aligned to the signing window.
 // Auth misses, bad keys, and unauthorized keys stay no-store.
 

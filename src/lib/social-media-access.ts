@@ -7,14 +7,14 @@ import {
 } from "@/lib/social-media";
 import { isStoryLive } from "@/lib/social-stories";
 
-// Sign /api/social/media only after the session can already see the object.
-// Posts-lane ownership (own upload, cover, welcome) may sign before a row exists.
-// A stories-lane key does not. It follows stories_select: active, expires_at
-// still in the future, and the caller is the author or follows them. Prefix
-// ownership does not skip expires_at. An active post the session can read,
-// or that author's published cover / welcome, can sign a posts-lane key.
-// A foreign key written onto the caller's profile does not match the author
-// embedded in the key, so it does not sign. Query failures fail closed.
+// GC-P1-3. Sign /api/social/media only for a key attached to a row the
+// caller can select: post media, or a non-expired story visible under
+// stories_select (active, expires_at still ahead, author or follow).
+// isForbiddenMediaKey is a shape check, not a grant. Prefix ownership
+// and profile cover / welcome are not rows, so they do not sign.
+// The read uses the user-scoped client, so posts_select and stories_select
+// stay the authorization layer. Story follow and expires_at are checked
+// again so a returned row that fails them is still denied. Fail closed.
 
 export type SocialMediaStoryGrant = {
   author_id: string;
@@ -29,19 +29,8 @@ export type SocialMediaPostGrant = {
   media: unknown;
 };
 
-export type SocialMediaProfileGrant = {
-  id: string;
-  cover_key?: string | null;
-  welcome_video_key?: string | null;
-};
-
 function mediaStoresKey(media: unknown, key: string): boolean {
   return parsePostMedia(media).some((item) => item.key === key);
-}
-
-function profilePublishesKey(profile: SocialMediaProfileGrant, key: string): boolean {
-  if (!isOwnedSocialMediaKey(key, profile.id, "posts")) return false;
-  return profile.cover_key === key || profile.welcome_video_key === key;
 }
 
 export function socialMediaReadGrant(input: {
@@ -51,14 +40,10 @@ export function socialMediaReadGrant(input: {
   followeeIds?: readonly string[];
   stories?: readonly SocialMediaStoryGrant[];
   posts?: readonly SocialMediaPostGrant[];
-  profiles?: readonly SocialMediaProfileGrant[];
 }): boolean {
   if (!input.userId || isForbiddenMediaKey(input.key)) return false;
   const parsed = parseSocialMediaObjectKey(input.key);
   if (!parsed) return false;
-  if (parsed.lane === "posts" && isOwnedSocialMediaKey(input.key, input.userId, "posts")) {
-    return true;
-  }
   const now = input.now ?? new Date();
   if (parsed.lane === "stories") {
     const followees = new Set(input.followeeIds ?? []);
@@ -70,18 +55,15 @@ export function socialMediaReadGrant(input: {
       return mediaStoresKey(story.media, input.key);
     });
   }
-  const onPost = (input.posts ?? []).some((post) => {
+  return (input.posts ?? []).some((post) => {
     if (post.status !== "active") return false;
     if (!isOwnedSocialMediaKey(input.key, post.author_id, "posts")) return false;
     return mediaStoresKey(post.media, input.key);
   });
-  if (onPost) return true;
-  return (input.profiles ?? []).some((profile) => profilePublishesKey(profile, input.key));
 }
 
 export async function viewerMaySignSocialMedia(userId: string, key: string, now = new Date()): Promise<boolean> {
   if (!userId || isForbiddenMediaKey(key)) return false;
-  if (isOwnedSocialMediaKey(key, userId, "posts")) return true;
   const parsed = parseSocialMediaObjectKey(key);
   if (!parsed) return false;
   try {
@@ -112,28 +94,15 @@ export async function viewerMaySignSocialMedia(userId: string, key: string, now 
         stories: stories ?? [],
       });
     }
-    const [{ data: posts, error: postError }, { data: profile, error: profileError }] = await Promise.all([
-      supabase
-        .from("posts")
-        .select("author_id, status, media")
-        .eq("author_id", parsed.userId)
-        .eq("status", "active")
-        .contains("media", [{ key }])
-        .limit(8),
-      supabase
-        .from("profiles")
-        .select("id, cover_key, welcome_video_key")
-        .eq("id", parsed.userId)
-        .maybeSingle(),
-    ]);
-    if (postError || profileError) return false;
-    return socialMediaReadGrant({
-      userId,
-      key,
-      now,
-      posts: posts ?? [],
-      profiles: profile ? [profile] : [],
-    });
+    const { data: posts, error } = await supabase
+      .from("posts")
+      .select("author_id, status, media")
+      .eq("author_id", parsed.userId)
+      .eq("status", "active")
+      .contains("media", [{ key }])
+      .limit(8);
+    if (error) return false;
+    return socialMediaReadGrant({ userId, key, now, posts: posts ?? [] });
   } catch {
     return false;
   }

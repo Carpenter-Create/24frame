@@ -10,6 +10,7 @@ const OTHER = "33333333-3333-4333-8333-333333333333";
 const OBJECT = "22222222-2222-4222-8222-222222222222";
 const STORY_KEY = `stories/${OTHER}/${OBJECT}.mp4`;
 const POST_KEY = `posts/${OTHER}/${OBJECT}.jpg`;
+const OWN_POST = `posts/${USER}/${OBJECT}.jpg`;
 const NOW = new Date("2026-09-24T00:00:00.000Z");
 const LIVE = "2026-09-25T00:00:00.000Z";
 const EXPIRED = "2026-09-23T00:00:00.000Z";
@@ -37,27 +38,12 @@ function chain(result: { data: unknown; error?: { message: string } | null }) {
 }
 
 describe("socialMediaReadGrant", () => {
-  it("allows a posts-lane object the caller owns before a row exists", () => {
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: `posts/${USER}/${OBJECT}.jpg`,
-        now: NOW,
-      }),
-    ).toBe(true);
-  });
-
-  it("does not sign a story key from prefix ownership alone", () => {
-    const own = `stories/${USER}/${OBJECT}.mp4`;
-    expect(socialMediaReadGrant({ userId: USER, key: own, now: NOW })).toBe(false);
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: own,
-        now: NOW,
-        stories: [{ author_id: USER, status: "active", expires_at: EXPIRED, media: storyMedia(own) }],
-      }),
-    ).toBe(false);
+  it("denies a key that is not attached to a selectable row", () => {
+    expect(socialMediaReadGrant({ userId: USER, key: OWN_POST, now: NOW })).toBe(false);
+    expect(socialMediaReadGrant({ userId: USER, key: `stories/${USER}/${OBJECT}.mp4`, now: NOW })).toBe(false);
+    expect(socialMediaReadGrant({ userId: USER, key: POST_KEY, now: NOW, posts: [] })).toBe(false);
+    expect(socialMediaReadGrant({ userId: USER, key: "avatars/secret", now: NOW })).toBe(false);
+    expect(socialMediaReadGrant({ userId: "", key: STORY_KEY, now: NOW })).toBe(false);
   });
 
   it("allows a live story the caller follows when the key is on that story", () => {
@@ -124,9 +110,15 @@ describe("socialMediaReadGrant", () => {
         ],
       }),
     ).toBe(false);
-    expect(socialMediaReadGrant({ ...base, stories: [] })).toBe(false);
-    expect(socialMediaReadGrant({ userId: USER, key: "avatars/secret", now: NOW })).toBe(false);
-    expect(socialMediaReadGrant({ userId: "", key: STORY_KEY, now: NOW })).toBe(false);
+    const own = `stories/${USER}/${OBJECT}.mp4`;
+    expect(
+      socialMediaReadGrant({
+        userId: USER,
+        key: own,
+        now: NOW,
+        stories: [{ author_id: USER, status: "active", expires_at: EXPIRED, media: storyMedia(own) }],
+      }),
+    ).toBe(false);
   });
 
   it("allows an active post the session can read and denies a post that is not active", () => {
@@ -136,6 +128,14 @@ describe("socialMediaReadGrant", () => {
         key: POST_KEY,
         now: NOW,
         posts: [{ author_id: OTHER, status: "active", media: postMedia() }],
+      }),
+    ).toBe(true);
+    expect(
+      socialMediaReadGrant({
+        userId: USER,
+        key: OWN_POST,
+        now: NOW,
+        posts: [{ author_id: USER, status: "active", media: postMedia(OWN_POST) }],
       }),
     ).toBe(true);
     expect(
@@ -154,46 +154,6 @@ describe("socialMediaReadGrant", () => {
         posts: [{ author_id: OTHER, status: "hidden", media: postMedia() }],
       }),
     ).toBe(false);
-    expect(socialMediaReadGrant({ userId: USER, key: POST_KEY, now: NOW, posts: [] })).toBe(false);
-  });
-
-  it("allows a readable profile cover or welcome that the profile owns", () => {
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: POST_KEY,
-        now: NOW,
-        profiles: [{ id: OTHER, cover_key: POST_KEY, welcome_video_key: null }],
-      }),
-    ).toBe(true);
-    const welcome = `posts/${OTHER}/${OBJECT}.mp4`;
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: welcome,
-        now: NOW,
-        profiles: [{ id: OTHER, cover_key: null, welcome_video_key: welcome }],
-      }),
-    ).toBe(true);
-  });
-
-  it("does not treat a foreign key stored on a profile as published media", () => {
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: POST_KEY,
-        now: NOW,
-        profiles: [{ id: USER, cover_key: POST_KEY, welcome_video_key: POST_KEY }],
-      }),
-    ).toBe(false);
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: POST_KEY,
-        now: NOW,
-        profiles: [{ id: OTHER, cover_key: `posts/${OTHER}/44444444-4444-4444-8444-444444444444.jpg` }],
-      }),
-    ).toBe(false);
   });
 });
 
@@ -202,9 +162,12 @@ describe("viewerMaySignSocialMedia", () => {
     vi.mocked(createClient).mockReset();
   });
 
-  it("does not query for a posts-lane key the caller owns", async () => {
-    await expect(viewerMaySignSocialMedia(USER, `posts/${USER}/${OBJECT}.jpg`, NOW)).resolves.toBe(true);
-    expect(createClient).not.toHaveBeenCalled();
+  it("denies an owned key when no selectable row stores it", async () => {
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn(() => chain({ data: [] })),
+    } as never);
+    await expect(viewerMaySignSocialMedia(USER, OWN_POST, NOW)).resolves.toBe(false);
+    expect(createClient).toHaveBeenCalledTimes(1);
   });
 
   it("requires a live story row for the author's own story key", async () => {
@@ -287,44 +250,19 @@ describe("viewerMaySignSocialMedia", () => {
 
   it("signs an active post the session can read and refuses a random key", async () => {
     vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn((table: string) => {
-        if (table === "posts") {
-          return chain({
-            data: [{ author_id: OTHER, status: "active", media: postMedia() }],
-          });
-        }
-        return chain({ data: null });
-      }),
+      from: vi.fn(() =>
+        chain({
+          data: [{ author_id: OTHER, status: "active", media: postMedia() }],
+        }),
+      ),
     } as never);
     await expect(viewerMaySignSocialMedia(USER, POST_KEY, NOW)).resolves.toBe(true);
 
     vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn(() => chain({ data: tableDataEmpty() })),
+      from: vi.fn(() => chain({ data: [] })),
     } as never);
     await expect(viewerMaySignSocialMedia(USER, POST_KEY, NOW)).resolves.toBe(false);
     await expect(viewerMaySignSocialMedia(USER, "not-a-media-key", NOW)).resolves.toBe(false);
     expect(createClient).toHaveBeenCalledTimes(2);
   });
-
-  it("signs a profile cover the session can read and refuses a stuffed foreign key", async () => {
-    vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn((table: string) => {
-        if (table === "profiles") return chain({ data: { id: OTHER, cover_key: POST_KEY, welcome_video_key: null } });
-        return chain({ data: [] });
-      }),
-    } as never);
-    await expect(viewerMaySignSocialMedia(USER, POST_KEY, NOW)).resolves.toBe(true);
-
-    vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn((table: string) => {
-        if (table === "profiles") return chain({ data: { id: OTHER, cover_key: null, welcome_video_key: null } });
-        return chain({ data: [] });
-      }),
-    } as never);
-    await expect(viewerMaySignSocialMedia(USER, POST_KEY, NOW)).resolves.toBe(false);
-  });
 });
-
-function tableDataEmpty(): unknown[] {
-  return [];
-}

@@ -65,15 +65,35 @@ describe("GET /api/social/media", () => {
     expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
-  it("302s a freshly signed GET for a key the caller owns", async () => {
+  it("is 403 for an owned key with no selectable row and does not sign", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
+    const res = await GET(mediaRequest(KEY));
+    expect(res.status).toBe(403);
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(res.headers.get("Location")).toBeNull();
+    expect(signedSocialMediaUrl).not.toHaveBeenCalled();
+    expect(createClient).toHaveBeenCalled();
+  });
+
+  it("302s a freshly signed GET when an active post the session can read stores the key", async () => {
     vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
     vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://media.example/signed");
+    mockRows({
+      posts: {
+        data: [
+          {
+            author_id: UID,
+            status: "active",
+            media: [{ kind: "image", key: KEY, contentType: "image/jpeg" }],
+          },
+        ],
+      },
+    });
     const res = await GET(mediaRequest(KEY));
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toBe("https://media.example/signed");
     expect(res.headers.get("Cache-Control")).toBe("private, max-age=300");
     expect(signedSocialMediaUrl).toHaveBeenCalledWith(KEY);
-    expect(createClient).not.toHaveBeenCalled();
   });
 
   it("302s the caller's own live story and refuses that key once it has expired", async () => {
@@ -200,22 +220,20 @@ describe("GET /api/social/media", () => {
     expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
-  it("302s a profile cover the session can read", async () => {
-    vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
-    vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://media.example/cover");
-    mockRows({
-      posts: { data: [] },
-      profiles: { data: { id: OTHER, cover_key: FOREIGN_POST, welcome_video_key: null } },
-    });
-    const res = await GET(mediaRequest(FOREIGN_POST));
-    expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toBe("https://media.example/cover");
-    expect(signedSocialMediaUrl).toHaveBeenCalledWith(FOREIGN_POST);
-  });
-
   it("is 404 when the grant allows the key but signing returns nothing", async () => {
     vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
     vi.mocked(signedSocialMediaUrl).mockResolvedValue(null);
+    mockRows({
+      posts: {
+        data: [
+          {
+            author_id: UID,
+            status: "active",
+            media: [{ kind: "image", key: KEY, contentType: "image/jpeg" }],
+          },
+        ],
+      },
+    });
     const res = await GET(mediaRequest(KEY));
     expect(res.status).toBe(404);
     expect(res.headers.get("Location")).toBeNull();
