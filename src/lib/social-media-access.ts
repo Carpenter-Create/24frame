@@ -33,6 +33,15 @@ function mediaStoresKey(media: unknown, key: string): boolean {
   return parsePostMedia(media).some((item) => item.key === key);
 }
 
+/**
+ * jsonb `@>` value for `.contains`.
+ * postgrest-js@2.110.6 serializes arrays as `cs.{join}` and objects as
+ * `[object Object]`. A JSON string is sent as `cs.<json>`.
+ */
+export function socialMediaJsonContains(key: string): string {
+  return JSON.stringify([{ key }]);
+}
+
 export function socialMediaReadGrant(input: {
   userId: string;
   key: string;
@@ -82,7 +91,7 @@ export async function viewerMaySignSocialMedia(userId: string, key: string, now 
           .eq("author_id", parsed.userId)
           .eq("status", "active")
           .gt("expires_at", now.toISOString())
-          .contains("media", [{ key }])
+          .contains("media", socialMediaJsonContains(key))
           .limit(8),
       ]);
       if (followError || storyError) return false;
@@ -99,7 +108,7 @@ export async function viewerMaySignSocialMedia(userId: string, key: string, now 
       .select("author_id, status, media")
       .eq("author_id", parsed.userId)
       .eq("status", "active")
-      .contains("media", [{ key }])
+      .contains("media", socialMediaJsonContains(key))
       .limit(8);
     if (error) return false;
     return socialMediaReadGrant({ userId, key, now, posts: posts ?? [] });

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
-import { socialMediaReadGrant, viewerMaySignSocialMedia } from "@/lib/social-media-access";
+import { socialMediaJsonContains, socialMediaReadGrant, viewerMaySignSocialMedia } from "@/lib/social-media-access";
 
 const USER = "11111111-1111-4111-8111-111111111111";
 const OTHER = "33333333-3333-4333-8333-333333333333";
@@ -157,6 +157,21 @@ describe("socialMediaReadGrant", () => {
   });
 });
 
+describe("socialMediaJsonContains", () => {
+  it("is a JSON string so postgrest-js contains does not emit [object Object]", () => {
+    const value = socialMediaJsonContains(POST_KEY);
+    const asPostgrest = (raw: unknown) => {
+      if (typeof raw === "string") return `cs.${raw}`;
+      if (Array.isArray(raw)) return `cs.{${raw.join(",")}}`;
+      return `cs.${JSON.stringify(raw)}`;
+    };
+    expect(typeof value).toBe("string");
+    expect(asPostgrest(value)).toBe(`cs.${JSON.stringify([{ key: POST_KEY }])}`);
+    expect(asPostgrest(value)).not.toContain("[object Object]");
+    expect(asPostgrest([{ key: POST_KEY }])).toContain("[object Object]");
+  });
+});
+
 describe("viewerMaySignSocialMedia", () => {
   beforeEach(() => {
     vi.mocked(createClient).mockReset();
@@ -202,17 +217,17 @@ describe("viewerMaySignSocialMedia", () => {
   });
 
   it("signs a followed live story and refuses when the queries fail or return nothing", async () => {
+    const stories = chain({
+      data: [{ author_id: OTHER, status: "active", expires_at: LIVE, media: storyMedia() }],
+    });
     const from = vi.fn((table: string) => {
       if (table === "follows") return chain({ data: { followee_id: OTHER } });
-      if (table === "stories") {
-        return chain({
-          data: [{ author_id: OTHER, status: "active", expires_at: LIVE, media: storyMedia() }],
-        });
-      }
+      if (table === "stories") return stories;
       return chain({ data: [] });
     });
     vi.mocked(createClient).mockResolvedValue({ from } as never);
     await expect(viewerMaySignSocialMedia(USER, STORY_KEY, NOW)).resolves.toBe(true);
+    expect(stories.contains).toHaveBeenCalledWith("media", JSON.stringify([{ key: STORY_KEY }]));
 
     vi.mocked(createClient).mockResolvedValue({
       from: vi.fn((table: string) => {
@@ -249,14 +264,14 @@ describe("viewerMaySignSocialMedia", () => {
   });
 
   it("signs an active post the session can read and refuses a random key", async () => {
+    const posts = chain({
+      data: [{ author_id: OTHER, status: "active", media: postMedia() }],
+    });
     vi.mocked(createClient).mockResolvedValue({
-      from: vi.fn(() =>
-        chain({
-          data: [{ author_id: OTHER, status: "active", media: postMedia() }],
-        }),
-      ),
+      from: vi.fn(() => posts),
     } as never);
     await expect(viewerMaySignSocialMedia(USER, POST_KEY, NOW)).resolves.toBe(true);
+    expect(posts.contains).toHaveBeenCalledWith("media", JSON.stringify([{ key: POST_KEY }]));
 
     vi.mocked(createClient).mockResolvedValue({
       from: vi.fn(() => chain({ data: [] })),
