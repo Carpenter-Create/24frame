@@ -12,6 +12,10 @@ import {
   DM_THREAD_ROOT_CLASS,
   DM_THREAD_COMPOSER_FIELD_CLASS,
   DM_THREAD_COMPOSER_SEND_CLASS,
+  DM_THREAD_HEADER_AVATAR_CLASS,
+  DM_THREAD_HEADER_BACK_CLASS,
+  DM_THREAD_HEADER_CLASS,
+  DM_THREAD_HEADER_LABEL_CLASS,
   DM_THREAD_DAY_CLASS,
   DM_THREAD_LIST_CLASS,
   DM_THREAD_SYSTEM_LINE_CLASS,
@@ -19,6 +23,7 @@ import {
   dmThreadAlign,
   dmThreadBubbleClass,
   dmThreadDayLabel,
+  dmThreadHeaderModel,
   dmThreadShowsAvatar,
   dmThreadSideClass,
   dmThreadStorySystemLine,
@@ -192,8 +197,71 @@ describe("DM thread message format", () => {
     expect(stick).toContain("scrollTop");
     expect(stick).not.toContain("[data-house-lead-scroll]");
     const page = readFileSync("src/app/(app)/social/dms/[id]/page.tsx", "utf8");
-    expect(page.indexOf("<SocialDmThread")).toBeLessThan(page.indexOf("<SocialDmCompose"));
-    expect(page.indexOf("<SocialAddPeopleForm")).toBeLessThan(page.indexOf("<SocialDmThread"));
+    expect(page.indexOf("<SocialDmThread\n")).toBeLessThan(page.indexOf("<SocialDmCompose"));
+    expect(page.indexOf("<SocialAddPeopleForm")).toBeLessThan(page.indexOf("<SocialDmThread\n"));
+    expect(page.indexOf("<SocialDmThreadHeader")).toBeLessThan(page.indexOf("<SocialAddPeopleForm"));
+  });
+
+  it("keeps the peer header to one truncated name", () => {
+    expect(DM_THREAD_HEADER_CLASS).toContain("sticky");
+    expect(DM_THREAD_HEADER_CLASS).toContain("top-0");
+    expect(DM_THREAD_HEADER_CLASS).toContain("h-12");
+    expect(DM_THREAD_HEADER_CLASS).toContain("bg-surface");
+    expect(DM_THREAD_HEADER_CLASS).toContain("border-hairline");
+    expect(DM_THREAD_HEADER_CLASS).toContain("px-4");
+    expect(DM_THREAD_HEADER_CLASS).toContain("shadow-none");
+    expect(DM_THREAD_HEADER_CLASS).not.toContain("max-md:");
+    expect(DM_THREAD_HEADER_CLASS).not.toContain("md:");
+    expect(DM_THREAD_HEADER_BACK_CLASS).toContain("size-10");
+    expect(DM_THREAD_HEADER_AVATAR_CLASS).toContain("size-8");
+    expect(DM_THREAD_HEADER_LABEL_CLASS).toContain("truncate");
+    expect(DM_THREAD_HEADER_LABEL_CLASS).toContain("t-body-sm");
+    expect(DM_THREAD_HEADER_LABEL_CLASS).toContain("font-medium");
+    expect(DM_THREAD_COMPOSER_CLASS).not.toContain("sticky");
+
+    const named = dmThreadHeaderModel({
+      peers: [{ handle: "theofficialJKC", displayName: "Joshua K. Carpenter" }],
+    });
+    expect(named.label).toBe("Joshua K. Carpenter");
+    expect(named.href).toBe("/social/u/theofficialJKC");
+    expect(named.label).not.toContain("@");
+    expect(named.label).not.toContain("theofficialJKC");
+
+    const bare = dmThreadHeaderModel({
+      peers: [{ handle: "@theofficialJKC", displayName: "Member" }],
+    });
+    expect(bare.label).toBe("theofficialJKC");
+    expect(bare.href).toBe("/social/u/theofficialJKC");
+    expect(bare.label).not.toContain("@");
+
+    const room = dmThreadHeaderModel({
+      peers: [
+        { handle: "bob", displayName: "Bob One" },
+        { handle: "carol", displayName: "Carol One" },
+      ],
+    });
+    expect(room.label).toBe("Bob One, Carol One");
+    expect(room.href).toBeNull();
+    expect(room.photoUrl).toBeNull();
+    expect(room.label).not.toContain("@");
+
+    const titled = dmThreadHeaderModel({
+      title: "Friday table",
+      peers: [
+        { handle: "bob", displayName: "Bob One" },
+        { handle: "carol", displayName: null },
+      ],
+    });
+    expect(titled.label).toBe("Friday table");
+    expect(titled.href).toBeNull();
+
+    const header = readFileSync("src/components/social/social-dm-thread-header.tsx", "utf8");
+    expect(header).toContain('name="caret-left"');
+    expect(header).toContain("size={20}");
+    expect(header).not.toContain("PageHeader");
+    const page = readFileSync("src/app/(app)/social/dms/[id]/page.tsx", "utf8");
+    expect(page).toContain("<SocialDmThreadHeader");
+    expect(page).not.toContain("displayHandle");
   });
 
   it("does not center the story share in the thread view", () => {

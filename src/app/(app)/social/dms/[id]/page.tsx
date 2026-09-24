@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialAddPeopleForm, SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
 import { SocialDmThread, type DmThreadViewMessage } from "@/components/social/social-dm-thread";
+import { SocialDmThreadHeader } from "@/components/social/social-dm-thread-header";
 import { SocialDmThreadStick } from "@/components/social/social-dm-thread-stick";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import {
@@ -10,14 +11,14 @@ import {
   parseDmThreadCursorParam,
   socialDmThreadHref,
 } from "@/lib/social-dm-bounds";
-import { bareHandle, conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
+import { bareHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
 import {
   dmStoryComment,
   parseDmStoryShare,
   presentDmStoryShare,
   type DmStoryLive,
 } from "@/lib/social-dm-story";
-import { DM_THREAD_ROOT_CLASS, dmThreadStorySystemLine } from "@/lib/social-dm-thread-format";
+import { DM_THREAD_ROOT_CLASS, dmThreadHeaderModel, dmThreadStorySystemLine } from "@/lib/social-dm-thread-format";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -106,14 +107,14 @@ export default async function SocialDmThreadPage({
     .filter((userId) => userId !== ctx.user.id)
     .map((userId) => people.get(userId))
     .filter((person): person is NonNullable<typeof person> => !!person);
-  const title = conversationRoomLabel(
-    conversation.title,
-    others.map((person) => socialPersonLabel({ handle: person.handle, displayName: person.display_name })),
-  );
-  const subtitle =
-    others.length === 1
-      ? displayHandle(others[0].handle)
-      : others.map((person) => displayHandle(person.handle)).join(", ") || undefined;
+  const header = dmThreadHeaderModel({
+    title: conversation.title,
+    peers: others.map((person) => ({
+      handle: person.handle,
+      displayName: person.display_name,
+      photoUrl: faces.get(person.id) ?? null,
+    })),
+  });
   const historical = cursor !== null;
   const threadMessages: DmThreadViewMessage[] = messages.map((message) => {
     const sender = message.sender_id ? people.get(message.sender_id) : null;
@@ -166,10 +167,11 @@ export default async function SocialDmThreadPage({
 
   return (
     <div data-social-dm-thread="" data-social-dm-kind={conversation.kind} className={DM_THREAD_ROOT_CLASS}>
-      <PageHeader
-        title={title}
-        subtitle={subtitle}
-        backLink={{ href: SOCIAL_ROUTES.dms, label: SOCIAL.dms.title }}
+      <SocialDmThreadHeader
+        label={header.label}
+        href={header.href}
+        photoUrl={header.photoUrl}
+        avatarName={header.avatarName}
       />
       {profile ? <SocialAddPeopleForm conversationId={conversation.id} /> : null}
       {profile && conversation.kind === "group" ? (

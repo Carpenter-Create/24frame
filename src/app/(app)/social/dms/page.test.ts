@@ -211,7 +211,13 @@ describe("social DMs", () => {
     const html = renderToStaticMarkup(await SocialDmThreadPage({ params: Promise.resolve({ id: "c-group" }) }));
     expect(html).toContain("data-social-dm-thread");
     expect(html).toContain('data-social-dm-kind="group"');
+    expect(html).toContain("data-social-dm-header");
+    expect(html).toContain("h-12");
     expect(html).toContain("Bob One, Carol One");
+    const peerHeader = html.slice(html.indexOf("data-social-dm-header"), html.indexOf("data-social-add-people"));
+    expect(peerHeader).not.toContain("@");
+    expect(peerHeader).not.toContain("t-title");
+    expect(peerHeader).toContain("truncate");
     expect(html).toContain("prior hello");
     expect(html).toContain('data-social-dm-align="mine"');
     expect(html).toContain("data-social-dm-day");
@@ -401,6 +407,13 @@ describe("social DMs", () => {
     });
     vi.mocked(createClient).mockResolvedValue({ from: threadFrom, rpc: vi.fn() } as never);
     const thread = renderToStaticMarkup(await SocialDmThreadPage({ params: Promise.resolve({ id: "c1" }) }));
+    const peerHeader = thread.slice(thread.indexOf("data-social-dm-header"), thread.indexOf("data-social-add-people"));
+    expect(peerHeader).toContain("Bob One");
+    expect(peerHeader).toContain('href="/social/u/bob"');
+    expect(peerHeader).toContain("size-8");
+    expect(peerHeader).toContain("size-10");
+    expect(peerHeader).not.toContain("@");
+    expect(peerHeader).not.toContain("t-title");
     expect(thread).toContain("data-social-dm-story-share");
     expect(thread).toContain("w-[168px]");
     expect(thread).toContain("aspect-[9/16]");

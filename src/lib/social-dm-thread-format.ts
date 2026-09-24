@@ -1,4 +1,11 @@
-import { bareHandle, SOCIAL } from "@/lib/social";
+import {
+  bareHandle,
+  conversationRoomLabel,
+  SOCIAL,
+  socialMemberHref,
+  socialPersonIdentity,
+  socialPersonLabel,
+} from "@/lib/social";
 import { storySendSystemLine } from "@/lib/social-dm-story";
 
 // DM thread message format lock v1.
@@ -49,6 +56,67 @@ export const DM_THREAD_COMPOSER_FIELD_CLASS =
 
 export const DM_THREAD_COMPOSER_SEND_CLASS =
   "flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast";
+
+// Header density lock v1. Phone and desktop share this row.
+// docs/design-locks/dm-thread-header-density-lock-v1.md
+// Surface #FFFFFF and hairline #ECEDF0 are bg-surface / border-hairline.
+// Ink is text-ink. 0.9375rem is t-body-sm. Truncate is this label only.
+export const DM_THREAD_HEADER_CLASS =
+  "sticky top-0 z-10 flex h-12 w-full shrink-0 items-center gap-2 border-b border-hairline bg-surface px-4 shadow-none";
+
+export const DM_THREAD_HEADER_BACK_CLASS =
+  "inline-flex size-10 shrink-0 items-center justify-center text-ink";
+
+export const DM_THREAD_HEADER_PEER_CLASS = "flex min-w-0 flex-1 items-center gap-2";
+
+export const DM_THREAD_HEADER_AVATAR_CLASS = "size-8 shrink-0";
+
+export const DM_THREAD_HEADER_LABEL_CLASS = "min-w-0 flex-1 truncate t-body-sm font-medium text-ink";
+
+export type DmThreadHeaderPeer = {
+  handle: string;
+  displayName?: string | null;
+  photoUrl?: string | null;
+};
+
+export type DmThreadHeaderModel = {
+  label: string;
+  href: string | null;
+  photoUrl: string | null;
+  avatarName: string;
+};
+
+// One other person: display name, or the bare handle when the name is empty.
+// Never both, and never an @ in the bar. A room with several people keeps the
+// title or joined names and has no single profile target.
+export function dmThreadHeaderModel(input: {
+  title?: string | null;
+  peers: readonly DmThreadHeaderPeer[];
+}): DmThreadHeaderModel {
+  const peers = input.peers.filter((peer) => bareHandle(peer.handle));
+  if (peers.length === 1) {
+    const peer = peers[0];
+    const identity = socialPersonIdentity({
+      handle: peer.handle,
+      displayName: peer.displayName,
+    });
+    return {
+      label: identity.label,
+      href: socialMemberHref(identity.handle),
+      photoUrl: peer.photoUrl ?? null,
+      avatarName: identity.avatarName,
+    };
+  }
+  return {
+    label: conversationRoomLabel(
+      input.title,
+      peers.map((peer) => socialPersonLabel({ handle: peer.handle, displayName: peer.displayName })),
+    ),
+    href: null,
+    photoUrl: null,
+    avatarName: "",
+  };
+}
 
 export type DmThreadAlign = "mine" | "theirs";
 
