@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   AGGREGATION_VIEW_AS,
@@ -10,6 +10,7 @@ import {
   aggregationViewAsAppliesToPath,
   aggregationViewAsAuditRow,
   aggregationViewAsCookieOptions,
+  aggregationViewAsSurface,
   applyAggregationViewAs,
   isClientAggregationPath,
   parseAggregationViewAsOrgId,
@@ -31,12 +32,17 @@ const staffBase = {
 };
 
 describe("aggregation view-as cookie and copy", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("names the Aggregation-only cookie and keeps copy calm", () => {
     expect(AGGREGATION_VIEW_AS_COOKIE).toBe("24frame_aggregation_view_as");
     expect(AGGREGATION_VIEW_AS_COOKIE_PATH).toBe("/aggregation");
     expect(aggregationViewAsCookieOptions()).toEqual({
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       path: "/aggregation",
     });
     expect(aggregationViewAsCookieOptions().path).not.toBe("/");
@@ -45,6 +51,18 @@ describe("aggregation view-as cookie and copy", () => {
     expect(AGGREGATION_VIEW_AS.exit).toBe("Exit");
     expect(AGGREGATION_VIEW_AS.start).toBe("View Aggregation");
     expect(AGGREGATION_VIEW_AS.forbidden).toBe("Not authorized.");
+  });
+
+  it("marks the view-as cookie Secure in production, like the portal session cookie", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(aggregationViewAsCookieOptions()).toEqual({
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      path: "/aggregation",
+    });
+    vi.stubEnv("NODE_ENV", "development");
+    expect(aggregationViewAsCookieOptions().secure).toBe(false);
   });
 
   it("accepts only a canonical org UUID", () => {
@@ -79,12 +97,41 @@ describe("aggregation view-as path isolation", () => {
   });
 });
 
+describe("aggregationViewAsSurface", () => {
+  it("drops operate and staff lifecycle controls while view-as is active", () => {
+    expect(
+      aggregationViewAsSurface({
+        viewAs: { orgId: ORG.id, orgName: ORG.name },
+        canOperate: true,
+        isGcStaff: true,
+      }),
+    ).toEqual({ canOperate: false, isStaff: false });
+  });
+
+  it("leaves membership operate and staff lifecycle alone when view-as is off", () => {
+    expect(
+      aggregationViewAsSurface({
+        viewAs: null,
+        canOperate: true,
+        isGcStaff: false,
+      }),
+    ).toEqual({ canOperate: true, isStaff: false });
+    expect(
+      aggregationViewAsSurface({
+        viewAs: null,
+        canOperate: false,
+        isGcStaff: true,
+      }),
+    ).toEqual({ canOperate: false, isStaff: true });
+  });
+});
+
 describe("applyAggregationViewAs", () => {
-  it("scopes staff to the client org owner surface", () => {
-    const next = applyAggregationViewAs(staffBase, ORG);
+  it("scopes staff to the client org view without operate", () => {
+    const next = applyAggregationViewAs({ ...staffBase, canOperate: true }, ORG);
     expect(next.activeOrg).toEqual(ORG);
     expect(next.activeRole).toBe("account_owner");
-    expect(next.canOperate).toBe(true);
+    expect(next.canOperate).toBe(false);
     expect(next.isGcStaff).toBe(true);
     expect(next.aggregationViewAs).toEqual({ orgId: ORG.id, orgName: ORG.name });
     expect(next.rows).toEqual([{ role: "account_owner", organizations: ORG }]);
@@ -99,10 +146,11 @@ describe("applyAggregationViewAs", () => {
   });
 
   it("leaves membership context alone when no view-as org loaded", () => {
-    const next = applyAggregationViewAs(staffBase, null);
+    const next = applyAggregationViewAs({ ...staffBase, canOperate: true }, null);
     expect(next).toMatchObject({
       activeOrg: null,
       aggregationViewAs: null,
+      canOperate: true,
       isGcStaff: true,
     });
   });
@@ -162,5 +210,16 @@ describe("view-as stays off Social sources", () => {
     expect(context).toContain("AGGREGATION_VIEW_AS_COOKIE");
     expect(context).toContain("applyAggregationViewAs");
     expect(context).toContain("isGcStaff");
+  });
+
+  it("routes title operate CTAs through the view-as surface", () => {
+    const catalog = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
+    const detail = readFileSync("src/app/(app)/aggregation/titles/[id]/page.tsx", "utf8");
+    const metadata = readFileSync("src/app/(app)/aggregation/titles/[id]/metadata/page.tsx", "utf8");
+    for (const src of [catalog, detail, metadata]) {
+      expect(src).toContain("aggregationViewAsSurface");
+    }
+    expect(catalog).toContain("isStaff={lifecycleStaff}");
+    expect(detail).toContain("isStaff={lifecycleStaff}");
   });
 });

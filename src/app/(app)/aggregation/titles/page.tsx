@@ -18,6 +18,7 @@ import {
   filterCatalogByStatus,
   parseCatalogStatusFilter,
 } from "@/lib/titles-catalog";
+import { aggregationViewAsSurface } from "@/lib/aggregation-impersonation";
 import { publicCatalogId, titleClientPath } from "@/lib/title-public-id";
 import {
   TitlesCatalogEmpty,
@@ -57,7 +58,11 @@ export default async function TitlesPage({
   if (!ctx) redirect("/login");
   if (!ctx.activeOrg) redirect("/");
   const activeOrg = ctx.activeOrg;
-  const canOperate = ctx.canOperate;
+  const { canOperate, isStaff: lifecycleStaff } = aggregationViewAsSurface({
+    viewAs: ctx.aggregationViewAs,
+    canOperate: ctx.canOperate,
+    isGcStaff: ctx.isGcStaff,
+  });
 
   // BOUNDED (catalog-at-scale spec, phase 1). Unbounded, this returned exactly 1,000 rows
   // at PostgREST's max_rows with no error — a client with 1,200 films could not see 200 of
@@ -101,7 +106,7 @@ export default async function TitlesPage({
   const filtered = filterCatalogByStatus(filterTitles(all, q), statusFilter);
 
   const catalogById = new Map(list.map((t) => [t.id, t.catalog_id]));
-  const lifecycleActor = { isStaff: ctx.isGcStaff, canOperate };
+  const lifecycleActor = { isStaff: lifecycleStaff, canOperate };
   const stills = filtered.map((r) => {
     const catalogId = catalogById.get(r.id) ?? null;
     const flags = titleLifecycleFlags(
@@ -190,7 +195,7 @@ export default async function TitlesPage({
                     titleId={r.key}
                     titleName={r.title}
                     status={r.status as TitleStatus}
-                    isStaff={ctx.isGcStaff}
+                    isStaff={lifecycleStaff}
                     flags={r.flags}
                   />
                 ) : undefined

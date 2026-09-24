@@ -49,11 +49,15 @@ export function parseAggregationViewAsOrgId(value: string | undefined | null): s
 export function aggregationViewAsCookieOptions(): {
   httpOnly: true;
   sameSite: "lax";
+  secure: boolean;
   path: string;
 } {
   return {
     httpOnly: true,
     sameSite: "lax",
+    // Portal session cookie (verify-otp) uses the same production Secure flag
+    // so local http can still set the cookie.
+    secure: process.env.NODE_ENV === "production",
     path: AGGREGATION_VIEW_AS_COOKIE_PATH,
   };
 }
@@ -69,6 +73,17 @@ export function aggregationViewAsAppliesToPath(pathname: string): boolean {
     return false;
   }
   return isClientAggregationPath(pathname);
+}
+
+// View-as paints the client catalog via a synthetic owner role. That role is
+// not membership: operate stays off, and staff delete/archive/restore stay off.
+export function aggregationViewAsSurface(input: {
+  viewAs: AggregationViewAs | null;
+  canOperate: boolean;
+  isGcStaff: boolean;
+}): { canOperate: boolean; isStaff: boolean } {
+  if (input.viewAs) return { canOperate: false, isStaff: false };
+  return { canOperate: input.canOperate, isStaff: input.isGcStaff };
 }
 
 export function applyAggregationViewAs<
@@ -90,7 +105,7 @@ export function applyAggregationViewAs<
     orgs: [{ id: viewAsOrg.id, name: viewAsOrg.name }],
     activeOrg: viewAsOrg,
     activeRole: AGGREGATION_VIEW_AS_ROLE,
-    canOperate: true,
+    canOperate: false,
     aggregationViewAs: { orgId: viewAsOrg.id, orgName: viewAsOrg.name },
   };
 }

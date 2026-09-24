@@ -137,7 +137,8 @@ describe("TitleLifecycleControls", () => {
   it("mounts on the title-detail hero overflow, not mid-page alone", () => {
     expect(pageSrc).toContain("overflow={");
     expect(pageSrc).toContain("<TitleLifecycleControls");
-    expect(pageSrc).toContain("isStaff={ctx.isGcStaff}");
+    expect(pageSrc).toContain("aggregationViewAsSurface");
+    expect(pageSrc).toContain("isStaff={lifecycleStaff}");
     expect(pageSrc).toContain("titleName={title.title}");
     expect(listSrc).toContain("titleName={r.title}");
     expect(gcSrc).toContain("titleName={t.title}");
