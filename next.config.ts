@@ -44,8 +44,9 @@ const nextConfig: NextConfig = {
     // can attach client navigation spans. Off by default in Next 16.3.
     instrumentationClientRouterTransitionEvents: true,
     // One limit for every server action. Next has no per-action bodySizeLimit.
-    // `"3gb"` is 3GiB. The ceiling is the largest house file cap a server
-    // action accepts, plus 20KB multipart overhead.
+    // Lesson source bytes multipart straight to S3. This ceiling is the
+    // largest file still posted to an action (education cover, 10MiB)
+    // plus 20KB. `"3gb"` was 3GiB on every action.
     serverActions: { bodySizeLimit: SERVER_ACTION_BODY_SIZE_LIMIT_BYTES },
   },
 

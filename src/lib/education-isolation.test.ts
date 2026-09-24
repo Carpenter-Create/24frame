@@ -23,7 +23,9 @@ describe("education isolation", () => {
     expect(infra).toContain("24frame-education-source-prod");
     expect(infra).toContain("24frame-education-output-prod");
     expect(infra).toContain("Do **not** create these buckets");
-    expect(infra).toContain("Cover and lesson source bytes PUT **server-side**");
+    expect(infra).toContain("Cover bytes PUT **server-side**");
+    expect(infra).toContain("Lesson source bytes multipart-upload from the browser");
+    expect(infra).toContain("never enters a server-action body");
     expect(infra).toContain("courses/{courseId}/lessons/{lessonId}/hls/*");
     expect(infra).toContain("/api/education/hls/");
     expect(infra).toContain("EDUCATION_AWS_ACCESS_KEY_ID");
@@ -138,15 +140,20 @@ describe("education isolation", () => {
     expect(hls).not.toContain("process.env.FINANCE_CLOUDFRONT_");
   });
 
-  it("uploads covers and lesson sources server-side so Saving… can clear without a browser S3 PUT", () => {
+  it("uploads covers server-side and lesson sources by multipart straight to S3", () => {
     const forms = readFileSync("src/app/(app)/(operator)/education/manage/education-forms.tsx", "utf8");
     const actions = readFileSync("src/app/(app)/(operator)/education/manage/actions.ts", "utf8");
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(forms).toContain("uploadEducationCover");
-    expect(forms).toContain("uploadEducationLessonSource");
+    expect(forms).toContain("uploadEducationLessonSourceFromBrowser");
+    expect(forms).not.toMatch(/uploadEducationLessonSource\(/);
     expect(forms).toContain("finally");
     expect(forms).not.toMatch(/presignEducationUpload/);
     expect(forms).not.toContain("putEducationBrowserObject");
+    expect(readFileSync("src/lib/education-source-upload.ts", "utf8")).not.toContain("FormData");
+    expect(actions).toContain("createEducationSourceMultipart");
+    expect(actions).toContain("completeEducationSourceMultipart");
+    expect(actions).not.toContain("function uploadEducationLessonSource");
     expect(actions).toContain("putEducationSourceObject");
     expect(actions).toContain("cover_key");
     expect(actions).toContain("source_key");
