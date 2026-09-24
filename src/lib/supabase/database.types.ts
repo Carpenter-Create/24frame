@@ -3843,7 +3843,7 @@ export type Database = {
       }
       portal_claim_otp_attempt: {
         Args: { p_max_attempts: number; p_otp_id: string }
-        Returns: number
+        Returns: number | null
       }
       portal_resolve_download: {
         Args: { p_session_token_hash: string }
