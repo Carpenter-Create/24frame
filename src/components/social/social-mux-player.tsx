@@ -7,28 +7,35 @@ import { cn } from "@/lib/cn";
 import { SOCIAL_MUX_PLAYER_CLASS } from "@/lib/social-chrome";
 import {
   SOCIAL_MUX_PLAYBACK_ROUTE,
+  socialMuxPlaybackRequiresTokens,
   socialMuxPlaybackTokensFromJson,
   socialMuxThumbnailUrl,
+  type SocialMuxPlaybackPolicy,
   type SocialMuxPlaybackTokens,
 } from "@/lib/social-mux";
 
 // Mux Player is browser-only. SSR paints the host so feed tests stay
-// static. Tokens are minted on the Node route after GC-P1-4 signed policy.
+// static. Signed policy mints tokens on the Node route. Public policy
+// and rows with no policy play the playback id alone.
 // Adaptive Auto — no quality Settings control in v1.
 
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
 export function SocialMuxPlayer({
   playbackId,
+  playbackPolicy,
   className,
 }: {
   playbackId: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
   className?: string;
 }) {
+  const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
   const [mint, setMint] = useState<{ playbackId: string; tokens: SocialMuxPlaybackTokens } | null>(null);
-  const tokens = mint?.playbackId === playbackId ? mint.tokens : null;
+  const tokens = signed && mint?.playbackId === playbackId ? mint.tokens : null;
 
   useEffect(() => {
+    if (!signed) return;
     const controller = new AbortController();
     void fetch(`${SOCIAL_MUX_PLAYBACK_ROUTE}?playbackId=${encodeURIComponent(playbackId)}`, {
       signal: controller.signal,
@@ -43,31 +50,43 @@ export function SocialMuxPlayer({
         if (error instanceof DOMException && error.name === "AbortError") return;
       });
     return () => controller.abort();
-  }, [playbackId]);
+  }, [playbackId, signed]);
 
   return (
     <div
       data-social-mux-player={playbackId}
-      data-social-mux-playback={tokens ? "signed" : "pending"}
+      data-social-mux-playback={signed ? (tokens ? "signed" : "pending") : "public"}
       data-social-post-video=""
       className={cn(SOCIAL_MUX_PLAYER_CLASS, className)}
     >
-      {tokens ? (
+      {signed ? (
+        tokens ? (
+          <MuxPlayer
+            playbackId={playbackId}
+            tokens={{
+              playback: tokens.playback,
+              thumbnail: tokens.thumbnail,
+              storyboard: tokens.storyboard,
+            }}
+            streamType="on-demand"
+            playsInline
+            preload="metadata"
+            poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
+            className="size-full object-cover"
+            style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : null
+      ) : (
         <MuxPlayer
           playbackId={playbackId}
-          tokens={{
-            playback: tokens.playback,
-            thumbnail: tokens.thumbnail,
-            storyboard: tokens.storyboard,
-          }}
           streamType="on-demand"
           playsInline
           preload="metadata"
-          poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
+          poster={socialMuxThumbnailUrl(playbackId)}
           className="size-full object-cover"
           style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
         />
-      ) : null}
+      )}
     </div>
   );
 }

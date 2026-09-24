@@ -68,6 +68,38 @@ describe("Social Edge media proxies", () => {
     ]);
     expect(items[0]?.url).not.toContain(SOCIAL_MEDIA_ROUTE);
   });
+
+  it("forwards public and signed playback policy onto the feed item", () => {
+    const key = `posts/${AUTHOR}/${OBJECT}.mp4`;
+    const signed = socialMediaProxies(
+      [
+        {
+          kind: "video",
+          key,
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+        },
+      ],
+      AUTHOR,
+    );
+    expect(signed[0]?.playbackPolicy).toBe("signed");
+    const legacy = socialMediaProxies(
+      [
+        {
+          kind: "video",
+          key,
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "public",
+        },
+      ],
+      AUTHOR,
+    );
+    expect(legacy[0]?.playbackPolicy).toBe("public");
+  });
 });
 
 describe("Social Edge vs Node runtime lock", () => {

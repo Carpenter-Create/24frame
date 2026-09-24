@@ -10,6 +10,7 @@ import {
   SOCIAL_MUX_ORIGINAL_RESOLUTION,
   socialMuxAssetSettings,
   socialMuxPassthroughBoundToUser,
+  socialMuxPlaybackRequiresTokens,
   socialMuxPlaybackTokensFromJson,
   socialMuxPlaybackUrl,
   socialMuxThumbnailUrl,
@@ -117,6 +118,18 @@ describe("social Mux encode locks", () => {
     expect(socialMuxPassthroughBoundToUser(`${userId}:object`, "  ")).toBe(false);
     expect(socialMuxPassthroughBoundToUser(null, userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser(undefined, userId)).toBe(false);
+  });
+
+  it("mints playback tokens only for signed policy", () => {
+    const player = readFileSync("src/components/social/social-mux-player.tsx", "utf8");
+    const feed = readFileSync("src/components/social/social-feed-video.tsx", "utf8");
+    expect(socialMuxPlaybackRequiresTokens("signed")).toBe(true);
+    expect(socialMuxPlaybackRequiresTokens("public")).toBe(false);
+    expect(socialMuxPlaybackRequiresTokens(undefined)).toBe(false);
+    expect(socialMuxPlaybackRequiresTokens(null)).toBe(false);
+    expect(player).toContain("socialMuxPlaybackRequiresTokens(playbackPolicy)");
+    expect(player).toContain("if (!signed) return");
+    expect(feed).toContain("playbackPolicy={item.playbackPolicy}");
   });
 
   it("accepts a playback token set the player can pass to Mux", () => {

@@ -20,12 +20,23 @@ export type SocialMuxAssetSettings = {
   maxResolutionTier: SocialMuxResolutionTier;
 };
 
+export const SOCIAL_MUX_PLAYBACK_POLICIES = ["public", "signed"] as const;
+export type SocialMuxPlaybackPolicy = (typeof SOCIAL_MUX_PLAYBACK_POLICIES)[number];
+
 export type SocialMuxMediaFields = {
   provider: typeof SOCIAL_MUX_PROVIDER;
   playbackId: string;
   uploadId?: string;
   assetId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
 };
+
+/** Signed assets need a playback JWT. Public assets, and legacy rows with no policy, do not. */
+export function socialMuxPlaybackRequiresTokens(
+  playbackPolicy: SocialMuxPlaybackPolicy | null | undefined,
+): boolean {
+  return playbackPolicy === "signed";
+}
 
 export function isSocialMuxId(value: string): boolean {
   return SOCIAL_MUX_ID_RE.test(value);

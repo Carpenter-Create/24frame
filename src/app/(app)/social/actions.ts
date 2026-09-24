@@ -337,6 +337,7 @@ export async function finalizeSocialMuxUpload(formData: FormData): Promise<{
         playbackId: ready.playbackId,
         uploadId: ready.uploadId,
         assetId: ready.assetId,
+        playbackPolicy: "signed",
       },
     };
   } catch (error) {
