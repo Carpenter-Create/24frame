@@ -319,6 +319,22 @@ body {
   animation-fill-mode: forwards;
 }
 
+/* Pause-on-hold. iOS must not select the open viewer or raise the callout. */
+.social-story-no-callout,
+.social-story-no-callout * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.social-story-no-callout input,
+.social-story-no-callout textarea,
+.social-story-no-callout [contenteditable="true"] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .social-mux-player {
   --media-accent-color: var(--accent);
   --media-background-color: var(--surface-muted);

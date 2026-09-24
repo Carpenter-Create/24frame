@@ -243,6 +243,11 @@ export const SOCIAL_STORIES_EMPTY_ACTION_CLASS =
 export const SOCIAL_STORY_STAGE_CLASS =
   "fixed inset-0 z-50 bg-[#0A0A0B] text-band-ink";
 
+// Open viewer hold surface. select-none plus the callout utility: a long-press
+// pauses, and iOS must not select the stage or raise the system callout.
+// Text fields opt back in in globals.css.
+export const SOCIAL_STORY_HOLD_SURFACE_CLASS = "select-none social-story-no-callout";
+
 // Rich calm v1.4 — paint on the viewer and rail. Durations live in globals.css.
 // A still has no media duration; the fill uses this display interval.
 // Not a capture cap.

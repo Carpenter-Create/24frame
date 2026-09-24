@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
 } from "react";
@@ -26,6 +27,7 @@ import {
   SOCIAL_STORY_ACTIVATE_NEXT_CLASS,
   SOCIAL_STORY_ACTIVATE_PREV_CLASS,
   SOCIAL_STORY_ACTIVE_CARD_CLASS,
+  SOCIAL_STORY_HOLD_SURFACE_CLASS,
   SOCIAL_STORY_CARET_CLASS,
   SOCIAL_STORY_NEIGHBOR_CARD_CLASS,
   SOCIAL_STORY_PROGRESS_BAR_CLASS,
@@ -58,6 +60,15 @@ export type SocialStoryNeighbor = {
 };
 
 const STORY_ENTER_KEY = "social-story-enter";
+// touchstart preventDefault can cancel the pointer in the same turn. That is not a finger-up.
+const STORY_POINTER_CANCEL_IGNORE_MS = 32;
+
+function storyTouchTargetsTextField(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    target.closest("input, textarea, [contenteditable='true']") !== null
+  );
+}
 
 function consumeStoryEnter(): "next" | "prev" | null {
   if (typeof window === "undefined") return null;
@@ -457,6 +468,50 @@ export function SocialStoryViewer({
     return () => window.removeEventListener("keydown", onKey);
   }, [go]);
 
+  const releaseHold = useCallback(
+    (point: { clientX: number; clientY: number }) => {
+      const start = holdRef.current;
+      holdRef.current = null;
+      setHeld(false);
+      if (!start) return;
+      const bounds = mediaRef.current?.getBoundingClientRect();
+      const release = storyHoldRelease({
+        elapsedMs: performance.now() - start.at,
+        dx: point.clientX - start.x,
+        dy: point.clientY - start.y,
+        width: bounds?.width ?? 0,
+        x: point.clientX - (bounds?.left ?? 0),
+      });
+      suppressClick.current = true;
+      if (release === "resume") return;
+      go(release, "manual");
+    },
+    [go],
+  );
+
+  useEffect(() => {
+    const node = mediaRef.current;
+    if (!node) return;
+    // React's delegated touchstart is passive, so it cannot cancel iOS selection.
+    const blockCallout = (event: TouchEvent) => {
+      if (storyTouchTargetsTextField(event.target)) return;
+      if (event.cancelable) event.preventDefault();
+    };
+    const endTouch = (event: TouchEvent) => {
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      releaseHold({ clientX: touch.clientX, clientY: touch.clientY });
+    };
+    node.addEventListener("touchstart", blockCallout, { passive: false, capture: true });
+    node.addEventListener("touchend", endTouch);
+    node.addEventListener("touchcancel", endTouch);
+    return () => {
+      node.removeEventListener("touchstart", blockCallout, { capture: true });
+      node.removeEventListener("touchend", endTouch);
+      node.removeEventListener("touchcancel", endTouch);
+    };
+  }, [releaseHold, item?.id]);
+
   function onZonePointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
     if (event.button !== 0) return;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -465,21 +520,19 @@ export function SocialStoryViewer({
   }
 
   function onZonePointerUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    releaseHold(event);
+  }
+
+  function onZonePointerCancel(event: ReactPointerEvent<HTMLButtonElement>) {
     const start = holdRef.current;
-    holdRef.current = null;
-    setHeld(false);
     if (!start) return;
-    const bounds = mediaRef.current?.getBoundingClientRect();
-    const release = storyHoldRelease({
-      elapsedMs: performance.now() - start.at,
-      dx: event.clientX - start.x,
-      dy: event.clientY - start.y,
-      width: bounds?.width ?? 0,
-      x: event.clientX - (bounds?.left ?? 0),
-    });
-    suppressClick.current = true;
-    if (release === "resume") return;
-    go(release, "manual");
+    if (performance.now() - start.at < STORY_POINTER_CANCEL_IGNORE_MS) return;
+    releaseHold(event);
+  }
+
+  function onMediaContextMenu(event: ReactMouseEvent<HTMLDivElement>) {
+    if (storyTouchTargetsTextField(event.target)) return;
+    event.preventDefault();
   }
 
   function onZoneClick(direction: "next" | "prev") {
@@ -496,7 +549,11 @@ export function SocialStoryViewer({
     <div
       ref={stageRef}
       data-social-story-stage=""
-      className={cn(SOCIAL_STORY_STAGE_CLASS, enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null)}
+      className={cn(
+        SOCIAL_STORY_STAGE_CLASS,
+        SOCIAL_STORY_HOLD_SURFACE_CLASS,
+        enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null,
+      )}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-40 hidden items-center justify-between p-4 md:flex">
         {/* eslint-disable-next-line @next/next/no-img-element -- dark-stage wordmark; BrandLogo swaps with theme */}
@@ -519,12 +576,17 @@ export function SocialStoryViewer({
         {prevNeighbor ? (
           <NeighborCard neighbor={prevNeighbor} onSelect={() => jumpTo(cursor.author - 1, "last")} />
         ) : null}
-        <article data-social-story-viewer={item.id} className={SOCIAL_STORY_ACTIVE_CARD_CLASS}>
+        <article
+          data-social-story-viewer={item.id}
+          className={cn(SOCIAL_STORY_ACTIVE_CARD_CLASS, SOCIAL_STORY_HOLD_SURFACE_CLASS)}
+        >
           <div
             ref={mediaRef}
             data-social-story-frame=""
+            onContextMenu={onMediaContextMenu}
             className={cn(
               "absolute inset-0",
+              SOCIAL_STORY_HOLD_SURFACE_CLASS,
               hop === "next" ? SOCIAL_STORY_ACTIVATE_NEXT_CLASS : null,
               hop === "prev" ? SOCIAL_STORY_ACTIVATE_PREV_CLASS : null,
             )}
@@ -553,18 +615,20 @@ export function SocialStoryViewer({
               type="button"
               aria-label={SOCIAL.stories.previous}
               data-social-story-tap="prev"
-              className="absolute inset-y-0 left-0 z-10 w-1/3"
+              className={cn("absolute inset-y-0 left-0 z-10 w-1/3", SOCIAL_STORY_HOLD_SURFACE_CLASS)}
               onPointerDown={onZonePointerDown}
               onPointerUp={onZonePointerUp}
+              onPointerCancel={onZonePointerCancel}
               onClick={() => onZoneClick("prev")}
             />
             <button
               type="button"
               aria-label={SOCIAL.stories.next}
               data-social-story-tap="next"
-              className="absolute inset-y-0 right-0 z-10 w-2/3"
+              className={cn("absolute inset-y-0 right-0 z-10 w-2/3", SOCIAL_STORY_HOLD_SURFACE_CLASS)}
               onPointerDown={onZonePointerDown}
               onPointerUp={onZonePointerUp}
+              onPointerCancel={onZonePointerCancel}
               onClick={() => onZoneClick("next")}
             />
           </div>

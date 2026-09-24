@@ -18,7 +18,12 @@ vi.mock("next/dynamic", () => ({
     },
 }));
 
-import { SOCIAL_STORY_ACTIVE_CARD_CLASS, SOCIAL_STORY_STAGE_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_STORY_ACTIVE_CARD_CLASS,
+  SOCIAL_STORY_HOLD_SURFACE_CLASS,
+  SOCIAL_STORY_REPLY_PILL_CLASS,
+  SOCIAL_STORY_STAGE_CLASS,
+} from "@/lib/social-chrome";
 import { SocialStoryViewer } from "./social-story-viewer";
 
 const viewerProps = {
@@ -135,5 +140,63 @@ describe("SocialStoryViewer", () => {
     expect(page).toContain("key={story.id}");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");
     expect(page).toContain("SOCIAL.stories.close");
+  });
+
+  it("keeps a hold from selecting the viewer or raising the iOS callout", () => {
+    expect(SOCIAL_STORY_HOLD_SURFACE_CLASS).toContain("select-none");
+    expect(SOCIAL_STORY_HOLD_SURFACE_CLASS).toContain("social-story-no-callout");
+    expect(SOCIAL_STORY_REPLY_PILL_CLASS).not.toContain("select-none");
+    expect(SOCIAL_STORY_REPLY_PILL_CLASS).not.toContain("social-story-no-callout");
+    const html = renderToStaticMarkup(
+      createElement(SocialStoryViewer, {
+        ...viewerProps,
+        media: [{ kind: "video", url: "/api/social/media?key=stories%2Forg%2Fclip.mp4" }],
+        canReply: true,
+      }),
+    );
+    expect(html.split("social-story-no-callout").length - 1).toBe(5);
+    expect(html).toContain('data-social-story-stage=""');
+    expect(html).toContain('data-social-story-frame=""');
+    expect(html).toContain('data-social-story-tap="prev"');
+    expect(html).toContain('data-social-story-tap="next"');
+    expect(html).toContain("w-1/3");
+    expect(html).toContain("w-2/3");
+    const replyAt = html.indexOf('data-social-story-reply=""');
+    const reply = html.slice(replyAt, html.indexOf("</form>", replyAt));
+    expect(reply).not.toContain("social-story-no-callout");
+    expect(reply).not.toContain("select-none");
+    const pauseAt = html.indexOf('data-social-story-pause=""');
+    const pause = html.slice(pauseAt, html.indexOf("</button>", pauseAt));
+    expect(pause).not.toContain("social-story-no-callout");
+    expect(pause).not.toContain("select-none");
+    const src = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
+    const touch = src.slice(
+      src.lastIndexOf("useEffect", src.indexOf("const blockCallout")),
+      src.indexOf("function onZonePointerDown"),
+    );
+    expect(touch).toContain("const node = mediaRef.current");
+    expect(touch).not.toContain("stageRef");
+    expect(touch).toContain(
+      'addEventListener("touchstart", blockCallout, { passive: false, capture: true })',
+    );
+    expect(touch).toContain("event.preventDefault()");
+    expect(touch).toContain("storyTouchTargetsTextField");
+    expect(src).toContain("onContextMenu={onMediaContextMenu}");
+    expect(src).toContain("onPointerDown={onZonePointerDown}");
+    expect(src).toContain("onPointerUp={onZonePointerUp}");
+    expect(src).toContain("onPointerCancel={onZonePointerCancel}");
+    expect(src).toContain("SOCIAL_STORY_ACTIVATE_NEXT_CLASS");
+    const cancel = src.slice(
+      src.indexOf("function onZonePointerCancel"),
+      src.indexOf("function onMediaContextMenu"),
+    );
+    expect(cancel.indexOf("STORY_POINTER_CANCEL_IGNORE_MS")).toBeLessThan(cancel.indexOf("releaseHold"));
+    const css = readFileSync("src/app/globals.css", "utf8");
+    const callout = css.slice(css.indexOf(".social-story-no-callout"));
+    expect(callout).toContain("-webkit-touch-callout: none");
+    expect(callout).toContain("-webkit-user-select: none");
+    expect(callout).toContain("user-select: text");
+    expect(callout).toContain("textarea");
+    expect(callout).toContain('[contenteditable="true"]');
   });
 });
