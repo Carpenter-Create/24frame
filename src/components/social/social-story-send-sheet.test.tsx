@@ -68,7 +68,9 @@ describe("SocialStorySendSheet", () => {
     expect(src).toContain("holdSheetFieldViewport");
     expect(src).toContain("window.scrollTo");
     expect(src).toContain('event.key === "Enter"');
-    expect(src).toContain("fontSize: 16");
+    expect(src).toContain('variant="bare"');
+    expect(src).not.toContain("fontSize: 16");
+    expect(src).not.toContain("<input");
     expect(src).toContain('selected ? "min-h-0" : "min-h-0 overflow-hidden"');
     expect(src).not.toContain("router");
     expect(src).not.toContain("HouseDialogFrame");

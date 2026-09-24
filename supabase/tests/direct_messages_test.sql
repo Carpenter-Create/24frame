@@ -7,7 +7,7 @@
 -- privilege-bridge via is_gc_staff. Ask Globee ai_* tables stay.
 
 begin;
-select plan(74);
+select plan(75);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);

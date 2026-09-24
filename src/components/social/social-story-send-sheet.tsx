@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Input } from "@/components/ui/input";
 import { listStorySendPeople, sendSocialStoryItem } from "@/app/(app)/social/light-actions";
 import { HouseScrim } from "@/components/chrome/house-overlay";
 import { displayHandle, SOCIAL } from "@/lib/social";
@@ -154,16 +155,16 @@ export function SocialStorySendSheet({
             <label className="sr-only" htmlFor={searchId}>
               {SOCIAL.stories.search}
             </label>
-            <input
+            <Input
               id={searchId}
               type="text"
+              variant="bare"
               enterKeyHint="search"
               data-social-story-send-search=""
               value={query}
               placeholder={SOCIAL.stories.search}
               autoComplete="off"
-              style={{ fontSize: 16 }}
-              className="h-10 min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-white/60"
+              className="h-10 min-w-0 flex-1 text-white placeholder:text-white/60"
               onFocus={holdSheetFieldViewport}
               onKeyDown={(event) => {
                 if (event.key === "Enter") event.preventDefault();
@@ -261,22 +262,24 @@ export function SocialStorySendSheet({
             <label className="sr-only" htmlFor={`${searchId}-note`}>
               {SOCIAL.stories.writeMessage}
             </label>
-            <input
-              id={`${searchId}-note`}
-              type="text"
-              enterKeyHint="done"
-              data-social-story-send-note=""
-              value={note}
-              placeholder={SOCIAL.stories.writeMessage}
-              autoComplete="off"
-              style={{ fontSize: 16 }}
-              className="mt-4 h-10 w-full rounded-[20px] bg-[#2A2A2E] px-4 text-white outline-none placeholder:text-white/60"
-              onFocus={holdSheetFieldViewport}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") event.preventDefault();
-              }}
-              onChange={(event) => setNote(event.target.value)}
-            />
+            <div className="mt-4 flex h-10 w-full items-center rounded-[20px] bg-[#2A2A2E] px-4">
+              <Input
+                id={`${searchId}-note`}
+                type="text"
+                variant="bare"
+                enterKeyHint="done"
+                data-social-story-send-note=""
+                value={note}
+                placeholder={SOCIAL.stories.writeMessage}
+                autoComplete="off"
+                className="h-full w-full text-white placeholder:text-white/60"
+                onFocus={holdSheetFieldViewport}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") event.preventDefault();
+                }}
+                onChange={(event) => setNote(event.target.value)}
+              />
+            </div>
             <button
               type="button"
               data-social-story-send-submit=""
