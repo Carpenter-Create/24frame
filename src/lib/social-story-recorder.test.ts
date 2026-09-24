@@ -149,6 +149,11 @@ describe("story MediaRecorder mime probe", () => {
     const playBlock = studio.slice(playStart, playEnd);
     expect(playBlock).toContain("bindStoryReviewVideo");
     expect(playBlock.indexOf("postingRef.current")).toBeLessThan(playBlock.indexOf("bindStoryReviewVideo"));
+    expect(playBlock).toContain("storyReviewMediaSrc");
+    expect(playBlock).toContain("node.play().catch(() => undefined)");
+    expect(playBlock.slice(playBlock.indexOf(".catch("))).not.toContain("mediaMissing");
+    const playButton = studio.slice(studio.indexOf('data-social-story-play=""'));
+    expect(playButton.slice(0, 400)).toContain("disabled={posting}");
     expect(playBlock).not.toContain("attachPreview");
     expect(playBlock).not.toContain("getUserMedia");
     expect(playBlock).not.toContain('setPhase("preview")');
@@ -181,6 +186,7 @@ describe("story MediaRecorder mime probe", () => {
     const pickBlock = studio.slice(pickStart, pickEnd);
     expect(pickBlock).toContain("reviewArmRef.current = 0");
     expect(pickBlock).not.toContain("reviewArmRef.current = Date.now()");
+    expect(pickBlock.indexOf("setStillMode(false)")).toBeGreaterThan(pickBlock.indexOf("releasePreview()"));
   });
 
   it("keeps the story upload type exact and splits store errors", async () => {

@@ -648,6 +648,9 @@ export function SocialStoryCompose({
       return;
     }
     releasePreview();
+    // A photo-camera gallery pick leaves still latched. The video file
+    // input stays unmounted while still is on, so a later Upload does nothing.
+    setStillMode(false);
     if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
     const url = URL.createObjectURL(file);
     clipUrlRef.current = url;
@@ -675,11 +678,12 @@ export function SocialStoryCompose({
       setError(SOCIAL.stories.mediaMissing);
       return;
     }
-    bindStoryReviewVideo(node, url);
+    const mediaSrc = storyReviewMediaSrc(url);
+    if (node.getAttribute("src") !== mediaSrc && node.src !== mediaSrc) {
+      bindStoryReviewVideo(node, url);
+    }
     node.muted = false;
-    void node.play().catch(() => {
-      setError(SOCIAL.stories.mediaMissing);
-    });
+    void node.play().catch(() => undefined);
   }
 
   async function postClip() {
@@ -1073,6 +1077,7 @@ export function SocialStoryCompose({
                 type="button"
                 data-social-story-play=""
                 aria-label={SOCIAL.stories.play}
+                disabled={posting}
                 className="absolute left-1/2 top-1/2 z-10 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-band-ink/20 text-band-ink"
                 onClick={playReview}
               >
