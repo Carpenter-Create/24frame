@@ -243,6 +243,15 @@ export const SOCIAL_STORIES_EMPTY_ACTION_CLASS =
 export const SOCIAL_STORY_STAGE_CLASS =
   "fixed inset-0 z-50 bg-[#0A0A0B] text-band-ink";
 
+// Rich calm v1.1 — paint only. Durations live in globals.css.
+// A still has no media duration; the fill uses this display interval.
+// Not a capture cap.
+export const SOCIAL_STORY_STILL_PROGRESS_MS = 5000;
+export const SOCIAL_STORY_STAGE_IN_CLASS = "social-story-stage-in";
+export const SOCIAL_STORY_ACTIVATE_NEXT_CLASS = "social-story-activate";
+export const SOCIAL_STORY_ACTIVATE_PREV_CLASS = "social-story-activate-prev";
+export const SOCIAL_STORY_PROGRESS_FILL_CLASS = "social-story-progress";
+
 export const SOCIAL_STORY_ACTIVE_CARD_CLASS =
   "relative h-full w-full overflow-hidden bg-[#0A0A0B] md:h-[min(90vh-16px,840px)] md:w-[calc(min(90vh-16px,840px)*9/16)] md:shrink-0 md:rounded-[16px]";
 
@@ -786,7 +795,7 @@ export const SOCIAL_STORY_CAPTURE_ROW_CLASS =
   "grid grid-cols-3 items-center px-4";
 
 export const SOCIAL_STORY_SHUTTER_CLASS =
-  "flex size-[72px] items-center justify-center justify-self-center rounded-full border-4 border-band-ink";
+  "social-story-shutter flex size-[72px] items-center justify-center justify-self-center rounded-full border-4 border-band-ink";
 
 export function socialStoryShutterFillClass(recording: boolean): string {
   return recording ? "size-14 rounded-full bg-accent" : "size-14 rounded-full bg-band-ink";

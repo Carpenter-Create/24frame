@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type SyntheticEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -12,11 +12,16 @@ import { BRAND_LOGO_DARK_SRC, BRAND_LOGO_HEIGHT_PX } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { PRODUCT_NAME } from "@/lib/product";
 import {
+  SOCIAL_STORY_ACTIVATE_NEXT_CLASS,
+  SOCIAL_STORY_ACTIVATE_PREV_CLASS,
   SOCIAL_STORY_ACTIVE_CARD_CLASS,
   SOCIAL_STORY_CARET_CLASS,
   SOCIAL_STORY_NEIGHBOR_CARD_CLASS,
   SOCIAL_STORY_PROGRESS_BAR_CLASS,
+  SOCIAL_STORY_PROGRESS_FILL_CLASS,
   SOCIAL_STORY_STAGE_CLASS,
+  SOCIAL_STORY_STAGE_IN_CLASS,
+  SOCIAL_STORY_STILL_PROGRESS_MS,
 } from "@/lib/social-chrome";
 import { SOCIAL_POST_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
 import { SOCIAL, SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
@@ -31,6 +36,28 @@ export type SocialStoryNeighbor = {
   coverUrl: string | null;
   coverKind: "image" | "video" | null;
 };
+
+const STORY_ENTER_KEY = "social-story-enter";
+
+function markStoryEnter(direction: "next" | "prev") {
+  try {
+    sessionStorage.setItem(STORY_ENTER_KEY, direction);
+  } catch {
+    // Private mode can refuse storage. The stage still opens.
+  }
+}
+
+function takeStoryEnter(): "next" | "prev" | "open" {
+  if (typeof window === "undefined") return "open";
+  try {
+    const value = sessionStorage.getItem(STORY_ENTER_KEY);
+    sessionStorage.removeItem(STORY_ENTER_KEY);
+    if (value === "next" || value === "prev") return value;
+  } catch {
+    // Same as a cold open.
+  }
+  return "open";
+}
 
 function neighborHref(neighbor: SocialStoryNeighbor | null, itemId: string | null): string | null {
   if (itemId) return socialStoryHref(itemId);
@@ -63,10 +90,17 @@ function StoryCover({
   );
 }
 
-function NeighborCard({ neighbor }: { neighbor: SocialStoryNeighbor }) {
+function NeighborCard({
+  neighbor,
+  direction,
+}: {
+  neighbor: SocialStoryNeighbor;
+  direction: "next" | "prev";
+}) {
   return (
     <Link
       href={socialStoryHref(neighbor.storyId)}
+      onClick={() => markStoryEnter(direction)}
       data-social-story-neighbor={neighbor.storyId}
       aria-label={neighbor.authorName}
       className={SOCIAL_STORY_NEIGHBOR_CARD_CLASS}
@@ -101,11 +135,13 @@ function StoryVideo({
   paused,
   muted,
   onAudible,
+  onProgress,
 }: {
   src: string;
   paused: boolean;
   muted: boolean;
   onAudible: (audible: boolean) => void;
+  onProgress: (progress: number) => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
 
@@ -139,6 +175,11 @@ function StoryVideo({
       preload="metadata"
       src={socialVideoDisplaySrc(src)}
       className="absolute inset-0 size-full object-cover"
+      onTimeUpdate={(event: SyntheticEvent<HTMLVideoElement>) => {
+        const node = event.currentTarget;
+        if (!node.duration || !Number.isFinite(node.duration)) return;
+        onProgress(Math.min(1, node.currentTime / node.duration));
+      }}
       onLoadedMetadata={(event: SyntheticEvent<HTMLVideoElement>) => {
         const tracks = (
           event.currentTarget as HTMLVideoElement & { audioTracks?: { length: number } }
@@ -186,6 +227,12 @@ export function SocialStoryViewer({
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(false);
   const [audible, setAudible] = useState(true);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(() => setEnter(takeStoryEnter()));
+    return () => cancelAnimationFrame(frame);
+  }, []);
   const bars = Math.max(total, 1);
   const prevTap = neighborHref(prevAuthor, prevId);
   const nextTap = neighborHref(nextAuthor, nextId);
@@ -203,9 +250,11 @@ export function SocialStoryViewer({
       }
       if (event.key === "ArrowLeft" && prevAuthorHref) {
         event.preventDefault();
+        markStoryEnter("prev");
         router.push(prevAuthorHref);
       } else if (event.key === "ArrowRight" && nextAuthorHref) {
         event.preventDefault();
+        markStoryEnter("next");
         router.push(nextAuthorHref);
       }
     }
@@ -214,7 +263,10 @@ export function SocialStoryViewer({
   }, [nextAuthorHref, prevAuthorHref, router]);
 
   return (
-    <div data-social-story-stage="" className={SOCIAL_STORY_STAGE_CLASS}>
+    <div
+      data-social-story-stage=""
+      className={cn(SOCIAL_STORY_STAGE_CLASS, enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null)}
+    >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-40 hidden items-center justify-between p-4 md:flex">
         {/* eslint-disable-next-line @next/next/no-img-element -- dark-stage wordmark; BrandLogo swaps with theme */}
         <img
@@ -233,8 +285,15 @@ export function SocialStoryViewer({
         </Link>
       </div>
       <div className="flex h-full w-full items-center justify-center md:gap-6">
-        {prevAuthor ? <NeighborCard neighbor={prevAuthor} /> : null}
-        <article data-social-story-viewer={storyId} className={SOCIAL_STORY_ACTIVE_CARD_CLASS}>
+        {prevAuthor ? <NeighborCard neighbor={prevAuthor} direction="prev" /> : null}
+        <article
+          data-social-story-viewer={storyId}
+          className={cn(
+            SOCIAL_STORY_ACTIVE_CARD_CLASS,
+            enter === "next" ? SOCIAL_STORY_ACTIVATE_NEXT_CLASS : null,
+            enter === "prev" ? SOCIAL_STORY_ACTIVATE_PREV_CLASS : null,
+          )}
+        >
           {clip?.kind === "image" ? (
             <div data-social-story-frame="" className="absolute inset-0">
               <SocialMediaImage src={clip.url} sizes={SOCIAL_POST_IMAGE_SIZES} alt="" />
@@ -247,6 +306,7 @@ export function SocialStoryViewer({
                 paused={paused}
                 muted={muted}
                 onAudible={setAudible}
+                onProgress={setVideoProgress}
               />
             </div>
           ) : null}
@@ -258,6 +318,7 @@ export function SocialStoryViewer({
           {prevTap ? (
             <Link
               href={prevTap}
+              onClick={() => markStoryEnter("prev")}
               aria-label={SOCIAL.stories.previous}
               data-social-story-tap="prev"
               className="absolute inset-y-0 left-0 z-10 w-1/3"
@@ -266,6 +327,7 @@ export function SocialStoryViewer({
           {nextTap ? (
             <Link
               href={nextTap}
+              onClick={() => markStoryEnter("next")}
               aria-label={SOCIAL.stories.next}
               data-social-story-tap="next"
               className="absolute inset-y-0 right-0 z-10 w-1/3"
@@ -274,6 +336,7 @@ export function SocialStoryViewer({
           {prevAuthor ? (
             <Link
               href={socialStoryHref(prevAuthor.storyId)}
+              onClick={() => markStoryEnter("prev")}
               aria-label={SOCIAL.stories.previous}
               className={cn(SOCIAL_STORY_CARET_CLASS, "-left-3 -translate-x-1/2")}
             >
@@ -283,6 +346,7 @@ export function SocialStoryViewer({
           {nextAuthor ? (
             <Link
               href={socialStoryHref(nextAuthor.storyId)}
+              onClick={() => markStoryEnter("next")}
               aria-label={SOCIAL.stories.next}
               className={cn(SOCIAL_STORY_CARET_CLASS, "-right-3 translate-x-1/2")}
             >
@@ -294,11 +358,25 @@ export function SocialStoryViewer({
               {Array.from({ length: bars }, (_, i) => (
                 <span
                   key={i}
-                  className={cn(
-                    SOCIAL_STORY_PROGRESS_BAR_CLASS,
-                    i <= index ? "bg-band-ink" : "bg-band-ink/35",
-                  )}
-                />
+                  className={cn(SOCIAL_STORY_PROGRESS_BAR_CLASS, "overflow-hidden bg-band-ink/35")}
+                >
+                  <span
+                    data-social-story-progress-fill=""
+                    className={cn(
+                      "block h-full origin-left bg-band-ink",
+                      i === index && !video ? SOCIAL_STORY_PROGRESS_FILL_CLASS : null,
+                    )}
+                    style={
+                      i < index
+                        ? { transform: "scaleX(1)" }
+                        : i > index
+                          ? { transform: "scaleX(0)" }
+                          : video
+                            ? { transform: `scaleX(${videoProgress})` }
+                            : { animationDuration: `${SOCIAL_STORY_STILL_PROGRESS_MS}ms` }
+                    }
+                  />
+                </span>
               ))}
             </div>
             <div className="flex items-center gap-2">
@@ -358,7 +436,7 @@ export function SocialStoryViewer({
             </span>
           </div>
         </article>
-        {nextAuthor ? <NeighborCard neighbor={nextAuthor} /> : null}
+        {nextAuthor ? <NeighborCard neighbor={nextAuthor} direction="next" /> : null}
       </div>
     </div>
   );

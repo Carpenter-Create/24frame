@@ -98,5 +98,7 @@ describe("SocialStoryViewer", () => {
     expect(still).not.toContain("data-social-story-neighbor");
     expect(still).not.toContain("aspect-video");
     expect(still).not.toContain("aspect-[4/5]");
+    expect(still).toContain("social-story-progress");
+    expect(still).toContain("animation-duration:5000ms");
   });
 });
