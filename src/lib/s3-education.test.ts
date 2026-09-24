@@ -25,7 +25,15 @@ vi.mock("@/lib/education-cloudfront", () => ({
   signEducationCloudfrontUrl: vi.fn(),
 }));
 
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+  UploadPartCommand,
+} from "@aws-sdk/client-s3";
 
 import {
   isEducationCloudfrontConfigured,
@@ -45,6 +53,9 @@ import {
   headEducationSourceObject,
   presignEducationOutputGet,
   presignEducationSourceGet,
+  completeEducationSourceMultipart,
+  createEducationSourceMultipart,
+  presignEducationSourcePart,
   presignEducationSourcePut,
   putEducationSourceObject,
   signedEducationCoverUrl,
@@ -126,6 +137,37 @@ describe("s3-education isolated lane", () => {
     expect(cmd.input.Body).toBe(body);
     expect(cmd.input.ContentType).toBe("video/mp4");
     expect(cmd.input.ACL).toBeUndefined();
+  });
+
+  it("multipart-uploads a lesson source on the Education source bucket", async () => {
+    mockSend.mockResolvedValueOnce({ UploadId: "upload-1" });
+    await expect(createEducationSourceMultipart(SOURCE, "video/mp4")).resolves.toBe("upload-1");
+    const created = mockSend.mock.calls[0]?.[0] as CreateMultipartUploadCommand;
+    expect(created).toBeInstanceOf(CreateMultipartUploadCommand);
+    expect(created.input.Bucket).toBe("test-education-source-bucket");
+    expect(created.input.Key).toBe(SOURCE);
+    expect(created.input.ContentType).toBe("video/mp4");
+
+    mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/part");
+    await expect(presignEducationSourcePart(SOURCE, "upload-1", 1)).resolves.toBe("https://s3.example/part");
+    const part = mockGetSignedUrl.mock.calls[0]?.[1] as UploadPartCommand;
+    expect(part).toBeInstanceOf(UploadPartCommand);
+    expect(part.input.Bucket).toBe("test-education-source-bucket");
+    expect(part.input.UploadId).toBe("upload-1");
+    expect(part.input.PartNumber).toBe(1);
+
+    mockSend.mockResolvedValueOnce({ ETag: '"done"' });
+    await completeEducationSourceMultipart(SOURCE, "upload-1", [{ partNumber: 1, etag: '"abc"' }]);
+    const completed = mockSend.mock.calls[1]?.[0] as CompleteMultipartUploadCommand;
+    expect(completed).toBeInstanceOf(CompleteMultipartUploadCommand);
+    expect(completed.input.Bucket).toBe("test-education-source-bucket");
+    expect(completed.input.MultipartUpload?.Parts).toEqual([{ PartNumber: 1, ETag: '"abc"' }]);
+  });
+
+  it("does not multipart-upload a title-prefix key", async () => {
+    const foreign = `orgs/${COURSE}/titles/${LESSON}/master/a.mov`;
+    await expect(createEducationSourceMultipart(foreign, "video/mp4")).rejects.toThrow(/not allowed/);
+    expect(mockSend).not.toHaveBeenCalled();
   });
 
   it("presigns cover PUT/GET on the Education source bucket", async () => {

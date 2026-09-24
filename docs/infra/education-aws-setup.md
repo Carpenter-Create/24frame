@@ -103,10 +103,9 @@ Agents do not set values.
   S3 presigned master URL. Relative HLS children are not authorized
   by that presign (Preview play limitation). Do not read
   `CLOUDFRONT_*` / `MEDIA_CLOUDFRONT_*` / `FINANCE_CLOUDFRONT_*`.
-- Cover and lesson source bytes PUT **server-side** (same pattern as
-  avatars). Browser CORS on the Education source bucket is not required
-  for staff uploads.
-- Do not wire a browser presigned PUT for Education staff uploads. If a
-  future browser path is required, apply CORS on the Education source
-  bucket only — never Social / Titles / finance / avatars. Do not create
-  CORS from this repository unless founder-authorized.
+- Cover bytes PUT **server-side** (same pattern as avatars).
+- Lesson source bytes multipart-upload from the browser to the Education
+  source bucket. The file never enters a server-action body. Same shape
+  as title masters: initiate, sign parts, PUT parts, complete. CORS on
+  the Education source bucket only (PUT, expose ETag). Do not create
+  CORS from this repository. Never Social / Titles / finance / avatars.

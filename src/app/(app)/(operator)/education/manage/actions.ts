@@ -18,8 +18,12 @@ import {
   educationHlsPrefix,
   educationLessonCoverKey,
   educationLessonSourceKey,
+  EDUCATION_SOURCE_MAX_PARTS,
+  EDUCATION_SOURCE_PART_BYTES,
+  EDUCATION_SOURCE_SIGN_BATCH,
   isCourseStatus,
   isEducationObjectKey,
+  isEducationVideoContentType,
   minutesToDurationSeconds,
   normalizeEducationCoverContentType,
   normalizeEducationSourceContentType,
@@ -36,11 +40,15 @@ import {
   submitEducationHlsJob,
 } from "@/lib/education-mediaconvert";
 import {
+  completeEducationSourceMultipart,
+  createEducationSourceMultipart,
   headEducationSourceObject,
   isEducationAwsConfigured,
+  presignEducationSourcePart,
   presignEducationSourcePut,
   putEducationSourceObject,
 } from "@/lib/s3-education";
+import { planParts } from "@/lib/upload-plan";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -607,82 +615,46 @@ export async function attachEducationCover(raw: unknown): Promise<{ error?: stri
   return {};
 }
 
-export async function uploadEducationLessonSource(formData: FormData): Promise<{ error?: string }> {
-  const courseId = String(formData.get("courseId") ?? "");
-  const lessonId = String(formData.get("lessonId") ?? "");
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) return { error: EDUCATION_ADMIN.invalid };
-  const parsed = z
-    .object({ courseId: z.string().uuid(), lessonId: z.string().uuid() })
-    .safeParse({ courseId, lessonId });
-  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+function educationLessonSourceKeyMatches(courseId: string, lessonId: string, key: string): boolean {
+  return isEducationObjectKey(key) && key.startsWith(`courses/${courseId}/lessons/${lessonId}/source.`);
+}
 
-  const staff = await requireEducationStaff();
-  if (!staff.ok) return { error: staff.error };
-  if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
-
-  const contentType = normalizeEducationSourceContentType(file.type, file.name);
-  const checked = validateEducationUpload({
-    kind: "source",
-    contentType,
-    byteLength: file.size,
-  });
-  if (!checked.ok) return { error: EDUCATION_ADMIN.invalid };
-
-  let key: string;
-  try {
-    key = educationLessonSourceKey(parsed.data.courseId, parsed.data.lessonId, checked.contentType);
-  } catch {
-    return { error: EDUCATION_ADMIN.invalid };
-  }
-  if (
-    !isEducationObjectKey(key) ||
-    !key.startsWith(`courses/${parsed.data.courseId}/lessons/${parsed.data.lessonId}/source.`)
-  ) {
-    return { error: EDUCATION_ADMIN.invalid };
-  }
-
+async function writeEducationLessonSourceKey(input: {
+  courseId: string;
+  lessonId: string;
+  key: string;
+}): Promise<{ error?: string }> {
   const admin = createAdminClient();
   const { data: lesson } = await admin
     .from("lessons")
     .select("id, education_video_id, modules(course_id, courses(slug))")
-    .eq("id", parsed.data.lessonId)
+    .eq("id", input.lessonId)
     .maybeSingle();
   if (!lesson) return { error: EDUCATION_ADMIN.missing };
 
   const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
   const course = moduleRow && (Array.isArray(moduleRow.courses) ? moduleRow.courses[0] : moduleRow.courses);
-  if (moduleRow?.course_id !== parsed.data.courseId) return { error: EDUCATION_ADMIN.missing };
-
-  try {
-    const body = new Uint8Array(await file.arrayBuffer());
-    await putEducationSourceObject(key, body, checked.contentType);
-  } catch (err) {
-    if (err instanceof Error && /environment variable is not set/.test(err.message)) {
-      return { error: EDUCATION_ADMIN.envUnset };
-    }
-    return { error: EDUCATION_ADMIN.uploadFailed };
-  }
+  if (moduleRow?.course_id !== input.courseId) return { error: EDUCATION_ADMIN.missing };
 
   const now = new Date().toISOString();
   const { error } = await admin
     .from("lessons")
     .update({
-      source_key: key,
+      source_key: input.key,
       encode_status: null,
       encode_job_id: null,
       encode_error: null,
       hls_key: null,
       encode_updated_at: now,
     })
-    .eq("id", parsed.data.lessonId);
+    .eq("id", input.lessonId);
   if (error) return { error: error.message };
 
   if (lesson.education_video_id) {
     await admin
       .from("education_videos")
       .update({
-        source_key: key,
+        source_key: input.key,
         encode_status: null,
         encode_job_id: null,
         encode_error: null,
@@ -694,6 +666,162 @@ export async function uploadEducationLessonSource(formData: FormData): Promise<{
 
   if (course?.slug) revalidateEducation(course.slug);
   return {};
+}
+
+export async function startEducationLessonSourceUpload(raw: unknown): Promise<{
+  error?: string;
+  key?: string;
+  uploadId?: string;
+  partSize?: number;
+}> {
+  const parsed = z
+    .object({
+      courseId: z.string().uuid(),
+      lessonId: z.string().uuid(),
+      contentType: z.string(),
+      fileName: z.string().max(255),
+      byteLength: z.number().int().positive(),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+  if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
+
+  const contentType = normalizeEducationSourceContentType(parsed.data.contentType, parsed.data.fileName);
+  const checked = validateEducationUpload({
+    kind: "source",
+    contentType,
+    byteLength: parsed.data.byteLength,
+  });
+  if (!checked.ok || !isEducationVideoContentType(checked.contentType)) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  let key: string;
+  try {
+    key = educationLessonSourceKey(parsed.data.courseId, parsed.data.lessonId, checked.contentType);
+  } catch {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+  if (!educationLessonSourceKeyMatches(parsed.data.courseId, parsed.data.lessonId, key)) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  try {
+    const uploadId = await createEducationSourceMultipart(key, checked.contentType);
+    return { key, uploadId, partSize: EDUCATION_SOURCE_PART_BYTES };
+  } catch (err) {
+    if (err instanceof Error && /environment variable is not set/.test(err.message)) {
+      return { error: EDUCATION_ADMIN.envUnset };
+    }
+    return { error: EDUCATION_ADMIN.uploadFailed };
+  }
+}
+
+export async function signEducationLessonSourceParts(raw: unknown): Promise<{
+  error?: string;
+  urls?: { partNumber: number; url: string }[];
+}> {
+  const parsed = z
+    .object({
+      courseId: z.string().uuid(),
+      lessonId: z.string().uuid(),
+      key: z.string().min(1),
+      uploadId: z.string().min(1).max(1024),
+      parts: z
+        .array(z.object({ partNumber: z.number().int().min(1).max(EDUCATION_SOURCE_MAX_PARTS) }))
+        .min(1)
+        .max(EDUCATION_SOURCE_SIGN_BATCH),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+  if (!educationLessonSourceKeyMatches(parsed.data.courseId, parsed.data.lessonId, parsed.data.key)) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+  if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
+
+  try {
+    const urls = await Promise.all(
+      parsed.data.parts.map(async (part) => ({
+        partNumber: part.partNumber,
+        url: await presignEducationSourcePart(parsed.data.key, parsed.data.uploadId, part.partNumber),
+      })),
+    );
+    return { urls };
+  } catch (err) {
+    if (err instanceof Error && /environment variable is not set/.test(err.message)) {
+      return { error: EDUCATION_ADMIN.envUnset };
+    }
+    return { error: EDUCATION_ADMIN.uploadFailed };
+  }
+}
+
+export async function completeEducationLessonSourceUpload(raw: unknown): Promise<{ error?: string }> {
+  const parsed = z
+    .object({
+      courseId: z.string().uuid(),
+      lessonId: z.string().uuid(),
+      key: z.string().min(1),
+      uploadId: z.string().min(1).max(1024),
+      byteLength: z.number().int().positive(),
+      parts: z
+        .array(
+          z.object({
+            partNumber: z.number().int().min(1).max(EDUCATION_SOURCE_MAX_PARTS),
+            etag: z.string().min(1).max(1024),
+          }),
+        )
+        .min(1)
+        .max(EDUCATION_SOURCE_MAX_PARTS),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+  if (!educationLessonSourceKeyMatches(parsed.data.courseId, parsed.data.lessonId, parsed.data.key)) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  const checked = validateEducationUpload({
+    kind: "source",
+    contentType: "video/mp4",
+    byteLength: parsed.data.byteLength,
+  });
+  if (!checked.ok) return { error: EDUCATION_ADMIN.invalid };
+
+  let expected: { partNumber: number }[];
+  try {
+    expected = planParts(parsed.data.byteLength, EDUCATION_SOURCE_PART_BYTES);
+  } catch {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+  if (parsed.data.parts.length !== expected.length) return { error: EDUCATION_ADMIN.invalid };
+  const got = new Set(parsed.data.parts.map((part) => part.partNumber));
+  if (got.size !== expected.length || expected.some((part) => !got.has(part.partNumber))) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+  if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
+
+  try {
+    await completeEducationSourceMultipart(parsed.data.key, parsed.data.uploadId, parsed.data.parts);
+  } catch (err) {
+    if (err instanceof Error && /environment variable is not set/.test(err.message)) {
+      return { error: EDUCATION_ADMIN.envUnset };
+    }
+    return { error: EDUCATION_ADMIN.uploadFailed };
+  }
+
+  return writeEducationLessonSourceKey({
+    courseId: parsed.data.courseId,
+    lessonId: parsed.data.lessonId,
+    key: parsed.data.key,
+  });
 }
 
 export async function attachEducationLessonSource(raw: unknown): Promise<{ error?: string }> {

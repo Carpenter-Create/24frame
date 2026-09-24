@@ -19,7 +19,6 @@ vi.mock("./actions", () => ({
   updateEducationLesson: vi.fn(),
   uploadEducationCover: vi.fn(),
   uploadEducationLessonCover: vi.fn(),
-  uploadEducationLessonSource: vi.fn(),
 }));
 
 import {

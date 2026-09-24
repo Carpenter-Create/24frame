@@ -25,6 +25,7 @@ import {
   type EducationProductModel,
 } from "@/lib/education";
 import type { CourseModuleRow } from "@/lib/courses";
+import { uploadEducationLessonSourceFromBrowser } from "@/lib/education-source-upload";
 import {
   createEducationCourse,
   createEducationLesson,
@@ -35,7 +36,6 @@ import {
   updateEducationLesson,
   uploadEducationCover,
   uploadEducationLessonCover,
-  uploadEducationLessonSource,
 } from "./actions";
 
 const field = "flex flex-col gap-1";
@@ -862,11 +862,7 @@ export function LessonMediaPane({
     setSaving(true);
     setError("");
     try {
-      const body = new FormData();
-      body.set("courseId", courseId);
-      body.set("lessonId", lessonId);
-      body.set("file", file);
-      const attached = await uploadEducationLessonSource(body);
+      const attached = await uploadEducationLessonSourceFromBrowser({ courseId, lessonId, file });
       if (attached.error) {
         setError(attached.error);
         return;

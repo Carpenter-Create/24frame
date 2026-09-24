@@ -1,6 +1,14 @@
 import "server-only";
 
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+  UploadPartCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import type { CourseOutlineModule } from "@/lib/courses";
@@ -131,6 +139,65 @@ export async function headEducationSourceObject(
   } catch {
     return null;
   }
+}
+
+export async function createEducationSourceMultipart(
+  key: string,
+  contentType: EducationVideoContentType,
+): Promise<string> {
+  assertEducationKey(key);
+  const { bucket, s3 } = educationClient(educationSourceBucket());
+  const out = await s3.send(
+    new CreateMultipartUploadCommand({
+      Bucket: bucket,
+      Key: key,
+      ContentType: contentType,
+    }),
+  );
+  if (!out.UploadId) throw new Error("S3 did not return an UploadId");
+  return out.UploadId;
+}
+
+export async function presignEducationSourcePart(
+  key: string,
+  uploadId: string,
+  partNumber: number,
+): Promise<string> {
+  assertEducationKey(key);
+  const { bucket, s3 } = educationClient(educationSourceBucket());
+  return getSignedUrl(
+    s3,
+    new UploadPartCommand({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+    }),
+    { expiresIn: EDUCATION_PUT_TTL_SECONDS },
+  );
+}
+
+export async function completeEducationSourceMultipart(
+  key: string,
+  uploadId: string,
+  parts: readonly { partNumber: number; etag: string }[],
+): Promise<void> {
+  assertEducationKey(key);
+  const { bucket, s3 } = educationClient(educationSourceBucket());
+  const out = await s3.send(
+    new CompleteMultipartUploadCommand({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: {
+        Parts: parts
+          .slice()
+          .sort((a, b) => a.partNumber - b.partNumber)
+          .map((part) => ({ PartNumber: part.partNumber, ETag: part.etag })),
+      },
+    }),
+  );
+  if (!out.ETag) throw new Error("S3 did not return an ETag");
 }
 
 export async function presignEducationSourceGet(key: string): Promise<string> {

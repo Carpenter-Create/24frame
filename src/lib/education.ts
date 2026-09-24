@@ -73,6 +73,13 @@ export const EDUCATION_SIGNED_URL_TTL_SECONDS = 300;
 export const EDUCATION_PUT_TTL_SECONDS = 900;
 export const EDUCATION_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const EDUCATION_VIDEO_MAX_BYTES = 2 * 1024 * 1024 * 1024;
+/** Lesson-source multipart part size. Bytes go to S3, not a server action. */
+export const EDUCATION_SOURCE_PART_BYTES = 64 * 1024 * 1024;
+export const EDUCATION_SOURCE_MAX_PARTS = Math.ceil(
+  EDUCATION_VIDEO_MAX_BYTES / EDUCATION_SOURCE_PART_BYTES,
+);
+/** Parts signed per round-trip so a 15-minute URL is not held across the whole file. */
+export const EDUCATION_SOURCE_SIGN_BATCH = 25;
 export const EDUCATION_SLUG_MAX = 80;
 export const EDUCATION_TITLE_MAX = 160;
 export const EDUCATION_NAME_MAX = 80;

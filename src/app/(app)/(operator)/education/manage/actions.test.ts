@@ -9,6 +9,9 @@ vi.mock("@/lib/s3-education", () => ({
   presignEducationSourcePut: vi.fn(),
   putEducationSourceObject: vi.fn(),
   headEducationSourceObject: vi.fn(async () => null),
+  createEducationSourceMultipart: vi.fn(),
+  presignEducationSourcePart: vi.fn(),
+  completeEducationSourceMultipart: vi.fn(),
 }));
 vi.mock("@/lib/education-mediaconvert", () => ({
   isEducationMediaconvertConfigured: vi.fn(() => false),
@@ -20,6 +23,8 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
+  completeEducationSourceMultipart,
+  createEducationSourceMultipart,
   headEducationSourceObject,
   isEducationAwsConfigured,
   presignEducationSourcePut,
@@ -45,8 +50,9 @@ import {
   reorderEducationCourses,
   startEducationLessonEncode,
   updateEducationCourse,
+  completeEducationLessonSourceUpload,
+  startEducationLessonSourceUpload,
   uploadEducationCover,
-  uploadEducationLessonSource,
 } from "./actions";
 
 const USER = { id: "11111111-1111-4111-8111-111111111111" };
@@ -411,14 +417,6 @@ describe("uploadEducationCover", () => {
   });
 });
 
-function sourceForm(file: File, courseId = COURSE, lessonId = LESSON) {
-  const body = new FormData();
-  body.set("courseId", courseId);
-  body.set("lessonId", lessonId);
-  body.set("file", file);
-  return body;
-}
-
 function sourceAdminClient(courseId = COURSE) {
   const maybeSingle = vi.fn(async () => ({
     data: {
@@ -435,25 +433,83 @@ function sourceAdminClient(courseId = COURSE) {
   return { from, update, updateEq };
 }
 
-describe("uploadEducationLessonSource", () => {
+describe("education lesson source multipart", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getAuthUser).mockResolvedValue(USER as never);
-    vi.mocked(putEducationSourceObject).mockResolvedValue(undefined);
+    vi.mocked(createEducationSourceMultipart).mockResolvedValue("upload-1");
+    vi.mocked(completeEducationSourceMultipart).mockResolvedValue(undefined);
   });
 
-  it("PUTs source bytes then sets source_key and does not hang on a browser PUT", async () => {
+  it("refuses a lesson source over the house byte cap before any multipart call", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    await expect(
+      startEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        contentType: "video/mp4",
+        fileName: "huge.mp4",
+        byteLength: EDUCATION_VIDEO_MAX_BYTES + 1,
+      }),
+    ).resolves.toEqual({ error: EDUCATION_ADMIN.invalid });
+    expect(createEducationSourceMultipart).not.toHaveBeenCalled();
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+  });
+
+  it("starts a multipart upload and does not accept file bytes", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const key = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
+    await expect(
+      startEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        contentType: "video/mp4",
+        fileName: "smoke.mp4",
+        byteLength: 4,
+      }),
+    ).resolves.toEqual({ key, uploadId: "upload-1", partSize: 64 * 1024 * 1024 });
+    expect(createEducationSourceMultipart).toHaveBeenCalledWith(key, "video/mp4");
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    expect(presignEducationSourcePut).not.toHaveBeenCalled();
+  });
+
+  it("normalizes an empty MP4 MIME when starting the multipart upload", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    await expect(
+      startEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        contentType: "",
+        fileName: "smoke.MP4",
+        byteLength: 4,
+      }),
+    ).resolves.toMatchObject({
+      key: educationLessonSourceKey(COURSE, LESSON, "video/mp4"),
+      uploadId: "upload-1",
+    });
+  });
+
+  it("completes multipart then sets source_key", async () => {
     staffClient({ user_id: USER.id });
     vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
     const { update } = sourceAdminClient();
-    const file = new File([new Uint8Array([1, 2, 3, 4])], "smoke.mp4", { type: "video/mp4" });
-    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({});
     const key = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
-    expect(putEducationSourceObject).toHaveBeenCalledTimes(1);
-    const [putKey, body, type] = vi.mocked(putEducationSourceObject).mock.calls[0] ?? [];
-    expect(putKey).toBe(key);
-    expect(type).toBe("video/mp4");
-    expect(body).toBeInstanceOf(Uint8Array);
+    await expect(
+      completeEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        key,
+        uploadId: "upload-1",
+        byteLength: 4,
+        parts: [{ partNumber: 1, etag: '"abc"' }],
+      }),
+    ).resolves.toEqual({});
+    expect(completeEducationSourceMultipart).toHaveBeenCalledWith(key, "upload-1", [
+      { partNumber: 1, etag: '"abc"' },
+    ]);
     expect(update).toHaveBeenCalledWith({
       source_key: key,
       encode_status: null,
@@ -462,68 +518,71 @@ describe("uploadEducationLessonSource", () => {
       hls_key: null,
       encode_updated_at: expect.any(String),
     });
-    expect(presignEducationSourcePut).not.toHaveBeenCalled();
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
   });
 
-  it("normalizes an empty MP4 MIME so attach is not rejected after a successful PUT", async () => {
+  it("does not write source_key when multipart complete fails", async () => {
     staffClient({ user_id: USER.id });
     vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
     const { update } = sourceAdminClient();
-    const file = new File([new Uint8Array([1])], "smoke.MP4", { type: "" });
-    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({});
-    expect(putEducationSourceObject).toHaveBeenCalledWith(
-      educationLessonSourceKey(COURSE, LESSON, "video/mp4"),
-      expect.any(Uint8Array),
-      "video/mp4",
-    );
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ source_key: educationLessonSourceKey(COURSE, LESSON, "video/mp4") }),
-    );
-  });
-
-  it("does not write source_key when the source PUT fails", async () => {
-    staffClient({ user_id: USER.id });
-    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
-    const { update } = sourceAdminClient();
-    vi.mocked(putEducationSourceObject).mockRejectedValueOnce(new Error("AccessDenied"));
-    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
-    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
-      error: EDUCATION_ADMIN.uploadFailed,
-    });
+    vi.mocked(completeEducationSourceMultipart).mockRejectedValueOnce(new Error("AccessDenied"));
+    await expect(
+      completeEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        key: educationLessonSourceKey(COURSE, LESSON, "video/mp4"),
+        uploadId: "upload-1",
+        byteLength: 4,
+        parts: [{ partNumber: 1, etag: '"abc"' }],
+      }),
+    ).resolves.toEqual({ error: EDUCATION_ADMIN.uploadFailed });
     expect(update).not.toHaveBeenCalled();
   });
 
   it("refuses when Education storage env is stubbed", async () => {
     staffClient({ user_id: USER.id });
     vi.mocked(isEducationAwsConfigured).mockReturnValue(false);
-    const { update } = sourceAdminClient();
-    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
-    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
-      error: EDUCATION_ADMIN.envUnset,
-    });
-    expect(putEducationSourceObject).not.toHaveBeenCalled();
-    expect(update).not.toHaveBeenCalled();
+    await expect(
+      startEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        contentType: "video/mp4",
+        fileName: "smoke.mp4",
+        byteLength: 4,
+      }),
+    ).resolves.toEqual({ error: EDUCATION_ADMIN.envUnset });
+    expect(createEducationSourceMultipart).not.toHaveBeenCalled();
   });
 
   it("refuses a member write", async () => {
     staffClient(null);
     vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
-    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
-    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
-      error: EDUCATION_ADMIN.notAuthorized,
-    });
-    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    await expect(
+      startEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        contentType: "video/mp4",
+        fileName: "smoke.mp4",
+        byteLength: 4,
+      }),
+    ).resolves.toEqual({ error: EDUCATION_ADMIN.notAuthorized });
+    expect(createEducationSourceMultipart).not.toHaveBeenCalled();
   });
 
   it("refuses when the lesson is not on the given course", async () => {
     staffClient({ user_id: USER.id });
     vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
     const { update } = sourceAdminClient(OTHER_COURSE);
-    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
-    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
-      error: EDUCATION_ADMIN.missing,
-    });
-    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    await expect(
+      completeEducationLessonSourceUpload({
+        courseId: COURSE,
+        lessonId: LESSON,
+        key: educationLessonSourceKey(COURSE, LESSON, "video/mp4"),
+        uploadId: "upload-1",
+        byteLength: 4,
+        parts: [{ partNumber: 1, etag: '"abc"' }],
+      }),
+    ).resolves.toEqual({ error: EDUCATION_ADMIN.missing });
     expect(update).not.toHaveBeenCalled();
   });
 });
