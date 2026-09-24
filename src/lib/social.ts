@@ -63,6 +63,15 @@ export function isSocialStoryCreatePath(pathname: string): boolean {
   return path === SOCIAL_ROUTES.storiesNew;
 }
 
+/** Open DM thread. Not the inbox, not New message. */
+export function isSocialDmThreadPath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  const prefix = `${SOCIAL_ROUTES.dms}/`;
+  if (!path.startsWith(prefix)) return false;
+  const id = path.slice(prefix.length);
+  return id.length > 0 && !id.includes("/") && id !== "new";
+}
+
 /** Open story viewer. Not the index, not the create stage. */
 export function isSocialStoryOpenPath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
@@ -864,9 +873,14 @@ export const SOCIAL = {
   },
   dms: {
     title: "Messages",
-    subtitle: `One-to-one and group conversations in ${PRODUCT_NAME}.`,
+    subtitle: `One-to-one and multi-party messages in ${PRODUCT_NAME}.`,
     empty: "No conversations yet.",
     startCta: "Start a conversation",
+    newMessage: "New message",
+    chat: "Chat",
+    searchPeople: "Search people",
+    membershipSealed: "People are chosen when the conversation starts.",
+    membershipEmpty: "Choose someone to message.",
     thread: "Conversation",
     compose: "Write a message",
     submit: "Send",
@@ -892,6 +906,8 @@ export const SOCIAL = {
     sentStory: "Sent a story",
     sentYouStory: "Sent you a story",
     youSentStory: (handle: string) => `You sent @${handle}'s story`,
+    theySentAuthorStory: (name: string, handle: string) => `${name} sent @${handle}'s story`,
+    threadPlaceholder: "Message…",
     storyUnavailable: "Story unavailable",
     storyMeta: "Story",
   },
@@ -1168,6 +1184,22 @@ export function inboxPeerIds(row: {
     return [...new Set(row.participant_ids.filter(Boolean))];
   }
   return row.peer_id ? [row.peer_id] : [];
+}
+
+// get_dm_inbox still excludes the caller (peer.user_id <> me), so a
+// note-to-self comes back with peer_id null and participant_ids [].
+// The client uses the viewer until a later inbox RPC includes them.
+export function dmInboxDisplayPeerIds(
+  row: {
+    kind: string;
+    peer_id: string | null;
+    participant_ids?: string[] | null;
+  },
+  viewerId: string,
+): string[] {
+  const peers = inboxPeerIds(row);
+  if (row.kind === "direct" && peers.length === 0 && viewerId) return [viewerId];
+  return peers;
 }
 
 export function quietDmAddError(message: string): string {

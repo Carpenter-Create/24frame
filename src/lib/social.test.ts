@@ -6,6 +6,7 @@ import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import {
   conversationRoomLabel,
   displayHandle,
+  dmInboxDisplayPeerIds,
   handleDisplay,
   handleFieldValue,
   handleKey,
@@ -25,6 +26,7 @@ import {
   quietDmAddError,
   SOCIAL,
   isSocialStoryCreatePath,
+  isSocialDmThreadPath,
   isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
@@ -166,6 +168,11 @@ describe("social copy lock", () => {
     expect(isSocialStoryOpenPath(SOCIAL_ROUTES.stories)).toBe(false);
     expect(isSocialStoryOpenPath(SOCIAL_ROUTES.storiesNew)).toBe(false);
     expect(isSocialStoryOpenPath(SOCIAL_ROUTES.home)).toBe(false);
+    expect(isSocialDmThreadPath("/social/dms/thread-1")).toBe(true);
+    expect(isSocialDmThreadPath("/social/dms/thread-1/")).toBe(true);
+    expect(isSocialDmThreadPath(SOCIAL_ROUTES.dms)).toBe(false);
+    expect(isSocialDmThreadPath(`${SOCIAL_ROUTES.dms}/new`)).toBe(false);
+    expect(isSocialDmThreadPath(SOCIAL_ROUTES.home)).toBe(false);
     expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
@@ -263,8 +270,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.explore.truncated).toContain("20");
     expect(SOCIAL.dms.truncatedInbox).toContain("50");
     expect(SOCIAL.dms.truncatedThread).toContain("50");
-    expect(SOCIAL.dms.roomFull).toContain("32");
-    expect(SOCIAL.dms.addBatch).toContain("32");
+    expect(SOCIAL.dms.roomFull).toContain("16");
+    expect(SOCIAL.dms.addBatch).toContain("16");
+    expect(SOCIAL.dms.chat).toBe("Chat");
+    expect(JSON.stringify(SOCIAL.dms)).not.toContain("Create group");
     expect(SOCIAL.dms.olderPage).toContain("older");
     expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
@@ -633,7 +642,8 @@ describe("social writes stay on the live spine", () => {
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");
     expect(actions).not.toContain("from \"@/lib/mediaconvert\"");
     expect(actions).toContain("open_or_get_direct_conversation");
-    expect(actions).toContain("add_conversation_participants");
+    expect(actions).toContain("create_group_conversation");
+    expect(actions).not.toContain("add_conversation_participants");
     expect(actions).toContain("set_group_conversation_title");
     expect(actions).toContain("mark_direct_conversation_read");
     expect(actions).not.toContain("min_level");
@@ -666,6 +676,25 @@ describe("social writes stay on the live spine", () => {
     expect(conversationRoomLabel("  ", [])).toBe(SOCIAL.dms.thread);
     expect(inboxPeerIds({ peer_id: "u2", participant_ids: ["u2", "u3"] })).toEqual(["u2", "u3"]);
     expect(inboxPeerIds({ peer_id: "u2", participant_ids: [] })).toEqual(["u2"]);
+    const self = dmInboxDisplayPeerIds(
+      { kind: "direct", peer_id: null, participant_ids: [] },
+      "u1",
+    );
+    expect(self).toEqual(["u1"]);
+    expect(conversationRoomLabel(null, self.map(() => "Ada Lovelace"))).toBe("Ada Lovelace");
+    expect(conversationRoomLabel(null, self.map(() => "Ada Lovelace"))).not.toBe(SOCIAL.dms.thread);
+    expect(
+      dmInboxDisplayPeerIds({ kind: "direct", peer_id: "u2", participant_ids: ["u2"] }, "u1"),
+    ).toEqual(["u2"]);
+    expect(
+      dmInboxDisplayPeerIds(
+        { kind: "group", peer_id: null, participant_ids: ["u2", "u3"] },
+        "u1",
+      ),
+    ).toEqual(["u2", "u3"]);
+    expect(
+      dmInboxDisplayPeerIds({ kind: "group", peer_id: null, participant_ids: [] }, "u1"),
+    ).toEqual([]);
     expect(normalizeConversationTitle("")).toEqual({ title: null });
     expect(normalizeConversationTitle("Desk room")).toEqual({ title: "Desk room" });
     expect(normalizeConversationTitle("x".repeat(81))).toBeNull();

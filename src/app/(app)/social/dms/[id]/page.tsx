@@ -1,23 +1,24 @@
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialDmStoryShare } from "@/components/social/social-dm-story-share";
-import { SocialAddPeopleForm, SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
-import { SocialAvatar } from "@/components/social/social-ui";
+import { SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
+import { SocialDmThread, type DmThreadViewMessage } from "@/components/social/social-dm-thread";
+import { SocialDmThreadHeader } from "@/components/social/social-dm-thread-header";
+import { SocialDmThreadStick } from "@/components/social/social-dm-thread-stick";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import {
   SOCIAL_DM_THREAD_CURSOR_PARAM,
   parseDmThreadCursorParam,
   socialDmThreadHref,
 } from "@/lib/social-dm-bounds";
-import { bareHandle, conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
+import { bareHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
 import {
   dmStoryComment,
   parseDmStoryShare,
   presentDmStoryShare,
-  storySendSystemLine,
   type DmStoryLive,
 } from "@/lib/social-dm-story";
+import { DM_THREAD_ROOT_CLASS, dmThreadHeaderModel, dmThreadHeaderPeers, dmThreadStorySystemLine } from "@/lib/social-dm-thread-format";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -88,6 +89,7 @@ export default async function SocialDmThreadPage({
   const activeIds = members.rows.map((row) => row.user_id);
   const peopleIds = [
     ...new Set([
+      ...(profile ? [profile.id] : []),
       ...activeIds,
       ...messages.map((row) => row.sender_id).filter((id): id is string => !!id),
       ...messages.flatMap((message) => {
@@ -106,24 +108,83 @@ export default async function SocialDmThreadPage({
     .filter((userId) => userId !== ctx.user.id)
     .map((userId) => people.get(userId))
     .filter((person): person is NonNullable<typeof person> => !!person);
-  const title = conversationRoomLabel(
-    conversation.title,
-    others.map((person) => socialPersonLabel({ handle: person.handle, displayName: person.display_name })),
-  );
-  const subtitle =
-    others.length === 1
-      ? displayHandle(others[0].handle)
-      : others.map((person) => displayHandle(person.handle)).join(", ") || undefined;
+  const selfPerson = people.get(ctx.user.id) ?? profile;
+  const header = dmThreadHeaderModel({
+    title: conversation.title,
+    peers: dmThreadHeaderPeers({
+      kind: conversation.kind,
+      peers: others.map((person) => ({
+        handle: person.handle,
+        displayName: person.display_name,
+        photoUrl: faces.get(person.id) ?? null,
+      })),
+      self: selfPerson
+        ? {
+            handle: selfPerson.handle,
+            displayName: selfPerson.display_name,
+            photoUrl: faces.get(selfPerson.id) ?? null,
+          }
+        : null,
+    }),
+  });
   const historical = cursor !== null;
+  const threadMessages: DmThreadViewMessage[] = messages.map((message) => {
+    const sender = message.sender_id ? people.get(message.sender_id) : null;
+    const senderName = socialPersonLabel({
+      handle: sender?.handle ?? "",
+      displayName: sender?.display_name,
+    });
+    const mine = message.sender_id === ctx.user.id;
+    const parsed = parseDmStoryShare(message);
+    const card = parsed
+      ? presentDmStoryShare({
+          body: message.body,
+          media: message.media,
+          live: parsed.legacy && parsed.storyId ? liveById.get(parsed.storyId) ?? null : null,
+        })
+      : null;
+    const base = {
+      id: message.id,
+      senderId: message.sender_id,
+      createdAt: message.created_at,
+      mine,
+      senderName,
+      senderPhotoUrl: message.sender_id ? faces.get(message.sender_id) ?? null : null,
+    };
+    if (!card) {
+      return { ...base, text: message.body, story: null };
+    }
+    const author = card.authorId ? people.get(card.authorId) : null;
+    const authorHandle = author?.handle || parsed?.authorHandle || "";
+    return {
+      ...base,
+      text: null,
+      story: {
+        comment: dmStoryComment(message),
+        line: dmThreadStorySystemLine({
+          mine,
+          authorHandle: authorHandle || null,
+          senderName,
+        }),
+        authorName: authorHandle ? bareHandle(authorHandle) : "",
+        authorPhotoUrl: card.authorId ? faces.get(card.authorId) ?? null : null,
+        unavailable: card.unavailable,
+        kind: card.kind,
+        url: card.url,
+        playbackId: card.playbackId,
+        href: card.href,
+      },
+    };
+  });
 
   return (
-    <div data-social-dm-thread="" data-social-dm-kind={conversation.kind}>
-      <PageHeader
-        title={title}
-        subtitle={subtitle}
-        backLink={{ href: SOCIAL_ROUTES.dms, label: SOCIAL.dms.title }}
+    <div data-social-dm-thread="" data-social-dm-kind={conversation.kind} className={DM_THREAD_ROOT_CLASS}>
+      <SocialDmThreadHeader
+        label={header.label}
+        href={header.href}
+        photoUrl={header.photoUrl}
+        avatarName={header.avatarName}
       />
-      {profile ? <SocialAddPeopleForm conversationId={conversation.id} /> : null}
       {profile && conversation.kind === "group" ? (
         <SocialGroupTitleForm conversationId={conversation.id} title={conversation.title} />
       ) : null}
@@ -156,77 +217,14 @@ export default async function SocialDmThreadPage({
           ) : null}
         </div>
       ) : null}
-      <ol className="flex flex-col gap-[var(--space-4)]">
-        {messages.map((message) => {
-          const sender = message.sender_id ? people.get(message.sender_id) : null;
-          const name = socialPersonLabel({
-            handle: sender?.handle ?? "",
-            displayName: sender?.display_name,
-          });
-          const parsed = parseDmStoryShare(message);
-          const card = parsed
-            ? presentDmStoryShare({
-                body: message.body,
-                media: message.media,
-                live: parsed.legacy && parsed.storyId ? liveById.get(parsed.storyId) ?? null : null,
-              })
-            : null;
-          if (card) {
-            const author = card.authorId ? people.get(card.authorId) : null;
-            const authorHandle = author?.handle || parsed?.authorHandle || "";
-            const authorName = authorHandle ? bareHandle(authorHandle) : "";
-            const comment = dmStoryComment(message);
-            const line = authorHandle ? storySendSystemLine(authorHandle) : null;
-            const mine = message.sender_id === ctx.user.id;
-            return (
-              <li key={message.id} data-social-dm-story-group="" className="flex flex-col gap-2">
-                {comment ? (
-                  <p
-                    data-social-dm-story-comment=""
-                    className={
-                      mine
-                        ? "ml-auto max-w-[240px] rounded-[16px] bg-surface-muted px-4 py-2 t-body text-ink whitespace-pre-wrap"
-                        : "mr-auto max-w-[240px] rounded-[16px] bg-surface-muted px-4 py-2 t-body text-ink whitespace-pre-wrap"
-                    }
-                  >
-                    {comment}
-                  </p>
-                ) : null}
-                {line ? (
-                  <p data-social-dm-story-line="" className="text-center t-body-sm text-ink-2">
-                    {line}
-                  </p>
-                ) : null}
-                <div className="flex justify-center">
-                  <SocialDmStoryShare
-                    authorName={authorName}
-                    authorPhotoUrl={card.authorId ? faces.get(card.authorId) ?? null : null}
-                    unavailable={card.unavailable}
-                    kind={card.kind}
-                    url={card.url}
-                    playbackId={card.playbackId}
-                    href={card.href}
-                  />
-                </div>
-              </li>
-            );
-          }
-          return (
-            <li key={message.id} className="flex gap-[var(--space-3)]">
-              <SocialAvatar
-                name={name}
-                photoUrl={message.sender_id ? faces.get(message.sender_id) ?? null : null}
-              />
-              <div className="min-w-0">
-                <p className="t-body-sm text-ink-3">{name}</p>
-                <p className="t-body text-ink whitespace-pre-wrap">{message.body}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-      {messages.length === 0 ? <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty> : null}
+      <SocialDmThread
+        messages={threadMessages}
+        empty={<HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty>}
+      />
       {profile && !historical ? <SocialDmCompose conversationId={conversation.id} /> : null}
+      {!historical ? (
+        <SocialDmThreadStick nonce={messages[messages.length - 1]?.id ?? "empty"} />
+      ) : null}
     </div>
   );
 }

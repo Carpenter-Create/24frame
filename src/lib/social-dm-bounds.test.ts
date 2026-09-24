@@ -19,8 +19,8 @@ import {
 
 describe("DM independent caps", () => {
   it("names room, batch, fan-out, inbox, and thread separately under PostgREST max_rows", () => {
-    expect(SOCIAL_DM_ROOM_LIMIT).toBe(32);
-    expect(SOCIAL_DM_ADD_BATCH_LIMIT).toBe(32);
+    expect(SOCIAL_DM_ROOM_LIMIT).toBe(16);
+    expect(SOCIAL_DM_ADD_BATCH_LIMIT).toBe(16);
     expect(SOCIAL_DM_FANOUT_BATCH).toBe(32);
     expect(SOCIAL_DM_INBOX_LIMIT).toBe(50);
     expect(SOCIAL_DM_THREAD_LIMIT).toBe(50);

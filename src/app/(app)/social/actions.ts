@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { loadPeopleSearch } from "@/lib/social-feed";
 import {
   isOwnedSocialMediaKey,
   isSocialMediaContentType,
@@ -37,7 +39,7 @@ import {
   socialProfileLinkError,
 } from "@/lib/social-profile-links";
 import { parseSocialImdbInput } from "@/lib/social-imdb";
-import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
+import { DM_MEMBERSHIP_CAP } from "@/lib/social-dm-membership";
 import {
   groupInsertRow,
   messageInsertRow,
@@ -53,8 +55,10 @@ import {
   normalizePostBody,
   postInsertRow,
   profileInsertRow,
+  bareHandle,
   quietDmAddError,
   SOCIAL,
+  socialPersonLabel,
   SOCIAL_ROUTES,
   socialPublicDisplayName,
   socialDmHref,
@@ -534,43 +538,56 @@ export async function markSocialDmRead(conversationId: string): Promise<void> {
 }
 
 export async function addSocialDmPeople(formData: FormData): Promise<ActionResult> {
+  void formData;
+  return { error: SOCIAL.dms.membershipSealed };
+}
+
+export async function startSocialDm(formData: FormData): Promise<ActionResult> {
   const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
-  const conversationId = String(formData.get("conversation_id") ?? "").trim();
-  if (!conversationId) return { error: SOCIAL.dms.missing };
+  const peers = [
+    ...new Set(
+      formData
+        .getAll("peer_id")
+        .map((value) => String(value).trim())
+        .filter((id) => id.length > 0 && id !== user.id),
+    ),
+  ];
+  if (peers.length === 0) return { error: SOCIAL.dms.membershipEmpty };
+  if (peers.length > DM_MEMBERSHIP_CAP - 1) return { error: SOCIAL.dms.roomFull };
 
-  const handles = String(formData.get("handles") ?? "")
-    .split(/[\s,]+/)
-    .map((part) => normalizeHandle(part))
-    .filter((handle): handle is string => !!handle);
-  if (handles.length === 0) return { error: SOCIAL.dms.addMissing };
-  if (handles.length > SOCIAL_DM_ADD_BATCH_LIMIT) return { error: SOCIAL.dms.addBatch };
-
-  const { data: peers } = await supabase
-    .from("profiles")
-    .select("id, handle")
-    .in("handle", handles);
-  const found = peers ?? [];
-  if (found.length === 0) return { error: SOCIAL.dms.addMissing };
-
-  const foundHandles = new Set(found.map((peer) => peer.handle));
-  if (handles.some((handle) => !foundHandles.has(handle))) {
-    return { error: SOCIAL.dms.addMissing };
+  if (peers.length === 1) {
+    const { data, error } = await supabase.rpc("open_or_get_direct_conversation", {
+      p_peer: peers[0],
+    });
+    if (error || !data) return { error: error?.message ?? SOCIAL.member.missing };
+    redirect(socialDmHref(data));
   }
 
-  const ids = [...new Set(found.map((peer) => peer.id))];
-  if (ids.includes(user.id)) return { error: SOCIAL.dms.addSelf };
-
-  const { error } = await supabase.rpc("add_conversation_participants", {
-    p_conversation: conversationId,
-    p_peers: ids,
+  const { data, error } = await supabase.rpc("create_group_conversation", {
+    p_peers: peers,
   });
-  if (error) return { error: quietDmAddError(error.message) };
+  if (error || !data) return { error: quietDmAddError(error?.message ?? SOCIAL.dms.missing) };
+  redirect(socialDmHref(data));
+}
 
-  revalidatePath(socialDmHref(conversationId));
-  revalidatePath(SOCIAL_ROUTES.dms);
-  return {};
+export async function searchSocialDmPeers(query: string): Promise<{
+  people: { id: string; handle: string; name: string; photoUrl: string | null }[];
+}> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { people: [] };
+  const page = await loadPeopleSearch(supabase, query);
+  const people = page.people.filter((person) => person.id !== user.id);
+  const faces = await signedAvatarUrls(people.map((person) => person.id));
+  return {
+    people: people.map((person) => ({
+      id: person.id,
+      handle: bareHandle(person.handle),
+      name: socialPersonLabel({ handle: person.handle, displayName: person.display_name }),
+      photoUrl: faces.get(person.id) ?? null,
+    })),
+  };
 }
 
 export async function setSocialDmTitle(formData: FormData): Promise<ActionResult> {

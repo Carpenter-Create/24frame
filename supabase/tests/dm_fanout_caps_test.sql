@@ -4,7 +4,7 @@
 -- for 1:1 and small-room paths.
 
 begin;
-select plan(18);
+select plan(19);
 
 select set_config('t.alice', gen_random_uuid()::text, false);
 select set_config('t.bob',   gen_random_uuid()::text, false);
@@ -42,8 +42,15 @@ select ok(
   (select p.prosrc from pg_proc p
      join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname = 'add_conversation_participants')
+    ilike '%membership is set at create%',
+  'add_conversation_participants refuses an existing thread');
+
+select ok(
+  (select p.prosrc from pg_proc p
+     join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'create_group_conversation')
     ilike '%room is full%',
-  'add_conversation_participants names the room cap');
+  'create_group_conversation names the room cap');
 
 select ok(
   not exists (
@@ -62,6 +69,7 @@ select ok(
       and p.proname in (
         'get_dm_inbox',
         'add_conversation_participants',
+        'create_group_conversation',
         'broadcast_new_message'
       )
       and p.prosrc ilike '%is_gc_staff%'
@@ -120,18 +128,20 @@ select lives_ok(
   $sql$, current_setting('t.bob')),
   'open 1:1');
 
-select lives_ok(
+select throws_ok(
   format($sql$
     select public.add_conversation_participants(%L, array[%L]::uuid[])
   $sql$, current_setting('t.conv'), current_setting('t.carol')),
-  'adding one peer still works');
+  '22023',
+  'membership is set at create',
+  'adding into the 1:1 is refused');
 
 select is(
   (select count(*)::integer from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null),
-  3,
-  'small room has three active members');
+  2,
+  'sealed 1:1 stays two people');
 
 -- ---- batch cap (33 ids, no insert) ----------------------------------------
 select throws_ok(
@@ -142,20 +152,20 @@ select throws_ok(
     )
   $sql$, current_setting('t.conv'), current_setting('t.dave')),
   '22023',
-  'too many participants in one add',
+  'membership is set at create',
   'a 33-peer add is refused before insert');
 
 select is(
   (select count(*)::integer from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null),
-  3,
+  2,
   'refused batch does not grow the room');
 
--- ---- room cap (fill to 32, then refuse) -----------------------------------
+-- ---- sealed room (fill to 16, then refuse another add) --------------------
 reset role;
 create temp table t_c6_extra (id uuid primary key);
-insert into t_c6_extra select gen_random_uuid() from generate_series(1, 29);
+insert into t_c6_extra select gen_random_uuid() from generate_series(1, 14);
 insert into auth.users (id) select id from t_c6_extra;
 insert into public.profiles (id, handle, display_name, birth_date)
 select id,
@@ -176,23 +186,23 @@ select is(
   (select count(*)::integer from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null),
-  32,
-  'fixture room is exactly 32');
+  16,
+  'fixture room is exactly 16');
 
 select throws_ok(
   format($sql$
     select public.add_conversation_participants(%L, array[%L]::uuid[])
   $sql$, current_setting('t.conv'), current_setting('t.dave')),
   '22023',
-  'room is full',
+  'membership is set at create',
   'the 33rd active participant is refused');
 
 select is(
   (select count(*)::integer from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null),
-  32,
-  'full room stays at 32');
+  16,
+  'sealed room stays at 16');
 
 select * from finish();
 rollback;

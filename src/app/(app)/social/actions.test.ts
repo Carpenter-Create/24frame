@@ -22,6 +22,7 @@ import {
   saveSocialWelcomeVideo,
   createSocialStory,
   openSocialDm,
+  startSocialDm,
   createSocialMuxUpload,
   finalizeSocialMuxUpload,
   presignSocialMediaUpload,
@@ -700,34 +701,14 @@ describe("social actions", () => {
     await expect(sendSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-1");
   });
 
-  it("adds people through the RPC and never inserts participants", async () => {
-    const from = vi.fn((table: string) => {
-      const chain = {
-        select: vi.fn(() => chain),
-        eq: vi.fn(() => chain),
-        in: vi.fn(() => chain),
-        maybeSingle: vi.fn(async () => ({ data: { id: "u1" }, error: null })),
-        then: (resolve: (value: unknown) => unknown) =>
-          Promise.resolve({
-            data: table === "profiles" ? [{ id: "u3", handle: "carol" }] : { id: "u1" },
-            error: null,
-          }).then(resolve),
-      };
-      return chain;
-    });
-    const rpc = vi.fn(async () => ({ data: "conv-1", error: null }));
-    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
-
+  it("refuses adding people into an existing thread", async () => {
+    const rpc = vi.fn();
+    vi.mocked(createClient).mockResolvedValue({ from: vi.fn(), rpc } as never);
     const form = new FormData();
     form.set("conversation_id", "conv-1");
     form.set("handles", "carol");
-    expect(await addSocialDmPeople(form)).toEqual({});
-    expect(rpc).toHaveBeenCalledWith("add_conversation_participants", {
-      p_conversation: "conv-1",
-      p_peers: ["u3"],
-    });
-    expect(from).not.toHaveBeenCalledWith("conversations");
-    expect(from).not.toHaveBeenCalledWith("conversation_participants");
+    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.membershipSealed });
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("refuses an oversized add-people batch before the RPC", async () => {
@@ -751,7 +732,7 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("conversation_id", "conv-1");
     form.set("handles", Array.from({ length: 33 }, (_, i) => `peer${i}`).join(" "));
-    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.addBatch });
+    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.membershipSealed });
     expect(rpc).not.toHaveBeenCalled();
   });
 
@@ -776,7 +757,28 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("conversation_id", "conv-1");
     form.set("handles", "carol");
-    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.addBlocked });
+    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.membershipSealed });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("opens a 1:1 from one selected person", async () => {
+    const { rpc, from } = stub({ profile: { id: "u1" }, rpcData: "conv-1" });
+    const form = new FormData();
+    form.append("peer_id", "u2");
+    await expect(startSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-1");
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
+    expect(from).not.toHaveBeenCalledWith("conversations");
+  });
+
+  it("creates a fresh group from two other people", async () => {
+    const { rpc, from } = stub({ profile: { id: "u1" }, rpcData: "conv-g" });
+    const form = new FormData();
+    form.append("peer_id", "u2");
+    form.append("peer_id", "u3");
+    await expect(startSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-g");
+    expect(rpc).toHaveBeenCalledWith("create_group_conversation", { p_peers: ["u2", "u3"] });
+    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(from).not.toHaveBeenCalledWith("conversation_participants");
   });
 
   it("persists image and video keys on posts.media", async () => {
