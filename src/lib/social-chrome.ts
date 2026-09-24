@@ -273,6 +273,21 @@ export const SOCIAL_STORY_CARET_CLASS =
 export const SOCIAL_STORY_REPLY_PILL_CLASS =
   "flex h-11 w-full items-center rounded-full border border-band-ink/45 bg-transparent px-4 text-left t-body-sm text-band-ink";
 
+// Stories viewer IG actions lock v1. One bottom row on phone and desktop.
+// Gap 8, pad x 16, pad y 8. Hit 40. Liked heart stays Sporty Blue on the
+// dark stage — dark-mode --accent is the soft flip, not this control.
+export const SOCIAL_STORY_ACTIONS_ROW_CLASS =
+  "absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 px-4 py-2";
+
+export const SOCIAL_STORY_ACTIONS_CLUSTER_CLASS = "flex shrink-0 items-center gap-2";
+
+export const SOCIAL_STORY_ACTION_HIT_CLASS =
+  "flex size-10 shrink-0 items-center justify-center transition-colors duration-[120ms] active:opacity-70";
+
+export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
+
+export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
+
 // Home composer — airy canvas register. Adam 2026-09-22
 // lock_topics_composer_stories_wall. Supersedes the 2026-09-20 phone
 // cut (`hidden md:flex`). Avatar + prompt on the canvas, no gray liner

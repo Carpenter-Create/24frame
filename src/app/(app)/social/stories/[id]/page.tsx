@@ -13,12 +13,15 @@ import {
   groupStoryRail,
   loadFolloweeIds,
   loadLiveStories,
+  loadLikedStoryIds,
   loadProfilesByIds,
   loadStoryById,
+  loadStoryLikeCounts,
   loadViewedStoryIds,
   type SocialStoryRailCard,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import type { SocialStoryLikeState } from "@/lib/social-story-actions";
 import { sortStoryTrayOldestFirst, type SocialStoryTrayAuthor } from "@/lib/social-story-tray";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { requireSocialSession } from "@/lib/social-session";
@@ -110,11 +113,25 @@ export default async function SocialStoryPage({
   const storyRows = new Map(railPage.stories.map((row) => [row.id, row]));
   for (const row of authorStoriesPage.stories) storyRows.set(row.id, row);
   storyRows.set(story.id, story);
-  const signedEntries = await Promise.all(
-    [...storyRows.values()].map(async (row) => ({
-      id: row.id,
-      media: await signedSocialMediaItems(row.media, row.author_id, "stories"),
-    })),
+  const storyIds = [...storyRows.keys()];
+  const [signedEntries, likedStoryIds, likeCounts] = await Promise.all([
+    Promise.all(
+      [...storyRows.values()].map(async (row) => ({
+        id: row.id,
+        media: await signedSocialMediaItems(row.media, row.author_id, "stories"),
+      })),
+    ),
+    loadLikedStoryIds(supabase, ctx.user.id, storyIds),
+    loadStoryLikeCounts(supabase, storyIds),
+  ]);
+  const likes: Record<string, SocialStoryLikeState> = Object.fromEntries(
+    storyIds.map((storyItemId) => [
+      storyItemId,
+      {
+        liked: likedStoryIds.has(storyItemId),
+        count: likeCounts.get(storyItemId) ?? 0,
+      },
+    ]),
   );
   const mediaById = new Map(signedEntries.map((entry) => [entry.id, entry.media]));
   const railIds = rail.map((card) => card.authorId);
@@ -193,6 +210,7 @@ export default async function SocialStoryPage({
         canReply={!!profile}
         tray={tray}
         selfId={ctx.user.id}
+        likes={likes}
       />
     </div>
   );

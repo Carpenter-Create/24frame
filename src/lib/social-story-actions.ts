@@ -1,0 +1,65 @@
+import { SOCIAL } from "@/lib/social";
+
+// Stories viewer IG actions lock v1. Heart is per story item.
+// Count is hidden at 0. Send closes only after one DM succeeds.
+
+export type SocialStoryLikeState = {
+  liked: boolean;
+  count: number;
+};
+
+export type StorySendPerson = {
+  id: string;
+  name: string;
+  handle: string;
+  photoUrl: string | null;
+};
+
+export function nextStoryHeart(state: SocialStoryLikeState): SocialStoryLikeState {
+  const liked = !state.liked;
+  return {
+    liked,
+    count: Math.max(0, state.count + (liked ? 1 : -1)),
+  };
+}
+
+export function storyHeartCountVisible(count: number): boolean {
+  return count > 0;
+}
+
+export function storySendUiAfter(
+  result: { error?: string } | null | undefined,
+): { close: boolean; error: string } {
+  if (result && !result.error) return { close: true, error: "" };
+  return { close: false, error: result?.error || SOCIAL.stories.sendFailed };
+}
+
+/** Recent direct peers first, then people you follow. One id each. Never self. */
+export function storySendPeopleOrder(input: {
+  recentPeerIds: readonly (string | null)[];
+  followeeIds: readonly string[];
+  selfId: string;
+}): string[] {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const id of [...input.recentPeerIds, ...input.followeeIds]) {
+    if (!id || id === input.selfId || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+}
+
+export function storySendPeopleQuery(
+  people: readonly StorySendPerson[],
+  query: string,
+): StorySendPerson[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [...people];
+  return people.filter((person) => {
+    return (
+      person.name.toLowerCase().includes(needle) ||
+      person.handle.toLowerCase().includes(needle)
+    );
+  });
+}

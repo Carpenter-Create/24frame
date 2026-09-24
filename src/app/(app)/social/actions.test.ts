@@ -2,7 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { followInsertRow, likeInsertRow, postInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
+import {
+  followInsertRow,
+  likeInsertRow,
+  postInsertRow,
+  profileInsertRow,
+  SOCIAL,
+  socialStoryHref,
+  storyLikeInsertRow,
+} from "@/lib/social";
 import { SocialMuxUploadNotBoundError } from "@/lib/social-mux";
 import { revalidatePath } from "next/cache";
 import {
@@ -20,7 +28,14 @@ import {
   presignSocialMediaUpload,
   updateSocialBio,
 } from "./actions";
-import { createSocialComment, deleteSocialComment, toggleSocialFollow, toggleSocialLike } from "./light-actions";
+import {
+  createSocialComment,
+  deleteSocialComment,
+  sendSocialStoryItem,
+  toggleSocialFollow,
+  toggleSocialLike,
+  toggleSocialStoryLike,
+} from "./light-actions";
 import { commentInsertRow } from "@/lib/social-comments";
 
 vi.mock("@/lib/s3-social-media", () => ({
@@ -533,6 +548,87 @@ describe("social actions", () => {
     form.set("liked", "0");
     expect(await toggleSocialLike(form)).toEqual({});
     expect(inserts).toEqual([{ table: "likes", row: likeInsertRow("u1", "p1") }]);
+  });
+
+  it("likes a story item and removes that like without a redirect", async () => {
+    const liked = stub({ profile: { id: "u1" } });
+    const like = new FormData();
+    like.set("story_id", "s1");
+    like.set("liked", "0");
+    expect(await toggleSocialStoryLike(like)).toEqual({});
+    expect(liked.inserts).toEqual([{ table: "likes", row: storyLikeInsertRow("u1", "s1") }]);
+
+    const unlike = stub({ profile: { id: "u1" } });
+    const remove = new FormData();
+    remove.set("story_id", "s1");
+    remove.set("liked", "1");
+    expect(await toggleSocialStoryLike(remove)).toEqual({});
+    expect(unlike.inserts).toEqual([]);
+    expect(unlike.deletes).toEqual([{ table: "likes" }]);
+  });
+
+  it("sends this story item to one peer on the existing DM path and stays put", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const objectId = "22222222-2222-4222-8222-222222222222";
+    const media = [
+      {
+        kind: "image" as const,
+        key: `stories/${author}/${objectId}.jpg`,
+        contentType: "image/jpeg" as const,
+      },
+    ];
+    const inserts: { table: string; row: unknown }[] = [];
+    const from = vi.fn((table: string) => {
+      const chain: Record<string, unknown> = {};
+      chain.select = vi.fn(() => chain);
+      chain.eq = vi.fn(() => chain);
+      chain.maybeSingle = vi.fn(async () => {
+        if (table === "stories") {
+          return {
+            data: {
+              id: "s1",
+              author_id: author,
+              status: "active",
+              expires_at: "2099-01-01T00:00:00.000Z",
+              media,
+            },
+            error: null,
+          };
+        }
+        return {
+          data: { id: "u1", handle: "ada", display_name: "Ada", status: "active", bio: null },
+          error: null,
+        };
+      });
+      chain.insert = vi.fn((row: unknown) => {
+        inserts.push({ table, row });
+        const result = { data: null, error: null };
+        return {
+          then: (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve),
+        };
+      });
+      return chain;
+    });
+    const rpc = vi.fn(async () => ({ data: "conv-1", error: null }));
+    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+    const form = new FormData();
+    form.set("story_id", "s1");
+    form.set("peer_id", "u2");
+    expect(await sendSocialStoryItem(form)).toEqual({});
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
+    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(inserts).toEqual([
+      {
+        table: "messages",
+        row: {
+          sender_id: "u1",
+          conversation_id: "conv-1",
+          body: socialStoryHref("s1"),
+          media,
+          status: "active",
+        },
+      },
+    ]);
   });
 
   it("creates a comment when a profile exists", async () => {

@@ -85,10 +85,14 @@ describe("SocialStoryViewer", () => {
     expect(html).toContain('data-social-story-mark=""');
     expect(html).toContain('href="/social"');
     expect(html).toContain("Reply to Ada Lovelace…");
-    expect(html).toContain("data-social-story-heart");
+    expect(html).toContain('data-social-story-heart=""');
+    expect(html).toContain('data-social-story-heart-state="none"');
+    expect(html).toContain('data-social-story-send=""');
+    expect(html).toContain('aria-label="Send story"');
+    expect(html).not.toContain("data-social-story-heart-count");
     expect(html).toContain("bg-band-ink");
     expect(html).not.toContain("bg-accent");
-    expect(html).not.toContain("paper-plane");
+    expect(html).toContain("paper-plane-tilt");
     expect(html).not.toContain("Instagram");
     expect(html).not.toContain("aspect-video");
     expect(html).not.toContain("aspect-[4/5]");
@@ -198,5 +202,57 @@ describe("SocialStoryViewer", () => {
     expect(callout).toContain("user-select: text");
     expect(callout).toContain("textarea");
     expect(callout).toContain('[contenteditable="true"]');
+  });
+
+  it("replaces the heart stub with a live heart and send, and hides a zero count", () => {
+    const src = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
+    const heartTag = src.slice(
+      Math.max(0, src.indexOf('data-social-story-heart=""') - 120),
+      src.indexOf('data-social-story-heart=""'),
+    );
+    expect(heartTag).toContain("<button");
+    expect(heartTag).not.toContain("<span");
+    expect(src).toContain("nextStoryHeart");
+    expect(src).toContain("toggleSocialStoryLike");
+    expect(src).toContain("storyHeartCountVisible");
+    expect(src).not.toMatch(/ThumbsUp|thumbs-up|thumbs-down|data-social-story-thumb/);
+    expect(src).not.toContain("data-social-story-comments");
+    const idle = renderToStaticMarkup(
+      createElement(SocialStoryViewer, {
+        ...viewerProps,
+        media: [{ kind: "image", url: "/api/social/media?key=stories%2Forg%2Fstill.jpg" }],
+        likes: { s1: { liked: false, count: 0 } },
+      }),
+    );
+    const heartAt = idle.indexOf('data-social-story-heart=""');
+    const heart = idle.slice(heartAt - 80, idle.indexOf("</button>", heartAt));
+    expect(heart.startsWith("button") || heart.includes("<button")).toBe(true);
+    expect(idle).toContain('data-social-story-heart-state="none"');
+    expect(idle).toContain('aria-pressed="false"');
+    expect(idle).not.toContain("data-social-story-heart-count");
+    expect(idle).toContain("size-10");
+    expect(idle).toContain("gap-2");
+    expect(idle).toContain("duration-[120ms]");
+    expect(idle).toContain("active:opacity-70");
+    expect(idle).not.toContain("animate-bounce");
+    expect(idle).not.toContain("scale-");
+    expect(idle).toContain("min-w-0 flex-1");
+    const liked = renderToStaticMarkup(
+      createElement(SocialStoryViewer, {
+        ...viewerProps,
+        media: [{ kind: "image", url: "/api/social/media?key=stories%2Forg%2Fstill.jpg" }],
+        likes: { s1: { liked: true, count: 2 } },
+      }),
+    );
+    expect(liked).toContain('data-social-story-heart-state="liked"');
+    expect(liked).toContain('aria-pressed="true"');
+    expect(liked).toContain("data-social-story-heart-count");
+    expect(liked).toContain(">2<");
+    expect(liked).toContain("text-[#1769FF]");
+    expect(liked).toContain('data-social-icon-active=""');
+    const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
+    expect(page).toContain("loadStoryLikeCounts");
+    expect(page).toContain("loadLikedStoryIds");
+    expect(page).toContain("likes={likes}");
   });
 });

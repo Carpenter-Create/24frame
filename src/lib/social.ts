@@ -612,6 +612,11 @@ export const SOCIAL = {
     previous: "Previous story",
     next: "Next story",
     replyTo: (name: string) => `Reply to ${name}…`,
+    like: "Like",
+    unlike: "Unlike",
+    send: "Send story",
+    sendEmpty: "No people yet.",
+    sendFailed: "Could not send this story.",
     unavailable: "Recording is not available in this browser. Upload a video instead.",
     permission: "Camera access is needed to record.",
     emptyRail: "No stories yet",
@@ -1273,6 +1278,14 @@ export function likeInsertRow(userId: string, postId: string) {
   };
 }
 
+export function storyLikeInsertRow(userId: string, storyId: string) {
+  return {
+    user_id: userId,
+    target_type: "story_item" as const,
+    target_id: storyId,
+  };
+}
+
 export function messageInsertRow(input: {
   senderId: string;
   conversationId: string;
@@ -1282,6 +1295,22 @@ export function messageInsertRow(input: {
     sender_id: input.senderId,
     conversation_id: input.conversationId,
     body: input.body,
+    status: "active" as const,
+  };
+}
+
+/** One story item in an existing direct thread: link in the body, media keys as the attachment. */
+export function storyDmInsertRow(input: {
+  senderId: string;
+  conversationId: string;
+  storyId: string;
+  media: SocialMediaItem[];
+}) {
+  return {
+    sender_id: input.senderId,
+    conversation_id: input.conversationId,
+    body: socialStoryHref(input.storyId),
+    media: input.media,
     status: "active" as const,
   };
 }

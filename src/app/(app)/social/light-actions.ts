@@ -11,10 +11,24 @@ import {
   likeInsertRow,
   SOCIAL,
   SOCIAL_ROUTES,
+  socialDmHref,
   socialGroupHref,
   socialGroupPostHref,
+  socialPersonLabel,
   socialPostHref,
+  socialStoryHref,
+  storyDmInsertRow,
+  storyLikeInsertRow,
 } from "@/lib/social";
+import { socialAvatarHref } from "@/lib/social-edge";
+import { loadDmInbox } from "@/lib/social-dms";
+import { loadFolloweeIds, loadProfilesByIds } from "@/lib/social-feed";
+import { ownedMediaItems } from "@/lib/social-media";
+import { isStoryLive } from "@/lib/social-stories";
+import {
+  storySendPeopleOrder,
+  type StorySendPerson,
+} from "@/lib/social-story-actions";
 import { commentBodyError, commentInsertRow, normalizeCommentBody } from "@/lib/social-comments";
 import { bustSocialFollowHotCache } from "@/lib/social-hot-cache";
 import {
@@ -23,7 +37,7 @@ import {
   newFollowerSourceRefs,
 } from "@/lib/social-follow";
 
-// Follow / like only. No AWS, no MediaRecorder, no profile Save.
+// Follow / like / story heart / story send. No AWS, no MediaRecorder, no profile Save.
 // Public Edge reads import these — not actions.ts (presign lives there).
 
 type ActionResult = { error?: string };
@@ -105,6 +119,104 @@ export async function toggleSocialLike(formData: FormData): Promise<ActionResult
     revalidatePath(socialGroupPostHref(slug, postId));
   }
   return {};
+}
+
+export async function toggleSocialStoryLike(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const storyId = String(formData.get("story_id") ?? "").trim();
+  const liked = String(formData.get("liked") ?? "") === "1";
+  if (!storyId) return { error: SOCIAL.stories.missing };
+
+  if (liked) {
+    const { error } = await supabase
+      .from("likes")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("target_type", "story_item")
+      .eq("target_id", storyId);
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase.from("likes").insert(storyLikeInsertRow(user.id, storyId));
+    if (error && error.code !== "23505") return { error: error.message };
+  }
+
+  revalidatePath(socialStoryHref(storyId));
+  return {};
+}
+
+export async function sendSocialStoryItem(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const storyId = String(formData.get("story_id") ?? "").trim();
+  const peerId = String(formData.get("peer_id") ?? "").trim();
+  if (!storyId || !peerId || peerId === user.id) return { error: SOCIAL.stories.sendFailed };
+
+  const { data: story, error: storyError } = await supabase
+    .from("stories")
+    .select("id, author_id, media, status, expires_at")
+    .eq("id", storyId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (storyError || !story || !isStoryLive(story.expires_at)) return { error: SOCIAL.stories.missing };
+
+  const { data, error: openError } = await supabase.rpc("open_or_get_direct_conversation", {
+    p_peer: peerId,
+  });
+  const conversationId = typeof data === "string" ? data : "";
+  if (openError || !conversationId) return { error: openError?.message || SOCIAL.stories.sendFailed };
+
+  const { error } = await supabase.from("messages").insert(
+    storyDmInsertRow({
+      senderId: user.id,
+      conversationId,
+      storyId: story.id,
+      media: ownedMediaItems(story.media, story.author_id, "stories"),
+    }),
+  );
+  if (error) return { error: error.message || SOCIAL.stories.sendFailed };
+
+  revalidatePath(socialDmHref(conversationId));
+  revalidatePath(SOCIAL_ROUTES.dms);
+  revalidatePath(socialStoryHref(story.id));
+  return {};
+}
+
+export async function listStorySendPeople(): Promise<{ people: StorySendPerson[]; error?: string }> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { people: [], error: SOCIAL.cta.needProfile };
+
+  const [followees, inbox] = await Promise.all([
+    loadFolloweeIds(supabase, user.id),
+    loadDmInbox(supabase),
+  ]);
+  const recentPeerIds = inbox.rows.flatMap((row) =>
+    row.kind === "direct" && row.peer_id ? [row.peer_id] : [],
+  );
+  const ids = storySendPeopleOrder({
+    recentPeerIds,
+    followeeIds: followees.ids,
+    selfId: user.id,
+  });
+  const profiles = await loadProfilesByIds(supabase, ids);
+  const people = ids.flatMap((id) => {
+    const person = profiles.get(id);
+    if (!person || person.status !== "active") return [];
+    return [
+      {
+        id,
+        name: socialPersonLabel({
+          handle: person.handle,
+          displayName: person.display_name,
+        }),
+        handle: person.handle,
+        photoUrl: socialAvatarHref(id),
+      },
+    ];
+  });
+  return { people };
 }
 
 type CommentActionResult = ActionResult & { id?: string; created_at?: string };

@@ -37,8 +37,8 @@ select is(
      join pg_type t on t.oid = e.enumtypid
      join pg_namespace n on n.oid = t.typnamespace
     where n.nspname = 'public' and t.typname = 'like_target'),
-  array['post','comment']::text[],
-  'like_target labels stay post|comment');
+  array['post','comment','story_item']::text[],
+  'like_target labels stay post|comment|story_item');
 select is(
   (select array_agg(e.enumlabel::text order by e.enumsortorder)
      from pg_enum e

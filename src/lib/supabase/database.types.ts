@@ -842,6 +842,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          like_count: number
           media: Json
           status: Database["public"]["Enums"]["post_status"]
         }
@@ -851,6 +852,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          like_count?: number
           media?: Json
           status?: Database["public"]["Enums"]["post_status"]
         }
@@ -860,6 +862,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          like_count?: number
           media?: Json
           status?: Database["public"]["Enums"]["post_status"]
         }
@@ -4082,7 +4085,7 @@ export type Database = {
         | "sale"
         | "payable"
         | "closing"
-      like_target: "post" | "comment"
+      like_target: "post" | "comment" | "story_item"
       membership_status: "invited" | "active" | "removed"
       notification_kind: "title_rejected" | "delivery_update" | "new_follower"
       notification_sender: "gc_support" | "globee" | "member"
@@ -4376,7 +4379,7 @@ export const Constants = {
         "payable",
         "closing",
       ],
-      like_target: ["post", "comment"],
+      like_target: ["post", "comment", "story_item"],
       membership_status: ["invited", "active", "removed"],
       notification_kind: ["title_rejected", "delivery_update", "new_follower"],
       notification_sender: ["gc_support", "globee", "member"],

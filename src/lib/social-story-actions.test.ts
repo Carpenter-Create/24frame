@@ -1,0 +1,110 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+import { SOCIAL, socialStoryHref, storyDmInsertRow, storyLikeInsertRow } from "@/lib/social";
+import {
+  nextStoryHeart,
+  storyHeartCountVisible,
+  storySendPeopleOrder,
+  storySendPeopleQuery,
+  storySendUiAfter,
+} from "@/lib/social-story-actions";
+
+describe("story heart", () => {
+  it("toggles none and liked and hides a zero count", () => {
+    expect(nextStoryHeart({ liked: false, count: 0 })).toEqual({ liked: true, count: 1 });
+    expect(nextStoryHeart({ liked: true, count: 1 })).toEqual({ liked: false, count: 0 });
+    expect(nextStoryHeart({ liked: true, count: 4 })).toEqual({ liked: false, count: 3 });
+    expect(nextStoryHeart({ liked: false, count: 4 })).toEqual({ liked: true, count: 5 });
+    expect(nextStoryHeart({ liked: true, count: 0 })).toEqual({ liked: false, count: 0 });
+    expect(storyHeartCountVisible(0)).toBe(false);
+    expect(storyHeartCountVisible(1)).toBe(true);
+  });
+
+  it("stores a story item like separately from a post like", () => {
+    expect(storyLikeInsertRow("u1", "s1")).toEqual({
+      user_id: "u1",
+      target_type: "story_item",
+      target_id: "s1",
+    });
+  });
+});
+
+describe("send story", () => {
+  it("closes only after a successful single send", () => {
+    expect(storySendUiAfter({})).toEqual({ close: true, error: "" });
+    expect(storySendUiAfter({ error: "Could not send this story." })).toEqual({
+      close: false,
+      error: "Could not send this story.",
+    });
+    expect(storySendUiAfter(undefined)).toEqual({
+      close: false,
+      error: SOCIAL.stories.sendFailed,
+    });
+    expect(storySendUiAfter(null)).toEqual({
+      close: false,
+      error: SOCIAL.stories.sendFailed,
+    });
+  });
+
+  it("orders recent direct peers ahead of following and drops self", () => {
+    expect(
+      storySendPeopleOrder({
+        recentPeerIds: ["u2", null, "u1"],
+        followeeIds: ["u3", "u2", "u1"],
+        selfId: "u1",
+      }),
+    ).toEqual(["u2", "u3"]);
+  });
+
+  it("filters the people already loaded", () => {
+    const people = [
+      { id: "u2", name: "Ada Lovelace", handle: "ada", photoUrl: null },
+      { id: "u3", name: "Grace Hopper", handle: "grace", photoUrl: null },
+    ];
+    expect(storySendPeopleQuery(people, "")).toEqual(people);
+    expect(storySendPeopleQuery(people, "hop")).toEqual([people[1]]);
+    expect(storySendPeopleQuery(people, "ADA")).toEqual([people[0]]);
+  });
+
+  it("sends this story item as a DM link plus its media", () => {
+    const media = [
+      {
+        kind: "image" as const,
+        key: "stories/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.jpg",
+        contentType: "image/jpeg" as const,
+      },
+    ];
+    expect(
+      storyDmInsertRow({
+        senderId: "u1",
+        conversationId: "conv-1",
+        storyId: "s1",
+        media,
+      }),
+    ).toEqual({
+      sender_id: "u1",
+      conversation_id: "conv-1",
+      body: socialStoryHref("s1"),
+      media,
+      status: "active",
+    });
+  });
+});
+
+describe("story item likes migration", () => {
+  it("adds the enum label before any policy uses it, and does not drop likes", () => {
+    const add = readFileSync("supabase/migrations/20260924120000_like_target_story_item.sql", "utf8");
+    const use = readFileSync("supabase/migrations/20260924120100_story_item_likes.sql", "utf8");
+    expect(add).toContain("add value if not exists 'story_item'");
+    expect(add).not.toContain("create policy");
+    expect(add).toContain("do NOT apply");
+    expect(use).toContain("likes_insert_story_item");
+    expect(use).toContain("like_count");
+    expect(use).toContain("comment likes are not in this slice");
+    expect(use).toContain("do NOT apply");
+    expect(use).not.toMatch(/^\s*drop table/im);
+    const policy = use.slice(use.indexOf("create policy likes_insert_story_item"), use.indexOf("do $$"));
+    expect(policy).not.toContain("is_gc_staff");
+  });
+});
