@@ -1,8 +1,8 @@
-# [GC][24Frame] LOCK — Visual register · rich calm v1.2
+# [GC][24Frame] LOCK — Visual register · rich calm v1.3
 
 **Date:** 2026-09-24 (CT)  
-**Status:** **LOCKED** · **FINAL v1.2** (Design confirmed **thoughtful IN** — no v1.3 wait · primary richness is **video + media** · Coinbase chrome stays professional · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
-**Version:** v1.2 supersedes v1.1 wording (same path). Thoughtful is in this version.  
+**Status:** **LOCKED** · **Own→READY** (v1.3 — **G0** rich video/media **REQUIRED**, peer-grade · Coinbase / professional / 24Frame / **thoughtful** stay · primary richness is **video + media** · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
+**Version:** v1.3 supersedes v1.2 wording (same path). Thoughtful stays IN.  
 **Scope:** House visual register for **24Frame** — **Social + Stories first**. Amends feel bar only. **Does not** reopen geometry. Stories geometry is closed.  
 **Cites (geometry stays):**  
 - `stories-home-rail-fb-card-lock-v1.md`  
@@ -20,9 +20,9 @@
 
 **Coinbase register stays:** Geist · greyscale surfaces · one accent Sporty Blue `#1769FF` · hairlines · spacing **8 / 16 / 24 / 48** · **no drop shadows** · quiet type · Coinbase-calm **institutional trust**. Chrome is professional Coinbase calm: interesting, not flat, not boring. **No ornamental invent.**
 
-**Register.** Coinbase / professional / 24Frame **and thoughtful** (intentional hierarchy · restraint with presence · considered media). Thoughtful is **IN** at v1.2. Design confirmed. No v1.3 wait.
+**Register.** Coinbase / professional / 24Frame **and thoughtful** (intentional hierarchy · restraint with presence · considered media). Thoughtful is **IN** at v1.3.
 
-**Standing gospel.** The audience is a film/media community, so the rich media bar is **required**, not optional polish.
+**G0.** Serves a film/media community. Rich video/media is **REQUIRED** (peer-grade), not optional polish, and not “good enough chrome”.
 
 **Primary richness is video + media.** Interesting + rich means presence, fill, and immersion — FB/IG-grade playback and viewer — **not** flat empty plates, **not** boring sparse “settings energy” on Social/Stories, and **not** chrome invented past the locked levers.
 
@@ -74,6 +74,7 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 ## Forbidden
 
 - Soft-grading Stories to “thin calm” and polishing later  
+- “Good enough chrome” where peer-grade video/media is required  
 - Flat / boring Social+Stories faces when media or immersion is locked  
 - Playful · gimmick · toy aesthetic for its own sake  
 - Loud consumer fluff that breaks institutional calm  
@@ -86,6 +87,7 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 
 ## Gates
 
+**G0.** Serves a film/media community. Rich video/media is **REQUIRED** (peer-grade), not optional polish, and not “good enough chrome”.  
 **G1.** Coinbase calm tokens still govern light product chrome — professional trust intact.  
 **G2.** Social + Stories fail if flat, boring, or empty where video/media presence, fill, or immersion is required.  
 **G3.** Primary richness = video + media (presence, fill, immersion, FB/IG-grade playback and viewer) + sparse Sporty Blue + listed motion — not shadows, clutter, ornamental invent, or toy play.  
@@ -93,10 +95,10 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 **G5.** Motion only at listed durations; no bounce.  
 **G6.** Cited Stories geometry locks unchanged by this file. Stories geometry is closed.  
 **G7.** Design no PR — CoS routes Dev.  
-**G8.** Thoughtful is IN at v1.2: intentional hierarchy, restraint with presence, considered media. Inventing chrome past the locked levers = FAIL.  
-**G9.** Film/media community audience: the rich media bar is required, not optional polish.
+**G8.** Thoughtful is IN at v1.3: intentional hierarchy, restraint with presence, considered media. Inventing chrome past the locked levers = FAIL.  
+**G9.** Film/media community audience: the rich media bar is required, not optional polish. Peer-grade video/media. “Good enough chrome” = FAIL.
 
 ## Repo citation
 
-CoS seeds: `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` (v1.2 wording)  
+CoS seeds: `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` (v1.3 wording)  
 Box: `/workspace/24frame-agg-ux/24frame-visual-register-rich-calm-lock-v1.md`

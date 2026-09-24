@@ -12,12 +12,12 @@ import {
 } from "@/lib/social-chrome";
 
 const css = readFileSync("src/app/globals.css", "utf8");
-const motion = css.slice(css.indexOf("Rich calm v1.2"));
+const motion = css.slice(css.indexOf("Rich calm v1.3"));
 const viewer = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
 const rail = readFileSync("src/components/social/social-stories-rail.tsx", "utf8");
 const cover = readFileSync("src/components/social/social-story-rail-cover.tsx", "utf8");
 
-describe("rich calm visual register v1.2", () => {
+describe("rich calm visual register v1.3", () => {
   it("paints viewer and rail motion and leaves the create shutter at v1.5", () => {
     expect(SOCIAL_STORY_STAGE_IN_CLASS).toBe("social-story-stage-in");
     expect(SOCIAL_STORY_ACTIVATE_NEXT_CLASS).toBe("social-story-activate");
@@ -47,15 +47,19 @@ describe("rich calm visual register v1.2", () => {
       "docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md",
       "utf8",
     );
-    expect(register).toContain("rich calm v1.2");
+    expect(register).toContain("rich calm v1.3");
+    expect(register).toContain("**G0.**");
+    expect(register).toContain("peer-grade");
+    expect(register).toContain("good enough chrome");
     expect(register).toContain("video + media");
     expect(register).toContain("and thoughtful");
     expect(register).toContain("intentional hierarchy");
-    expect(register).toContain("Thoughtful is **IN** at v1.2");
+    expect(register).toContain("Thoughtful is **IN** at v1.3");
     expect(register).toContain("film/media community");
-    expect(register).toContain("rich media bar is **required**, not optional polish");
+    expect(register).toContain("not optional polish");
     expect(register).toContain("No ornamental invent");
     expect(register).toContain("Does not** reopen geometry");
+    expect(register).not.toContain("FINAL v1.2");
     expect(register).not.toContain("v1.1 folds");
   });
 });
