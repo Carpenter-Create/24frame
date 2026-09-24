@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   const { data: otp } = await admin
     .from("portal_otps")
-    .select("id, code_hash, expires_at, attempts, consumed_at")
+    .select("id, code_hash, expires_at")
     .eq("link_id", link.id)
     .eq("email", email)
     .is("consumed_at", null)
@@ -38,11 +38,27 @@ export async function POST(req: Request) {
   if (!otp || new Date(otp.expires_at) < new Date()) {
     return NextResponse.json({ error: "Code incorrect or expired" }, { status: 400 });
   }
-  if (otp.attempts >= PORTAL.otpMaxAttempts) {
+
+  // One atomic claim against portal_otps.attempts. A stale read plus a
+  // client-computed increment lets concurrent verifies share a count and
+  // all compare a code. The RPC increments only while attempts are under
+  // the cap and returns null when it changes no row — treat that as
+  // exhausted and do not compare the code. Cap stays PORTAL.otpMaxAttempts.
+  const { data: claimedAttempts, error: claimError } = await admin.rpc("portal_claim_otp_attempt", {
+    p_otp_id: otp.id,
+    p_max_attempts: PORTAL.otpMaxAttempts,
+  });
+  if (claimError) {
+    return NextResponse.json({ error: "Could not verify code" }, { status: 500 });
+  }
+  if (
+    typeof claimedAttempts !== "number" ||
+    claimedAttempts < 1 ||
+    claimedAttempts > PORTAL.otpMaxAttempts
+  ) {
     return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
   }
 
-  await admin.from("portal_otps").update({ attempts: otp.attempts + 1 }).eq("id", otp.id);
   if (!safeEqualHex(otp.code_hash, hashOtp(code, link.id))) {
     return NextResponse.json({ error: "Code incorrect or expired" }, { status: 400 });
   }
