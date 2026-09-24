@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 
 import { signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { privateMaxAgeCacheControl } from "@/lib/signing-window";
+import { viewerMaySignSocialMedia } from "@/lib/social-media-access";
 import { isForbiddenMediaKey, SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS } from "@/lib/social-media";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
-// Node signer for Edge Social reads. Session required. Forbidden /
-// title-asset keys stay closed. Successful 302 is private max-age
-// aligned to the signing window. Auth misses and bad keys stay no-store.
+// Node signer for Edge Social reads. Session required. A non-forbidden
+// key is not a grant. Sign only when the key is attached to a row this
+// session can select: post media, or a non-expired story visible under
+// stories_select (self or follow, expires_at still ahead).
+// Successful 302 is private max-age aligned to the signing window.
+// Auth misses, bad keys, and unauthorized keys stay no-store.
 
 export async function GET(request: Request) {
   const user = await getAuthUser();
@@ -24,6 +28,13 @@ export async function GET(request: Request) {
   if (!key || isForbiddenMediaKey(key)) {
     return new NextResponse(null, {
       status: 400,
+      headers: { "Cache-Control": "private, no-store" },
+    });
+  }
+
+  if (!(await viewerMaySignSocialMedia(user.id, key))) {
+    return new NextResponse(null, {
+      status: 403,
       headers: { "Cache-Control": "private, no-store" },
     });
   }
