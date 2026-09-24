@@ -43,11 +43,9 @@ const nextConfig: NextConfig = {
     // Lets instrumentation-client.ts export onRouterTransitionStart so Sentry
     // can attach client navigation spans. Off by default in Next 16.3.
     instrumentationClientRouterTransitionEvents: true,
-    // Education lesson sources PUT server-side (avatars pattern). The file cap
-    // is 2GiB. Stories, social, and title bytes do not travel through this
-    // parser. Default 1MB would reject a valid lesson source before attach.
-    // The ceiling is that cap plus multipart headroom — see
-    // SERVER_ACTION_BODY_SIZE_LIMIT_BYTES. `"3gb"` was 3GiB.
+    // One limit for every server action. Next has no per-action bodySizeLimit.
+    // `"3gb"` is 3GiB. The ceiling is the largest house file cap a server
+    // action accepts, plus 20KB multipart overhead.
     serverActions: { bodySizeLimit: SERVER_ACTION_BODY_SIZE_LIMIT_BYTES },
   },
 

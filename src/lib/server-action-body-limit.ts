@@ -1,26 +1,26 @@
-// Server-action request body ceiling.
+// `experimental.serverActions.bodySizeLimit` is one knob. Next applies it
+// to every server action. There is no per-action body size limit.
 //
-// Next applies one parser limit to every server action
-// (`experimental.serverActions.bodySizeLimit`). The previous value `"3gb"`
-// is 3 GiB in Next's bytes parser (`gb` = 1 << 30). The only in-body media
-// upload is an Education lesson source, capped at 2 GiB. Stories, social,
-// and title masters send file bytes to S3 or Mux; those actions carry
-// metadata only, under their own smaller caps.
-//
-// The ceiling is that 2 GiB cap plus multipart headroom (boundaries, the
-// two id fields, and the filename). Next rejects a larger body with 413
-// before the action runs (`size > limit`). A spare gigabyte is not headroom.
+// `"3gb"` parses as 3 GiB (`gb` = 1 << 30) and was larger than any file a
+// server action is allowed to read. The ceiling is the largest of those
+// house caps plus the multipart overhead Next documents for this knob
+// (10–20 KB). A body one byte over is rejected with 413 before the action
+// runs (`size > limit`).
 
-/** Must stay equal to EDUCATION_VIDEO_MAX_BYTES. Locked by the unit test. */
-export const SERVER_ACTION_MEDIA_CAP_BYTES = 2 * 1024 * 1024 * 1024;
+/** Next serverActions `bodySizeLimit` docs: leave 10–20 KB for multipart. */
+export const SERVER_ACTION_MULTIPART_HEADROOM_BYTES = 20 * 1024;
 
-/** Multipart and flight overhead above the largest allowed file. */
-export const SERVER_ACTION_MULTIPART_HEADROOM_BYTES = 1024 * 1024;
+/**
+ * Largest file a server action may carry. Must stay equal to
+ * max(AVATAR_MAX_BYTES, EDUCATION_IMAGE_MAX_BYTES, EDUCATION_VIDEO_MAX_BYTES).
+ * Locked by the unit test so this module can stay import-free for next.config.
+ */
+export const SERVER_ACTION_MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024;
 
 export const SERVER_ACTION_BODY_SIZE_LIMIT_BYTES =
-  SERVER_ACTION_MEDIA_CAP_BYTES + SERVER_ACTION_MULTIPART_HEADROOM_BYTES;
+  SERVER_ACTION_MAX_FILE_BYTES + SERVER_ACTION_MULTIPART_HEADROOM_BYTES;
 
-/** Former `bodySizeLimit: "3gb"` — Next parses `gb` as 1 << 30. */
+/** Former `bodySizeLimit: "3gb"`. */
 export const RETIRED_SERVER_ACTION_BODY_LIMIT_BYTES = 3 * (1 << 30);
 
 /**
