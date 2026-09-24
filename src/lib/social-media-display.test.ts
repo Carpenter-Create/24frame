@@ -5,6 +5,7 @@ import {
   isSessionGatedSocialSrc,
   socialAvatarImageSizes,
   socialMediaFrameClass,
+  socialStoryMediaFrameClass,
   socialMediaOrientation,
   socialVideoDisplaySrc,
 } from "./social-media-display";
@@ -55,5 +56,8 @@ describe("social media display", () => {
     expect(socialMediaFrameClass({ kind: "video" })).toContain("aspect-video");
     expect(socialMediaFrameClass({ kind: "video" })).not.toContain("aspect-square");
     expect(socialMediaFrameClass({ kind: "image" })).not.toContain("aspect-square");
+    expect(socialStoryMediaFrameClass()).toBe("aspect-[9/16] w-full object-cover");
+    expect(socialStoryMediaFrameClass()).not.toContain("aspect-video");
+    expect(socialStoryMediaFrameClass()).not.toContain("aspect-[4/5]");
   });
 });

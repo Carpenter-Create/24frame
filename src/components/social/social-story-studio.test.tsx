@@ -63,10 +63,23 @@ describe("SocialStoryCompose create stage", () => {
     expect(src).toContain("probeStoryRecorderMimeType");
     expect(src).toContain('lane", "stories"');
     expect(src).toContain("createSocialStory");
-    expect(src).toContain('capture="environment"');
+    expect(src).toContain("captureStoryStillFrame");
+    expect(src).toContain("openPhotoCamera");
+    expect(src).toContain("data-social-story-still-shutter");
+    expect(src).not.toContain('capture="environment"');
     expect(src).not.toContain('capture="user"');
+    expect(src).not.toMatch(/\scapture\s*=/);
     expect(src).toContain("data-social-story-photo-library");
     expect(src).toContain("data-social-story-photo-capture");
+    const photoFace = src.slice(src.indexOf('phase === "photo"'), src.indexOf('phase === "video"'));
+    expect(photoFace.indexOf("data-social-story-photo-capture")).toBeLessThan(
+      photoFace.indexOf("data-social-story-photo-library"),
+    );
+    const photoCamera = src.slice(src.indexOf("async function openPhotoCamera"), src.indexOf("async function takeStill"));
+    expect(photoCamera).toContain("SOCIAL.stories.photoUnavailable");
+    expect(photoCamera).toContain("SOCIAL.stories.photoPermission");
+    expect(photoCamera).not.toContain("SOCIAL.stories.unavailable");
+    expect(photoCamera).not.toContain("SOCIAL.stories.permission");
     expect(src).not.toContain("data-social-story-picker");
     expect(src).not.toContain("pickerHint");
     expect(src).not.toContain("footnote");
@@ -86,8 +99,29 @@ describe("SocialStoryCompose create stage", () => {
       `${SOCIAL_STORY_STUDIO_PREVIEW_CLASS} ${SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS}`,
     );
     expect(socialStoryStudioPreviewClass(false)).toBe(SOCIAL_STORY_STUDIO_PREVIEW_CLASS);
-    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("object-contain");
-    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).not.toContain("object-cover");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("absolute inset-0");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("object-cover");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).not.toContain("object-contain");
+    expect(src).not.toContain("SOCIAL_STORY_STUDIO_RING_CLASS");
+    expect(src).toContain('phase === "recording" ? clock');
+    expect(src).toContain("data-social-story-camera-close");
+    expect(src).toContain("data-social-story-flash");
+    expect(src).toContain("data-social-story-gallery");
+    expect(src).toContain("data-social-story-flip");
+    expect(src).toContain("data-social-story-mode");
+    expect(src).toContain("openRoll");
+    expect(src).toContain('setPhase(photo ? "photo" : "video")');
+    expect(src).toContain("storyCameraSupportsTorch");
+    expect(src).not.toContain("Boomerang");
+    expect(src).not.toContain("REELS");
+    expect(src).not.toContain("data-social-story-tools");
+    const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+    expect(chrome).toContain("size-[72px]");
+    expect(chrome).toContain("border-4");
+    expect(chrome).toContain("size-14");
+    expect(chrome).toContain("size-12");
+    expect(chrome).not.toContain("SOCIAL_STORY_STUDIO_RING_CLASS");
+    expect(chrome).not.toContain("size-[280px]");
     expect(SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS).toBe("-scale-x-100");
     expect(SOCIAL_STORY_STUDIO_REVIEW_CLASS).toContain("object-cover");
     expect(SOCIAL_STORY_STUDIO_REVIEW_CLASS).not.toContain("scale-x");

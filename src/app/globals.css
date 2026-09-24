@@ -279,6 +279,62 @@ body {
   }
 }
 
+/* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation. */
+@keyframes social-story-stage-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.social-story-stage-in {
+  animation: social-story-stage-in 180ms ease-out both;
+}
+
+@keyframes social-story-activate {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes social-story-activate-prev {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: none; }
+}
+
+.social-story-activate {
+  animation: social-story-activate 220ms ease-out both;
+}
+
+.social-story-activate-prev {
+  animation: social-story-activate-prev 220ms ease-out both;
+}
+
+@keyframes social-story-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.social-story-progress {
+  transform-origin: left center;
+  animation-name: social-story-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* Pause-on-hold. iOS must not select the open viewer or raise the callout. */
+.social-story-no-callout,
+.social-story-no-callout * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.social-story-no-callout input,
+.social-story-no-callout textarea,
+.social-story-no-callout [contenteditable="true"] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .social-mux-player {
   --media-accent-color: var(--accent);
   --media-background-color: var(--surface-muted);

@@ -26,15 +26,24 @@ export function isMediaCloudfrontConfigured(): boolean {
   return MEDIA_CLOUDFRONT_ENV.every((name) => !!process.env[name]);
 }
 
+// Preview stores MEDIA_CLOUDFRONT_DOMAIN as a host. getSignedUrl throws
+// "Invalid URI scheme" without http(s), signedSocialMediaUrl returns null,
+// and GET /api/social/media 404s before any redirect.
+function mediaCloudfrontObjectUrl(storageKey: string): string {
+  const raw = requireMediaEnv("MEDIA_CLOUDFRONT_DOMAIN").trim().replace(/\/+$/, "");
+  const domain = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  const key = storageKey.replace(/^\/+/, "");
+  return `${domain}/${key}`;
+}
+
 export function signSocialMediaCloudfrontUrl(
   storageKey: string,
   ttlSeconds: number = SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
 ): string {
-  const domain = requireMediaEnv("MEDIA_CLOUDFRONT_DOMAIN").replace(/\/+$/, "");
   const keyPairId = requireMediaEnv("MEDIA_CLOUDFRONT_KEY_PAIR_ID");
   const privateKey = requireMediaEnv("MEDIA_CLOUDFRONT_PRIVATE_KEY");
   const key = storageKey.replace(/^\/+/, "");
-  const url = `${domain}/${key}`;
+  const url = mediaCloudfrontObjectUrl(storageKey);
   const boundary = stableExpiryEpoch(ttlSeconds);
   return cachedSignedUrl(`media:${key}`, boundary, () =>
     getSignedUrl({

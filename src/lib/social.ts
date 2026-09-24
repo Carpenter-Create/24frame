@@ -14,7 +14,12 @@ import {
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
 } from "@/lib/social-home-bounds";
-import type { SocialMediaItem, SocialMediaLane, SocialMediaRuleError } from "@/lib/social-media";
+import type {
+  SocialMediaItem,
+  SocialMediaKind,
+  SocialMediaLane,
+  SocialMediaRuleError,
+} from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
 // Handle: 3–30, A–Z a–z 0–9 . _; no leading/trailing `.`, no `..`.
@@ -56,6 +61,15 @@ export const SOCIAL_ROUTES = {
 export function isSocialStoryCreatePath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
   return path === SOCIAL_ROUTES.storiesNew;
+}
+
+/** Open story viewer. Not the index, not the create stage. */
+export function isSocialStoryOpenPath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  if (path === SOCIAL_ROUTES.stories || path === SOCIAL_ROUTES.storiesNew) return false;
+  if (!path.startsWith(`${SOCIAL_ROUTES.stories}/`)) return false;
+  const id = path.slice(SOCIAL_ROUTES.stories.length + 1);
+  return id.length > 0 && !id.includes("/");
 }
 
 /** Header Search people discovery. Not a dock tab. Not Explore. */
@@ -556,13 +570,17 @@ export const SOCIAL = {
     mediaMissing: "Choose a video first.",
     // Design 144:1218/144:1444 also showed “up to 15 seconds”. Not an Adam lock.
     // Do not treat that note as a duration cap.
-    // Create-story lock v1.1: photo card and video card. Entry subtitle and footnote removed.
+    // Create-story lock v1.5: Upload and Take for photo and video.
+    // Camera face is a rectangular full-bleed viewfinder. No face ring.
+    // Chrome is close, flash, shutter, gallery, flip, and one STORY label.
     photoCard: "Create a photo story",
     videoCard: "Create a video story",
-    photoLibrary: "Choose from library",
+    photoLibrary: "Upload a photo",
     photoLibraryHint: "Stills from your camera roll",
     photoCapture: "Take a photo",
     photoCaptureHint: "Open the camera",
+    photoUnavailable: "The camera is not available in this browser. Upload a photo instead.",
+    photoPermission: "Camera access is needed to take a photo.",
     photoMediaType: "Use a photo (JPEG, PNG, WebP, GIF).",
     photoMissing: "Choose a photo first.",
     back: "Back",
@@ -584,8 +602,16 @@ export const SOCIAL = {
     postedHint: "Back to Stories",
     viewStories: "View Stories",
     flipCamera: "Flip camera",
+    flash: "Flash",
+    cameraMode: "STORY",
     close: "Close",
     play: "Play",
+    pause: "Pause",
+    mute: "Mute",
+    unmute: "Unmute",
+    previous: "Previous story",
+    next: "Next story",
+    replyTo: (name: string) => `Reply to ${name}…`,
     unavailable: "Recording is not available in this browser. Upload a video instead.",
     permission: "Camera access is needed to record.",
     emptyRail: "No stories yet",
@@ -1195,10 +1221,16 @@ export function profileInsertRow(input: {
 export function socialMediaRuleMessage(
   error: SocialMediaRuleError,
   lane: SocialMediaLane = "posts",
+  kind?: SocialMediaKind,
 ): string {
-  if (error === "type") return lane === "stories" ? SOCIAL.stories.mediaType : SOCIAL.home.mediaType;
+  const photo = lane === "stories" && kind === "image";
+  if (error === "type") {
+    if (photo) return SOCIAL.stories.photoMediaType;
+    return lane === "stories" ? SOCIAL.stories.mediaType : SOCIAL.home.mediaType;
+  }
   if (error === "tooLarge") return SOCIAL.home.mediaTooLarge;
   if (error === "missing") {
+    if (photo) return SOCIAL.stories.photoMissing;
     return lane === "stories" ? SOCIAL.stories.mediaMissing : SOCIAL.home.mediaMissing;
   }
   if (error === "limit") return SOCIAL.home.mediaLimit;

@@ -7,6 +7,9 @@ import {
   mediaItemsForInsert,
   ownedMediaItems,
   profileCoverKeyFromMedia,
+  readStoryInputPick,
+  storyImageAccept,
+  storyPickFile,
   welcomeVideoKeyFromMedia,
   parsePostMedia,
   socialMediaObjectKey,
@@ -308,5 +311,32 @@ describe("posts.media persist shape", () => {
     expect(
       mediaItemsForInsert([{ ...video, provider: "mux", playbackId: undefined }], USER),
     ).toEqual({ ok: false, error: "invalid" });
+  });
+});
+
+describe("story library pick", () => {
+  it("keeps the file when clearing the input empties the live list", () => {
+    const file = new File([new Uint8Array([1, 2, 3])], "still.jpg", { type: "" });
+    const live = {
+      files: { length: 1, 0: file } as { length: number; 0?: File },
+      value: "",
+    };
+    Object.defineProperty(live, "value", {
+      set(next: string) {
+        if (next !== "") return;
+        live.files.length = 0;
+        delete live.files[0];
+      },
+    });
+    const picked = readStoryInputPick(live);
+    expect(picked).toBe(file);
+    expect(live.files.length).toBe(0);
+    expect(storyPickFile(file)).toMatchObject({ contentType: "image/jpeg", kind: "image" });
+    expect(storyPickFile(new File([new Uint8Array([1])], "still.jpg", { type: "image/jpg" }))?.file.type).toBe(
+      "image/jpeg",
+    );
+    expect(storyPickFile(new File([new Uint8Array([1])], "notes.txt", { type: "" }))).toBeNull();
+    expect(storyImageAccept()).toContain(".jpg");
+    expect(storyImageAccept()).not.toContain("capture");
   });
 });

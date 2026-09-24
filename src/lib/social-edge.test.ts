@@ -11,6 +11,7 @@ import {
   socialMediaHref,
   socialMediaProxies,
   socialMediaProxiesByPostId,
+  socialStoryRailCover,
 } from "@/lib/social-edge";
 
 const AUTHOR = "11111111-1111-4111-8111-111111111111";
@@ -42,6 +43,21 @@ describe("Social Edge media proxies", () => {
       { id: "p1", author_id: AUTHOR, media: [{ kind: "image", key, contentType: "image/jpeg" }] },
     ]);
     expect(byPost.get("p1")).toEqual(items);
+  });
+
+  it("uses the story media proxy as the rail cover", () => {
+    const imageKey = `stories/${AUTHOR}/${OBJECT}.jpg`;
+    const videoKey = `stories/${AUTHOR}/${OBJECT}.mp4`;
+    expect(
+      socialStoryRailCover([{ kind: "image", key: imageKey, contentType: "image/jpeg" }], AUTHOR),
+    ).toEqual({ kind: "image", url: socialMediaHref(imageKey) });
+    expect(
+      socialStoryRailCover([{ kind: "video", key: videoKey, contentType: "video/mp4" }], AUTHOR),
+    ).toEqual({ kind: "video", url: socialMediaHref(videoKey) });
+    expect(socialStoryRailCover([], AUTHOR)).toBeNull();
+    expect(
+      socialStoryRailCover([{ kind: "image", key: "avatars/x", contentType: "image/jpeg" }], AUTHOR),
+    ).toBeNull();
   });
 
   it("exposes Mux playback ids on Edge profile without the S3 proxy", () => {

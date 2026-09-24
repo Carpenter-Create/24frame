@@ -37,7 +37,7 @@ import {
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_STORY_CARD_CLASS,
-  SOCIAL_STORY_VIEWER_CLASS,
+  SOCIAL_STORY_STAGE_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 
@@ -283,14 +283,10 @@ export function SocialStoriesSkeleton() {
 
 export function SocialStoryViewerSkeleton() {
   return (
-    <div data-social-story-viewer-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <SocialStoriesRailSkeleton />
-        <div className={SOCIAL_STORY_VIEWER_CLASS}>
-          <Skeleton className="h-[520px] w-full rounded-[16px]" />
-        </div>
+    <div data-social-story-viewer-skeleton="" className={SOCIAL_STORY_STAGE_CLASS}>
+      <div className="flex h-full items-center justify-center">
+        <Skeleton className="h-full w-full md:h-[min(90vh-16px,840px)] md:w-[calc(min(90vh-16px,840px)*9/16)] md:rounded-[16px]" />
       </div>
-      <SocialForYouSkeleton />
     </div>
   );
 }

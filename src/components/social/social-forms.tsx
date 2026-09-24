@@ -20,6 +20,7 @@ import {
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_STORY_REPLY_PILL_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
@@ -791,7 +792,13 @@ export function SocialGroupCreateForm() {
   );
 }
 
-export function SocialStoryReply({ peerId }: { peerId: string }) {
+export function SocialStoryReply({
+  peerId,
+  placeholder = SOCIAL.stories.reply,
+}: {
+  peerId: string;
+  placeholder?: string;
+}) {
   const [error, setError] = useState("");
   return (
     <form
@@ -804,11 +811,8 @@ export function SocialStoryReply({ peerId }: { peerId: string }) {
       }}
     >
       <input type="hidden" name="peer_id" value={peerId} />
-      <button
-        type="submit"
-        className="w-full rounded-full border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink-3"
-      >
-        {SOCIAL.stories.reply}
+      <button type="submit" className={SOCIAL_STORY_REPLY_PILL_CLASS}>
+        {placeholder}
       </button>
       <FormError error={error} />
     </form>

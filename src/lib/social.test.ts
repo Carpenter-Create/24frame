@@ -25,6 +25,7 @@ import {
   quietDmAddError,
   SOCIAL,
   isSocialStoryCreatePath,
+  isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
@@ -160,6 +161,12 @@ describe("social copy lock", () => {
     expect(isSocialStoryCreatePath(`${SOCIAL_ROUTES.storiesNew}/`)).toBe(true);
     expect(isSocialStoryCreatePath(SOCIAL_ROUTES.home)).toBe(false);
     expect(isSocialStoryCreatePath(SOCIAL_ROUTES.stories)).toBe(false);
+    expect(isSocialStoryOpenPath("/social/stories/story-1")).toBe(true);
+    expect(isSocialStoryOpenPath("/social/stories/story-1/")).toBe(true);
+    expect(isSocialStoryOpenPath(SOCIAL_ROUTES.stories)).toBe(false);
+    expect(isSocialStoryOpenPath(SOCIAL_ROUTES.storiesNew)).toBe(false);
+    expect(isSocialStoryOpenPath(SOCIAL_ROUTES.home)).toBe(false);
+    expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
     expect(SOCIAL.stories.reply).toBe("Reply quietly…");
@@ -170,8 +177,18 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.mediaMissing).toBe("Choose a video first.");
     expect(SOCIAL.stories.photoCard).toBe("Create a photo story");
     expect(SOCIAL.stories.videoCard).toBe("Create a video story");
-    expect(SOCIAL.stories.photoLibrary).toBe("Choose from library");
+    expect(SOCIAL.stories.photoLibrary).toBe("Upload a photo");
     expect(SOCIAL.stories.photoCapture).toBe("Take a photo");
+    expect(SOCIAL.stories.photoUnavailable).toBe(
+      "The camera is not available in this browser. Upload a photo instead.",
+    );
+    expect(SOCIAL.stories.photoPermission).toBe("Camera access is needed to take a photo.");
+    expect(SOCIAL.stories.photoUnavailable).not.toMatch(/record|video/i);
+    expect(SOCIAL.stories.photoPermission).not.toMatch(/record|video/i);
+    expect(SOCIAL.stories.unavailable).toBe(
+      "Recording is not available in this browser. Upload a video instead.",
+    );
+    expect(SOCIAL.stories.permission).toBe("Camera access is needed to record.");
     expect(SOCIAL.stories.record).toBe("Record a video");
     expect(SOCIAL.stories.recordHint).toBe("Open in-app studio");
     expect(SOCIAL.stories.upload).toBe("Upload a video");
@@ -180,11 +197,16 @@ describe("social copy lock", () => {
     expect(JSON.stringify(SOCIAL.stories)).not.toContain("No text story");
     expect(SOCIAL.stories.studioTitle).toBe("Story studio");
     expect(SOCIAL.stories.holdOrTap).toBe("Hold or tap to record");
+    expect(SOCIAL.stories.flash).toBe("Flash");
+    expect(SOCIAL.stories.cameraMode).toBe("STORY");
     expect(SOCIAL.stories.post).toBe("Post");
     expect(SOCIAL.stories.posted).toBe("Story posted");
     expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/photo or video/i);
     expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/15 second/i);
     expect(socialMediaRuleMessage("type", "stories")).toBe(SOCIAL.stories.mediaType);
+    expect(socialMediaRuleMessage("type", "stories", "image")).toBe(SOCIAL.stories.photoMediaType);
+    expect(socialMediaRuleMessage("missing", "stories", "image")).toBe(SOCIAL.stories.photoMissing);
+    expect(socialMediaRuleMessage("missing", "stories", "video")).toBe(SOCIAL.stories.mediaMissing);
     expect(socialMediaRuleMessage("type")).toBe(SOCIAL.home.mediaType);
     const storyCompose = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
     expect(storyCompose).toContain("SOCIAL_VIDEO_CONTENT_TYPES.join(\",\")");
@@ -202,7 +224,12 @@ describe("social copy lock", () => {
     expect(storyCompose).not.toContain("HouseDialog");
     expect(storyCompose).toContain("storyStudioMirrorsPreview");
     expect(storyCompose).toContain("storyRecorderVideoConstraints");
-    expect(storyCompose).not.toContain("capture=\"user\"");
+    expect(storyCompose).toContain("HouseLink");
+    expect(storyCompose).toContain("captureStoryStillFrame");
+    expect(storyCompose).toContain("readStoryInputPick");
+    expect(storyCompose).toContain("openPhotoCamera");
+    expect(storyCompose).not.toMatch(/\scapture\s*=/);
+    expect(storyCompose).not.toContain('from "next/link"');
     expect(storyCompose).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");

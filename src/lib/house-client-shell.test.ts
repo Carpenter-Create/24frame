@@ -16,6 +16,7 @@ import {
   houseFocusBelongsToInactiveScreen,
   houseHomePeriodHop,
   houseHrefKey,
+  houseMayClientOwnHop,
   houseNavHop,
   housePaintedKeys,
   houseReadScroll,
@@ -100,6 +101,22 @@ describe("house client shell SoT", () => {
     expect(houseShouldKeepAlive("/social/stories/new")).toBe(false);
     expect(houseShouldKeepAlive("/social")).toBe(true);
     expect(houseShouldClientNavigate("/social/create/live", ["/social/create/live"])).toBe(false);
+  });
+
+  it("does not pushState-exit a cold create screen", () => {
+    expect(houseMayClientOwnHop("/social/stories/new", "/social/stories/new")).toBe(false);
+    expect(houseMayClientOwnHop("/social", "/social/stories/new")).toBe(false);
+    expect(houseMayClientOwnHop("/social/stories/new", "/social")).toBe(false);
+    expect(houseMayClientOwnHop("/social/create/live", "/social/create/live")).toBe(false);
+    expect(houseMayClientOwnHop("/social/create/live", "/social")).toBe(false);
+    expect(houseMayClientOwnHop("/social", "/social")).toBe(true);
+    expect(houseMayClientOwnHop("/social", "/social/explore")).toBe(true);
+    const provider = readFileSync("src/components/chrome/house-client-shell.tsx", "utf8");
+    expect(provider).toContain("if (!houseMayClientOwnHop(parsed.pathname, nextPath)) return false");
+    const close = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
+    expect(close).toContain("HouseLink");
+    expect(close).toContain('href={SOCIAL_ROUTES.home}');
+    expect(close).toContain('data-social-story-close=""');
   });
 
   it("remembers scroll per screen key", () => {

@@ -43,6 +43,17 @@ export type SocialEdgeMediaItem = {
   playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
+/** Rail / neighbor cover. Same proxy as playback. Video stays a still (no second CDN). */
+export function socialStoryRailCover(
+  media: unknown,
+  authorId: string,
+): { kind: "image" | "video"; url: string } | null {
+  const first = socialMediaProxies(media, authorId, "stories")[0];
+  if (!first?.url) return null;
+  if (first.playbackId) return { kind: "image", url: first.url };
+  return { kind: first.kind, url: first.url };
+}
+
 export function socialMediaProxies(
   media: unknown,
   authorId: string,

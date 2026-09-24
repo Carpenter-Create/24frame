@@ -234,6 +234,31 @@ Residual, not a pretend-mp4 path:
 - Empty `blob.type` on some Safari versions — persist the probed house type.
 - A Chrome-recorded webm story may not play in Safari’s viewer. This slice does not remux and does not use AWS IVS / Chime / Elemental.
 
+Story Post and photo Post share one browser PUT: `uploadStoryMedia` → `presignSocialMediaUpload` → `PUT` to `24frame-media-source-prod` (us-west-2). The PUT options match post stills: `Content-Type` only, no abort signal. `presignSocialMediaPut` sets `requestChecksumCalculation: "WHEN_REQUIRED"`, so the signed URL has no `x-amz-checksum-*` query params. A failed PUT logs `story-put` with the HTTP status, status text, and body, or the thrown error when the browser never gets a response. A presign failure shows “Those attachments could not be stored.” A PUT or network failure still shows “The file could not be stored.” `createSocialStory` errors pass through unchanged.
+
+Live preflight on 2026-09-24: that bucket allows `PUT` from `http://localhost:3000` only. The eb56af preview origin gets **403** and no `Access-Control-Allow-Origin`, which makes `fetch` throw before a status exists. Do not use a production origin as the isolation check. Applying bucket CORS is CoS/Adam, not a Dev prod apply. S3 has no `*.vercel.app` origin form; preview hosts need `*` on their own rule. `put-bucket-cors` replaces the whole config, so the localhost rule stays in the same call. Do not run this from CI.
+
+```bash
+aws s3api put-bucket-cors --bucket 24frame-media-source-prod --region us-west-2 --cors-configuration '{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["http://localhost:3000"],
+      "AllowedMethods": ["GET", "PUT", "HEAD"],
+      "AllowedHeaders": ["content-type"],
+      "ExposeHeaders": ["ETag", "x-amz-request-id"],
+      "MaxAgeSeconds": 3000
+    },
+    {
+      "AllowedOrigins": ["*"],
+      "AllowedMethods": ["GET", "PUT", "HEAD"],
+      "AllowedHeaders": ["content-type"],
+      "ExposeHeaders": ["ETag", "x-amz-request-id"],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}'
+```
+
 ---
 
 ## Trigger: Social Mux Video

@@ -56,6 +56,17 @@ export function houseShouldKeepAlive(pathname: string): boolean {
   return pathname !== SOCIAL_ROUTES.createLive && pathname !== SOCIAL_ROUTES.storiesNew;
 }
 
+/**
+ * pushState soft-exit is safe only when the screen being left and the
+ * Next address are both keep-alive. Cold create (`stories/new`, go live)
+ * must return false from `navigateOwned` so Link performs a real Next
+ * navigation. Otherwise a cached `/social` hop rewrites the address bar
+ * and leaves the create stage painted.
+ */
+export function houseMayClientOwnHop(currentPathname: string, nextPathname: string): boolean {
+  return houseShouldKeepAlive(currentPathname) && houseShouldKeepAlive(nextPathname);
+}
+
 export function houseScreenQueryNames(pathname: string): readonly string[] {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname || "/";
   if (path === SOCIAL_ROUTES.home) {

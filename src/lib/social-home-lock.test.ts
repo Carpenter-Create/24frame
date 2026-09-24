@@ -403,8 +403,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(stories).not.toContain("SocialStoriesEmpty");
     expect(stories).not.toContain("education");
     const storyViewer = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
-    expect(storyViewer).toContain('surface="stories"');
-    expect(storyViewer).toContain("SocialForYouRail");
+    expect(storyViewer).toContain("SocialStoryViewer");
+    expect(storyViewer).toContain("prevAuthor");
+    expect(storyViewer).not.toContain('surface="stories"');
+    expect(storyViewer).not.toContain("SocialForYouRail");
     expect(SOCIAL.stories.emptyHint).toBe(
       "When people you follow share stories, they show up here. Start with your own.",
     );

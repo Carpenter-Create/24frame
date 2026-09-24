@@ -21,6 +21,12 @@ Design locks land in this directory before CoS undrafts a UI pull request.
 - [`theme-chrome-avatar-only-lock-v1.md`](theme-chrome-avatar-only-lock-v1.md) — avatar Theme drill; header sun/moon removed
 - [`preferences-drill-nested-slugs-lock-v1.md`](preferences-drill-nested-slugs-lock-v1.md) — Preferences drill URLs nest under `/settings/preferences/<drill>`
 - [`social-home-activity-feed-lock-v1.md`](social-home-activity-feed-lock-v1.md) — Social Home is the live activity feed at `/social`
-- [`create-story-photo-video-fb-layout-lock-v1.1.md`](create-story-photo-video-fb-layout-lock-v1.1.md) — Create story photo + video stage at `/social/stories/new`
+- [`create-story-photo-video-fb-layout-lock-v1.5.md`](create-story-photo-video-fb-layout-lock-v1.5.md) — Create story stage at `/social/stories/new`. Photo and video each have Upload (file) and Take (live camera). Camera face is a rectangular full-bleed viewfinder plus Stories chrome (close, flash, shutter, gallery, flip, STORY). Supersedes v1.4.
+- [`stories-viewer-desktop-ig-carousel-lock-v1.md`](stories-viewer-desktop-ig-carousel-lock-v1.md) — Desktop story open is a full-viewport dark stage with a centered 9:16 card, dimmed neighbor cards, and chevrons. Phone is a full-bleed single card. Supersedes the light `max-w-[420px]` story page card.
+- [`stories-viewer-ig-parity-lock-v1.md`](stories-viewer-ig-parity-lock-v1.md) — Viewer behavior on that stage: persistent host, photo 5s, video media-length, white 2px segments, auto-advance, hold, 220ms in-viewer morph. Does not reopen carousel geometry, the home rail, or create-story v1.5.
+- [`stories-home-rail-fb-card-lock-v1.md`](stories-home-rail-fb-card-lock-v1.md) — Social Home tall story cards: story-media cover, top-left avatar ring, bottom name gradient, Create story split plate.
+- [`24frame-visual-register-rich-calm-lock-v1.md`](24frame-visual-register-rich-calm-lock-v1.md) — Rich calm v1.4 only. Supersedes v1.3. Video and photo are peer-grade, full-bleed media. Paint on the viewer and home rail. Geometry closed. Create-story shutter stays v1.5.
+- [`create-story-photo-video-fb-layout-lock-v1.4.md`](create-story-photo-video-fb-layout-lock-v1.4.md) — superseded by v1.5 for camera-face chrome. Rectangular full-bleed viewfinder retained.
+- [`create-story-photo-video-fb-layout-lock-v1.3.md`](create-story-photo-video-fb-layout-lock-v1.3.md) — media-path grammar retained. Superseded by v1.4 for the live viewfinder.
 - [`shell-desktop-horizontal-gutter-lock-v2.md`](shell-desktop-horizontal-gutter-lock-v2.md) — desktop shell L = R = 32. Supersedes v1.
 - [`shell-desktop-horizontal-gutter-lock-v1.md`](shell-desktop-horizontal-gutter-lock-v1.md) — superseded by v2. #661 shipped 32 / 44.
