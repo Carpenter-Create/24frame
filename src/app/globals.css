@@ -319,14 +319,6 @@ body {
   animation-fill-mode: forwards;
 }
 
-.social-story-shutter {
-  transition: transform 120ms ease-out;
-}
-
-.social-story-shutter:active {
-  transform: scale(0.96);
-}
-
 .social-mux-player {
   --media-accent-color: var(--accent);
   --media-background-color: var(--surface-muted);

@@ -18,7 +18,7 @@ const rail = readFileSync("src/components/social/social-stories-rail.tsx", "utf8
 const cover = readFileSync("src/components/social/social-story-rail-cover.tsx", "utf8");
 
 describe("rich calm visual register v1.1", () => {
-  it("keeps the four listed motions and no shadow or bounce", () => {
+  it("paints viewer and rail motion and leaves the create shutter at v1.5", () => {
     expect(SOCIAL_STORY_STAGE_IN_CLASS).toBe("social-story-stage-in");
     expect(SOCIAL_STORY_ACTIVATE_NEXT_CLASS).toBe("social-story-activate");
     expect(SOCIAL_STORY_ACTIVATE_PREV_CLASS).toBe("social-story-activate-prev");
@@ -28,11 +28,12 @@ describe("rich calm visual register v1.1", () => {
     expect(motion).toContain("animation: social-story-activate 220ms ease-out both");
     expect(motion).toContain("animation: social-story-activate-prev 220ms ease-out both");
     expect(motion).toContain("animation-timing-function: linear");
-    expect(motion).toContain("transition: transform 120ms ease-out");
-    expect(motion).toContain("transform: scale(0.96)");
     expect(motion).not.toMatch(/bounce|spring|parallax/i);
     expect(motion).not.toMatch(/box-shadow|drop-shadow/);
-    expect(SOCIAL_STORY_SHUTTER_CLASS).toContain("social-story-shutter");
+    expect(motion).not.toContain("social-story-shutter");
+    expect(SOCIAL_STORY_SHUTTER_CLASS).toBe(
+      "flex size-[72px] items-center justify-center justify-self-center rounded-full border-4 border-band-ink",
+    );
     expect(SOCIAL_STORY_SHUTTER_CLASS).toContain("size-[72px]");
     expect(SOCIAL_STORY_SHUTTER_CLASS).not.toMatch(/shadow/);
     expect(SOCIAL_STORY_STAGE_CLASS).not.toMatch(/shadow/);

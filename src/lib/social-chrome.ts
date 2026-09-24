@@ -795,7 +795,7 @@ export const SOCIAL_STORY_CAPTURE_ROW_CLASS =
   "grid grid-cols-3 items-center px-4";
 
 export const SOCIAL_STORY_SHUTTER_CLASS =
-  "social-story-shutter flex size-[72px] items-center justify-center justify-self-center rounded-full border-4 border-band-ink";
+  "flex size-[72px] items-center justify-center justify-self-center rounded-full border-4 border-band-ink";
 
 export function socialStoryShutterFillClass(recording: boolean): string {
   return recording ? "size-14 rounded-full bg-accent" : "size-14 rounded-full bg-band-ink";
