@@ -155,18 +155,31 @@ export function socialMediaObjectKey(
   return `${lane}/${user.data}/${object.data}.${EXT_BY_TYPE[contentType]}`;
 }
 
+const SOCIAL_MEDIA_OBJECT_KEY =
+  /^(posts|stories)\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i;
+
+/** Lane and author embedded in a posts/ or stories/ object key. Null when the key is closed or not that shape. */
+export function parseSocialMediaObjectKey(
+  key: string,
+): { lane: SocialMediaLane; userId: string } | null {
+  if (isForbiddenMediaKey(key)) return null;
+  const match = key.match(SOCIAL_MEDIA_OBJECT_KEY);
+  const lane = match?.[1];
+  const userId = match?.[2];
+  if (lane !== "posts" && lane !== "stories") return null;
+  if (!userId) return null;
+  return { lane, userId };
+}
+
 export function isOwnedSocialMediaKey(
   key: string,
   userId: string,
   lane: SocialMediaLane = "posts",
 ): boolean {
-  if (isForbiddenMediaKey(key)) return false;
   const user = uuidSchema.safeParse(userId);
   if (!user.success) return false;
-  const match = key.match(
-    /^(posts|stories)\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i,
-  );
-  return !!match && match[1] === lane && match[2] === user.data;
+  const parsed = parseSocialMediaObjectKey(key);
+  return !!parsed && parsed.lane === lane && parsed.userId === user.data;
 }
 
 export function parsePostMedia(value: unknown): SocialMediaItem[] {
