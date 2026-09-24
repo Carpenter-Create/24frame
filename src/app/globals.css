@@ -349,3 +349,13 @@ body {
   aspect-ratio: unset;
   object-fit: cover;
 }
+
+/* Stories posted confirm. The studio host lives in the page scroller;
+   the Social lead and phone dock are siblings. Hide them while the
+   confirm is up — the same chrome-tax kill as the immersive studio
+   overlay. Restore is automatic when the host unmounts on /social.
+   docs/design-locks/stories-upload-success-immersive-lock-v1.md */
+html:has([data-social-story-studio="posted"]) [data-house-lead-stack],
+html:has([data-social-story-studio="posted"]) [data-house-phone-bottom-nav] {
+  display: none;
+}

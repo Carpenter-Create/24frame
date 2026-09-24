@@ -40,7 +40,9 @@ import {
   SOCIAL_STORY_GALLERY_CLASS,
   SOCIAL_STORY_MODE_LABEL_CLASS,
   SOCIAL_STORY_MODE_RAIL_CLASS,
-  SOCIAL_STORY_POSTED_CLASS,
+  SOCIAL_STORY_POSTED_CTA_CLASS,
+  SOCIAL_STORY_POSTED_SCRIM_CLASS,
+  SOCIAL_STORY_POSTED_TITLE_CLASS,
   SOCIAL_STORY_SHUTTER_CLASS,
   SOCIAL_STORY_STUDIO_CHROME_CLASS,
   SOCIAL_STORY_STUDIO_CLASS,
@@ -53,7 +55,6 @@ import {
 import {
   SOCIAL_ICON_SIZE_STORY_PICKER,
   SOCIAL_ICON_SIZE_STORY_PLAY,
-  SOCIAL_ICON_SIZE_STORY_POSTED,
   SOCIAL_ICON_SIZE_STORY_STUDIO,
 } from "@/lib/social-icons";
 import {
@@ -106,6 +107,62 @@ type ReviewClip = {
   contentType: SocialMediaContentType;
   kind: SocialMediaKind;
 };
+
+// One posted face for Upload and Record. Media stays on the studio host.
+// docs/design-locks/stories-upload-success-immersive-lock-v1.md
+export function SocialStoryPostedConfirm({
+  url,
+  kind,
+}: {
+  url: string;
+  kind: SocialMediaKind;
+}) {
+  return (
+    <div
+      data-social-story-posted=""
+      data-social-story-studio="posted"
+      className={SOCIAL_STORY_STUDIO_CLASS}
+    >
+      <div className={SOCIAL_STORY_STUDIO_STAGE_CLASS}>
+        {kind === "video" ? (
+          <video
+            data-social-story-posted-media=""
+            src={url}
+            playsInline
+            muted
+            loop
+            autoPlay
+            className={SOCIAL_STORY_STUDIO_REVIEW_CLASS}
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- local blob before leaving the confirm
+          <img
+            data-social-story-posted-media=""
+            src={url}
+            alt=""
+            className={SOCIAL_STORY_STUDIO_REVIEW_CLASS}
+          />
+        )}
+        <div className={SOCIAL_STORY_STUDIO_CHROME_CLASS}>
+          <HouseLink
+            href={SOCIAL_ROUTES.home}
+            aria-label={SOCIAL.stories.close}
+            className={SOCIAL_STORY_STUDIO_ICON_CLASS}
+          >
+            <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
+          </HouseLink>
+          <p className={SOCIAL_STORY_POSTED_TITLE_CLASS}>{SOCIAL.stories.posted}</p>
+          <span className="size-10" />
+        </div>
+        <div className={SOCIAL_STORY_POSTED_SCRIM_CLASS}>
+          <HouseLink href={SOCIAL_ROUTES.home} data-social-story-view="" className={SOCIAL_STORY_POSTED_CTA_CLASS}>
+            {SOCIAL.stories.viewStories}
+          </HouseLink>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
@@ -752,7 +809,6 @@ export function SocialStoryCompose({
         return;
       }
       releasePreview();
-      releaseClip();
       setPhase("posted");
     } catch {
       if (!storyStudioIsLive(postRef.current, postId)) return;
@@ -772,10 +828,12 @@ export function SocialStoryCompose({
     phase === "preview" ||
     phase === "recording" ||
     (phase === "review" && clip?.kind === "video");
+  const postedStudio = phase === "posted" && clip != null;
+  const immersive = videoStudio || postedStudio;
 
   return (
-    <div data-social-story-compose="" className={videoStudio ? undefined : SOCIAL_STORY_CREATE_HOST_CLASS}>
-      {videoStudio ? null : (
+    <div data-social-story-compose="" className={immersive ? undefined : SOCIAL_STORY_CREATE_HOST_CLASS}>
+      {immersive ? null : (
         <>
           <aside data-social-story-rail="" className={SOCIAL_STORY_CREATE_RAIL_CLASS}>
             <HouseLink
@@ -976,22 +1034,6 @@ export function SocialStoryCompose({
                 </div>
               </div>
             ) : null}
-
-            {phase === "posted" ? (
-              <div className="flex flex-1 items-center justify-center p-[var(--space-4)]">
-                <div data-social-story-posted="" className={SOCIAL_STORY_POSTED_CLASS}>
-                  <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
-                  <p className="t-title text-ink">{SOCIAL.stories.posted}</p>
-                  <p className="t-body-sm text-ink-2 whitespace-normal break-words">{SOCIAL.stories.postedHint}</p>
-                  <HouseLink
-                    href={SOCIAL_ROUTES.home}
-                    className="inline-flex items-center justify-center rounded-full bg-accent px-[var(--space-6)] py-[var(--space-4)] t-body-sm font-semibold text-accent-contrast"
-                  >
-                    {SOCIAL.stories.viewStories}
-                  </HouseLink>
-                </div>
-              </div>
-            ) : null}
           </div>
         </>
       )}
@@ -1188,6 +1230,8 @@ export function SocialStoryCompose({
           </div>
         </div>
       ) : null}
+
+      {postedStudio && clip ? <SocialStoryPostedConfirm url={clip.url} kind={clip.kind} /> : null}
 
       {(phase === "video" || videoStudio) && !still ? (
         <input

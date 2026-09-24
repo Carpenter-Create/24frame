@@ -844,8 +844,15 @@ export const SOCIAL_STORY_STOP_CLASS =
 export const SOCIAL_STORY_REC_PILL_CLASS =
   "absolute left-1/2 top-[72px] z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-accent px-2.5 py-1.5 t-label font-semibold text-accent-contrast";
 
-export const SOCIAL_STORY_POSTED_CLASS =
-  "flex w-full max-w-[326px] flex-col items-center gap-4 rounded-[16px] border border-hairline bg-surface px-6 py-8 text-center";
+// Posted confirm stays on the studio host. The thin white receipt is out.
+// docs/design-locks/stories-upload-success-immersive-lock-v1.md
+export const SOCIAL_STORY_POSTED_TITLE_CLASS = "t-body-sm font-medium text-band-ink";
+
+export const SOCIAL_STORY_POSTED_SCRIM_CLASS =
+  "absolute inset-x-0 bottom-0 z-10 flex flex-col items-center bg-gradient-to-t from-band/80 to-transparent px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))] pt-[var(--space-12)]";
+
+export const SOCIAL_STORY_POSTED_CTA_CLASS =
+  "inline-flex h-[var(--space-12)] items-center justify-center rounded-full bg-accent px-[var(--space-4)] t-body-sm font-medium text-accent-contrast";
 
 export const SOCIAL_MUX_PLAYER_CLASS =
   "social-mux-player block size-full overflow-hidden bg-surface-muted object-cover";

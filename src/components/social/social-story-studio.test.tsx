@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { SocialStoryCompose } from "./social-story-studio";
+import { SocialStoryCompose, SocialStoryPostedConfirm } from "./social-story-studio";
 import { housePhoneForbidsTruncate } from "@/lib/house-phone-stack";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
@@ -10,10 +10,13 @@ import {
   SOCIAL_FIGMA_STORY_STUDIO,
   SOCIAL_STORY_CREATE_RAIL_CLASS,
   SOCIAL_STORY_PHOTO_CARD_CLASS,
-  SOCIAL_STORY_VIDEO_CARD_CLASS,
+  SOCIAL_STORY_POSTED_CTA_CLASS,
+  SOCIAL_STORY_POSTED_SCRIM_CLASS,
+  SOCIAL_STORY_STUDIO_CLASS,
   SOCIAL_STORY_STUDIO_PREVIEW_CLASS,
   SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS,
   SOCIAL_STORY_STUDIO_REVIEW_CLASS,
+  SOCIAL_STORY_VIDEO_CARD_CLASS,
   socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
 
@@ -136,5 +139,73 @@ describe("SocialStoryCompose create stage", () => {
       "147:251",
     ]);
     expect(SOCIAL_FIGMA_STORY_PICKER).toEqual(["144:1218", "144:1444"]);
+  });
+
+  it("keeps the just-posted clip and hides the create rail on one studio host", () => {
+    const src = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
+    const post = src.slice(src.indexOf("async function postClip"));
+    expect(post).toContain('setPhase("posted")');
+    expect(post).toContain("releasePreview()");
+    expect(post).not.toContain("releaseClip(");
+    expect(src).not.toContain("SOCIAL_STORY_POSTED_CLASS");
+    expect(src).not.toContain("check-circle");
+    expect(src).toContain("const postedStudio = phase === \"posted\" && clip != null");
+    expect(src).toContain("const immersive = videoStudio || postedStudio");
+    expect(src).toContain("{immersive ? null : (");
+    expect(src).toContain("<SocialStoryPostedConfirm");
+    const css = readFileSync("src/app/globals.css", "utf8");
+    expect(css).toContain('html:has([data-social-story-studio="posted"]) [data-house-lead-stack]');
+    expect(css).toContain('html:has([data-social-story-studio="posted"]) [data-house-phone-bottom-nav]');
+    expect(css).toContain("display: none");
+  });
+});
+
+describe("SocialStoryPostedConfirm", () => {
+  it("paints a library video on the immersive studio without the thin check card", () => {
+    const html = renderToStaticMarkup(
+      <SocialStoryPostedConfirm url="blob:library-video" kind="video" />,
+    );
+    expect(html).toContain('data-social-story-studio="posted"');
+    expect(html).toContain('data-social-story-posted-media=""');
+    expect(html).toContain('src="blob:library-video"');
+    expect(html).toContain("<video");
+    expect(html).toContain("muted");
+    expect(html).toContain("loop");
+    expect(html).toContain(SOCIAL_STORY_STUDIO_CLASS);
+    expect(html).toContain(SOCIAL_STORY_STUDIO_REVIEW_CLASS);
+    expect(html).toContain("object-cover");
+    expect(html).toContain(SOCIAL_STORY_POSTED_SCRIM_CLASS);
+    expect(html).toContain(SOCIAL_STORY_POSTED_CTA_CLASS);
+    expect(html).toContain("h-[var(--space-12)]");
+    expect(html).toContain("bg-accent");
+    expect(html).not.toContain("shadow");
+    expect(html).toContain("size-10");
+    expect(html).not.toContain("max-w-[326px]");
+    expect(html).not.toContain("check-circle");
+    expect(html).not.toContain("data-social-story-rail");
+    expect(html).not.toContain(SOCIAL.stories.yourStory);
+    expect(html).not.toContain(SOCIAL.stories.postedHint);
+    expect(html).toContain(SOCIAL.stories.posted);
+    expect(html).toContain(SOCIAL.stories.viewStories);
+    expect((html.match(/Story posted/g) ?? []).length).toBe(1);
+    expect((html.match(/href="\/social"/g) ?? []).length).toBe(2);
+    expect(html).toContain(`href="${SOCIAL_ROUTES.home}"`);
+    expect(housePhoneForbidsTruncate(html)).toBe(true);
+  });
+
+  it("paints a still on the same confirm host", () => {
+    const html = renderToStaticMarkup(
+      <SocialStoryPostedConfirm url="blob:still" kind="image" />,
+    );
+    expect(html).toContain("<img");
+    expect(html).not.toContain("<video");
+    expect(html).toContain('src="blob:still"');
+    expect(html).toContain('data-social-story-studio="posted"');
+    expect(html).toContain('data-social-story-posted-media=""');
+    expect(html).toContain(SOCIAL_STORY_STUDIO_REVIEW_CLASS);
+    expect(html).toContain(SOCIAL.stories.viewStories);
+    expect(html).not.toContain("max-w-[326px]");
+    expect(html).not.toContain("data-social-story-rail");
+    expect(html).not.toContain(SOCIAL.stories.postedHint);
   });
 });
