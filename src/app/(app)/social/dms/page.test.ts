@@ -53,7 +53,7 @@ function ctx() {
 function inboxFrom(profiles: unknown) {
   return vi.fn((table: string) => {
     if (table === "profiles") return chain(profiles);
-    if (table === "follows" || table === "courses") return chain([]);
+    if (table === "follows" || table === "courses" || table === "messages") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });
 }
@@ -303,6 +303,90 @@ describe("social DMs", () => {
     expect(html).toContain("ancient hello");
     expect(html).not.toContain("data-social-dm-form");
     expect(html).not.toContain("data-social-dm-thread-truncated");
+  });
+
+  it("does not put a story URL in the inbox excerpt or the thread", async () => {
+    const inboxFromStory = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u2", handle: "bob", display_name: "Bob One", status: "active" }]);
+      }
+      if (table === "messages") {
+        return chain([
+          {
+            conversation_id: "c1",
+            body: "/social/stories/s1",
+            sender_id: "u2",
+            media: [],
+            created_at: "2026-09-24T12:00:00.000Z",
+          },
+        ]);
+      }
+      if (table === "follows" || table === "courses") return chain([]);
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({
+      from: inboxFromStory,
+      rpc: vi.fn(async () => ({
+        data: [
+          {
+            conversation_id: "c1",
+            last_message_at: "2026-09-24T12:00:00.000Z",
+            unread_count: 0,
+            muted: false,
+            peer_id: "u2",
+            kind: "direct",
+            title: null,
+            participant_ids: ["u2"],
+          },
+        ],
+        error: null,
+      })),
+    } as never);
+    const inbox = await renderServerMarkup(await SocialDmsPage());
+    expect(inbox).toContain("data-social-dm-excerpt");
+    expect(inbox).toContain(SOCIAL.dms.sentYouStory);
+    expect(inbox).not.toContain("/social/stories");
+
+    const threadFrom = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u2", handle: "bob", display_name: "Bob One", status: "active" }]);
+      }
+      if (table === "conversations") {
+        return chain({ id: "c1", kind: "direct", title: null });
+      }
+      if (table === "messages") {
+        return chain([
+          {
+            id: "m-story",
+            body: "Sent a story",
+            sender_id: "u2",
+            created_at: "2026-09-24T12:00:00.000Z",
+            status: "active",
+            media: [
+              {
+                kind: "story-share",
+                storyId: "s1",
+                authorId: "u2",
+                expiresAt: "2000-01-01T00:00:00.000Z",
+              },
+            ],
+          },
+        ]);
+      }
+      if (table === "conversation_participants") {
+        return chain([
+          { user_id: "u1", left_at: null },
+          { user_id: "u2", left_at: null },
+        ]);
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ from: threadFrom, rpc: vi.fn() } as never);
+    const thread = renderToStaticMarkup(await SocialDmThreadPage({ params: Promise.resolve({ id: "c1" }) }));
+    expect(thread).toContain("data-social-dm-story-share");
+    expect(thread).toContain(SOCIAL.dms.storyUnavailable);
+    expect(thread).not.toContain("/social/stories");
+    expect(thread).not.toContain("Sent a story");
   });
 
   it("does not touch gated community group create fields", () => {

@@ -610,6 +610,35 @@ export async function loadGroupsByIds(
   return new Map((data ?? []).map((row) => [row.id, row]));
 }
 
+export async function loadStoryLikeCounts(
+  supabase: ServerClient,
+  storyIds: readonly string[],
+): Promise<Map<string, number>> {
+  if (storyIds.length === 0) return new Map();
+  const { data, error } = await supabase
+    .from("stories")
+    .select("id, like_count")
+    .in("id", [...storyIds]);
+  if (error || !data) return new Map();
+  return new Map(data.map((row) => [row.id, row.like_count]));
+}
+
+export async function loadLikedStoryIds(
+  supabase: ServerClient,
+  userId: string,
+  storyIds: readonly string[],
+): Promise<Set<string>> {
+  if (!userId || storyIds.length === 0) return new Set();
+  const { data, error } = await supabase
+    .from("likes")
+    .select("target_id")
+    .eq("user_id", userId)
+    .eq("target_type", "story_item")
+    .in("target_id", [...storyIds]);
+  if (error || !data) return new Set();
+  return new Set(data.map((row) => row.target_id));
+}
+
 export async function loadLikedPostIds(
   supabase: ServerClient,
   userId: string,

@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
+import { dmStoryInboxExcerpt } from "@/lib/social-dm-story";
 import { probeRange, splitProbe } from "@/lib/list-bounds";
 import {
   SOCIAL_DM_INBOX_LIMIT,
@@ -25,6 +26,7 @@ export type DmMessageRow = {
   sender_id: string | null;
   created_at: string;
   status: string;
+  media?: unknown;
 };
 
 export type DmThreadPage = {
@@ -67,7 +69,7 @@ export async function loadDmThreadMessages(
 ): Promise<DmThreadPage> {
   let query = supabase
     .from("messages")
-    .select("id, body, sender_id, created_at, status")
+    .select("id, body, sender_id, created_at, status, media")
     .eq("conversation_id", conversationId)
     .eq("status", "active");
   if (opts?.cursor) query = query.or(dmThreadKeysetOrFilter(opts.cursor));
@@ -100,4 +102,38 @@ export async function loadDmParticipants(
     .order("user_id", { ascending: true })
     .range(...probeRange(SOCIAL_DM_ROOM_LIMIT));
   return splitProbe(data as DmParticipantRow[] | null, SOCIAL_DM_ROOM_LIMIT);
+}
+
+/**
+ * Newest message per room, story shares only.
+ * The inbox RPC has no body. A URL stored on an older row must not surface.
+ */
+export async function loadDmStoryInboxLines(
+  supabase: ServerClient,
+  conversationIds: readonly string[],
+  viewerId: string,
+): Promise<Map<string, string>> {
+  const lines = new Map<string, string>();
+  if (conversationIds.length === 0) return lines;
+  const cap = Math.min(400, Math.max(conversationIds.length, conversationIds.length * 8));
+  const { data } = await supabase
+    .from("messages")
+    .select("conversation_id, body, sender_id, media, created_at")
+    .in("conversation_id", [...conversationIds])
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .range(0, cap - 1);
+  const seen = new Set<string>();
+  for (const row of data ?? []) {
+    if (!row.conversation_id || seen.has(row.conversation_id)) continue;
+    seen.add(row.conversation_id);
+    const line = dmStoryInboxExcerpt({
+      body: row.body,
+      media: row.media,
+      senderId: row.sender_id,
+      viewerId,
+    });
+    if (line) lines.set(row.conversation_id, line);
+  }
+  return lines;
 }

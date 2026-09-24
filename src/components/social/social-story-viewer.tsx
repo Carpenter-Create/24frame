@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 
 import { SocialStoryReply } from "@/components/social/social-forms";
+import { SocialStorySendSheet } from "@/components/social/social-story-send-sheet";
+import { SocialStorySentToast } from "@/components/social/social-story-sent-toast";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialMediaImage } from "@/components/social/social-media-image";
 import { SocialIcon } from "@/components/social/social-icon";
@@ -24,9 +26,14 @@ import { HOUSE_CLIENT_SHELL } from "@/lib/house-client-shell";
 import { cn } from "@/lib/cn";
 import { PRODUCT_NAME } from "@/lib/product";
 import {
+  SOCIAL_STORY_ACTION_HIT_CLASS,
+  SOCIAL_STORY_ACTION_IDLE_CLASS,
+  SOCIAL_STORY_ACTIONS_CLUSTER_CLASS,
+  SOCIAL_STORY_ACTIONS_ROW_CLASS,
   SOCIAL_STORY_ACTIVATE_NEXT_CLASS,
   SOCIAL_STORY_ACTIVATE_PREV_CLASS,
   SOCIAL_STORY_ACTIVE_CARD_CLASS,
+  SOCIAL_STORY_HEART_LIKED_CLASS,
   SOCIAL_STORY_HOLD_SURFACE_CLASS,
   SOCIAL_STORY_CARET_CLASS,
   SOCIAL_STORY_NEIGHBOR_CARD_CLASS,
@@ -39,6 +46,14 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_POST_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
+import { toggleSocialStoryLike } from "@/app/(app)/social/light-actions";
+import {
+  nextStoryHeart,
+  storyAdvanceWhileSending,
+  storyHeartCountVisible,
+  STORY_SEND_TOAST_MS,
+  type SocialStoryLikeState,
+} from "@/lib/social-story-actions";
 import { SOCIAL, SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
 import {
   storyHoldRelease,
@@ -305,6 +320,7 @@ export function SocialStoryViewer({
   canReply,
   tray,
   selfId,
+  likes = {},
 }: {
   storyId: string;
   authorId: string;
@@ -322,6 +338,7 @@ export function SocialStoryViewer({
   canReply: boolean;
   tray?: readonly SocialStoryTrayAuthor[];
   selfId?: string;
+  likes?: Readonly<Record<string, SocialStoryLikeState>>;
 }) {
   const router = useRouter();
   const authors = useMemo(() => {
@@ -360,6 +377,10 @@ export function SocialStoryViewer({
   const [videoProgress, setVideoProgress] = useState(0);
   const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
   const [hop, setHop] = useState<"next" | "prev" | null>(null);
+  const [hearts, setHearts] = useState<Record<string, SocialStoryLikeState>>({ ...likes });
+  const [heartPending, setHeartPending] = useState(false);
+  const [sendItemId, setSendItemId] = useState<string | null>(null);
+  const [sentToast, setSentToast] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const holdRef = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -369,7 +390,8 @@ export function SocialStoryViewer({
   const item = author?.items[cursor.item];
   const clip = item?.media[0] ?? null;
   const video = clip?.kind === "video" ? clip : null;
-  const playbackPaused = paused || held;
+  const sendSheetOpen = sendItemId !== null;
+  const playbackPaused = paused || held || sendSheetOpen;
   const allowReply = !!author && canReply && (!selfId || author.authorId !== selfId);
   const prevNeighbor = neighborView(authors[cursor.author - 1], "last");
   const nextNeighbor = neighborView(authors[cursor.author + 1], "first");
@@ -381,7 +403,7 @@ export function SocialStoryViewer({
       const stage = stageRef.current;
       const screen = stage ? storyScreen(stage) : null;
       if (storyPlaybackHeld(screen, false)) return;
-      if (reason === "auto" && (paused || held)) return;
+      if (!storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)) return;
       const result = storyTrayStep(authors, cursor, direction);
       if (result === "close") {
         router.push(SOCIAL_ROUTES.home);
@@ -393,7 +415,7 @@ export function SocialStoryViewer({
       setHeld(false);
       setCursor(result);
     },
-    [authors, cursor, held, paused, router],
+    [authors, cursor, held, paused, router, sendSheetOpen],
   );
 
   const jumpTo = useCallback(
@@ -401,6 +423,7 @@ export function SocialStoryViewer({
       const stage = stageRef.current;
       const screen = stage ? storyScreen(stage) : null;
       if (storyPlaybackHeld(screen, false)) return;
+      if (sendSheetOpen) return;
       const row = authors[authorIndex];
       if (!row || row.items.length === 0) return;
       const direction = authorIndex >= cursor.author ? "next" : "prev";
@@ -412,7 +435,7 @@ export function SocialStoryViewer({
         item: edge === "first" ? 0 : row.items.length - 1,
       });
     },
-    [authors, cursor.author],
+    [authors, cursor.author, sendSheetOpen],
   );
 
   useLayoutEffect(() => {
@@ -434,6 +457,11 @@ export function SocialStoryViewer({
     observer.observe(screen, { attributes: true, attributeFilter: ["hidden"] });
     return () => observer.disconnect();
   }, [storyId]);
+  useEffect(() => {
+    if (!sentToast) return undefined;
+    const timer = window.setTimeout(() => setSentToast(false), STORY_SEND_TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [sentToast]);
   useEffect(() => {
     if (!item || item.id === storyId) return;
     const href = socialStoryHref(item.id);
@@ -543,7 +571,25 @@ export function SocialStoryViewer({
     go(direction, "manual");
   }
 
+  async function onHeart() {
+    if (!item || heartPending) return;
+    const storyItemId = item.id;
+    const current = hearts[storyItemId] ?? { liked: false, count: 0 };
+    const next = nextStoryHeart(current);
+    setHeartPending(true);
+    setHearts((prev) => ({ ...prev, [storyItemId]: next }));
+    const form = new FormData();
+    form.set("story_id", storyItemId);
+    form.set("liked", current.liked ? "1" : "0");
+    const result = await toggleSocialStoryLike(form);
+    if (result?.error) setHearts((prev) => ({ ...prev, [storyItemId]: current }));
+    setHeartPending(false);
+  }
+
   if (!author || !item) return null;
+
+  const heart = hearts[item.id] ?? { liked: false, count: 0 };
+  const heartLiked = heart.liked;
 
   return (
     <div
@@ -728,27 +774,69 @@ export function SocialStoryViewer({
               </Link>
             </div>
           </div>
-          <div className="absolute inset-x-2 bottom-4 z-20 flex items-center gap-4">
+          <div data-social-story-actions="" className={SOCIAL_STORY_ACTIONS_ROW_CLASS}>
             {allowReply ? (
               <SocialStoryReply
                 peerId={author.authorId}
                 placeholder={SOCIAL.stories.replyTo(author.authorName)}
               />
             ) : (
-              <div className="flex-1" />
+              <div className="min-w-0 flex-1" />
             )}
-            <span
-              data-social-story-heart=""
-              className="flex size-10 shrink-0 items-center justify-center text-band-ink"
-            >
-              <SocialIcon name="heart" size={22} />
-            </span>
+            <div className={SOCIAL_STORY_ACTIONS_CLUSTER_CLASS}>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  data-social-story-heart=""
+                  data-social-story-heart-state={heartLiked ? "liked" : "none"}
+                  aria-pressed={heartLiked}
+                  aria-label={heartLiked ? SOCIAL.stories.unlike : SOCIAL.stories.like}
+                  disabled={heartPending}
+                  className={cn(
+                    SOCIAL_STORY_ACTION_HIT_CLASS,
+                    heartLiked ? SOCIAL_STORY_HEART_LIKED_CLASS : SOCIAL_STORY_ACTION_IDLE_CLASS,
+                  )}
+                  onClick={() => void onHeart()}
+                >
+                  <SocialIcon name="heart" active={heartLiked} size={20} />
+                </button>
+                {storyHeartCountVisible(heart.count) ? (
+                  <span
+                    data-social-story-heart-count=""
+                    className={cn(
+                      "t-label",
+                      heartLiked ? SOCIAL_STORY_HEART_LIKED_CLASS : SOCIAL_STORY_ACTION_IDLE_CLASS,
+                    )}
+                  >
+                    {heart.count}
+                  </span>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                data-social-story-send=""
+                aria-label={SOCIAL.stories.send}
+                className={cn(SOCIAL_STORY_ACTION_HIT_CLASS, SOCIAL_STORY_ACTION_IDLE_CLASS)}
+                onClick={() => setSendItemId(item.id)}
+              >
+                <SocialIcon name="paper-plane-tilt" size={20} />
+              </button>
+            </div>
           </div>
         </article>
         {nextNeighbor ? (
           <NeighborCard neighbor={nextNeighbor} onSelect={() => jumpTo(cursor.author + 1, "first")} />
         ) : null}
       </div>
+      {sendItemId ? (
+        <SocialStorySendSheet
+          storyId={sendItemId}
+          open
+          onClose={() => setSendItemId(null)}
+          onSent={() => setSentToast(true)}
+        />
+      ) : null}
+      {sentToast ? <SocialStorySentToast /> : null}
     </div>
   );
 }

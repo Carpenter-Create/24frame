@@ -11,7 +11,7 @@ import { SocialConversationFaces } from "@/components/social/social-ui";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { conversationRoomLabel, inboxPeerIds, SOCIAL, SOCIAL_ROUTES, socialDmHref, socialPersonLabel } from "@/lib/social";
-import { loadDmInbox } from "@/lib/social-dms";
+import { loadDmInbox, loadDmStoryInboxLines } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
@@ -41,9 +41,14 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
   ]);
   const rows = profile ? inbox.rows : [];
   const peopleIds = [...new Set(rows.flatMap((row) => inboxPeerIds(row)))];
-  const [peers, faces] = await Promise.all([
+  const [peers, faces, excerpts] = await Promise.all([
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrls(peopleIds),
+    loadDmStoryInboxLines(
+      supabase,
+      rows.map((row) => row.conversation_id),
+      ctx.user.id,
+    ),
   ]);
 
   return (
@@ -89,6 +94,11 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
                 <SocialConversationFaces people={others} />
                 <div className="min-w-0">
                   <p className="t-body font-medium text-ink">{label}</p>
+                  {excerpts.get(row.conversation_id) ? (
+                    <p data-social-dm-excerpt="" className="break-words t-body-sm text-ink-3">
+                      {excerpts.get(row.conversation_id)}
+                    </p>
+                  ) : null}
                   {row.unread_count > 0 ? (
                     <p className="t-body-sm text-ink-3">{row.unread_count} unread</p>
                   ) : null}

@@ -612,6 +612,17 @@ export const SOCIAL = {
     previous: "Previous story",
     next: "Next story",
     replyTo: (name: string) => `Reply to ${name}…`,
+    like: "Like",
+    unlike: "Unlike",
+    send: "Send story",
+    search: "Search",
+    writeMessage: "Write a message…",
+    sendCta: "Send",
+    cancel: "Cancel",
+    newGroup: "New group",
+    sendEmpty: "No people yet.",
+    sendFailed: "Could not send this story.",
+    sent: "Sent",
     unavailable: "Recording is not available in this browser. Upload a video instead.",
     permission: "Camera access is needed to record.",
     emptyRail: "No stories yet",
@@ -878,6 +889,11 @@ export const SOCIAL = {
     titleHint: "Optional. Names stay first.",
     titleSave: "Save title",
     titleInvalid: "Enter a shorter title.",
+    sentStory: "Sent a story",
+    sentYouStory: "Sent you a story",
+    youSentStory: (handle: string) => `You sent @${handle}'s story`,
+    storyUnavailable: "Story unavailable",
+    storyMeta: "Story",
   },
   leaderboard: {
     title: "Leaderboard",
@@ -1270,6 +1286,14 @@ export function likeInsertRow(userId: string, postId: string) {
     user_id: userId,
     target_type: "post" as const,
     target_id: postId,
+  };
+}
+
+export function storyLikeInsertRow(userId: string, storyId: string) {
+  return {
+    user_id: userId,
+    target_type: "story_item" as const,
+    target_id: storyId,
   };
 }
 
