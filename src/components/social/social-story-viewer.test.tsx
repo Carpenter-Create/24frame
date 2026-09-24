@@ -123,6 +123,9 @@ describe("SocialStoryViewer", () => {
       src.indexOf("flushSync(() => apply(direction))"),
     );
     expect(src).toContain("void stage.offsetWidth");
+    const onKey = src.slice(src.indexOf("function onKey"), src.indexOf('addEventListener("keydown"'));
+    expect(onKey).toContain("storyPlaybackHeld(screen, false)");
+    expect(onKey.indexOf("storyPlaybackHeld(screen, false)")).toBeLessThan(onKey.indexOf("router.push"));
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");

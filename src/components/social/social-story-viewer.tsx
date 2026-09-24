@@ -301,6 +301,10 @@ export function SocialStoryViewer({
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
+      const stage = stageRef.current;
+      const screen = stage ? storyScreen(stage) : null;
+      // A paused visible story still takes arrows. A hidden keep-alive twin must not.
+      if (storyPlaybackHeld(screen, false)) return;
       const target = event.target;
       if (
         target instanceof HTMLElement &&
