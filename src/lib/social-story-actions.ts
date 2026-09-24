@@ -1,4 +1,4 @@
-import { SOCIAL } from "@/lib/social";
+import { SOCIAL, socialPersonLabel } from "@/lib/social";
 
 // Stories viewer IG actions lock v1. Heart is per story item.
 // Count is hidden at 0. Send closes only after one DM succeeds.
@@ -28,6 +28,56 @@ export function nextStoryHeart(state: SocialStoryLikeState): SocialStoryLikeStat
 
 export function storyHeartCountVisible(count: number): boolean {
   return count > 0;
+}
+
+export const SOCIAL_STORY_SAY_EMOJIS = ["😂", "😮", "😍", "😢", "👏", "🔥", "🎉", "💯"] as const;
+
+export function storySayPlaceholder(expanded: boolean): string {
+  return expanded ? SOCIAL.stories.saySomethingExpanded : SOCIAL.stories.saySomething;
+}
+
+export function storySayDraftWithEmoji(draft: string, emoji: string): string {
+  return `${draft}${emoji}`;
+}
+
+export type StoryActivityViewer = {
+  id: string;
+  name: string;
+  handle: string;
+  photoUrl: string | null;
+};
+
+export function storyActivityViewers(input: {
+  authorId: string;
+  views: readonly { viewerId: string; viewedAt: string }[];
+  profiles: ReadonlyMap<
+    string,
+    { handle: string; displayName: string | null; status: string }
+  >;
+  photoUrl: (viewerId: string) => string | null;
+}): StoryActivityViewer[] {
+  return input.views
+    .flatMap((view) => {
+      if (!view.viewerId || view.viewerId === input.authorId) return [];
+      const profile = input.profiles.get(view.viewerId);
+      if (!profile || profile.status !== "active") return [];
+      return [
+        {
+          id: view.viewerId,
+          viewedAt: view.viewedAt,
+          name: socialPersonLabel({
+            handle: profile.handle,
+            displayName: profile.displayName,
+          }),
+          handle: profile.handle,
+          photoUrl: input.photoUrl(view.viewerId),
+        },
+      ];
+    })
+    .sort(
+      (a, b) => Date.parse(b.viewedAt) - Date.parse(a.viewedAt) || a.id.localeCompare(b.id),
+    )
+    .map(({ id, name, handle, photoUrl }) => ({ id, name, handle, photoUrl }));
 }
 
 export function storySendUiAfter(

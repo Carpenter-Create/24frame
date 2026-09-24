@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 
 import { SocialStoryReply } from "@/components/social/social-forms";
+import { SocialStoryActivitySheet } from "@/components/social/social-story-activity-sheet";
+import { SocialStorySaySomething } from "@/components/social/social-story-say";
 import { SocialStorySendSheet } from "@/components/social/social-story-send-sheet";
 import { SocialStorySentToast } from "@/components/social/social-story-sent-toast";
 import { SocialAvatar } from "@/components/social/social-avatar";
@@ -187,7 +189,6 @@ function StoryVideo({
   src,
   paused,
   muted,
-  onAudible,
   onForcedMute,
   onProgress,
   onComplete,
@@ -195,7 +196,6 @@ function StoryVideo({
   src: string;
   paused: boolean;
   muted: boolean;
-  onAudible: (audible: boolean) => void;
   onForcedMute: () => void;
   onProgress: (progress: number) => void;
   onComplete: () => void;
@@ -256,12 +256,6 @@ function StoryVideo({
         const node = event.currentTarget;
         if (!node.duration || !Number.isFinite(node.duration)) return;
         onProgress(Math.min(1, node.currentTime / node.duration));
-      }}
-      onLoadedMetadata={(event: SyntheticEvent<HTMLVideoElement>) => {
-        const tracks = (
-          event.currentTarget as HTMLVideoElement & { audioTracks?: { length: number } }
-        ).audioTracks;
-        if (tracks && tracks.length === 0) onAudible(false);
       }}
       onEnded={() => onComplete()}
     />
@@ -374,12 +368,15 @@ export function SocialStoryViewer({
   const [held, setHeld] = useState(false);
   const [muted, setMuted] = useState(false);
   const [audible, setAudible] = useState(true);
+  const [audibleFor, setAudibleFor] = useState<string | null>(null);
   const [videoProgress, setVideoProgress] = useState(0);
   const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
   const [hop, setHop] = useState<"next" | "prev" | null>(null);
   const [hearts, setHearts] = useState<Record<string, SocialStoryLikeState>>({ ...likes });
   const [heartPending, setHeartPending] = useState(false);
   const [sendItemId, setSendItemId] = useState<string | null>(null);
+  const [activityStoryId, setActivityStoryId] = useState<string | null>(null);
+  const [sayExpanded, setSayExpanded] = useState(false);
   const [sentToast, setSentToast] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
@@ -391,7 +388,15 @@ export function SocialStoryViewer({
   const clip = item?.media[0] ?? null;
   const video = clip?.kind === "video" ? clip : null;
   const sendSheetOpen = sendItemId !== null;
-  const playbackPaused = paused || held || sendSheetOpen;
+  const activityOpen = activityStoryId !== null;
+  const playbackPaused = paused || held || sendSheetOpen || activityOpen || sayExpanded;
+  const presenceId = item?.id ?? "";
+  if (presenceId !== audibleFor) {
+    setAudibleFor(presenceId);
+    setAudible(true);
+    setSayExpanded(false);
+    setActivityStoryId(null);
+  }
   const allowReply = !!author && canReply && (!selfId || author.authorId !== selfId);
   const prevNeighbor = neighborView(authors[cursor.author - 1], "last");
   const nextNeighbor = neighborView(authors[cursor.author + 1], "first");
@@ -403,7 +408,7 @@ export function SocialStoryViewer({
       const stage = stageRef.current;
       const screen = stage ? storyScreen(stage) : null;
       if (storyPlaybackHeld(screen, false)) return;
-      if (!storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)) return;
+      if (!storyAdvanceWhileSending(sendSheetOpen || activityOpen, reason, paused || held)) return;
       const result = storyTrayStep(authors, cursor, direction);
       if (result === "close") {
         router.push(SOCIAL_ROUTES.home);
@@ -415,7 +420,7 @@ export function SocialStoryViewer({
       setHeld(false);
       setCursor(result);
     },
-    [authors, cursor, held, paused, router, sendSheetOpen],
+    [activityOpen, authors, cursor, held, paused, router, sendSheetOpen],
   );
 
   const jumpTo = useCallback(
@@ -590,6 +595,7 @@ export function SocialStoryViewer({
 
   const heart = hearts[item.id] ?? { liked: false, count: 0 };
   const heartLiked = heart.liked;
+  const ownStory = !!selfId && author.authorId === selfId;
 
   return (
     <div
@@ -646,7 +652,6 @@ export function SocialStoryViewer({
                 src={video.url}
                 paused={playbackPaused}
                 muted={muted}
-                onAudible={setAudible}
                 onForcedMute={forceMute}
                 onProgress={setVideoProgress}
                 onComplete={() => go("next", "auto")}
@@ -741,10 +746,11 @@ export function SocialStoryViewer({
               <p className="min-w-0 truncate t-body-sm font-medium text-band-ink">{author.authorName}</p>
               <p className="shrink-0 t-label text-band-ink/65">{socialRelativeTime(item.createdAt)}</p>
               <span className="flex-1" />
-              {video && audible ? (
+              {video ? (
                 <button
                   type="button"
                   data-social-story-mute=""
+                  data-social-story-audible={audible ? "true" : "false"}
                   aria-label={muted ? SOCIAL.stories.unmute : SOCIAL.stories.mute}
                   aria-pressed={muted}
                   className="flex size-10 items-center justify-center text-band-ink"
@@ -774,16 +780,32 @@ export function SocialStoryViewer({
               </Link>
             </div>
           </div>
-          <div data-social-story-actions="" className={SOCIAL_STORY_ACTIONS_ROW_CLASS}>
-            {allowReply ? (
+          <div
+            data-social-story-actions=""
+            className={cn(SOCIAL_STORY_ACTIONS_ROW_CLASS, sayExpanded && "items-end")}
+          >
+            {ownStory ? (
+              <SocialStorySaySomething key={item.id} onExpandedChange={setSayExpanded} />
+            ) : allowReply ? (
               <SocialStoryReply
                 peerId={author.authorId}
-                placeholder={SOCIAL.stories.replyTo(author.authorName)}
+                placeholder={SOCIAL.stories.sendMessage}
               />
             ) : (
               <div className="min-w-0 flex-1" />
             )}
             <div className={SOCIAL_STORY_ACTIONS_CLUSTER_CLASS}>
+              {ownStory ? (
+                <button
+                  type="button"
+                  data-social-story-activity=""
+                  aria-label={SOCIAL.stories.activity}
+                  className={cn(SOCIAL_STORY_ACTION_HIT_CLASS, SOCIAL_STORY_ACTION_IDLE_CLASS)}
+                  onClick={() => setActivityStoryId(item.id)}
+                >
+                  <SocialIcon name="users" size={20} />
+                </button>
+              ) : null}
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -834,6 +856,13 @@ export function SocialStoryViewer({
           open
           onClose={() => setSendItemId(null)}
           onSent={() => setSentToast(true)}
+        />
+      ) : null}
+      {activityStoryId ? (
+        <SocialStoryActivitySheet
+          storyId={activityStoryId}
+          open
+          onClose={() => setActivityStoryId(null)}
         />
       ) : null}
       {sentToast ? <SocialStorySentToast /> : null}

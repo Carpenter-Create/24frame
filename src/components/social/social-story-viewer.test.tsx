@@ -84,7 +84,8 @@ describe("SocialStoryViewer", () => {
     expect(html).toContain("border-accent");
     expect(html).toContain('data-social-story-mark=""');
     expect(html).toContain('href="/social"');
-    expect(html).toContain("Reply to Ada Lovelace…");
+    expect(html).toContain("Send message");
+    expect(html).not.toContain("Reply to Ada Lovelace…");
     expect(html).toContain('data-social-story-heart=""');
     expect(html).toContain('data-social-story-heart-state="none"');
     expect(html).toContain('data-social-story-send=""');
@@ -116,6 +117,8 @@ describe("SocialStoryViewer", () => {
     const src = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
     expect(src).toContain("node.pause()");
     expect(src).toContain("onForcedMute");
+    expect(src).not.toContain("audioTracks");
+    expect(src).toContain("setAudible(true)");
     expect(src).toContain("consumeStoryEnter");
     expect(src).toContain("storyTrayStep");
     expect(src).toContain("w-2/3");
@@ -141,8 +144,12 @@ describe("SocialStoryViewer", () => {
     expect(onKey.indexOf("storyPlaybackHeld(screen, false)")).toBeLessThan(onKey.indexOf('go("prev"'));
     expect(onKey).not.toContain("router.push");
     expect(src).toContain("sendSheetOpen");
-    expect(src).toContain("storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)");
-    expect(src).toContain("const playbackPaused = paused || held || sendSheetOpen");
+    expect(src).toContain(
+      "storyAdvanceWhileSending(sendSheetOpen || activityOpen, reason, paused || held)",
+    );
+    expect(src).toContain(
+      "const playbackPaused = paused || held || sendSheetOpen || activityOpen || sayExpanded",
+    );
     expect(src).not.toContain("currentTime = 0");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");

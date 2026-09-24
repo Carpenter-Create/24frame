@@ -77,10 +77,10 @@ Same row on phone full-bleed and desktop 9:16 stage chrome. No mobile-only fork.
 |-------|------|
 | Control | Existing `SocialStoryReply` pill |
 | Behavior | Opens / sends **DM to author** (existing `openSocialDm` path) |
-| Label | Keep house Stories reply copy |
-| NOT | Public comments thread, comment count on story, comment list under media |
+| Label | See glass amend — **others:** Send message · **own:** Say something… (comment/@mention) |
+| NOT | Public feed comments thread · treating own field as caption editor |
 
-Do **not** redesign the pill chrome in this PR beyond row alignment.
+Pill chrome: see **Glass reply / own Say something amend** below.
 
 ---
 
@@ -142,3 +142,66 @@ Parity “reply+like” reads as **reply + heart + send** under this lock.
 ## Label
 
 **[Global Content][24Frame]** Stories viewer IG actions v1
+
+
+---
+
+**AMEND 2026-09-24 CT:** Silent send success **OUT**. Brief **Sent** toast + IG DM story-share card owned by `stories-send-dm-craft-lock-v1.md` (Adam #677 smoke).
+
+
+---
+
+## AMEND 2026-09-24 CT — Glass field own + other (Adam IG · supersedes others-only)
+
+**Status:** Own→READY for CoS CLEAR · **HOLD** the superseded others-only / no-field amend — **do not ship** that version.  
+**Mute:** CLOSED from Design (CoS CLEARED mute-control v1 → Dev).  
+**Supersedes:** “others-only / no self-reply / own = no field” (skipped-widget default).
+
+**Adam clarifying ask:** IG own “Say something…” — caption or comment?  
+**Lock:** **comment / @mention**, **NOT** caption. Caption = create-time text stickers only.
+
+### Product split
+
+| Viewer | Bottom left glass | Bottom right |
+|--------|-------------------|--------------|
+| **Own story** | Frosted **Say something…** — comment / @mention | Heart · Send (existing — keep) |
+| **Other author** | Frosted **Send message** / reply (`SocialStoryReply` DM-to-author) | Heart · Send (unchanged) |
+
+### 1) Own — Say something… (comment / @mention)
+
+| Token | Lock |
+|-------|------|
+| Resting placeholder | **Say something…** |
+| Focus / expand | → **Add a comment or @mention friends…** · emoji row (IG grammar) |
+| Role | **Comment / @mention** · **NOT** edit caption / text-sticker on media |
+| Face | Frosted glass on dark stage: translucent white wash (~12–20%) + `backdrop-blur` · hairline white~20% · height **40** · `flex-1` · rounded-full · **no** drop shadow |
+| Type | `t-body-sm` · white~70% placeholder |
+
+### 2) Other — glass reply (unchanged)
+
+| Token | Lock |
+|-------|------|
+| Control | `SocialStoryReply` · frosted glass · **Send message** |
+| Behavior | DM-to-author (existing) |
+
+### 3) Activity / viewers — cite only
+
+If an Activity / viewers path is **already locked elsewhere**, cite it — do **not** invent Boost, Facebook cross-post, or a new viewers product in this amend.
+
+### 4) Explicit OUT
+
+| OUT |
+|-----|
+| Treat own field as **caption editor** |
+| Keep **others-only** / **self-reply ban** / own = no field |
+| Soft / flat non-glass (`bg-surface` paper) |
+| Invent **Boost** / Facebook chrome |
+
+### Done-when
+
+1. **Own** → frosted **Say something…** · focus expands to **Add a comment or @mention friends…** + emoji row · not a caption editor.  
+2. **Other** → frosted **Send message** (`SocialStoryReply`).  
+3. Glass reads frosted — not paper.  
+4. No others-only ship · no Boost invent · no #664 reopen.
+
+**Label:** [Global Content][24Frame] Stories viewer glass — own Say something (comment/@mention) + other Send message
