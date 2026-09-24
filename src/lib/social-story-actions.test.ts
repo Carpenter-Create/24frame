@@ -7,6 +7,7 @@ import {
   nextStoryHeart,
   STORY_SEND_TOAST_MS,
   storyHeartCountVisible,
+  storyAdvanceWhileSending,
   storySendPeopleOrder,
   storySendPeopleQuery,
   storySendToast,
@@ -110,6 +111,14 @@ describe("send story", () => {
     });
     expect(row.body).toBe(SOCIAL.dms.sentStory);
     expect(JSON.stringify(row)).not.toMatch(/\/social\/stories|https?:/);
+  });
+
+  it("freezes advance while the send sheet is open and resumes the same rules after", () => {
+    expect(storyAdvanceWhileSending(true, "auto", false)).toBe(false);
+    expect(storyAdvanceWhileSending(true, "manual", false)).toBe(false);
+    expect(storyAdvanceWhileSending(false, "auto", true)).toBe(false);
+    expect(storyAdvanceWhileSending(false, "auto", false)).toBe(true);
+    expect(storyAdvanceWhileSending(false, "manual", true)).toBe(true);
   });
 
   it("toasts for 2000ms only after the sheet will close", () => {

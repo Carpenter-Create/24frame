@@ -16,8 +16,19 @@ import {
   type StorySendPerson,
 } from "@/lib/social-story-actions";
 
-// Send craft v1.4. One IG-dark drawer. Select morphs this same drawer.
-// Not the white house sheet. Not a second dialog.
+// Send craft v1.5. One IG-dark drawer. Select morphs this same drawer.
+// Do not lock document.body overflow. iOS Safari treats that, plus a
+// focused field, as a history scroll restore. The shell then replaces
+// the route and /social/loading paints the home skeleton.
+
+function holdSheetFieldViewport() {
+  const scrolling = document.scrollingElement;
+  const left = scrolling?.scrollLeft ?? window.scrollX;
+  const top = scrolling?.scrollTop ?? window.scrollY;
+  requestAnimationFrame(() => {
+    window.scrollTo(left, top);
+  });
+}
 
 export function SocialStorySendSheet({
   storyId,
@@ -53,11 +64,8 @@ export function SocialStorySendSheet({
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
     };
   }, [open, onClose]);
 
@@ -148,11 +156,18 @@ export function SocialStorySendSheet({
             </label>
             <input
               id={searchId}
+              type="text"
+              enterKeyHint="search"
               data-social-story-send-search=""
               value={query}
               placeholder={SOCIAL.stories.search}
               autoComplete="off"
-              className="h-10 min-w-0 flex-1 bg-transparent t-body-sm text-white outline-none placeholder:text-white/60"
+              style={{ fontSize: 16 }}
+              className="h-10 min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-white/60"
+              onFocus={holdSheetFieldViewport}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") event.preventDefault();
+              }}
               onChange={(event) => setQuery(event.target.value)}
             />
             {searching ? (
@@ -242,17 +257,24 @@ export function SocialStorySendSheet({
           className="grid shrink-0 transition-[grid-template-rows] duration-200 ease-out"
           style={{ gridTemplateRows: selected ? "1fr" : "0fr" }}
         >
-          <div className="overflow-hidden">
+          <div className={selected ? "min-h-0" : "min-h-0 overflow-hidden"}>
             <label className="sr-only" htmlFor={`${searchId}-note`}>
               {SOCIAL.stories.writeMessage}
             </label>
             <input
               id={`${searchId}-note`}
+              type="text"
+              enterKeyHint="done"
               data-social-story-send-note=""
               value={note}
               placeholder={SOCIAL.stories.writeMessage}
               autoComplete="off"
-              className="mt-4 h-10 w-full rounded-[20px] bg-[#2A2A2E] px-4 t-body text-white outline-none placeholder:text-white/60"
+              style={{ fontSize: 16 }}
+              className="mt-4 h-10 w-full rounded-[20px] bg-[#2A2A2E] px-4 text-white outline-none placeholder:text-white/60"
+              onFocus={holdSheetFieldViewport}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") event.preventDefault();
+              }}
               onChange={(event) => setNote(event.target.value)}
             />
             <button

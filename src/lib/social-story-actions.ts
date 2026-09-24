@@ -37,6 +37,21 @@ export function storySendUiAfter(
   return { close: false, error: result?.error || SOCIAL.stories.sendFailed };
 }
 
+/**
+ * Send craft v1.5. An open Send drawer owns the story surface.
+ * No auto-advance, no next item, no next author, no tray hop.
+ * Hold and the manual pause still block auto-advance after the drawer closes.
+ */
+export function storyAdvanceWhileSending(
+  sheetOpen: boolean,
+  reason: "auto" | "manual",
+  playbackHeld: boolean,
+): boolean {
+  if (sheetOpen) return false;
+  if (reason === "auto" && playbackHeld) return false;
+  return true;
+}
+
 /** Toast only when the sheet is about to close. Failure keeps the sheet. */
 export function storySendToast(
   result: { error?: string } | null | undefined,

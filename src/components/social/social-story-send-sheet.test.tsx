@@ -64,6 +64,13 @@ describe("SocialStorySendSheet", () => {
     expect(src).toContain("storySendUiAfter");
     expect(src).toContain("if (outcome.close)");
     expect(src).toContain("onClose()");
+    expect(src).not.toContain("document.body.style.overflow");
+    expect(src).toContain("holdSheetFieldViewport");
+    expect(src).toContain("window.scrollTo");
+    expect(src).toContain('event.key === "Enter"');
+    expect(src).toContain("fontSize: 16");
+    expect(src).toContain('selected ? "min-h-0" : "min-h-0 overflow-hidden"');
+    expect(src).not.toContain("router");
     expect(src).not.toContain("HouseDialogFrame");
     expect(src).not.toContain("AppSheet");
     expect(src).not.toMatch(/Copy link|Add to story|Facebook|share-network|type="checkbox"/);
@@ -95,6 +102,7 @@ describe("SocialStorySendSheet", () => {
     expect(html).toContain("h-12");
     expect(html).toContain(SOCIAL.stories.sendCta);
     expect(html).not.toMatch(/data-social-story-send-submit=""\s+disabled/);
+    expect(html).toContain('data-social-story-send-note=""');
     expect(html).not.toContain("HouseDialog");
   });
 

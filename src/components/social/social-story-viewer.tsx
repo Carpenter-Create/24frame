@@ -49,6 +49,7 @@ import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { toggleSocialStoryLike } from "@/app/(app)/social/light-actions";
 import {
   nextStoryHeart,
+  storyAdvanceWhileSending,
   storyHeartCountVisible,
   STORY_SEND_TOAST_MS,
   type SocialStoryLikeState,
@@ -389,7 +390,8 @@ export function SocialStoryViewer({
   const item = author?.items[cursor.item];
   const clip = item?.media[0] ?? null;
   const video = clip?.kind === "video" ? clip : null;
-  const playbackPaused = paused || held;
+  const sendSheetOpen = sendItemId !== null;
+  const playbackPaused = paused || held || sendSheetOpen;
   const allowReply = !!author && canReply && (!selfId || author.authorId !== selfId);
   const prevNeighbor = neighborView(authors[cursor.author - 1], "last");
   const nextNeighbor = neighborView(authors[cursor.author + 1], "first");
@@ -401,7 +403,7 @@ export function SocialStoryViewer({
       const stage = stageRef.current;
       const screen = stage ? storyScreen(stage) : null;
       if (storyPlaybackHeld(screen, false)) return;
-      if (reason === "auto" && (paused || held)) return;
+      if (!storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)) return;
       const result = storyTrayStep(authors, cursor, direction);
       if (result === "close") {
         router.push(SOCIAL_ROUTES.home);
@@ -413,7 +415,7 @@ export function SocialStoryViewer({
       setHeld(false);
       setCursor(result);
     },
-    [authors, cursor, held, paused, router],
+    [authors, cursor, held, paused, router, sendSheetOpen],
   );
 
   const jumpTo = useCallback(
@@ -421,6 +423,7 @@ export function SocialStoryViewer({
       const stage = stageRef.current;
       const screen = stage ? storyScreen(stage) : null;
       if (storyPlaybackHeld(screen, false)) return;
+      if (sendSheetOpen) return;
       const row = authors[authorIndex];
       if (!row || row.items.length === 0) return;
       const direction = authorIndex >= cursor.author ? "next" : "prev";
@@ -432,7 +435,7 @@ export function SocialStoryViewer({
         item: edge === "first" ? 0 : row.items.length - 1,
       });
     },
-    [authors, cursor.author],
+    [authors, cursor.author, sendSheetOpen],
   );
 
   useLayoutEffect(() => {

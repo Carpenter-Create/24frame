@@ -140,6 +140,10 @@ describe("SocialStoryViewer", () => {
     expect(onKey).toContain("storyPlaybackHeld(screen, false)");
     expect(onKey.indexOf("storyPlaybackHeld(screen, false)")).toBeLessThan(onKey.indexOf('go("prev"'));
     expect(onKey).not.toContain("router.push");
+    expect(src).toContain("sendSheetOpen");
+    expect(src).toContain("storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)");
+    expect(src).toContain("const playbackPaused = paused || held || sendSheetOpen");
+    expect(src).not.toContain("currentTime = 0");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");

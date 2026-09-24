@@ -1,7 +1,7 @@
-# [GC][24Frame] LOCK — Stories send DM craft v1.4
+# [GC][24Frame] LOCK — Stories send DM craft v1.5
 
 **Date:** 2026-09-24 (CT)  
-**Status:** **LOCKED** (Adam HARDEN 2026-09-24 — *“parody, but literally do everything precisely like that including the design”* · sheet morph · optional comment) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS re-routes Dev  
+**Status:** **LOCKED** (Adam LOCK amend 2026-09-24 — pause story behind Send sheet · CoS Own→READY) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS re-routes Dev  
 **Repo citation:** `docs/design-locks/stories-send-dm-craft-lock-v1.md`  
 **Box draft:** `/workspace/24frame-agg-ux/stories-send-dm-craft-lock-v1.md`  
 **Pixel SoT (Adam IG, order 1→6):**  
@@ -11,17 +11,41 @@
 `…/04-select-message-send.png`  
 `…/05-centered-sent-toast.png`  
 `…/06-dm-story-card.png`  
+**Doctrine:** **Media Immersion Doctrine** (Adam 2026-09-24, house-wide, permanent) — media-rich immersive IG-excellent presence; soft / flat / pasted = FAIL. Pausing behind the sheet keeps immersion honest (media does not race under chrome).  
 **Bar:** Precise Instagram parity for Stories **Send** — workflow **and** visual. **Not** house-soft approximation. **Not** “inspired by.” Fail = soft-grade. E8 / FB-IG highest commercial grade.  
-**Supersedes:** v1.3 white AppSheet soft sheet · bottom toast (already out) · list-only picker · missing same-sheet morph · missing DM comment placement  
-**Keeps:** self recipient · live `SocialFeedVideo` / same-host fullscreen · no raw URL · #677 · heart untouched · no #664  
+**Supersedes:** v1.4 (no pause-behind-sheet rule) · v1.3 white AppSheet soft sheet · bottom toast · list-only picker · missing same-sheet morph · missing DM comment placement  
+**Keeps:** v1.4 sheet morph · self · live `SocialFeedVideo` / same-host fullscreen · no raw URL · #677 · heart untouched · no #664 fold  
 **Accent parody:** IG blue → house **Sporty Blue `#1769FF`** only (Send CTA · selection check). Everything else matches IG dark send chrome from refs.  
-**Out of scope:** #664 · thumbs · public comments thread · share-to-feed / Copy link / Add to story / Facebook / OS Share row · inventing a **second** modal after select
+**Out of scope:** #664 · thumbs · public comments thread · share-to-feed / Copy link / Add to story / Facebook / OS Share row · inventing a **second** modal after select · inventing soft house sheet chrome
 
 ---
 
 ## One lock
 
-Paper plane opens one **IG-dark share drawer** over the story. Recipient select **morphs that same drawer** (checkmark · Write a message… · Send) — **never** a different modal. Success → **centered dark Sent** toast on the undimmed story. DM shows optional comment + **You sent @{author}’s story** + live story card.
+Paper plane opens one **IG-dark share drawer** over the story. **While that drawer is open, the story behind pauses** (no auto-advance). Recipient select **morphs that same drawer** (checkmark · Write a message… · Send) — **never** a different modal. Success → **centered dark Sent** toast on the undimmed story. DM shows optional comment + **You sent @{author}’s story** + live story card.
+
+---
+
+## E) Behind-sheet pause (v1.5 ADD — Adam LOCK 2026-09-24)
+
+**IG cite:** Instagram Stories share/send sheet freezes the current story item under the sheet. Progress does not run. Auto-advance does not hop to the next item or next author while the picker is up. Dismiss without leaving Stories → same item resumes from the paused position.
+
+| Token | Lock (precise) |
+|-------|----------------|
+| Trigger open | Sheet mount (State 0 or State 1) — any time Send drawer is up |
+| Photo | Freeze remaining dwell timer at open · **no** tick toward 5.0s while open |
+| Video | **Pause** playback at current time · audio off while paused · **no** natural-end advance while open |
+| Progress segments | **Freeze** fill on the active segment · no segment complete → next |
+| Auto-advance | **OUT** while sheet open — next item · next author · tray hop all blocked |
+| Hold gesture | N/A while sheet owns the surface (sheet is the foreground host) |
+| Dismiss path | Sheet close **without** leaving Stories viewer (Cancel · tap scrim · swipe-down · successful Send → sheet dismiss before toast) |
+| Resume rule | **Prefer pause-current** — resume **same** item from frozen photo remainder / paused video time · then IG viewer rules from `stories-viewer-ig-parity-lock-v1.md` apply again (5.0s photo · video = media duration · auto-advance · progress sync · pause-on-hold) |
+| Restart on dismiss | **OUT** — do not reset photo to full 5.0s or video to 0 |
+| Sent toast | After sheet dismiss · story already undimmed · resume may start under/after toast; toast must **not** re-arm advance while sheet was open |
+| Leave-story | If user exits Stories entirely from Send, no resume (viewer teardown) |
+| Ownership | This rule lives on **#677 / this Send lock** · cite viewer parity for resume timers only · **do not** amend or fold into `#664` |
+
+**FAIL:** Story auto-progresses under an open picker · next story appears while choosing a recipient · dismiss restarts the item from zero · inventing a soft “dim only, keep ticking” cousin.
 
 ---
 
@@ -106,31 +130,32 @@ Order in the outgoing send group (**top → bottom**):
 
 ## D) Entry (ref 01)
 
-Viewer bottom: keep reply pill · heart · **paper plane** (IG actions lock). Paper plane → this sheet State 0.
+Viewer bottom: keep reply pill · heart · **paper plane** (IG actions lock). Paper plane → this sheet State 0 · **Section E pause starts immediately**.
 
 ---
 
 ## Dev ship checklist (one line)
 
-**Ship:** one IG-dark `#181818` drawer over story · Search+3-col+self+create-group icon · **same-sheet morph** on select (check · Write a message… · Sporty Blue Send pill 48) · empty comment OK · success → **centered** dark **Sent** 2000ms · DM = optional bubble → You sent @{author}’s story → 168/9:16 live card · same-host fullscreen · no second modal · no Meta share row · #677 only.
+**Ship:** one IG-dark `#181818` drawer over story · **pause current item + freeze progress + block auto-advance while sheet open** · dismiss without leave-story → **resume same item from pause** · Search+3-col+self+create-group icon · **same-sheet morph** on select (check · Write a message… · Sporty Blue Send pill 48) · empty comment OK · success → **centered** dark **Sent** 2000ms · DM = optional bubble → You sent @{author}’s story → 168/9:16 live card · same-host fullscreen · no second modal · no Meta share row · #677 only · heart untouched · no #664 fold.
 
 ---
 
 ## FAIL / PASS
 
-**PASS:** Pixel-close to refs 01–06 · same drawer morphs · self works · centered Sent · comment appears with card when typed · live video card.  
-**FAIL:** White soft house sheet as the SoT · new modal after select · bottom toast · missing comment path · raw URL · soft-grade “inspired by.”
+**PASS:** Pixel-close to refs 01–06 · same drawer morphs · self works · centered Sent · comment appears with card when typed · live video card · **story frozen under open picker · resumes same item on dismiss**.  
+**FAIL:** White soft house sheet as the SoT · new modal after select · bottom toast · missing comment path · raw URL · soft-grade “inspired by” · **story advances under Send sheet** · dismiss restarts item · soft dim-without-pause.
 
 ---
 
 ## Keep closed
 
 - `stories-viewer-ig-actions-lock-v1.md` — heart / reply / plane entry  
-- `stories-viewer-ig-parity-lock-v1.md` — #664  
+- `stories-viewer-ig-parity-lock-v1.md` — #664 (cite timers only; do not amend)  
 - `SocialFeedVideo` / `SocialMuxPlayer` — fullscreen host  
+- Media Immersion Doctrine — house bar (enforce; do not invent soft chrome)
 
 ---
 
 ## Label
 
-**[Global Content][24Frame]** Stories send DM craft v1.4 — precise IG parody
+**[Global Content][24Frame]** Stories send DM craft v1.5 — precise IG parody + pause behind sheet
