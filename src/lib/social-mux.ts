@@ -31,6 +31,26 @@ export function isSocialMuxId(value: string): boolean {
   return SOCIAL_MUX_ID_RE.test(value);
 }
 
+// Create stores `${user.id}:${objectId}` on the Mux upload. Finalize accepts
+// the upload only when that passthrough starts with the session user id.
+export function socialMuxPassthroughBoundToUser(
+  passthrough: string | null | undefined,
+  userId: string,
+): boolean {
+  if (typeof passthrough !== "string" || typeof userId !== "string") return false;
+  const caller = userId.trim();
+  const token = passthrough.trim();
+  if (!caller || !token) return false;
+  return token.startsWith(caller);
+}
+
+export class SocialMuxUploadNotBoundError extends Error {
+  constructor() {
+    super("Mux upload is not bound to the caller");
+    this.name = "SocialMuxUploadNotBoundError";
+  }
+}
+
 export function isSocialMux4kSource(width: number, height: number): boolean {
   if (!Number.isFinite(width) || !Number.isFinite(height)) return false;
   return Math.max(width, height) >= SOCIAL_MUX_4K_MIN_EDGE;

@@ -27,10 +27,13 @@ the client bundle.
 | Go live (~10 min recorder → normal video post) | `plus` | `1080p` |
 | Video + “Upload in original quality (up to 4K)” + 4K source | `basic` | `2160p` |
 
-No livestream backend. No Settings quality maze. Playback IDs are
-`public` and stored on `posts.media` next to the author-bound key.
+No livestream backend. No Settings quality maze. New uploads use
+playback policy `signed`. Playback IDs are stored on `posts.media`
+next to the author-bound key. Mux Player still receives the playback
+id only; this path does not issue a playback token.
 
 ## Auth / cron
 
-Not touched. No session, RLS, webhook, or Vercel cron. Finalize polls
-Mux in the signed-in request after the client PUT.
+No RLS, webhook, or Vercel cron change. Finalize polls Mux in the
+signed-in request after the client PUT and rejects the upload unless
+`new_asset_settings.passthrough` starts with the session user id.

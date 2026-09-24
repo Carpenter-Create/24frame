@@ -1,15 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { SocialMuxUploadNotBoundError } from "./social-mux";
 import {
   createSocialMuxDirectUpload,
   finalizeSocialMuxDirectUpload,
-  publicPlaybackIdFromAsset,
+  signedPlaybackIdFromAsset,
   socialMuxSettingsFromUploadInput,
 } from "./social-mux-server";
 
 const UPLOAD_ID = "zd01Pe2bNpYhxbrwYABgFE";
 const ASSET_ID = "SqQnqz6s5MBuXGvJaUWdXu";
 const PLAYBACK_ID = "uNbxnGLKJ00yfbijDO8COxT";
+const SIGNED_PLAYBACK_ID = "signedPlaybackId01";
+const USER = "11111111-1111-4111-8111-111111111111";
 
 function muxJson(data: unknown, status = 200): Response {
   return new Response(JSON.stringify({ data }), {
@@ -60,33 +63,84 @@ describe("social Mux server client", () => {
       new_asset_settings: Record<string, unknown>;
     };
     expect(body.new_asset_settings).toMatchObject({
-      playback_policies: ["public"],
+      playback_policies: ["signed"],
       video_quality: "basic",
       max_resolution_tier: "1080p",
       passthrough: "user:object",
     });
   });
 
-  it("finalizes an upload once Mux has a public playback id", async () => {
+  it("finalizes an upload once Mux has a signed playback id bound to the caller", async () => {
     vi.stubEnv("MUX_TOKEN_ID", "tid");
     vi.stubEnv("MUX_TOKEN_SECRET", "tsecret");
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(muxJson({ id: UPLOAD_ID, status: "asset_created", asset_id: ASSET_ID }))
+      .mockResolvedValueOnce(
+        muxJson({
+          id: UPLOAD_ID,
+          status: "asset_created",
+          asset_id: ASSET_ID,
+          new_asset_settings: { passthrough: `${USER}:object` },
+        }),
+      )
       .mockResolvedValueOnce(
         muxJson({
           id: ASSET_ID,
           status: "preparing",
-          playback_ids: [{ id: PLAYBACK_ID, policy: "public" }],
+          playback_ids: [{ id: PLAYBACK_ID, policy: "signed" }],
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(finalizeSocialMuxDirectUpload(UPLOAD_ID)).resolves.toEqual({
+    await expect(finalizeSocialMuxDirectUpload(UPLOAD_ID, USER)).resolves.toEqual({
       uploadId: UPLOAD_ID,
       assetId: ASSET_ID,
       playbackId: PLAYBACK_ID,
     });
+  });
+
+  it("rejects finalize when the upload passthrough does not start with the caller", async () => {
+    vi.stubEnv("MUX_TOKEN_ID", "tid");
+    vi.stubEnv("MUX_TOKEN_SECRET", "tsecret");
+    const fetchMock = vi.fn().mockResolvedValue(
+      muxJson({
+        id: UPLOAD_ID,
+        status: "asset_created",
+        asset_id: ASSET_ID,
+        new_asset_settings: { passthrough: "22222222-2222-4222-8222-222222222222:object" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(finalizeSocialMuxDirectUpload(UPLOAD_ID, USER)).rejects.toBeInstanceOf(
+      SocialMuxUploadNotBoundError,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(`https://api.mux.com/video/v1/uploads/${UPLOAD_ID}`);
+  });
+
+  it("rejects finalize when the upload has no passthrough", async () => {
+    vi.stubEnv("MUX_TOKEN_ID", "tid");
+    vi.stubEnv("MUX_TOKEN_SECRET", "tsecret");
+    const fetchMock = vi.fn().mockResolvedValue(
+      muxJson({ id: UPLOAD_ID, status: "asset_created", asset_id: ASSET_ID }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(finalizeSocialMuxDirectUpload(UPLOAD_ID, USER)).rejects.toBeInstanceOf(
+      SocialMuxUploadNotBoundError,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects finalize before calling Mux when the caller id is empty", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(finalizeSocialMuxDirectUpload(UPLOAD_ID, "  ")).rejects.toBeInstanceOf(
+      SocialMuxUploadNotBoundError,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("maps live + 4K form fields on the server, not the client", () => {
@@ -110,12 +164,17 @@ describe("social Mux server client", () => {
       }).settings.maxResolutionTier,
     ).toBe("2160p");
     expect(
-      publicPlaybackIdFromAsset({
+      signedPlaybackIdFromAsset({
         playback_ids: [
-          { id: "signedxx", policy: "signed" },
           { id: PLAYBACK_ID, policy: "public" },
+          { id: SIGNED_PLAYBACK_ID, policy: "signed" },
         ],
       }),
-    ).toBe(PLAYBACK_ID);
+    ).toBe(SIGNED_PLAYBACK_ID);
+    expect(
+      signedPlaybackIdFromAsset({
+        playback_ids: [{ id: PLAYBACK_ID, policy: "public" }],
+      }),
+    ).toBeNull();
   });
 });

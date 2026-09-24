@@ -3,6 +3,8 @@ import "server-only";
 import {
   isSocialMuxId,
   socialMuxAssetSettings,
+  socialMuxPassthroughBoundToUser,
+  SocialMuxUploadNotBoundError,
   type SocialMuxAssetSettings,
   type SocialMuxIntent,
 } from "@/lib/social-mux";
@@ -32,6 +34,9 @@ type MuxUploadData = {
   url?: string;
   status?: string;
   asset_id?: string | null;
+  new_asset_settings?: {
+    passthrough?: string | null;
+  } | null;
 };
 
 type MuxAssetData = {
@@ -86,7 +91,7 @@ export async function createSocialMuxDirectUpload(input: {
     body: JSON.stringify({
       cors_origin: muxCorsOrigin(),
       new_asset_settings: {
-        playback_policies: ["public"],
+        playback_policies: ["signed"],
         video_quality: input.settings.videoQuality,
         max_resolution_tier: input.settings.maxResolutionTier,
         ...(input.passthrough ? { passthrough: input.passthrough } : {}),
@@ -109,19 +114,30 @@ export async function retrieveSocialMuxAsset(assetId: string): Promise<MuxAssetD
   return muxRequest<MuxAssetData>(`/video/v1/assets/${assetId}`);
 }
 
-export function publicPlaybackIdFromAsset(asset: MuxAssetData): string | null {
+export function signedPlaybackIdFromAsset(asset: MuxAssetData): string | null {
   const match = asset.playback_ids?.find(
-    (item) => item.policy === "public" && item.id && isSocialMuxId(item.id),
+    (item) => item.policy === "signed" && item.id && isSocialMuxId(item.id),
   );
   return match?.id ?? null;
 }
 
+function muxUploadPassthrough(upload: MuxUploadData): string | null {
+  const value = upload.new_asset_settings?.passthrough;
+  return typeof value === "string" ? value : null;
+}
+
 export async function finalizeSocialMuxDirectUpload(
   uploadId: string,
+  callerUserId: string,
 ): Promise<SocialMuxReadyAsset> {
+  if (!callerUserId.trim()) throw new SocialMuxUploadNotBoundError();
+
   let assetId = "";
   for (const delay of FINALIZE_DELAYS_MS) {
     const upload = await retrieveSocialMuxUpload(uploadId);
+    if (!socialMuxPassthroughBoundToUser(muxUploadPassthrough(upload), callerUserId)) {
+      throw new SocialMuxUploadNotBoundError();
+    }
     if (upload.status === "errored" || upload.status === "cancelled" || upload.status === "timed_out") {
       throw new Error("Mux upload failed");
     }
@@ -136,7 +152,7 @@ export async function finalizeSocialMuxDirectUpload(
   let playbackId: string | null = null;
   for (const delay of FINALIZE_DELAYS_MS) {
     const asset = await retrieveSocialMuxAsset(assetId);
-    playbackId = publicPlaybackIdFromAsset(asset);
+    playbackId = signedPlaybackIdFromAsset(asset);
     if (playbackId) {
       return { uploadId, assetId, playbackId };
     }

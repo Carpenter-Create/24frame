@@ -19,7 +19,7 @@ import {
   type SocialMediaItem,
 } from "@/lib/social-media";
 import { headSocialMediaObject, presignSocialMediaPut } from "@/lib/s3-social-media";
-import { isSocialMuxId, SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
+import { isSocialMuxId, SOCIAL_MUX_PROVIDER, SocialMuxUploadNotBoundError } from "@/lib/social-mux";
 import {
   createSocialMuxDirectUpload,
   finalizeSocialMuxDirectUpload,
@@ -327,7 +327,7 @@ export async function finalizeSocialMuxUpload(formData: FormData): Promise<{
     return { error: SOCIAL.home.mediaType };
   }
   try {
-    const ready = await finalizeSocialMuxDirectUpload(uploadId);
+    const ready = await finalizeSocialMuxDirectUpload(uploadId, user.id);
     return {
       item: {
         kind: "video",
@@ -339,7 +339,10 @@ export async function finalizeSocialMuxUpload(formData: FormData): Promise<{
         assetId: ready.assetId,
       },
     };
-  } catch {
+  } catch (error) {
+    if (error instanceof SocialMuxUploadNotBoundError) {
+      return { error: SOCIAL.home.mediaForbidden };
+    }
     return { error: SOCIAL.home.videoPreparing };
   }
 }

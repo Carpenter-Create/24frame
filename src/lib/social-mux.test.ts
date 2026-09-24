@@ -9,6 +9,7 @@ import {
   SOCIAL_MUX_IMAGE_HOST,
   SOCIAL_MUX_ORIGINAL_RESOLUTION,
   socialMuxAssetSettings,
+  socialMuxPassthroughBoundToUser,
   socialMuxPlaybackUrl,
   socialMuxThumbnailUrl,
 } from "./social-mux";
@@ -86,6 +87,19 @@ describe("social Mux encode locks", () => {
     expect(server).not.toContain("NEXT_PUBLIC_");
     expect(server).toContain("video_quality");
     expect(server).toContain("max_resolution_tier");
-    expect(server).toContain('playback_policies: ["public"]');
+    expect(server).toContain('playback_policies: ["signed"]');
+    expect(server).not.toContain('playback_policies: ["public"]');
+  });
+
+  it("binds a Mux upload passthrough only when it starts with the session user id", () => {
+    const userId = "11111111-1111-4111-8111-111111111111";
+    expect(socialMuxPassthroughBoundToUser(`${userId}:22222222-2222-4222-8222-222222222222`, userId)).toBe(true);
+    expect(socialMuxPassthroughBoundToUser(`  ${userId}:object`, userId)).toBe(true);
+    expect(socialMuxPassthroughBoundToUser(`other:${userId}`, userId)).toBe(false);
+    expect(socialMuxPassthroughBoundToUser("22222222-2222-4222-8222-222222222222:object", userId)).toBe(false);
+    expect(socialMuxPassthroughBoundToUser("", userId)).toBe(false);
+    expect(socialMuxPassthroughBoundToUser(`${userId}:object`, "  ")).toBe(false);
+    expect(socialMuxPassthroughBoundToUser(null, userId)).toBe(false);
+    expect(socialMuxPassthroughBoundToUser(undefined, userId)).toBe(false);
   });
 });
