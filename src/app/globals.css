@@ -279,7 +279,7 @@ body {
   }
 }
 
-/* Rich calm v1.3. Viewer and rail paint only. Listed durations. No elevation. */
+/* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation. */
 @keyframes social-story-stage-in {
   from { opacity: 0; }
   to { opacity: 1; }

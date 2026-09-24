@@ -1,8 +1,8 @@
-# [GC][24Frame] LOCK — Visual register · rich calm v1.3
+# [GC][24Frame] LOCK — Visual register · rich calm v1.4
 
 **Date:** 2026-09-24 (CT)  
-**Status:** **LOCKED** · **Own→READY** (v1.3 — **G0** rich video/media **REQUIRED**, peer-grade · Coinbase / professional / 24Frame / **thoughtful** stay · primary richness is **video + media** · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
-**Version:** Cite **v1.3 only**. Supersedes v1.2. Do not paint against v1.2. Thoughtful stays IN.  
+**Status:** **LOCKED** · **Own→READY** (v1.4 — video **and** photo at Instagram / TikTok / YouTube level · **G0** stays · Coinbase / professional / 24Frame / **thoughtful** stay · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
+**Version:** Cite **v1.4 only**. Supersedes v1.3. Do not paint against v1.3. Thoughtful stays IN.  
 **Scope:** House visual register for **24Frame** — **Social + Stories first**. Amends feel bar only. **Does not** reopen geometry. Stories geometry is closed.  
 **Cites (geometry stays):**  
 - `stories-home-rail-fb-card-lock-v1.md`  
@@ -12,7 +12,7 @@
 
 ---
 
-**Craft bar:** Primary richness is **video + media** — presence, fill, and immersion at Facebook / Instagram-grade playback and viewer — inside Coinbase **precise calm trust**. Professional. Thoughtful. Interesting. Not flat. Not boring. Not ornamental. Not decorative noise. Not playful gimmick. Not Meta brand clone.
+**Craft bar:** Video **and** photo are Instagram / TikTok / YouTube level rich media — peer-grade playback, presence, fill, and immersion — inside Coinbase **precise calm trust**. Professional. Thoughtful. Interesting. Not flat. Not boring. Not a postage stamp. Not ornamental. Not decorative noise. Not playful gimmick. Not a Meta, TikTok, or YouTube brand clone.
 
 ---
 
@@ -20,9 +20,11 @@
 
 **Coinbase register stays:** Geist · greyscale surfaces · one accent Sporty Blue `#1769FF` · hairlines · spacing **8 / 16 / 24 / 48** · **no drop shadows** · quiet type · Coinbase-calm **institutional trust**. Chrome is professional Coinbase calm: interesting, not flat, not boring. **No ornamental invent.**
 
-**Register.** Coinbase / professional / 24Frame **and thoughtful** (intentional hierarchy · restraint with presence · considered media). Thoughtful is **IN** at v1.3.
+**Register.** Coinbase / professional / 24Frame **and thoughtful** (intentional hierarchy · restraint with presence · considered media). Thoughtful is **IN** at v1.4.
 
 **G0.** Serves a film/media community. Rich video/media is **REQUIRED** (peer-grade), not optional polish, and not “good enough chrome”.
+
+**v1.4.** Video **and** photo = Instagram / TikTok / YouTube level rich media (peer-grade playback, presence, fill, immersion). Weak, collapsed, or postage-stamp media = FAIL even when chrome is calm.
 
 **Primary richness is video + media.** Interesting + rich means presence, fill, and immersion — FB/IG-grade playback and viewer — **not** flat empty plates, **not** boring sparse “settings energy” on Social/Stories, and **not** chrome invented past the locked levers.
 
@@ -36,7 +38,7 @@ Richness lands through **video + media** (presence, fill, immersion), never thro
 
 | Lever | IN (ship) | OUT |
 |-------|-----------|-----|
-| **Media vitality** | **Video + media first.** Full-bleed covers, live camera viewfinder, immersive viewer stage filled with real media (or honest dark stage), FB/IG-grade playback and viewer. Honor rail / viewer / create locks. | Grey discs · blank muted forever · flat institutional empty cards where a story face belongs · ornamental chrome in place of media |
+| **Media vitality** | **Video and photo.** Full-bleed covers and viewer playback at Instagram / TikTok / YouTube level: presence, fill, immersion. Live camera viewfinder stays create-story v1.5. Honest dark stage only while media is absent. | Grey discs · blank muted forever · weak, collapsed, or postage-stamp media · ornamental chrome in place of media |
 | **Depth / presence** | Scrims + gradients over media for type; dimmed neighbor cards; progress on media; dark immersive open. Reads as depth without elevation tricks. | Flat single-fill cards with no media layer · solid opaque bars where gradient scrims are locked |
 | **Accent punch** | Sporty Blue used **sparingly and vividly** (unseen rings, Create +, primary CTAs). | Blue wash backgrounds · rainbow IG rings · multi-accent candy · loud consumer promo chrome |
 | **Immersion** | Story open = dark full-viewport stage (viewer lock). Playback fills the card. Create Take/Record = full-bleed camera (create-story v1.5; geometry closed). | Light bordered max-width “form card” as the desktop story experience |
@@ -75,6 +77,7 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 
 - Soft-grading Stories to “thin calm” and polishing later  
 - “Good enough chrome” where peer-grade video/media is required  
+- Weak, collapsed, or postage-stamp photo or video, even when chrome is calm  
 - Flat / boring Social+Stories faces when media or immersion is locked  
 - Playful · gimmick · toy aesthetic for its own sake  
 - Loud consumer fluff that breaks institutional calm  
@@ -95,10 +98,11 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 **G5.** Motion only at listed durations; no bounce.  
 **G6.** Cited Stories geometry locks unchanged by this file. Stories geometry is closed.  
 **G7.** Design no PR — CoS routes Dev.  
-**G8.** Thoughtful is IN at v1.3: intentional hierarchy, restraint with presence, considered media. Inventing chrome past the locked levers = FAIL.  
-**G9.** Film/media community audience: the rich media bar is required, not optional polish. Peer-grade video/media. “Good enough chrome” = FAIL.
+**G8.** Thoughtful is IN at v1.4: intentional hierarchy, restraint with presence, considered media. Inventing chrome past the locked levers = FAIL.  
+**G9.** Film/media community audience: the rich media bar is required, not optional polish. Peer-grade video and photo. “Good enough chrome” = FAIL.  
+**G10.** Video and photo are Instagram / TikTok / YouTube level: playback, presence, fill, immersion. Postage-stamp media = FAIL.
 
 ## Repo citation
 
-CoS seeds: `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` (v1.3 only; supersedes v1.2)  
+CoS seeds: `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` (v1.4 only; supersedes v1.3)  
 Box: `/workspace/24frame-agg-ux/24frame-visual-register-rich-calm-lock-v1.md`
