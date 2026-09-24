@@ -51,6 +51,11 @@ describe("SocialDmStoryShare", () => {
     expect(mux).toContain("aspect-[9/16]");
     expect(mux).toContain("rounded-[8px]");
     expect(mux).toContain("border-hairline");
+    expect(mux).toContain("bg-[#0A0A0B]");
+    expect(mux).toContain("data-social-dm-story-chip");
+    expect(mux).toContain("absolute inset-x-0 top-0");
+    expect(mux).not.toContain("<footer");
+    expect(mux).not.toContain("bg-surface ");
     expect(mux).toContain("p-[8px]");
     expect(mux).toContain("size-6");
     expect(mux).toContain("Ada Lovelace");

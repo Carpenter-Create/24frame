@@ -13,9 +13,9 @@ import {
 } from "@/lib/social-dm-story-fullscreen";
 import { SOCIAL } from "@/lib/social";
 
-// Send-story DM craft v1.2. Video stays SocialFeedVideo. Tap fullscreens
-// that host: iOS webkitEnterFullscreen on the video / Mux media, otherwise
-// requestFullscreen on that same node. Not the card wrapper. No lightbox.
+// Send craft v1.4. The card is the story frame. Media fills it.
+// The author chip sits on the picture. Not a caption bar under a pasted still.
+// Tap fullscreens the same SocialFeedVideo host. No second player.
 
 function asFullscreenHost(node: Element | null): StoryShareFullscreenHost | null {
   if (!node || !(node instanceof HTMLElement)) return null;
@@ -29,6 +29,28 @@ function fullscreenSameHost(well: HTMLElement) {
       video: asFullscreenHost(well.querySelector("video")),
       mux: asFullscreenHost(mux),
     }),
+  );
+}
+
+function AuthorChip({
+  authorName,
+  authorPhotoUrl,
+}: {
+  authorName: string;
+  authorPhotoUrl: string | null;
+}) {
+  if (!authorName) return null;
+  return (
+    <div
+      data-social-dm-story-chip=""
+      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-[8px] bg-gradient-to-b from-black/60 to-transparent p-[8px]"
+    >
+      <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-6" />
+      <div className="min-w-0">
+        <p className="truncate t-body-sm text-white">{authorName}</p>
+        <p className="t-label text-white/70">{SOCIAL.dms.storyMeta}</p>
+      </div>
+    </div>
   );
 }
 
@@ -49,11 +71,11 @@ export function SocialDmStoryShare({
   playbackId?: string;
   href: string | null;
 }) {
-  const well = "relative aspect-[9/16] w-full overflow-hidden bg-surface-muted";
+  const frame = "absolute inset-0 size-full overflow-hidden bg-[#0A0A0B]";
   let media: ReactNode = null;
   if (unavailable || !url || !kind) {
     media = (
-      <p className={`${well} flex items-center justify-center px-[8px] text-center t-body-sm text-ink-2 break-words`}>
+      <p className={`${frame} flex items-center justify-center px-[8px] text-center t-body-sm text-white/80 break-words`}>
         {SOCIAL.dms.storyUnavailable}
       </p>
     );
@@ -61,7 +83,7 @@ export function SocialDmStoryShare({
     media = (
       <div
         data-social-dm-story-video=""
-        className={well}
+        className={frame}
         onClick={(event) => fullscreenSameHost(event.currentTarget)}
       >
         <SocialFeedVideo
@@ -72,13 +94,13 @@ export function SocialDmStoryShare({
     );
   } else if (href) {
     media = (
-      <Link href={href} data-social-dm-story-photo="" className={`${well} block`}>
+      <Link href={href} data-social-dm-story-photo="" className={`${frame} block`}>
         <SocialMediaImage src={url} sizes="168px" alt="" />
       </Link>
     );
   } else {
     media = (
-      <div data-social-dm-story-photo="" className={well}>
+      <div data-social-dm-story-photo="" className={frame}>
         <SocialMediaImage src={url} sizes="168px" alt="" />
       </div>
     );
@@ -87,18 +109,10 @@ export function SocialDmStoryShare({
   return (
     <article
       data-social-dm-story-share=""
-      className="w-[168px] shrink-0 overflow-hidden rounded-[8px] border border-hairline bg-surface"
+      className="relative aspect-[9/16] w-[168px] shrink-0 overflow-hidden rounded-[8px] border border-hairline bg-[#0A0A0B]"
     >
       {media}
-      {authorName ? (
-        <footer className="flex items-center gap-[8px] p-[8px]">
-          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-6" />
-          <div className="min-w-0">
-            <p className="break-words t-body-sm text-ink">{authorName}</p>
-            <p className="t-label text-ink-3">{SOCIAL.dms.storyMeta}</p>
-          </div>
-        </footer>
-      ) : null}
+      <AuthorChip authorName={authorName} authorPhotoUrl={authorPhotoUrl} />
     </article>
   );
 }
