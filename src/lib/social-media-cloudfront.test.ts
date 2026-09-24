@@ -45,6 +45,34 @@ describe("social media CloudFront", () => {
     expect(new Date(first.dateLessThan).getTime() % 300_000).toBe(0);
   });
 
+  it("prepends https when MEDIA_CLOUDFRONT_DOMAIN is a host", () => {
+    process.env.MEDIA_CLOUDFRONT_DOMAIN = "d364lvgeu9rmwn.cloudfront.net";
+    mockGetSignedUrl.mockReturnValueOnce("https://d364lvgeu9rmwn.cloudfront.net/signed");
+
+    expect(signSocialMediaCloudfrontUrl("stories/org/clip.mp4")).toBe(
+      "https://d364lvgeu9rmwn.cloudfront.net/signed",
+    );
+    expect(mockGetSignedUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://d364lvgeu9rmwn.cloudfront.net/stories/org/clip.mp4",
+        keyPairId: "KMEDIA",
+        privateKey: "media-private",
+      }),
+    );
+  });
+
+  it("strips a trailing slash before prepending https on a host-only domain", () => {
+    process.env.MEDIA_CLOUDFRONT_DOMAIN = "d364lvgeu9rmwn.cloudfront.net/";
+    mockGetSignedUrl.mockReturnValueOnce("https://d364lvgeu9rmwn.cloudfront.net/signed");
+
+    signSocialMediaCloudfrontUrl("stories/org/clip.mp4");
+    expect(mockGetSignedUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://d364lvgeu9rmwn.cloudfront.net/stories/org/clip.mp4",
+      }),
+    );
+  });
+
   it("quantises expiry so two signs in the same window share one RSA signature", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-05T14:01:00Z"));
