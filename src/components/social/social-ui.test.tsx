@@ -1045,6 +1045,17 @@ describe("SocialPostCard 24Frame blend", () => {
       />,
     );
     expect(html).toContain(SOCIAL_FEED_ROW_CLASS);
+    expect(html).toContain("px-[var(--space-4)]");
+    const mediaOpen = html.slice(
+      html.indexOf("data-social-post-media"),
+      html.indexOf(">", html.indexOf("data-social-post-media")) + 1,
+    );
+    expect(mediaOpen).toContain("w-full");
+    expect(mediaOpen).toContain("px-0");
+    expect(mediaOpen).not.toContain("px-[var(--space-4)]");
+    const media = html.slice(html.indexOf("data-social-post-media"), html.indexOf("data-social-post-actions"));
+    expect(media).not.toContain("md:rounded-[8px]");
+    expect(media).not.toContain("rounded-");
     expect(html).toContain('data-social-post-time=""');
     expect(html).toContain(socialRelativeTime(createdAt));
     expect(html).toContain(SOCIAL_POST_TIME_CLASS);

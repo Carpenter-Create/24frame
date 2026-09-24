@@ -9,6 +9,7 @@ import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_POST_TIME_CLASS,
@@ -181,7 +182,7 @@ export function SocialPostMedia({
 }) {
   if (items.length === 0) return null;
   return (
-    <div data-social-post-media="" className="flex flex-col gap-2">
+    <div data-social-post-media="" className="flex w-full flex-col gap-2 px-0">
       {items.map((item) => (
         <SocialPostMediaFrame
           key={item.playbackId ?? item.url}
@@ -205,7 +206,7 @@ function SocialPostMediaFrame({
 }) {
   const frame = cn(
     frameClass ?? socialMediaFrameClass(item),
-    "relative overflow-hidden bg-surface-muted md:rounded-[8px]",
+    "relative w-full overflow-hidden bg-surface-muted",
   );
   if (item.kind === "video") {
     return (
@@ -530,7 +531,7 @@ export function SocialPostCard({
       data-social-post-href={permalink ? href : undefined}
       className={SOCIAL_FEED_ROW_CLASS}
     >
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className={`flex min-w-0 items-center gap-2.5 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
           {post.authorHandle ? (
@@ -564,7 +565,7 @@ export function SocialPostCard({
       </div>
       {captionAboveMedia ? caption : null}
       {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
-      <div className="flex flex-col gap-1">
+      <div className={`flex flex-col gap-1 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <div data-social-post-actions="" className="flex items-center gap-3.5">
           {post.canLike ? (
             <SocialLikeButton

@@ -24,8 +24,11 @@ describe("Social Home stack lock", () => {
     expect(SOCIAL_HOME_STACK_ORDER).toEqual(["topics", "composer", "stories", "wall"]);
     expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("p-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
   });
 });
 

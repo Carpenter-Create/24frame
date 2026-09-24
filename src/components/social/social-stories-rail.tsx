@@ -68,7 +68,7 @@ function HomeTallStoriesRail({
       data-social-stories-tall=""
       className="overflow-x-auto"
     >
-      <div className="flex w-max gap-2 pr-4 pb-2">
+      <div className="flex w-max gap-2 pb-2">
         {canCreate ? (
           <Link
             href={SOCIAL_ROUTES.storiesNew}

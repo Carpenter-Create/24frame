@@ -117,6 +117,10 @@ const socialShellCenterClass =
 
 export const SOCIAL_HOME_CENTER_CLASS = socialShellCenterClass;
 
+// Home spine only. Phone SoT. 16 between Topics, composer, Stories, and
+// the feed. Profile, Explore, and Messages keep the shared gap-2 center.
+export const SOCIAL_HOME_SPINE_CLASS = "gap-[var(--space-4)]";
+
 // Profile desktop row matches Home: this column plus SocialForYouRail
 // at lg+. Explore and Messages use that same row. The center stays
 // the shared 720. The pair stays tight. Phone stays the full phone canvas.
@@ -186,24 +190,26 @@ export const SOCIAL_STORY_FACE_CLASS =
 export const SOCIAL_STORY_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[9px] bg-surface-muted";
 
-// Home tall FB-style cards — 160:482 / 160:964. Circular rings superseded.
+// Home tall FB-style cards. Phone SoT 120×208; desktop follows at 128×224.
+// Circular rings superseded. Spine density lock — do not shrink back to 108×192.
 export const SOCIAL_HOME_STORY_CARD_CLASS =
-  `relative h-[192px] w-[108px] shrink-0 overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface md:h-[200px] md:w-[112px]`;
+  `relative h-[208px] w-[120px] shrink-0 overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface md:h-[224px] md:w-[128px]`;
 
-// Upper profile. Plate is 72 phone / 80 md, so the seam is 120 on both sizes.
+// Create plate stays 72 phone / 80 md. The larger card grows the upper
+// media face. Seam = card height − plate (136 phone / 144 md).
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
-  "absolute inset-x-0 top-0 h-[120px] overflow-hidden bg-surface-muted md:h-[120px]";
+  "absolute inset-x-0 top-0 h-[136px] overflow-hidden bg-surface-muted md:h-[144px]";
 
 // Accent circle + white plus glyph. Not a white-fill well (Plus fill
 // knockout reads as white disc / blue +). border-surface is the seam
 // ring only — not the well fill. Phone + desktop share this class.
-// Centered on the photo/plate seam (120). 36 phone / 40 md.
+// Centered on the photo/plate seam (136 phone / 144 md). 36 phone / 40 md.
 export const SOCIAL_HOME_STORY_PLUS_CLASS =
-  "absolute left-1/2 top-[102px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[100px] md:size-10";
+  "absolute left-1/2 top-[118px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[124px] md:size-10";
 
 // Adam 2026-09-20 — Create Story is Social chrome, not an eyebrow.
 // t-label uppercase + 0.12em track stacked CREATE / STORY as a
-// leftover specialty face. Same token as Topics / Write something /
+// leftover specialty face. Same token as Topics / Share something /
 // Create sheet tiles. One SoT for phone + desktop — no device fork.
 export const SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS =
   "t-body-sm font-medium text-ink";
@@ -291,17 +297,16 @@ export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
 
 export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
 
-// Home composer — airy canvas register. Adam 2026-09-22
-// lock_topics_composer_stories_wall. Supersedes the 2026-09-20 phone
-// cut (`hidden md:flex`). Avatar + prompt on the canvas, no gray liner
-// / boxed form, on phone and desktop. The row opens the Create sheet
-// SoT. Create dock stays. Photo · Video · Write · Go live stay on that
-// sheet — never a second chooser strip on Home.
+// Home composer share stage. Phone SoT; desktop uses this same class.
+// Surface #FFFFFF (bg-surface), hairline #ECEDF0 (border-hairline),
+// radius 16, pad 16. Row is avatar 40 + muted pill (#F4F4F6, h 40, r 20).
+// Height is the 40 field plus 16/16 pad (~72). One press opens Create.
+// No transparent row, no Live/Photo/Feeling strip.
 export const SOCIAL_COMPOSER_CLASS =
-  "flex h-20 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
+  `flex w-full items-center gap-[var(--space-4)] ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
-  "flex h-11 min-w-0 flex-1 items-center t-body text-ink-2";
+  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] bg-surface-muted px-[var(--space-4)] t-body text-ink-2";
 
 export const SOCIAL_COMPOSER_MEDIA_CLASS =
   "relative flex size-9 shrink-0 cursor-pointer items-center justify-center text-ink-2";
@@ -316,9 +321,12 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
 // Post sits on the page canvas. The list draws the between-post
-// hairline (SOCIAL_FEED_GUTTER_CLASS). No card box.
+// hairline (SOCIAL_FEED_GUTTER_CLASS). No card box. Chrome keeps a
+// 16 inset; media is full-bleed of the center column (no side pad).
 export const SOCIAL_FEED_ROW_CLASS =
-  "flex flex-col gap-2 bg-surface p-[var(--space-4)]";
+  "flex flex-col gap-2 bg-surface py-[var(--space-4)]";
+
+export const SOCIAL_FEED_CHROME_CLASS = "px-[var(--space-4)]";
 
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).

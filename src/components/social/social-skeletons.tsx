@@ -2,12 +2,15 @@ import type { ReactNode } from "react";
 
 import { Skeleton } from "@/components/layout/skeleton";
 import { HOUSE_DRAWER_HOST_CLASS, HOUSE_DRAWER_PANEL_CLASS } from "@/lib/house-overlay";
+import { cn } from "@/lib/cn";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_AVATAR_SM_CLASS,
   SOCIAL_COMPOSER_CLASS,
+  SOCIAL_COMPOSER_FIELD_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
+  SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
@@ -18,6 +21,7 @@ import {
   SOCIAL_TOPIC_RAIL_STACK_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
+  SOCIAL_HOME_SPINE_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
@@ -78,22 +82,22 @@ export function SocialHomeCenterSkeleton({
         </div>
       ) : null}
       <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
-        <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-        <Skeleton className="h-9 min-w-0 flex-1" />
+        <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
+        <Skeleton className={SOCIAL_COMPOSER_FIELD_CLASS} />
       </div>
       <SocialStoriesRailSkeleton tall />
       {middle}
       <div data-social-feed-skeleton="" className={SOCIAL_FEED_GUTTER_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
-            <div className="flex gap-2">
+            <div className={`flex gap-2 ${SOCIAL_FEED_CHROME_CLASS}`}>
               <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <Skeleton className="h-3.5 w-1/3" />
                 <Skeleton className="h-3 w-2/3" />
               </div>
             </div>
-            <Skeleton className="h-40 w-full rounded-[8px]" />
+            <Skeleton className="h-40 w-full" />
           </div>
         ))}
       </div>
@@ -101,7 +105,7 @@ export function SocialHomeCenterSkeleton({
   );
   if (!topics) return body;
   return (
-    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={cn(SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_SPINE_CLASS)}>
       {body}
     </div>
   );
@@ -171,14 +175,14 @@ export function SocialProfileCenterSkeleton() {
       <div className={SOCIAL_FEED_GUTTER_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
-            <div className="flex gap-2">
+            <div className={`flex gap-2 ${SOCIAL_FEED_CHROME_CLASS}`}>
               <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <Skeleton className="h-3.5 w-1/3" />
                 <Skeleton className="h-3 w-2/3" />
               </div>
             </div>
-            <Skeleton className="h-40 w-full rounded-[8px]" />
+            <Skeleton className="h-40 w-full" />
           </div>
         ))}
       </div>

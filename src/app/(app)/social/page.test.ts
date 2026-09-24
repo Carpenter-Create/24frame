@@ -180,6 +180,11 @@ describe("Social home", () => {
     expect(html).not.toContain("Posts from people you follow");
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain('data-social-home-stack="lock_topics_composer_stories_wall"');
+    const stackClass = html.match(/data-social-home-stack="lock_topics_composer_stories_wall"[^>]*class="([^"]+)"/)?.[1]
+      ?? html.match(/class="([^"]+)"[^>]*data-social-home-stack="lock_topics_composer_stories_wall"/)?.[1];
+    expect(stackClass).toContain("gap-[var(--space-4)]");
+    expect(stackClass).not.toMatch(/(?:^|\s)gap-2(?:\s|$)/);
+    expect(stackClass).toContain("lg:max-w-[720px]");
     expect(html).toContain("data-social-create-sheet");
     expect(html).not.toContain("/social/create?kind=text");
     expect(html).toContain(SOCIAL.create.title);
@@ -188,7 +193,8 @@ describe("Social home", () => {
     expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
     expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-tabs"));
     expect(html).not.toMatch(/>Topics</);
-    expect(html).toContain("Write something");
+    expect(html).toContain("Share something");
+    expect(html).not.toContain("Write something");
     expect(html).not.toContain("What's on your mind");
     expect(html).not.toContain("Topics for you");
     expect(html).not.toContain("data-social-for-you-topics");

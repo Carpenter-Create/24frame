@@ -2,6 +2,7 @@
 
 **Date:** 2026-09-23 (CT)  
 **Status:** **LOCKED** (Adam product signal 2026-09-23 · prod shots `/social/stories` empty + Create story modal) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
+**Prompt copy superseded** by [`social-home-composer-share-copy-lock-v1.md`](social-home-composer-share-copy-lock-v1.md) — the live Home composer prompt and empty primary CTA are **Share something**. Purpose, stack, and URLs in this lock stay.  
 **Scope:** Social **Home purpose**, **canonical URL**, **Home rail mapping**, **page empty-state copy/CTAs**, and **Stories rail vs feed** relationship. Not full feed-card craft.  
 **Evidence:** Adam prod — sidebar **Home** selected while URL is `/social/stories`; page empty is stories-only (“No stories yet…” + Create a story). Second shot: `/social/stories/new` Create a story (Video only).  
 **House:** Coinbase register · never-patch · phone never truncate · spacing 8 / 16 / 24 / 48  
@@ -61,7 +62,7 @@ CoS may already have a Dev P0 on nav stuck-active; this lock is the **IA SoT** t
 Keep one Home column (cite `SOCIAL_HOME_STACK_LOCK` / `SOCIAL_HOME_STACK_ORDER`), with wall = **activity feed**:
 
 1. **Topics** (chip rail — no section label per existing Adam note)  
-2. **Composer** (“Write something” — phone + desktop; no gray liner strip)  
+2. **Composer** (“Share something” — phone + desktop; no gray liner strip)  
 3. **Stories row** — horizontal rail **on** Home (Your story + followees’ stories)  
 4. **Activity feed (wall)** — live activity items (not Stories-only empty as the page body)
 
@@ -79,7 +80,7 @@ Use **activity** copy. Do **not** ship Stories empty as the page.
 |------|------|
 | Title | **No activity yet** |
 | Hint | **Posts, stories, and updates from people you follow show up here.** |
-| Primary CTA | **Write something** → focuses Home composer (or `/social/create` media/text if composer cannot focus) |
+| Primary CTA | **Share something** → focuses Home composer (or `/social/create` media/text if composer cannot focus) |
 | Secondary CTA | **Create a story** → `/social/stories/new` |
 | Optional quiet | **Find people** → people search (`socialSearchHref`) when follow graph is empty |
 | Layout | Coinbase quiet empty: title `t-heading` · hint `t-body-sm` ink-3 · CTAs gap **16** · full strings wrap on phone (**never truncate**) |
@@ -106,7 +107,7 @@ Unchanged product face: `/social/stories/new` · Video only · existing Stories 
 | Rank | Miss | Fix |
 |------|------|-----|
 | **P0** | Home selected @ `/social/stories` with Stories-only empty | Home = `/social` activity feed; bare stories index redirects to Home |
-| **P0** | Page empty = “No stories yet…” + only Create a story | Page empty = activity copy + Write something primary + Create a story secondary |
+| **P0** | Page empty = “No stories yet…” + only Create a story | Page empty = activity copy + Share something primary + Create a story secondary |
 | **P0** | Home rail stuck / cannot re-select while on stories path | Home `href` + active = `/social` only; stories paths never wash Home |
 | **P1** | Home subtitle / purpose still “posts only” or “stories only” | Subtitle + wall = activity feed |
 | **P2** | Invent `/social/home` or a second Home layout | Forbidden — one `/social` |
@@ -127,7 +128,7 @@ Unchanged product face: `/social/stories/new` · Video only · existing Stories 
 **G2.** Canonical Home URL = `/social`; no `/social/home`.  
 **G3.** Home rail `href` + active state = `/social` only; `/social/stories*` never marks Home active.  
 **G4.** Bare `/social/stories` permanently redirects to `/social`; create/viewer stay under `/social/stories/…`.  
-**G5.** Page empty = “No activity yet” + activity hint + Write something primary + Create a story secondary (phone wraps, no truncate).  
+**G5.** Page empty = “No activity yet” + activity hint + Share something primary + Create a story secondary (phone wraps, no truncate).  
 **G6.** Stories row remains an on-Home rail; its empty does not replace the page empty.  
 **G7.** Design no PR — CoS routes Dev to this lock (nav P0 may land first; empty/URL must still match G1–G6).
 

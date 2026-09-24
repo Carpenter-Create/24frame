@@ -23,6 +23,7 @@ import {
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_EMPTY_ACTION_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
@@ -51,7 +52,7 @@ const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]])
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
 describe("Social Home craft (Figma 160:482 / 160:964)", () => {
-  it("renders the airy composer on phone and desktop as avatar + prompt that opens Create", () => {
+  it("renders the share stage on phone and desktop as avatar + prompt that opens Create", () => {
     const html = renderToStaticMarkup(
       <SocialHomeComposer authorName="Adam Carpenter" />,
     );
@@ -61,9 +62,11 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL_COMPOSER_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).not.toContain("/social/create?kind=text");
-    expect(html).toContain("Write something");
+    expect(html).toContain("Share something");
+    expect(html).not.toContain("Write something");
     expect(html).not.toContain("What&#x27;s on your mind");
-    expect(html.split("Write something").length - 1).toBe(1);
+    expect(html).not.toContain("Share something,");
+    expect(html.split("Share something").length - 1).toBe(1);
     expect(html).toContain(SOCIAL.create.title);
     expect(html).not.toContain('data-social-icon="plus"');
     expect(html).toContain("text-ink-2");
@@ -77,12 +80,23 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("<img");
     expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("h-20");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("rounded-[var(--radius-lg)]");
-    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-none");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("items-center");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("gap-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("p-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("bg-surface-muted");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-10");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("rounded-[20px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("px-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("t-body");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("text-ink-2");
+    expect(html).toContain("size-10");
+    expect(html).not.toContain("data-social-icon");
   });
 
   it("shows the composer author photo when a signed URL exists", () => {
@@ -177,18 +191,27 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("Maya C.");
-    expect(html).toContain("w-[108px]");
-    expect(html).toContain("h-[192px]");
-    expect(html).toContain("md:w-[112px]");
-    expect(html).toContain("md:h-[200px]");
+    expect(html).toContain("w-[120px]");
+    expect(html).toContain("h-[208px]");
+    expect(html).toContain("md:w-[128px]");
+    expect(html).toContain("md:h-[224px]");
+    expect(html).toContain("flex w-max gap-2 pb-2");
+    expect(html).not.toContain("pr-4");
+    expect(html).not.toContain("w-[108px]");
+    expect(html).not.toContain("h-[192px]");
     expect(html).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("bg-accent");
     expect(html).toContain("bg-gradient-to-t");
     expect(html).toContain("from-band/72");
     expect(html).not.toContain("bg-band/55");
-    expect(html).toContain("md:h-[120px]");
+    expect(html).toContain("md:h-[144px]");
+    expect(html).toContain("h-[72px]");
     expect(html).toContain("md:h-20");
-    expect(html).toContain("md:top-[100px]");
+    expect(html).toContain("md:top-[124px]");
+    expect(SOCIAL_HOME_STORY_CARD_CLASS).toContain("h-[208px]");
+    expect(SOCIAL_HOME_STORY_CARD_CLASS).toContain("w-[120px]");
+    expect(SOCIAL_HOME_STORY_CARD_CLASS).toContain("md:h-[224px]");
+    expect(SOCIAL_HOME_STORY_CARD_CLASS).toContain("md:w-[128px]");
     expect(html).toContain("md:size-10");
     expect(html).toContain("font-medium");
     expect(html).toContain(SOCIAL_HOME_STORY_CREATE_LABEL_CLASS);
@@ -415,8 +438,10 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     );
     expect(html).toContain('data-social-stories-surface="home"');
     expect(html).toContain("data-social-stories-tall");
-    expect(html).toContain("w-[108px]");
-    expect(html).toContain("h-[192px]");
+    expect(html).toContain("w-[120px]");
+    expect(html).toContain("h-[208px]");
+    expect(html).toContain("gap-2");
+    expect(html).not.toContain("gap-4");
     expect(html).toContain(`width="${SOCIAL_ICON_SIZE_STORY_PLUS}"`);
     expect(html).toContain(SOCIAL.stories.create);
     expect(html).toContain("data-social-avatar");

@@ -5,8 +5,8 @@ import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { SOCIAL_COMPOSER_CLASS, SOCIAL_COMPOSER_FIELD_CLASS } from "@/lib/social-chrome";
 import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
-// Airy create entry on phone and desktop. Avatar + prompt sit on the
-// canvas — no boxed liner. The row opens the Create sheet SoT
+// Share stage on phone and desktop. Avatar 40 + Share something pill
+// on a surface card. The whole stage opens the Create sheet SoT
 // (Photo · Video · Write · Go live). Create dock stays.
 export function SocialHomeComposer({
   authorName,
@@ -25,7 +25,7 @@ export function SocialHomeComposer({
           aria-label={SOCIAL.create.title}
           className={SOCIAL_COMPOSER_CLASS}
         >
-          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" />
+          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-10" />
           <span data-social-composer-prompt="" className={`${SOCIAL_COMPOSER_FIELD_CLASS} text-ink-2`}>
             {socialComposerPrompt(authorName)}
           </span>
