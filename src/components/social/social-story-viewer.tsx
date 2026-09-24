@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +9,7 @@ import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialMediaImage } from "@/components/social/social-media-image";
 import { SocialIcon } from "@/components/social/social-icon";
 import { BRAND_LOGO_DARK_SRC, BRAND_LOGO_HEIGHT_PX } from "@/lib/brand";
+import { HOUSE_CLIENT_SHELL } from "@/lib/house-client-shell";
 import { cn } from "@/lib/cn";
 import { PRODUCT_NAME } from "@/lib/product";
 import {
@@ -47,16 +48,21 @@ function markStoryEnter(direction: "next" | "prev") {
   }
 }
 
-function takeStoryEnter(): "next" | "prev" | "open" {
-  if (typeof window === "undefined") return "open";
+function consumeStoryEnter(): "next" | "prev" | null {
+  if (typeof window === "undefined") return null;
   try {
     const value = sessionStorage.getItem(STORY_ENTER_KEY);
     sessionStorage.removeItem(STORY_ENTER_KEY);
     if (value === "next" || value === "prev") return value;
   } catch {
-    // Same as a cold open.
+    // Cold open.
   }
-  return "open";
+  return null;
+}
+
+function storyScreen(node: HTMLElement): HTMLElement | null {
+  const screen = node.closest(`[${HOUSE_CLIENT_SHELL.screenAttr}]`);
+  return screen instanceof HTMLElement ? screen : null;
 }
 
 function neighborHref(neighbor: SocialStoryNeighbor | null, itemId: string | null): string | null {
@@ -135,12 +141,14 @@ function StoryVideo({
   paused,
   muted,
   onAudible,
+  onForcedMute,
   onProgress,
 }: {
   src: string;
   paused: boolean;
   muted: boolean;
   onAudible: (audible: boolean) => void;
+  onForcedMute: () => void;
   onProgress: (progress: number) => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -149,22 +157,31 @@ function StoryVideo({
     const node = ref.current;
     if (!node) return;
     let live = true;
-    node.muted = muted;
-    if (paused) {
-      node.pause();
-      return () => {
-        live = false;
-      };
-    }
-    void node.play().catch(() => {
+    const screen = storyScreen(node);
+    const sync = () => {
       if (!live) return;
-      node.muted = true;
-      void node.play().catch(() => undefined);
-    });
+      const concealed = screen?.hasAttribute("hidden") === true;
+      if (paused || concealed) {
+        node.pause();
+        return;
+      }
+      node.muted = muted;
+      void node.play().catch(() => {
+        if (!live) return;
+        onForcedMute();
+        node.muted = true;
+        void node.play().catch(() => undefined);
+      });
+    };
+    sync();
+    const observer = screen ? new MutationObserver(sync) : null;
+    observer?.observe(screen as HTMLElement, { attributes: true, attributeFilter: ["hidden"] });
     return () => {
       live = false;
+      observer?.disconnect();
+      node.pause();
     };
-  }, [muted, paused, src]);
+  }, [muted, onForcedMute, paused, src]);
 
   return (
     <video
@@ -229,10 +246,25 @@ export function SocialStoryViewer({
   const [audible, setAudible] = useState(true);
   const [videoProgress, setVideoProgress] = useState(0);
   const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const forceMute = useCallback(() => setMuted(true), []);
   useLayoutEffect(() => {
-    const frame = requestAnimationFrame(() => setEnter(takeStoryEnter()));
-    return () => cancelAnimationFrame(frame);
-  }, []);
+    // The 180ms fade must be on the frame the browser paints. A later frame flashes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- commit enter before paint
+    setEnter(consumeStoryEnter() ?? "open");
+  }, [storyId]);
+  useEffect(() => {
+    const stage = stageRef.current;
+    const screen = stage ? storyScreen(stage) : null;
+    if (!screen) return;
+    const observer = new MutationObserver(() => {
+      if (screen.hasAttribute("hidden")) return;
+      const direction = consumeStoryEnter();
+      if (direction) setEnter(direction);
+    });
+    observer.observe(screen, { attributes: true, attributeFilter: ["hidden"] });
+    return () => observer.disconnect();
+  }, [storyId]);
   const bars = Math.max(total, 1);
   const prevTap = neighborHref(prevAuthor, prevId);
   const nextTap = neighborHref(nextAuthor, nextId);
@@ -264,6 +296,7 @@ export function SocialStoryViewer({
 
   return (
     <div
+      ref={stageRef}
       data-social-story-stage=""
       className={cn(SOCIAL_STORY_STAGE_CLASS, enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null)}
     >
@@ -306,6 +339,7 @@ export function SocialStoryViewer({
                 paused={paused}
                 muted={muted}
                 onAudible={setAudible}
+                onForcedMute={forceMute}
                 onProgress={setVideoProgress}
               />
             </div>

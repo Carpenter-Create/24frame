@@ -1,6 +1,8 @@
-import { SocialEmpty } from "@/components/social/social-empty";
+import Link from "next/link";
+
+import { SocialIcon } from "@/components/social/social-icon";
 import { SocialStoryViewer, type SocialStoryNeighbor } from "@/components/social/social-story-viewer";
-import { SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_STORY_STAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
 import { socialStoryRailCover } from "@/lib/social-edge";
@@ -20,6 +22,38 @@ import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { requireSocialSession } from "@/lib/social-session";
 
+function StoryUnavailable({
+  marker,
+  title,
+}: {
+  marker: "missing" | "expired";
+  title: string;
+}) {
+  return (
+    <div
+      data-social-story-unavailable=""
+      data-social-story-missing={marker === "missing" ? "" : undefined}
+      data-social-story-expired={marker === "expired" ? "" : undefined}
+      className={SOCIAL_STORY_STAGE_CLASS}
+    >
+      <h1 className="sr-only">{SOCIAL.stories.title}</h1>
+      <Link
+        href={SOCIAL_ROUTES.home}
+        aria-label={SOCIAL.stories.close}
+        className="absolute right-4 top-4 flex size-12 items-center justify-center text-band-ink"
+      >
+        <SocialIcon name="x" size={22} />
+      </Link>
+      <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="t-body text-band-ink">{title}</p>
+        <Link href={SOCIAL_ROUTES.home} className="t-body-sm text-band-ink">
+          {SOCIAL.member.goHome}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default async function SocialStoryPage({
   params,
 }: {
@@ -29,28 +63,10 @@ export default async function SocialStoryPage({
   const { ctx, supabase } = session;
   const story = await loadStoryById(supabase, id);
   if (!story) {
-    return (
-      <div data-social-story-missing="" className={SOCIAL_PAGE_CLASS}>
-        <h1 className="sr-only">{SOCIAL.stories.title}</h1>
-        <SocialEmpty
-          icon="warning-circle"
-          title={SOCIAL.stories.missing}
-          action={{ href: SOCIAL_ROUTES.home, label: SOCIAL.member.goHome }}
-        />
-      </div>
-    );
+    return <StoryUnavailable marker="missing" title={SOCIAL.stories.missing} />;
   }
   if (!isStoryLive(story.expires_at)) {
-    return (
-      <div data-social-story-expired="" className={SOCIAL_PAGE_CLASS}>
-        <h1 className="sr-only">{SOCIAL.stories.title}</h1>
-        <SocialEmpty
-          icon="warning-circle"
-          title={SOCIAL.stories.expired}
-          action={{ href: SOCIAL_ROUTES.home, label: SOCIAL.member.goHome }}
-        />
-      </div>
-    );
+    return <StoryUnavailable marker="expired" title={SOCIAL.stories.expired} />;
   }
 
   const [profile, followees] = await Promise.all([
@@ -118,6 +134,7 @@ export default async function SocialStoryPage({
     <div data-social-story={story.id}>
       <h1 className="sr-only">{name}</h1>
       <SocialStoryViewer
+        key={story.id}
         storyId={story.id}
         authorId={story.author_id}
         authorName={name}

@@ -14,7 +14,12 @@ import {
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
 } from "@/lib/social-home-bounds";
-import type { SocialMediaItem, SocialMediaLane, SocialMediaRuleError } from "@/lib/social-media";
+import type {
+  SocialMediaItem,
+  SocialMediaKind,
+  SocialMediaLane,
+  SocialMediaRuleError,
+} from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
 // Handle: 3–30, A–Z a–z 0–9 . _; no leading/trailing `.`, no `..`.
@@ -1216,10 +1221,16 @@ export function profileInsertRow(input: {
 export function socialMediaRuleMessage(
   error: SocialMediaRuleError,
   lane: SocialMediaLane = "posts",
+  kind?: SocialMediaKind,
 ): string {
-  if (error === "type") return lane === "stories" ? SOCIAL.stories.mediaType : SOCIAL.home.mediaType;
+  const photo = lane === "stories" && kind === "image";
+  if (error === "type") {
+    if (photo) return SOCIAL.stories.photoMediaType;
+    return lane === "stories" ? SOCIAL.stories.mediaType : SOCIAL.home.mediaType;
+  }
   if (error === "tooLarge") return SOCIAL.home.mediaTooLarge;
   if (error === "missing") {
+    if (photo) return SOCIAL.stories.photoMissing;
     return lane === "stories" ? SOCIAL.stories.mediaMissing : SOCIAL.home.mediaMissing;
   }
   if (error === "limit") return SOCIAL.home.mediaLimit;

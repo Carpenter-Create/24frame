@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -100,5 +101,17 @@ describe("SocialStoryViewer", () => {
     expect(still).not.toContain("aspect-[4/5]");
     expect(still).toContain("social-story-progress");
     expect(still).toContain("animation-duration:5000ms");
+  });
+
+  it("pauses a hidden story and commits the enter class before paint", () => {
+    const src = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
+    expect(src).toContain("node.pause()");
+    expect(src).toContain("onForcedMute");
+    expect(src).toContain("consumeStoryEnter");
+    expect(src).not.toContain("requestAnimationFrame(() => setEnter");
+    const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
+    expect(page).toContain("key={story.id}");
+    expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");
+    expect(page).toContain("SOCIAL.stories.close");
   });
 });

@@ -809,15 +809,22 @@ describe("social actions", () => {
       JSON.stringify([{ kind: "image", key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" }]),
     );
     vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
-    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.mediaMissing });
+    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.photoMissing });
     vi.mocked(headSocialMediaObject).mockResolvedValueOnce({
       bytes: 11 * 1024 * 1024,
       contentType: "image/jpeg",
     });
     expect(await createSocialStory(form)).toEqual({ error: SOCIAL.home.mediaTooLarge });
     vi.mocked(headSocialMediaObject).mockResolvedValueOnce({ bytes: 1200, contentType: "video/mp4" });
-    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.mediaType });
+    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.photoMediaType });
     expect(headSocialMediaObject).toHaveBeenCalledWith(`stories/${author}/${object}.jpg`);
+    const video = new FormData();
+    video.set(
+      "media",
+      JSON.stringify([{ kind: "video", key: `stories/${author}/${object}.mp4`, contentType: "video/mp4" }]),
+    );
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
+    expect(await createSocialStory(video)).toEqual({ error: SOCIAL.stories.mediaMissing });
     expect(inserts).toEqual([]);
   });
 

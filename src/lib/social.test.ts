@@ -204,6 +204,9 @@ describe("social copy lock", () => {
     expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/photo or video/i);
     expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/15 second/i);
     expect(socialMediaRuleMessage("type", "stories")).toBe(SOCIAL.stories.mediaType);
+    expect(socialMediaRuleMessage("type", "stories", "image")).toBe(SOCIAL.stories.photoMediaType);
+    expect(socialMediaRuleMessage("missing", "stories", "image")).toBe(SOCIAL.stories.photoMissing);
+    expect(socialMediaRuleMessage("missing", "stories", "video")).toBe(SOCIAL.stories.mediaMissing);
     expect(socialMediaRuleMessage("type")).toBe(SOCIAL.home.mediaType);
     const storyCompose = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
     expect(storyCompose).toContain("SOCIAL_VIDEO_CONTENT_TYPES.join(\",\")");

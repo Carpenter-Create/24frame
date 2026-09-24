@@ -392,7 +392,7 @@ export async function createSocialStory(formData: FormData): Promise<ActionResul
 
   for (const item of media.items) {
     const rejection = storedSocialMediaRejection(item, await headSocialMediaObject(item.key));
-    if (rejection) return { error: socialMediaRuleMessage(rejection, "stories") };
+    if (rejection) return { error: socialMediaRuleMessage(rejection, "stories", item.kind) };
   }
 
   const { error } = await supabase.from("stories").insert(
