@@ -83,7 +83,7 @@ function storyPlaybackHeld(screen: HTMLElement | null, paused: boolean): boolean
 function paintStoryEnter(
   stage: HTMLElement | null,
   direction: "next" | "prev",
-  apply: (value: "open" | "next" | "prev" | null) => void,
+  apply: (value: "next" | "prev" | null) => void,
 ) {
   // A keep-alive unhide is already in the DOM. Commit the slide class, and
   // restart it when the last hop used the same direction, before paint.
