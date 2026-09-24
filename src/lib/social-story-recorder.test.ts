@@ -131,7 +131,7 @@ describe("story MediaRecorder mime probe", () => {
     const uploadEnd = studio.indexOf("export function SocialStoryCompose");
     const uploadBlock = studio.slice(uploadStart, uploadEnd);
     expect(uploadBlock).toContain('headers: { "Content-Type": signed.contentType }');
-    expect(uploadBlock).toContain('console.error("story-put", put.status, await put.text())');
+    expect(uploadBlock).toContain('console.error("story-put", put.status, put.statusText, await put.text())');
     expect(uploadBlock).not.toContain("signal");
     expect(uploadBlock).not.toContain("AbortSignal");
     expect(uploadBlock).toContain('storyStoreNotice("presign")');
@@ -163,6 +163,7 @@ describe("story MediaRecorder mime probe", () => {
     expect(postBlock).toContain('storyUploadNotice("read")');
     expect(postBlock).toContain('storyUploadNotice("missing", clip.kind)');
     expect(postBlock).toContain("postingRef.current = true");
+    expect(postBlock).toContain("setError(result.error)");
     const start = studio.indexOf("function startRecording");
     const startEnd = studio.indexOf("function releaseLiveCamera");
     const startBlock = studio.slice(start, startEnd);
@@ -218,9 +219,10 @@ describe("story MediaRecorder mime probe", () => {
     expect(storyUploadNotice("store")).toBe("The file could not be stored.");
     expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("read"));
     expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("missing"));
-    expect(storyStoreNotice("presign")).toBe("The file could not be stored.");
+    expect(storyStoreNotice("presign")).toBe("Those attachments could not be stored.");
+    expect(storyStoreNotice("presign")).not.toBe(storyStoreNotice("network"));
     expect(storyStoreNotice("reject")).toBe(storyStoreNotice("network"));
-    expect(storyStoreNotice("network")).toBe(storyUploadNotice("store"));
+    expect(storyStoreNotice("network")).toBe("The file could not be stored.");
     expect(storyStoreNotice("network")).not.toBe(storyUploadNotice("missing"));
     expect(storyPutBlockedByCors({ status: 403, allowOrigin: null })).toBe(true);
     expect(

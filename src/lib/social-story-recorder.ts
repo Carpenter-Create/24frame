@@ -242,20 +242,20 @@ export function storyUploadNotice(
   return SOCIAL.home.uploadFailed;
 }
 
-/** Why the story PUT became the store toast. No separate house sentence exists. */
+/** Why a story upload stopped. Presign and the PUT use different house sentences. */
 export type StoryStoreStop = "presign" | "reject" | "network";
 
 /**
- * presign: the server action threw before a URL existed.
+ * presign: the server action threw or returned no URL.
  * reject: S3 returned a non-2xx.
- * network: fetch threw. That is the CORS preflight on the media bucket.
- * 24frame-media-source-prod (us-west-2) allows PUT from http://localhost:3000
- * only. The eb56af preview origin gets 403 and no Access-Control-Allow-Origin,
- * so the browser throws and the screen stays "The file could not be stored."
+ * network: fetch threw before a status. Preview CORS does that.
+ * Presign uses the existing attachments sentence. PUT and the network
+ * throw stay on the store sentence, so a screenshot tells them apart.
  */
 export function storyStoreNotice(stop: StoryStoreStop): string {
   switch (stop) {
     case "presign":
+      return SOCIAL.home.mediaInvalid;
     case "reject":
     case "network":
       return SOCIAL.home.uploadFailed;

@@ -139,7 +139,7 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
       body: prepared,
     });
     if (!put.ok) {
-      console.error("story-put", put.status, await put.text());
+      console.error("story-put", put.status, put.statusText, await put.text());
       return { error: storyStoreNotice("reject") };
     }
     const kind = socialMediaKindFor(prepared.type);
