@@ -178,7 +178,7 @@ describe("SocialStoryPostedConfirm", () => {
     expect(html).toContain(SOCIAL_STORY_POSTED_CTA_CLASS);
     expect(html).toContain("h-[var(--space-12)]");
     expect(html).toContain("bg-accent");
-    expect(html).toContain("shadow-none");
+    expect(html).not.toContain("shadow");
     expect(html).toContain("size-10");
     expect(html).not.toContain("max-w-[326px]");
     expect(html).not.toContain("check-circle");
@@ -190,8 +190,6 @@ describe("SocialStoryPostedConfirm", () => {
     expect((html.match(/Story posted/g) ?? []).length).toBe(1);
     expect((html.match(/href="\/social"/g) ?? []).length).toBe(2);
     expect(html).toContain(`href="${SOCIAL_ROUTES.home}"`);
-    expect(html).not.toContain("shadow-sm");
-    expect(html).not.toContain("shadow-md");
     expect(housePhoneForbidsTruncate(html)).toBe(true);
   });
 
