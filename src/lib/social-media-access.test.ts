@@ -37,14 +37,7 @@ function chain(result: { data: unknown; error?: { message: string } | null }) {
 }
 
 describe("socialMediaReadGrant", () => {
-  it("allows an object the caller owns before a row exists", () => {
-    expect(
-      socialMediaReadGrant({
-        userId: USER,
-        key: `stories/${USER}/${OBJECT}.mp4`,
-        now: NOW,
-      }),
-    ).toBe(true);
+  it("allows a posts-lane object the caller owns before a row exists", () => {
     expect(
       socialMediaReadGrant({
         userId: USER,
@@ -52,6 +45,19 @@ describe("socialMediaReadGrant", () => {
         now: NOW,
       }),
     ).toBe(true);
+  });
+
+  it("does not sign a story key from prefix ownership alone", () => {
+    const own = `stories/${USER}/${OBJECT}.mp4`;
+    expect(socialMediaReadGrant({ userId: USER, key: own, now: NOW })).toBe(false);
+    expect(
+      socialMediaReadGrant({
+        userId: USER,
+        key: own,
+        now: NOW,
+        stories: [{ author_id: USER, status: "active", expires_at: EXPIRED, media: storyMedia(own) }],
+      }),
+    ).toBe(false);
   });
 
   it("allows a live story the caller follows when the key is on that story", () => {
@@ -196,9 +202,40 @@ describe("viewerMaySignSocialMedia", () => {
     vi.mocked(createClient).mockReset();
   });
 
-  it("does not query for a key the caller owns", async () => {
-    await expect(viewerMaySignSocialMedia(USER, `stories/${USER}/${OBJECT}.jpg`, NOW)).resolves.toBe(true);
+  it("does not query for a posts-lane key the caller owns", async () => {
+    await expect(viewerMaySignSocialMedia(USER, `posts/${USER}/${OBJECT}.jpg`, NOW)).resolves.toBe(true);
     expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("requires a live story row for the author's own story key", async () => {
+    const own = `stories/${USER}/${OBJECT}.mp4`;
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "follows") return chain({ data: null });
+        return chain({ data: [] });
+      }),
+    } as never);
+    await expect(viewerMaySignSocialMedia(USER, own, NOW)).resolves.toBe(false);
+
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "follows") return chain({ data: null });
+        return chain({
+          data: [{ author_id: USER, status: "active", expires_at: EXPIRED, media: storyMedia(own) }],
+        });
+      }),
+    } as never);
+    await expect(viewerMaySignSocialMedia(USER, own, NOW)).resolves.toBe(false);
+
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "follows") return chain({ data: null });
+        return chain({
+          data: [{ author_id: USER, status: "active", expires_at: LIVE, media: storyMedia(own) }],
+        });
+      }),
+    } as never);
+    await expect(viewerMaySignSocialMedia(USER, own, NOW)).resolves.toBe(true);
   });
 
   it("signs a followed live story and refuses when the queries fail or return nothing", async () => {

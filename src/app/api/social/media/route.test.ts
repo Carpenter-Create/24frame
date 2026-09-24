@@ -13,6 +13,7 @@ const UID = "11111111-1111-4111-8111-111111111111";
 const OTHER = "33333333-3333-4333-8333-333333333333";
 const OBJECT = "22222222-2222-4222-8222-222222222222";
 const KEY = `posts/${UID}/${OBJECT}.jpg`;
+const OWN_STORY = `stories/${UID}/${OBJECT}.mp4`;
 const FOREIGN_POST = `posts/${OTHER}/${OBJECT}.jpg`;
 const FOREIGN_STORY = `stories/${OTHER}/${OBJECT}.mp4`;
 const LIVE = "2026-09-25T00:00:00.000Z";
@@ -73,6 +74,47 @@ describe("GET /api/social/media", () => {
     expect(res.headers.get("Cache-Control")).toBe("private, max-age=300");
     expect(signedSocialMediaUrl).toHaveBeenCalledWith(KEY);
     expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("302s the caller's own live story and refuses that key once it has expired", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
+    vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://media.example/story");
+    mockRows({
+      follows: { data: null },
+      stories: {
+        data: [
+          {
+            author_id: UID,
+            status: "active",
+            expires_at: LIVE,
+            media: [{ kind: "video", key: OWN_STORY, contentType: "video/mp4" }],
+          },
+        ],
+      },
+    });
+    const live = await GET(mediaRequest(OWN_STORY));
+    expect(live.status).toBe(302);
+    expect(signedSocialMediaUrl).toHaveBeenCalledWith(OWN_STORY);
+
+    vi.mocked(signedSocialMediaUrl).mockClear();
+    mockRows({
+      follows: { data: null },
+      stories: {
+        data: [
+          {
+            author_id: UID,
+            status: "active",
+            expires_at: EXPIRED,
+            media: [{ kind: "video", key: OWN_STORY, contentType: "video/mp4" }],
+          },
+        ],
+      },
+    });
+    const expired = await GET(mediaRequest(OWN_STORY));
+    expect(expired.status).toBe(403);
+    expect(expired.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(expired.headers.get("Location")).toBeNull();
+    expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
   it("302s a followed live story and an active post the session can read", async () => {

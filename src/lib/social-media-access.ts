@@ -8,12 +8,13 @@ import {
 import { isStoryLive } from "@/lib/social-stories";
 
 // Sign /api/social/media only after the session can already see the object.
-// Owned keys (composer, own cover, own welcome) sign before a row exists.
-// Everyone else needs a live self-or-follow story, an active post RLS
-// returns, or the author's profile cover / welcome when that profile is
-// readable and the key is that profile's own posts-lane object.
-// A foreign key written onto the caller's profile does not match the
-// author embedded in the key, so it does not sign. Query failures fail closed.
+// Posts-lane ownership (own upload, cover, welcome) may sign before a row exists.
+// A stories-lane key does not. It follows stories_select: active, expires_at
+// still in the future, and the caller is the author or follows them. Prefix
+// ownership does not skip expires_at. An active post the session can read,
+// or that author's published cover / welcome, can sign a posts-lane key.
+// A foreign key written onto the caller's profile does not match the author
+// embedded in the key, so it does not sign. Query failures fail closed.
 
 export type SocialMediaStoryGrant = {
   author_id: string;
@@ -53,14 +54,11 @@ export function socialMediaReadGrant(input: {
   profiles?: readonly SocialMediaProfileGrant[];
 }): boolean {
   if (!input.userId || isForbiddenMediaKey(input.key)) return false;
-  if (
-    isOwnedSocialMediaKey(input.key, input.userId, "posts") ||
-    isOwnedSocialMediaKey(input.key, input.userId, "stories")
-  ) {
-    return true;
-  }
   const parsed = parseSocialMediaObjectKey(input.key);
   if (!parsed) return false;
+  if (parsed.lane === "posts" && isOwnedSocialMediaKey(input.key, input.userId, "posts")) {
+    return true;
+  }
   const now = input.now ?? new Date();
   if (parsed.lane === "stories") {
     const followees = new Set(input.followeeIds ?? []);
@@ -83,9 +81,7 @@ export function socialMediaReadGrant(input: {
 
 export async function viewerMaySignSocialMedia(userId: string, key: string, now = new Date()): Promise<boolean> {
   if (!userId || isForbiddenMediaKey(key)) return false;
-  if (isOwnedSocialMediaKey(key, userId, "posts") || isOwnedSocialMediaKey(key, userId, "stories")) {
-    return true;
-  }
+  if (isOwnedSocialMediaKey(key, userId, "posts")) return true;
   const parsed = parseSocialMediaObjectKey(key);
   if (!parsed) return false;
   try {
