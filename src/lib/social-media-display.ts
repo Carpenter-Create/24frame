@@ -99,3 +99,8 @@ export function socialMediaFrameClass(
     : "aspect-video w-full object-cover";
 }
 
+/** Story viewer lane only. A portrait story stays tall instead of the feed 16:9 crop. */
+export function socialStoryMediaFrameClass(): string {
+  return "aspect-[9/16] w-full object-cover";
+}
+

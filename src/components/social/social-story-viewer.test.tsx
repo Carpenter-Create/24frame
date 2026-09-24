@@ -48,6 +48,19 @@ describe("SocialStoryViewer", () => {
     const stage = html.slice(html.indexOf("min-h-[360px]"));
     expect(stage).toContain('data-social-story-frame=""');
     expect(stage).toContain("w-full self-stretch");
+    expect(stage).toContain("aspect-[9/16]");
+    expect(stage).not.toContain("aspect-video");
+    expect(stage).not.toContain("aspect-[4/5]");
     expect(stage.indexOf("w-full self-stretch")).toBeLessThan(stage.indexOf("data-social-post-video"));
+    const still = renderToStaticMarkup(
+      createElement(SocialStoryViewer, {
+        ...viewerProps,
+        media: [{ kind: "image", url: "/api/social/media?key=stories%2Forg%2Fstill.jpg" }],
+      }),
+    );
+    const stillStage = still.slice(still.indexOf("min-h-[360px]"));
+    expect(stillStage).toContain("aspect-[9/16]");
+    expect(stillStage).not.toContain("aspect-video");
+    expect(stillStage).not.toContain("aspect-[4/5]");
   });
 });

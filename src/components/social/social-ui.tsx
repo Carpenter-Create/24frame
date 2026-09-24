@@ -170,23 +170,38 @@ export type SocialPostCardModel = {
 export function SocialPostMedia({
   items,
   href,
+  frameClass,
 }: {
   items: readonly SocialPostMediaItem[];
   href?: string;
+  frameClass?: string;
 }) {
   if (items.length === 0) return null;
   return (
     <div data-social-post-media="" className="flex flex-col gap-2">
       {items.map((item) => (
-        <SocialPostMediaFrame key={item.playbackId ?? item.url} item={item} href={href} />
+        <SocialPostMediaFrame
+          key={item.playbackId ?? item.url}
+          item={item}
+          href={href}
+          frameClass={frameClass}
+        />
       ))}
     </div>
   );
 }
 
-function SocialPostMediaFrame({ item, href }: { item: SocialPostMediaItem; href?: string }) {
+function SocialPostMediaFrame({
+  item,
+  href,
+  frameClass,
+}: {
+  item: SocialPostMediaItem;
+  href?: string;
+  frameClass?: string;
+}) {
   const frame = cn(
-    socialMediaFrameClass(item),
+    frameClass ?? socialMediaFrameClass(item),
     "relative overflow-hidden bg-surface-muted md:rounded-[8px]",
   );
   if (item.kind === "video") {

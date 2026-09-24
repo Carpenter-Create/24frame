@@ -8,6 +8,7 @@ import {
   SOCIAL_STORY_PROGRESS_BAR_CLASS,
   SOCIAL_STORY_VIEWER_CLASS,
 } from "@/lib/social-chrome";
+import { socialStoryMediaFrameClass } from "@/lib/social-media-display";
 import { SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
 import { cn } from "@/lib/cn";
 
@@ -90,7 +91,7 @@ export function SocialStoryViewer({
           // The shell centers its flex item. The video is absolute, so a
           // shrink-to-fit item has no in-flow size and the frame is 0×0.
           <div data-social-story-frame="" className="w-full self-stretch">
-            <SocialPostMedia items={media} />
+            <SocialPostMedia items={media} frameClass={socialStoryMediaFrameClass()} />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-6)] text-center">
