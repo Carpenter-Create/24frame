@@ -1,4 +1,4 @@
-import { conversationRoomLabel, inboxPeerIds, socialRelativeTime } from "@/lib/social";
+import { conversationRoomLabel, dmInboxDisplayPeerIds, socialRelativeTime } from "@/lib/social";
 import type { DmInboxRow } from "@/lib/social-dms";
 
 // Home recent-chats preview. Inbox RPC stays class 6 — no new SQL.
@@ -20,9 +20,10 @@ export function socialHomeChatPreview(row: Pick<DmInboxRow, "last_message_at" | 
 export function socialHomeChats(
   rows: readonly DmInboxRow[],
   namesById: ReadonlyMap<string, string>,
+  viewerId: string,
 ): SocialHomeChat[] {
   return rows.map((row) => {
-    const peerIds = inboxPeerIds(row);
+    const peerIds = dmInboxDisplayPeerIds(row, viewerId);
     const names = peerIds.map((id) => namesById.get(id) ?? "");
     return {
       conversationId: row.conversation_id,

@@ -108,6 +108,19 @@ export type DmThreadHeaderModel = {
   avatarName: string;
 };
 
+// get_dm_inbox and the thread participant filter both drop the caller.
+// A direct room with no other person is a note to self: show the viewer.
+export function dmThreadHeaderPeers(input: {
+  kind: string;
+  peers: readonly DmThreadHeaderPeer[];
+  self: DmThreadHeaderPeer | null;
+}): readonly DmThreadHeaderPeer[] {
+  if (input.kind === "direct" && input.peers.length === 0 && input.self && bareHandle(input.self.handle)) {
+    return [input.self];
+  }
+  return input.peers;
+}
+
 // One other person: display name, or the bare handle when the name is empty.
 // Never both, and never an @ in the bar. A room with several people keeps the
 // title or joined names and has no single profile target.

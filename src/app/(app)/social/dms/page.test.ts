@@ -148,6 +148,51 @@ describe("social DMs", () => {
     expect(html).toContain('href="/social/dms/new"');
   });
 
+  it("shows the viewer on a direct room with no other peer", async () => {
+    const from = inboxFrom([
+      { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+      { id: "u2", handle: "bob", display_name: "Bob One", status: "active" },
+    ]);
+    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map([["u1", "https://cdn.example/ada.jpg"]]));
+    vi.mocked(createClient).mockResolvedValue({
+      from,
+      rpc: vi.fn(async () => ({
+        data: [
+          {
+            conversation_id: "c-self",
+            last_message_at: "2026-09-24T12:00:00.000Z",
+            unread_count: 0,
+            muted: false,
+            peer_id: null,
+            kind: "direct",
+            title: null,
+            participant_ids: [],
+          },
+          {
+            conversation_id: "c-bob",
+            last_message_at: "2026-09-24T11:00:00.000Z",
+            unread_count: 0,
+            muted: false,
+            peer_id: "u2",
+            kind: "direct",
+            title: null,
+            participant_ids: ["u2"],
+          },
+        ],
+        error: null,
+      })),
+    } as never);
+
+    const html = await renderServerMarkup(await SocialDmsPage());
+    const selfSlice = html.slice(html.indexOf('href="/social/dms/c-self"'), html.indexOf('href="/social/dms/c-bob"'));
+    expect(selfSlice).toContain("Ada Lovelace");
+    expect(selfSlice).toContain(encodeURIComponent("https://cdn.example/ada.jpg"));
+    expect(selfSlice).not.toContain(SOCIAL.dms.thread);
+    expect(selfSlice).not.toContain(">?<");
+    const bobSlice = html.slice(html.indexOf('href="/social/dms/c-bob"'));
+    expect(bobSlice).toContain("Bob One");
+  });
+
   it("names the inbox bound when the probe row comes back", async () => {
     const rpc = vi.fn(async () => ({
       data: Array.from({ length: 51 }, (_, i) => ({
@@ -433,6 +478,45 @@ describe("social DMs", () => {
     expect(line?.[0]).not.toContain("text-center");
     expect(line?.[0]).toContain("text-left");
     expect(line?.[0]).toContain("max-w-[168px]");
+  });
+
+  it("shows the viewer in a direct thread with no other participant", async () => {
+    const selfFrom = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" }]);
+      }
+      if (table === "conversations") {
+        return chain({ id: "c-self", kind: "direct", title: null });
+      }
+      if (table === "messages") {
+        return chain([
+          {
+            id: "m-self",
+            body: "Check this out!",
+            sender_id: "u1",
+            created_at: "2026-09-24T12:00:00.000Z",
+            status: "active",
+          },
+        ]);
+      }
+      if (table === "conversation_participants") {
+        return chain([{ user_id: "u1", left_at: null }]);
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map([["u1", "https://cdn.example/ada.jpg"]]));
+    vi.mocked(createClient).mockResolvedValue({ from: selfFrom, rpc: vi.fn() } as never);
+    const selfThread = renderToStaticMarkup(
+      await SocialDmThreadPage({ params: Promise.resolve({ id: "c-self" }) }),
+    );
+    const selfHeader = selfThread.slice(
+      selfThread.indexOf("data-social-dm-header"),
+      selfThread.indexOf("data-social-dm-column"),
+    );
+    expect(selfHeader).toContain("Ada Lovelace");
+    expect(selfHeader).toContain(encodeURIComponent("https://cdn.example/ada.jpg"));
+    expect(selfHeader).not.toContain(SOCIAL.dms.thread);
+    expect(selfHeader).not.toContain(">?<");
   });
 
   it("does not touch gated community group create fields", () => {

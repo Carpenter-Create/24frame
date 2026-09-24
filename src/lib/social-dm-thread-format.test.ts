@@ -28,6 +28,7 @@ import {
   dmThreadBubbleClass,
   dmThreadDayLabel,
   dmThreadHeaderModel,
+  dmThreadHeaderPeers,
   dmThreadShowsAvatar,
   dmThreadSideClass,
   dmThreadStackClass,
@@ -253,8 +254,24 @@ describe("DM thread message format", () => {
     expect(DM_THREAD_HEADER_LABEL_CLASS).toContain("font-medium");
     expect(DM_THREAD_COMPOSER_CLASS).not.toContain("sticky");
 
+    const self = dmThreadHeaderModel({
+      peers: dmThreadHeaderPeers({
+        kind: "direct",
+        peers: [],
+        self: { handle: "ada", displayName: "Ada Lovelace", photoUrl: "ada.jpg" },
+      }),
+    });
+    expect(self.label).toBe("Ada Lovelace");
+    expect(self.photoUrl).toBe("ada.jpg");
+    expect(self.avatarName).toBe("Ada Lovelace");
+    expect(self.label).not.toBe(SOCIAL.dms.thread);
+
     const named = dmThreadHeaderModel({
-      peers: [{ handle: "theofficialJKC", displayName: "Joshua K. Carpenter" }],
+      peers: dmThreadHeaderPeers({
+        kind: "direct",
+        peers: [{ handle: "theofficialJKC", displayName: "Joshua K. Carpenter" }],
+        self: { handle: "ada", displayName: "Ada Lovelace" },
+      }),
     });
     expect(named.label).toBe("Joshua K. Carpenter");
     expect(named.href).toBe("/social/u/theofficialJKC");
@@ -279,6 +296,16 @@ describe("DM thread message format", () => {
     expect(room.photoUrl).toBe("bob.jpg");
     expect(room.avatarName).toBe("Bob One");
     expect(room.label).not.toContain("@");
+    expect(
+      dmThreadHeaderPeers({
+        kind: "group",
+        peers: [
+          { handle: "bob", displayName: "Bob One" },
+          { handle: "carol", displayName: "Carol One" },
+        ],
+        self: { handle: "ada", displayName: "Ada Lovelace" },
+      }).map((peer) => peer.handle),
+    ).toEqual(["bob", "carol"]);
 
     const titled = dmThreadHeaderModel({
       title: "Friday table",

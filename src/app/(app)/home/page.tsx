@@ -39,7 +39,7 @@ import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { signedAvatarUrls } from "@/lib/social-edge";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { socialHomeChats } from "@/lib/social-home-chats";
-import { inboxPeerIds, socialPersonLabel } from "@/lib/social";
+import { dmInboxDisplayPeerIds, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -147,11 +147,12 @@ export async function HomeOverview({
   const inbox = profile
     ? await loadDmInbox(supabase, { limit: OVERVIEW_SOCIAL_DM_CAP })
     : { rows: [], truncated: false };
-  const peopleIds = [...new Set(inbox.rows.flatMap((row) => inboxPeerIds(row)))];
+  const peopleIds = [...new Set(inbox.rows.flatMap((row) => dmInboxDisplayPeerIds(row, ctx.user.id)))];
   const [authors, faces] = await Promise.all([
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrls(peopleIds),
   ]);
+  if (profile) authors.set(profile.id, profile);
   const namedChats = overviewSocialChats(
     socialHomeChats(
       inbox.rows,
@@ -161,6 +162,7 @@ export async function HomeOverview({
           socialPersonLabel({ handle: author.handle, displayName: author.display_name }),
         ]),
       ),
+      ctx.user.id,
     ),
   );
 

@@ -18,7 +18,7 @@ import {
   presentDmStoryShare,
   type DmStoryLive,
 } from "@/lib/social-dm-story";
-import { DM_THREAD_ROOT_CLASS, dmThreadHeaderModel, dmThreadStorySystemLine } from "@/lib/social-dm-thread-format";
+import { DM_THREAD_ROOT_CLASS, dmThreadHeaderModel, dmThreadHeaderPeers, dmThreadStorySystemLine } from "@/lib/social-dm-thread-format";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -89,6 +89,7 @@ export default async function SocialDmThreadPage({
   const activeIds = members.rows.map((row) => row.user_id);
   const peopleIds = [
     ...new Set([
+      ...(profile ? [profile.id] : []),
       ...activeIds,
       ...messages.map((row) => row.sender_id).filter((id): id is string => !!id),
       ...messages.flatMap((message) => {
@@ -107,13 +108,24 @@ export default async function SocialDmThreadPage({
     .filter((userId) => userId !== ctx.user.id)
     .map((userId) => people.get(userId))
     .filter((person): person is NonNullable<typeof person> => !!person);
+  const selfPerson = people.get(ctx.user.id) ?? profile;
   const header = dmThreadHeaderModel({
     title: conversation.title,
-    peers: others.map((person) => ({
-      handle: person.handle,
-      displayName: person.display_name,
-      photoUrl: faces.get(person.id) ?? null,
-    })),
+    peers: dmThreadHeaderPeers({
+      kind: conversation.kind,
+      peers: others.map((person) => ({
+        handle: person.handle,
+        displayName: person.display_name,
+        photoUrl: faces.get(person.id) ?? null,
+      })),
+      self: selfPerson
+        ? {
+            handle: selfPerson.handle,
+            displayName: selfPerson.display_name,
+            photoUrl: faces.get(selfPerson.id) ?? null,
+          }
+        : null,
+    }),
   });
   const historical = cursor !== null;
   const threadMessages: DmThreadViewMessage[] = messages.map((message) => {

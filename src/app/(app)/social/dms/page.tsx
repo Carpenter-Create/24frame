@@ -10,7 +10,7 @@ import { SocialDmsRowsSkeleton, SocialForYouSkeleton } from "@/components/social
 import { SocialConversationFaces } from "@/components/social/social-ui";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { conversationRoomLabel, inboxPeerIds, SOCIAL, SOCIAL_ROUTES, socialDmHref, socialPersonLabel } from "@/lib/social";
+import { conversationRoomLabel, dmInboxDisplayPeerIds, SOCIAL, SOCIAL_ROUTES, socialDmHref, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox, loadDmStoryInboxLines } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -40,8 +40,9 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
     loadDmInbox(supabase),
   ]);
   const rows = profile ? inbox.rows : [];
-  const peopleIds = [...new Set(rows.flatMap((row) => inboxPeerIds(row)))];
-  const [peers, faces, excerpts] = await Promise.all([
+  const viewerId = ctx.user.id;
+  const peopleIds = [...new Set(rows.flatMap((row) => dmInboxDisplayPeerIds(row, viewerId)))];
+  const [loadedPeers, faces, excerpts] = await Promise.all([
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrls(peopleIds),
     loadDmStoryInboxLines(
@@ -50,6 +51,8 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
       ctx.user.id,
     ),
   ]);
+  const peers = loadedPeers;
+  if (profile) peers.set(profile.id, profile);
 
   return (
     <>
@@ -70,7 +73,7 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
       ) : null}
       <ul className="flex flex-col">
         {rows.map((row) => {
-          const others = inboxPeerIds(row)
+          const others = dmInboxDisplayPeerIds(row, viewerId)
             .map((id) => {
               const peer = peers.get(id);
               return {

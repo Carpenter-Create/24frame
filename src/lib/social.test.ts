@@ -6,6 +6,7 @@ import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import {
   conversationRoomLabel,
   displayHandle,
+  dmInboxDisplayPeerIds,
   handleDisplay,
   handleFieldValue,
   handleKey,
@@ -675,6 +676,25 @@ describe("social writes stay on the live spine", () => {
     expect(conversationRoomLabel("  ", [])).toBe(SOCIAL.dms.thread);
     expect(inboxPeerIds({ peer_id: "u2", participant_ids: ["u2", "u3"] })).toEqual(["u2", "u3"]);
     expect(inboxPeerIds({ peer_id: "u2", participant_ids: [] })).toEqual(["u2"]);
+    const self = dmInboxDisplayPeerIds(
+      { kind: "direct", peer_id: null, participant_ids: [] },
+      "u1",
+    );
+    expect(self).toEqual(["u1"]);
+    expect(conversationRoomLabel(null, self.map(() => "Ada Lovelace"))).toBe("Ada Lovelace");
+    expect(conversationRoomLabel(null, self.map(() => "Ada Lovelace"))).not.toBe(SOCIAL.dms.thread);
+    expect(
+      dmInboxDisplayPeerIds({ kind: "direct", peer_id: "u2", participant_ids: ["u2"] }, "u1"),
+    ).toEqual(["u2"]);
+    expect(
+      dmInboxDisplayPeerIds(
+        { kind: "group", peer_id: null, participant_ids: ["u2", "u3"] },
+        "u1",
+      ),
+    ).toEqual(["u2", "u3"]);
+    expect(
+      dmInboxDisplayPeerIds({ kind: "group", peer_id: null, participant_ids: [] }, "u1"),
+    ).toEqual([]);
     expect(normalizeConversationTitle("")).toEqual({ title: null });
     expect(normalizeConversationTitle("Desk room")).toEqual({ title: "Desk room" });
     expect(normalizeConversationTitle("x".repeat(81))).toBeNull();
