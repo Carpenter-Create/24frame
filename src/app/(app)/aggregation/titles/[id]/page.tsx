@@ -39,6 +39,7 @@ import {
   type TitleStatus,
 } from "@/lib/titles";
 import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
+import { aggregationViewAsSurface } from "@/lib/aggregation-impersonation";
 import { titleLifecycleFlags } from "@/lib/titles-lifecycle";
 import { TITLE_DELIVERIES_TRUNCATED } from "@/lib/deliveries-browse";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
@@ -141,10 +142,16 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
 
   // Title-org role, not only the active-org cookie. Staff still get
   // lifecycle flags via ctx.isGcStaff when they are not operate on this org.
+  // View-as installs a synthetic owner role for the client catalog; that
+  // role does not grant operate or staff lifecycle controls.
   const titleRole =
     rows.find((m) => m.organizations.id === title.org_id)?.role ??
     (ctx.activeOrg.id === title.org_id ? ctx.activeRole : null);
-  const canOperate = titleRole === "account_owner" || titleRole === "delivery_ops";
+  const { canOperate, isStaff: lifecycleStaff } = aggregationViewAsSurface({
+    viewAs: ctx.aggregationViewAs,
+    canOperate: titleRole === "account_owner" || titleRole === "delivery_ops",
+    isGcStaff: ctx.isGcStaff,
+  });
 
   const { data: grants } = await supabase
     .from("rights_grants")
@@ -250,12 +257,12 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
 
   const canSubmit = canOperate && title.status === "draft";
   const needsReportingCheck =
-    ctx.isGcStaff && title.status !== "draft" && title.status !== "archived";
+    lifecycleStaff && title.status !== "draft" && title.status !== "archived";
   const { data: hasReportingActivity } = needsReportingCheck
     ? await supabase.rpc("title_has_reporting_activity", { p_title_id: titleId })
     : { data: false };
   const lifecycleFlags = titleLifecycleFlags(
-    { isStaff: ctx.isGcStaff, canOperate },
+    { isStaff: lifecycleStaff, canOperate },
     title.status as TitleStatus,
     hasReportingActivity === true,
   );
@@ -330,7 +337,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
             titleId={title.id}
             titleName={title.title}
             status={title.status as TitleStatus}
-            isStaff={ctx.isGcStaff}
+            isStaff={lifecycleStaff}
             flags={lifecycleFlags}
           />
         }

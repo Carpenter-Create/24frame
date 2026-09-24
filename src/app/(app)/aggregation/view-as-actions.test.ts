@@ -117,6 +117,7 @@ describe("startAggregationViewAs gate", () => {
     expect(set).toHaveBeenCalledWith(AGGREGATION_VIEW_AS_COOKIE, ORG_ID, {
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       path: "/aggregation",
     });
   });
@@ -181,6 +182,7 @@ describe("stopAggregationViewAs exit", () => {
     expect(set).toHaveBeenCalledWith(AGGREGATION_VIEW_AS_COOKIE, "", {
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       path: "/aggregation",
       maxAge: 0,
     });

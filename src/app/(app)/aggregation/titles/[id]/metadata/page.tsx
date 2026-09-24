@@ -5,6 +5,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetadataForm } from "./metadata-form";
 import { METADATA_FIELDS } from "@/lib/metadata";
+import { aggregationViewAsSurface } from "@/lib/aggregation-impersonation";
 import {
   firstTitleMatch,
   isCanonicalTitleSlug,
@@ -39,7 +40,11 @@ export default async function TitleMetadataPage({ params }: { params: Promise<{ 
   // The role in the org that owns THIS title -- not necessarily the active org.
   // ctx.rows already holds every active membership, so this needs no extra query.
   const titleRole = ctx.rows.find((r) => r.organizations.id === title.org_id)?.role;
-  const canOperate = titleRole === "account_owner" || titleRole === "delivery_ops";
+  const { canOperate } = aggregationViewAsSurface({
+    viewAs: ctx.aggregationViewAs,
+    canOperate: titleRole === "account_owner" || titleRole === "delivery_ops",
+    isGcStaff: ctx.isGcStaff,
+  });
 
   const { data: row } = await supabase
     .from("title_metadata")

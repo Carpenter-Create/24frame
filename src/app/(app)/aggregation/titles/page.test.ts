@@ -54,10 +54,12 @@ function ctx({
   canOperate = true,
   isGcStaff = false,
   hasOrg = true,
+  aggregationViewAs = null,
 }: {
   canOperate?: boolean;
   isGcStaff?: boolean;
   hasOrg?: boolean;
+  aggregationViewAs?: { orgId: string; orgName: string } | null;
 } = {}) {
   const org = hasOrg ? { id: "org-1", name: "Acme", status: "active" } : null;
   return {
@@ -68,6 +70,7 @@ function ctx({
     activeRole: org ? "account_owner" : null,
     canOperate: hasOrg && canOperate,
     isGcStaff,
+    aggregationViewAs,
     unread: Promise.resolve(0),
   };
 }
@@ -492,6 +495,39 @@ describe("client /titles catalog", () => {
     const reader = await renderCatalog();
     expect(reader).not.toContain("data-title-lifecycle-menu");
     expect(reader).not.toContain("data-titles-catalog-row-actions");
+  });
+
+  it("keeps staff lifecycle actions when view-as is off and hides Add Title", async () => {
+    stubClient([titleRow("draft", 0)]);
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ canOperate: false, isGcStaff: true, aggregationViewAs: null }) as never,
+    );
+
+    const html = await renderCatalog();
+
+    expect(html).toContain("data-title-lifecycle-menu");
+    expect(html).not.toContain("data-add-title");
+  });
+
+  it("hides catalog operate controls while Aggregation view-as is active", async () => {
+    stubClient([titleRow("draft", 0), titleRow("live", 1)]);
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({
+        canOperate: true,
+        isGcStaff: true,
+        aggregationViewAs: { orgId: "org-1", orgName: "Acme" },
+      }) as never,
+    );
+
+    const html = await renderCatalog();
+
+    expect(html).toContain("draft film");
+    expect(html).toContain("live film");
+    expect(html).not.toContain("data-title-lifecycle-menu");
+    expect(html).not.toContain("data-titles-catalog-row-actions");
+    expect(html).not.toContain("data-add-title");
+    expect(html).not.toContain("data-add-title-icon");
+    expect(html).not.toContain(TITLES_CATALOG.addTitle);
   });
 
   it("hides Add Title when the viewer cannot operate", async () => {
