@@ -32,6 +32,7 @@ export const CLIENT_BUNDLE_SECRET_RES = [
   /TROLLEY_/,
   /AWS_SECRET_ACCESS_KEY/,
   /MUX_TOKEN_SECRET/,
+  /MUX_PRIVATE_KEY/,
 ];
 
 export function listStaticFiles(dir, acc = []) {

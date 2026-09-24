@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 import { socialVideoDisplaySrc } from "@/lib/social-media-display";
-import { socialMuxThumbnailUrl } from "@/lib/social-mux";
 import { SocialMuxPlayer } from "./social-mux-player";
 
 export type SocialFeedVideoItem = {
@@ -18,11 +17,7 @@ export function SocialFeedVideo({
   const fill = cn("size-full object-cover", className);
   if (item.playbackId) {
     return (
-      <SocialMuxPlayer
-        playbackId={item.playbackId}
-        poster={item.url || socialMuxThumbnailUrl(item.playbackId)}
-        className={fill}
-      />
+      <SocialMuxPlayer playbackId={item.playbackId} className={fill} />
     );
   }
   return (

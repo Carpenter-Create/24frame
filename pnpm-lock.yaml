@@ -42,6 +42,9 @@ importers:
       '@marsidev/react-turnstile':
         specifier: ^1.5.3
         version: 1.5.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@mux/mux-node':
+        specifier: ^15.2.0
+        version: 15.2.0
       '@mux/mux-player-react':
         specifier: ^3.13.4
         version: 3.13.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1393,6 +1396,10 @@ packages:
 
   '@mux/mux-data-google-ima@0.3.17':
     resolution: {integrity: sha512-4wpH6dYybyZhqLn9qGn/+67Z8MZnQRAdqTFEEZw2bx61M9q01uPYYHxd8qwOnYtUGEeafsdTwVHVxKHGD3oc1A==}
+
+  '@mux/mux-node@15.2.0':
+    resolution: {integrity: sha512-KQPkKXhHZ/01aW5Sfbonfmg0r16jYkZC0p8lPzs0MEuRRolSsbFfJEqPJdVFSY9U2Nnpm09WpSN3wHS11WQTvg==}
+    hasBin: true
 
   '@mux/mux-player-react@3.13.4':
     resolution: {integrity: sha512-0xifio9IwZkkzsZr96DiihMwLw3r/XRbDiwF+bKXLhMpvR/Hw4HeDTDCodo212ETE8i/VdPdrF2aBYbHV660qg==}
@@ -7758,6 +7765,8 @@ snapshots:
   '@mux/mux-data-google-ima@0.3.17':
     dependencies:
       mux-embed: 5.18.1
+
+  '@mux/mux-node@15.2.0': {}
 
   '@mux/mux-player-react@3.13.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:

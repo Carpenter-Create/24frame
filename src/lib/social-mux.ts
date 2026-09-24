@@ -32,7 +32,7 @@ export function isSocialMuxId(value: string): boolean {
 }
 
 // Create stores `${user.id}:${objectId}` on the Mux upload. Finalize accepts
-// the upload only when that passthrough starts with the session user id.
+// the upload only when that passthrough starts with `${userId}:`.
 export function socialMuxPassthroughBoundToUser(
   passthrough: string | null | undefined,
   userId: string,
@@ -41,7 +41,27 @@ export function socialMuxPassthroughBoundToUser(
   const caller = userId.trim();
   const token = passthrough.trim();
   if (!caller || !token) return false;
-  return token.startsWith(caller);
+  return token.startsWith(`${caller}:`);
+}
+
+export const SOCIAL_MUX_PLAYBACK_ROUTE = "/api/social/mux-playback";
+
+export type SocialMuxPlaybackTokens = {
+  playback: string;
+  thumbnail: string;
+  storyboard: string;
+};
+
+export function socialMuxPlaybackTokensFromJson(value: unknown): SocialMuxPlaybackTokens | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  const playback = row.playback;
+  const thumbnail = row.thumbnail;
+  const storyboard = row.storyboard;
+  if (typeof playback !== "string" || !playback) return null;
+  if (typeof thumbnail !== "string" || !thumbnail) return null;
+  if (typeof storyboard !== "string" || !storyboard) return null;
+  return { playback, thumbnail, storyboard };
 }
 
 export class SocialMuxUploadNotBoundError extends Error {
@@ -85,8 +105,10 @@ export function socialMuxPlaybackUrl(playbackId: string): string {
   return `https://${SOCIAL_MUX_PLAYBACK_HOST}/${playbackId}.m3u8`;
 }
 
-export function socialMuxThumbnailUrl(playbackId: string): string {
-  return `https://${SOCIAL_MUX_IMAGE_HOST}/${playbackId}/thumbnail.webp`;
+export function socialMuxThumbnailUrl(playbackId: string, token?: string): string {
+  const url = `https://${SOCIAL_MUX_IMAGE_HOST}/${playbackId}/thumbnail.webp`;
+  if (!token) return url;
+  return `${url}?token=${encodeURIComponent(token)}`;
 }
 
 export function probeSocialVideoPixels(

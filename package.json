@@ -30,6 +30,7 @@
     "@aws-sdk/lib-dynamodb": "^3.1134.0",
     "@aws-sdk/s3-request-presigner": "^3.1090.0",
     "@marsidev/react-turnstile": "^1.5.3",
+    "@mux/mux-node": "^15.2.0",
     "@mux/mux-player-react": "^3.13.4",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-dropdown-menu": "^2.1.20",

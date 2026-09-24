@@ -13,11 +13,15 @@ commit values.
 ```
 MUX_TOKEN_ID=
 MUX_TOKEN_SECRET=
+MUX_SIGNING_KEY=
+MUX_PRIVATE_KEY=
 ```
 
 Names are listed in `.env.example` as empty placeholders. Agents do not
-set values. The secret stays in `src/lib/social-mux-server.ts` — never
-the client bundle.
+set values. `MUX_TOKEN_*` is the API credential. `MUX_SIGNING_KEY` is the
+signing key id and `MUX_PRIVATE_KEY` is the base64 PEM. Those two are the
+names the official Mux JWT helper reads. They stay in
+`src/lib/social-mux-server.ts` — never the client bundle.
 
 ## Encode locks
 
@@ -29,11 +33,18 @@ the client bundle.
 
 No livestream backend. No Settings quality maze. New uploads use
 playback policy `signed`. Playback IDs are stored on `posts.media`
-next to the author-bound key. Mux Player still receives the playback
-id only; this path does not issue a playback token.
+next to the author-bound key.
+
+## Playback tokens
+
+`mintSocialMuxPlaybackTokens` calls `mux.jwt.signPlaybackId` for video,
+thumbnail, and storyboard (`12h`). The Social player fetches
+`/api/social/mux-playback` (Node, session required) and passes
+`tokens` to Mux Player. Edge pages keep the playback id and do not
+import the signer.
 
 ## Auth / cron
 
 No RLS, webhook, or Vercel cron change. Finalize polls Mux in the
 signed-in request after the client PUT and rejects the upload unless
-`new_asset_settings.passthrough` starts with the session user id.
+`new_asset_settings.passthrough` starts with `${session user id}:`.

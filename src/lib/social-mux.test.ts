@@ -10,8 +10,10 @@ import {
   SOCIAL_MUX_ORIGINAL_RESOLUTION,
   socialMuxAssetSettings,
   socialMuxPassthroughBoundToUser,
+  socialMuxPlaybackTokensFromJson,
   socialMuxPlaybackUrl,
   socialMuxThumbnailUrl,
+  SOCIAL_MUX_PLAYBACK_ROUTE,
 } from "./social-mux";
 import { SOCIAL_MUX_ENV } from "./social-mux-server";
 
@@ -72,18 +74,30 @@ describe("social Mux encode locks", () => {
     expect(isSocialMuxId("short")).toBe(false);
     expect(socialMuxPlaybackUrl("abc12345")).toBe("https://stream.mux.com/abc12345.m3u8");
     expect(socialMuxThumbnailUrl("abc12345")).toBe(`https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp`);
+    expect(socialMuxThumbnailUrl("abc12345", "thumb.jwt")).toBe(
+      `https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp?token=thumb.jwt`,
+    );
   });
 
   it("keeps token names server-only and out of the client SoT", () => {
     const sot = readFileSync("src/lib/social-mux.ts", "utf8");
     const server = readFileSync("src/lib/social-mux-server.ts", "utf8");
-    expect(SOCIAL_MUX_ENV).toEqual(["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"]);
+    expect(SOCIAL_MUX_ENV).toEqual([
+      "MUX_TOKEN_ID",
+      "MUX_TOKEN_SECRET",
+      "MUX_SIGNING_KEY",
+      "MUX_PRIVATE_KEY",
+    ]);
     expect(sot).not.toContain("process.env");
     expect(sot).not.toContain("MUX_TOKEN_SECRET");
+    expect(sot).not.toContain("MUX_PRIVATE_KEY");
     expect(sot).not.toContain("NEXT_PUBLIC_MUX");
     expect(server).toContain('import "server-only"');
     expect(server).toContain("MUX_TOKEN_ID");
     expect(server).toContain("MUX_TOKEN_SECRET");
+    expect(server).toContain("MUX_SIGNING_KEY");
+    expect(server).toContain("MUX_PRIVATE_KEY");
+    expect(server).toContain("signPlaybackId");
     expect(server).not.toContain("NEXT_PUBLIC_");
     expect(server).toContain("video_quality");
     expect(server).toContain("max_resolution_tier");
@@ -91,15 +105,34 @@ describe("social Mux encode locks", () => {
     expect(server).not.toContain('playback_policies: ["public"]');
   });
 
-  it("binds a Mux upload passthrough only when it starts with the session user id", () => {
+  it("binds a Mux upload passthrough only when it starts with the session user id and a colon", () => {
     const userId = "11111111-1111-4111-8111-111111111111";
     expect(socialMuxPassthroughBoundToUser(`${userId}:22222222-2222-4222-8222-222222222222`, userId)).toBe(true);
     expect(socialMuxPassthroughBoundToUser(`  ${userId}:object`, userId)).toBe(true);
+    expect(socialMuxPassthroughBoundToUser(userId, userId)).toBe(false);
+    expect(socialMuxPassthroughBoundToUser(`${userId}9:object`, userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser(`other:${userId}`, userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser("22222222-2222-4222-8222-222222222222:object", userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser("", userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser(`${userId}:object`, "  ")).toBe(false);
     expect(socialMuxPassthroughBoundToUser(null, userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser(undefined, userId)).toBe(false);
+  });
+
+  it("accepts a playback token set the player can pass to Mux", () => {
+    expect(SOCIAL_MUX_PLAYBACK_ROUTE).toBe("/api/social/mux-playback");
+    expect(
+      socialMuxPlaybackTokensFromJson({
+        playback: "play.jwt",
+        thumbnail: "thumb.jwt",
+        storyboard: "board.jwt",
+      }),
+    ).toEqual({
+      playback: "play.jwt",
+      thumbnail: "thumb.jwt",
+      storyboard: "board.jwt",
+    });
+    expect(socialMuxPlaybackTokensFromJson({ playback: "play.jwt" })).toBeNull();
+    expect(socialMuxPlaybackTokensFromJson(null)).toBeNull();
   });
 });

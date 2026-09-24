@@ -1,9 +1,11 @@
+import { generateKeyPairSync, verify } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SocialMuxUploadNotBoundError } from "./social-mux";
 import {
   createSocialMuxDirectUpload,
   finalizeSocialMuxDirectUpload,
+  mintSocialMuxPlaybackTokens,
   signedPlaybackIdFromAsset,
   socialMuxSettingsFromUploadInput,
 } from "./social-mux-server";
@@ -99,6 +101,25 @@ describe("social Mux server client", () => {
     });
   });
 
+  it("rejects finalize when the passthrough only shares a user id prefix", async () => {
+    vi.stubEnv("MUX_TOKEN_ID", "tid");
+    vi.stubEnv("MUX_TOKEN_SECRET", "tsecret");
+    const fetchMock = vi.fn().mockResolvedValue(
+      muxJson({
+        id: UPLOAD_ID,
+        status: "asset_created",
+        asset_id: ASSET_ID,
+        new_asset_settings: { passthrough: `${USER}9:object` },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(finalizeSocialMuxDirectUpload(UPLOAD_ID, USER)).rejects.toBeInstanceOf(
+      SocialMuxUploadNotBoundError,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects finalize when the upload passthrough does not start with the caller", async () => {
     vi.stubEnv("MUX_TOKEN_ID", "tid");
     vi.stubEnv("MUX_TOKEN_SECRET", "tsecret");
@@ -141,6 +162,30 @@ describe("social Mux server client", () => {
       SocialMuxUploadNotBoundError,
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("mints signed playback, thumbnail, and storyboard JWTs", async () => {
+    const { publicKey, privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const pem = privateKey.export({ type: "pkcs1", format: "pem" }).toString();
+    vi.stubEnv("MUX_SIGNING_KEY", "signing-key-id");
+    vi.stubEnv("MUX_PRIVATE_KEY", Buffer.from(pem).toString("base64"));
+
+    const tokens = await mintSocialMuxPlaybackTokens(PLAYBACK_ID);
+    const claims = [tokens.playback, tokens.thumbnail, tokens.storyboard].map((token) => {
+      const [header, body, signature] = token.split(".");
+      expect(header && body && signature).toBeTruthy();
+      expect(
+        verify(
+          "RSA-SHA256",
+          Buffer.from(`${header}.${body}`),
+          publicKey,
+          Buffer.from(signature!, "base64url"),
+        ),
+      ).toBe(true);
+      return JSON.parse(Buffer.from(body!, "base64url").toString()) as { sub?: string; aud?: string; kid?: string };
+    });
+    expect(claims.map((claim) => claim.aud)).toEqual(["v", "t", "s"]);
+    expect(claims.every((claim) => claim.sub === PLAYBACK_ID && claim.kid === "signing-key-id")).toBe(true);
   });
 
   it("maps live + 4K form fields on the server, not the client", () => {

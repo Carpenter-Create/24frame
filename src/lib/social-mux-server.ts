@@ -1,5 +1,7 @@
 import "server-only";
 
+import Mux from "@mux/mux-node";
+
 import {
   isSocialMuxId,
   socialMuxAssetSettings,
@@ -7,9 +9,18 @@ import {
   SocialMuxUploadNotBoundError,
   type SocialMuxAssetSettings,
   type SocialMuxIntent,
+  type SocialMuxPlaybackTokens,
 } from "@/lib/social-mux";
 
-export const SOCIAL_MUX_ENV = ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"] as const;
+export const SOCIAL_MUX_ENV = [
+  "MUX_TOKEN_ID",
+  "MUX_TOKEN_SECRET",
+  "MUX_SIGNING_KEY",
+  "MUX_PRIVATE_KEY",
+] as const;
+
+// Official Mux JWT helper (`mux.jwt.signPlaybackId`). Key id is MUX_SIGNING_KEY.
+// Base64 PEM is MUX_PRIVATE_KEY. Do not mint with the API token secret.
 
 // Server-only Mux Video client for Social. Token secret never leaves this
 // module. Do not import from client components, Edge Social reads, or
@@ -17,6 +28,7 @@ export const SOCIAL_MUX_ENV = ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"] as const;
 
 const MUX_API = "https://api.mux.com";
 const FINALIZE_DELAYS_MS = [250, 500, 750, 1000, 1500, 2000, 2000, 2000] as const;
+const SOCIAL_MUX_PLAYBACK_TOKEN_EXPIRATION = "12h";
 
 export type SocialMuxDirectUpload = {
   uploadId: string;
@@ -112,6 +124,27 @@ export async function retrieveSocialMuxUpload(uploadId: string): Promise<MuxUplo
 export async function retrieveSocialMuxAsset(assetId: string): Promise<MuxAssetData> {
   if (!isSocialMuxId(assetId)) throw new Error("Mux asset id is invalid");
   return muxRequest<MuxAssetData>(`/video/v1/assets/${assetId}`);
+}
+
+export async function mintSocialMuxPlaybackTokens(
+  playbackId: string,
+): Promise<SocialMuxPlaybackTokens> {
+  if (!isSocialMuxId(playbackId)) throw new Error("Mux playback id is invalid");
+  const mux = new Mux({
+    jwtSigningKey: requireMuxEnv("MUX_SIGNING_KEY"),
+    jwtPrivateKey: requireMuxEnv("MUX_PRIVATE_KEY"),
+  });
+  const signed = await mux.jwt.signPlaybackId(playbackId, {
+    expiration: SOCIAL_MUX_PLAYBACK_TOKEN_EXPIRATION,
+    type: ["video", "thumbnail", "storyboard"],
+  });
+  const playback = signed["playback-token"];
+  const thumbnail = signed["thumbnail-token"];
+  const storyboard = signed["storyboard-token"];
+  if (!playback || !thumbnail || !storyboard) {
+    throw new Error("Mux playback token was not minted");
+  }
+  return { playback, thumbnail, storyboard };
 }
 
 export function signedPlaybackIdFromAsset(asset: MuxAssetData): string | null {

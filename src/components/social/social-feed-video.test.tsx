@@ -42,6 +42,10 @@ describe("SocialFeedVideo", () => {
     expect(player).toContain("streamType=\"on-demand\"");
     expect(player).toContain("objectFit: \"cover\"");
     expect(player).toContain("aspectRatio: \"auto\"");
+    expect(player).toContain('tokens={{');
+    expect(player).toContain("SOCIAL_MUX_PLAYBACK_ROUTE");
+    expect(player).toContain("playback: tokens.playback");
+    expect(player).not.toContain("@/lib/social-mux-server");
     expect(player).not.toContain("maxResolution");
     expect(player).not.toContain("minResolution");
     expect(player).not.toContain("renditionOrder");
