@@ -273,7 +273,7 @@ export const SOCIAL_STORY_CARET_CLASS =
 // Glass amend: frosted wash on the dark stage. Not paper (bg-surface).
 // ~15% band-ink is inside the 12–20% white wash. Hairline is band-ink/20.
 export const SOCIAL_STORY_GLASS_FIELD_CLASS =
-  "flex h-10 w-full min-w-0 flex-1 items-center rounded-full border border-band-ink/20 bg-band-ink/15 px-4 text-left t-body-sm shadow-none backdrop-blur";
+  "flex h-10 w-full min-w-0 flex-1 items-center rounded-full border border-band-ink/20 bg-band-ink/15 px-4 text-left t-body-sm backdrop-blur";
 
 export const SOCIAL_STORY_REPLY_PILL_CLASS = `${SOCIAL_STORY_GLASS_FIELD_CLASS} text-band-ink/70`;
 
