@@ -35,11 +35,16 @@ export function SocialStoryActivitySheet({
   const [people, setPeople] = useState<StoryActivityViewer[]>(viewers ? [...viewers] : []);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(!provided);
+  const [loadedFor, setLoadedFor] = useState<string | null>(provided ? storyId : null);
+  if (open && !provided && loadedFor !== storyId) {
+    setLoadedFor(storyId);
+    setLoading(true);
+    setError("");
+  }
 
   useEffect(() => {
     if (!open || provided) return undefined;
     let cancelled = false;
-    setLoading(true);
     void listStoryViewers(storyId).then((result) => {
       if (cancelled) return;
       setPeople(result.people);
