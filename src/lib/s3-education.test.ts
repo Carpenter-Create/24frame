@@ -25,7 +25,7 @@ vi.mock("@/lib/education-cloudfront", () => ({
   signEducationCloudfrontUrl: vi.fn(),
 }));
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import {
   isEducationCloudfrontConfigured,
@@ -42,6 +42,7 @@ import {
   attachEducationLessonPlayback,
   educationOutputBucket,
   educationSourceBucket,
+  headEducationSourceObject,
   presignEducationOutputGet,
   presignEducationSourceGet,
   presignEducationSourcePut,
@@ -129,12 +130,14 @@ describe("s3-education isolated lane", () => {
 
   it("presigns cover PUT/GET on the Education source bucket", async () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/put");
-    await expect(presignEducationSourcePut(COVER, "image/jpeg")).resolves.toBe("https://s3.example/put");
+    await expect(presignEducationSourcePut(COVER, "image/jpeg", 1200)).resolves.toBe("https://s3.example/put");
     const putCmd = mockGetSignedUrl.mock.calls[0]?.[1] as PutObjectCommand;
     expect(putCmd).toBeInstanceOf(PutObjectCommand);
     expect(putCmd.input.Bucket).toBe("test-education-source-bucket");
     expect(putCmd.input.Bucket).not.toBe(process.env.S3_BUCKET);
     expect(putCmd.input.Key).toBe(COVER);
+    expect(putCmd.input.ContentType).toBe("image/jpeg");
+    expect(putCmd.input.ContentLength).toBe(1200);
     expect(putCmd.input.CacheControl).toBeUndefined();
 
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/get");
@@ -156,8 +159,33 @@ describe("s3-education isolated lane", () => {
     expect(() => educationOutputBucket()).toThrow(/dedicated 24Frame education bucket/);
   });
 
+  it("does not sign a PUT whose length is outside the house cap", async () => {
+    await expect(presignEducationSourcePut(COVER, "image/jpeg", 11 * 1024 * 1024)).rejects.toThrow(/content length/);
+    await expect(presignEducationSourcePut(COVER, "image/jpeg", 0)).rejects.toThrow(/content length/);
+    await expect(presignEducationSourcePut(COVER, "image/jpeg", 1.5)).rejects.toThrow(/content length/);
+    await expect(presignEducationSourcePut(SOURCE, "video/mp4", 2 * 1024 * 1024 * 1024 + 1)).rejects.toThrow(
+      /content length/,
+    );
+    await expect(presignEducationSourcePut(COVER, "video/mp4", 1200)).rejects.toThrow(/content length/);
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("heads a stored education object on the source bucket", async () => {
+    mockSend.mockResolvedValueOnce({ ContentLength: 4096, ContentType: "image/jpeg; charset=binary" });
+    await expect(headEducationSourceObject(COVER)).resolves.toEqual({ bytes: 4096, contentType: "image/jpeg" });
+    const cmd = mockSend.mock.calls[0]?.[0] as HeadObjectCommand;
+    expect(cmd).toBeInstanceOf(HeadObjectCommand);
+    expect(cmd.input.Bucket).toBe("test-education-source-bucket");
+    expect(cmd.input.Key).toBe(COVER);
+    mockSend.mockRejectedValueOnce(new Error("NoSuchKey"));
+    await expect(headEducationSourceObject(COVER)).resolves.toBeNull();
+    await expect(headEducationSourceObject(`orgs/${COURSE}/titles/${LESSON}/master/a.mov`)).resolves.toBeNull();
+  });
+
   it("does not sign title-prefix keys", async () => {
-    await expect(presignEducationSourcePut(`orgs/${COURSE}/titles/${LESSON}/master/a.mov`, "video/mp4")).rejects.toThrow(
+    await expect(
+      presignEducationSourcePut(`orgs/${COURSE}/titles/${LESSON}/master/a.mov`, "video/mp4", 1200),
+    ).rejects.toThrow(
       /not allowed/,
     );
     await expect(signedEducationCoverUrl(`orgs/${COURSE}/titles/${LESSON}/master/a.mov`)).resolves.toBeNull();
@@ -250,7 +278,7 @@ describe("s3-education isolated lane", () => {
 
   it("constructs S3Client from EDUCATION_AWS_* even when other lanes are present", async () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/put");
-    await presignEducationSourcePut(COVER, "image/jpeg");
+    await presignEducationSourcePut(COVER, "image/jpeg", 1200);
     expect(S3Client).toHaveBeenCalledWith({
       region: EDUCATION_AWS.EDUCATION_AWS_REGION,
       credentials: {
@@ -271,7 +299,7 @@ describe("s3-education isolated lane", () => {
 
   it.each([...EDUCATION_AWS_ENV])("refuses when %s is missing and does not use other lanes", async (name) => {
     delete process.env[name];
-    await expect(presignEducationSourcePut(COVER, "image/jpeg")).rejects.toThrow(
+    await expect(presignEducationSourcePut(COVER, "image/jpeg", 1200)).rejects.toThrow(
       new RegExp(`${name} environment variable is not set`),
     );
     expect(S3Client).not.toHaveBeenCalled();

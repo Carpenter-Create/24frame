@@ -5,6 +5,8 @@ import {
   EDUCATION_AWS_REGION,
   EDUCATION_BUCKETS,
   EDUCATION_ADMIN,
+  EDUCATION_IMAGE_MAX_BYTES,
+  EDUCATION_VIDEO_MAX_BYTES,
   EDUCATION_HREF,
   assertEducationBucketName,
   educationCoverKey,
@@ -43,6 +45,8 @@ import {
   normalizeCourseSlug,
   normalizeEducationCoverContentType,
   normalizeEducationSourceContentType,
+  educationPutLengthAllowed,
+  storedEducationObjectRejection,
   validateEducationUpload,
 } from "./education";
 
@@ -147,6 +151,42 @@ describe("education names and keys", () => {
       ok: false,
       error: "type",
     });
+    expect(validateEducationUpload({ kind: "cover", contentType: "image/jpeg", byteLength: 0 })).toEqual({
+      ok: false,
+      error: "missing",
+    });
+    expect(validateEducationUpload({ kind: "cover", contentType: "image/jpeg", byteLength: 1.5 })).toEqual({
+      ok: false,
+      error: "missing",
+    });
+    expect(
+      validateEducationUpload({
+        kind: "cover",
+        contentType: "image/jpeg",
+        byteLength: EDUCATION_IMAGE_MAX_BYTES + 1,
+      }),
+    ).toEqual({
+      ok: false,
+      error: "tooLarge",
+    });
+    const cover = educationCoverKey(COURSE, "image/jpeg");
+    const source = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
+    expect(educationPutLengthAllowed(cover, "image/jpeg", 1200)).toBe(true);
+    expect(educationPutLengthAllowed(cover, "image/jpeg", EDUCATION_IMAGE_MAX_BYTES + 1)).toBe(false);
+    expect(educationPutLengthAllowed(source, "video/mp4", EDUCATION_VIDEO_MAX_BYTES)).toBe(true);
+    expect(educationPutLengthAllowed(source, "video/mp4", EDUCATION_VIDEO_MAX_BYTES + 1)).toBe(false);
+    expect(educationPutLengthAllowed(cover, "video/mp4", 1200)).toBe(false);
+    expect(storedEducationObjectRejection(cover, null)).toBe("missing");
+    expect(storedEducationObjectRejection(cover, { bytes: 0, contentType: "image/jpeg" })).toBe("missing");
+    expect(storedEducationObjectRejection(cover, { bytes: EDUCATION_IMAGE_MAX_BYTES + 1, contentType: "image/jpeg" })).toBe(
+      "tooLarge",
+    );
+    expect(storedEducationObjectRejection(cover, { bytes: 1200, contentType: "video/mp4" })).toBe("type");
+    expect(storedEducationObjectRejection(cover, { bytes: 1200, contentType: "image/jpeg" })).toBeNull();
+    expect(storedEducationObjectRejection(cover, { bytes: 1200, contentType: null })).toBeNull();
+    expect(storedEducationObjectRejection(source, { bytes: EDUCATION_VIDEO_MAX_BYTES + 1, contentType: "video/mp4" })).toBe(
+      "tooLarge",
+    );
     expect(normalizeEducationCoverContentType("image/jpg", "cover.JPG")).toBe("image/jpeg");
     expect(normalizeEducationCoverContentType("", "poster.webp")).toBe("image/webp");
     expect(normalizeEducationCoverContentType("image/gif", "x.gif")).toBe("image/gif");

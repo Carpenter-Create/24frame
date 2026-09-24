@@ -8,6 +8,7 @@ vi.mock("@/lib/s3-education", () => ({
   isEducationAwsConfigured: vi.fn(() => false),
   presignEducationSourcePut: vi.fn(),
   putEducationSourceObject: vi.fn(),
+  headEducationSourceObject: vi.fn(async () => null),
 }));
 vi.mock("@/lib/education-mediaconvert", () => ({
   isEducationMediaconvertConfigured: vi.fn(() => false),
@@ -18,12 +19,26 @@ vi.mock("@/lib/education-mediaconvert", () => ({
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isEducationAwsConfigured, presignEducationSourcePut, putEducationSourceObject } from "@/lib/s3-education";
+import {
+  headEducationSourceObject,
+  isEducationAwsConfigured,
+  presignEducationSourcePut,
+  putEducationSourceObject,
+} from "@/lib/s3-education";
 import { isEducationMediaconvertConfigured, submitEducationHlsJob } from "@/lib/education-mediaconvert";
-import { EDUCATION_ADMIN, educationCoverKey, educationHlsPrefix, educationLessonSourceKey } from "@/lib/education";
+import {
+  EDUCATION_ADMIN,
+  EDUCATION_IMAGE_MAX_BYTES,
+  EDUCATION_VIDEO_MAX_BYTES,
+  educationCoverKey,
+  educationHlsPrefix,
+  educationLessonSourceKey,
+} from "@/lib/education";
 import { revalidatePath } from "next/cache";
 
 import {
+  attachEducationCover,
+  attachEducationLessonSource,
   createEducationCourse,
   createEducationLesson,
   presignEducationUpload,
@@ -289,6 +304,22 @@ describe("education admin actions", () => {
     ).resolves.toEqual({ error: EDUCATION_ADMIN.envUnset });
     expect(presignEducationSourcePut).not.toHaveBeenCalled();
   });
+
+  it("signs the declared byte length on an education PUT", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    vi.mocked(presignEducationSourcePut).mockResolvedValue("https://s3.example/put");
+    const key = educationCoverKey(COURSE, "image/jpeg");
+    await expect(
+      presignEducationUpload({
+        kind: "cover",
+        courseId: COURSE,
+        contentType: "image/jpeg",
+        byteLength: 1200,
+      }),
+    ).resolves.toEqual({ key, url: "https://s3.example/put" });
+    expect(presignEducationSourcePut).toHaveBeenCalledWith(key, "image/jpeg", 1200);
+  });
 });
 
 function coverForm(file: File, courseId = COURSE) {
@@ -493,6 +524,67 @@ describe("uploadEducationLessonSource", () => {
       error: EDUCATION_ADMIN.missing,
     });
     expect(putEducationSourceObject).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe("education attach after a presigned PUT", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getAuthUser).mockResolvedValue(USER as never);
+  });
+
+  it("does not attach a cover that is missing, oversized, or a different type", async () => {
+    staffClient({ user_id: USER.id });
+    const { update } = coverAdminClient();
+    const key = educationCoverKey(COURSE, "image/jpeg");
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce(null);
+    await expect(attachEducationCover({ courseId: COURSE, key })).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce({
+      bytes: EDUCATION_IMAGE_MAX_BYTES + 1,
+      contentType: "image/jpeg",
+    });
+    await expect(attachEducationCover({ courseId: COURSE, key })).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce({ bytes: 1200, contentType: "video/mp4" });
+    await expect(attachEducationCover({ courseId: COURSE, key })).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
+    expect(headEducationSourceObject).toHaveBeenCalledWith(key);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("attaches a cover when the stored object matches", async () => {
+    staffClient({ user_id: USER.id });
+    const { update } = coverAdminClient();
+    const key = educationCoverKey(COURSE, "image/jpeg");
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce({ bytes: 1200, contentType: "image/jpeg" });
+    await expect(attachEducationCover({ courseId: COURSE, key })).resolves.toEqual({});
+    expect(update).toHaveBeenCalledWith({ cover_key: key });
+  });
+
+  it("does not attach a lesson source that is missing, oversized, or a different type", async () => {
+    staffClient({ user_id: USER.id });
+    const { update } = sourceAdminClient();
+    const key = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce(null);
+    await expect(attachEducationLessonSource({ courseId: COURSE, lessonId: LESSON, key })).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce({
+      bytes: EDUCATION_VIDEO_MAX_BYTES + 1,
+      contentType: "video/mp4",
+    });
+    await expect(attachEducationLessonSource({ courseId: COURSE, lessonId: LESSON, key })).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
+    vi.mocked(headEducationSourceObject).mockResolvedValueOnce({ bytes: 1200, contentType: "image/jpeg" });
+    await expect(attachEducationLessonSource({ courseId: COURSE, lessonId: LESSON, key })).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
     expect(update).not.toHaveBeenCalled();
   });
 });

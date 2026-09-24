@@ -25,6 +25,7 @@ import {
   normalizeEducationSourceContentType,
   parseEducationPriceDollars,
   resolveEducationProduct,
+  storedEducationObjectRejection,
   validateEducationUpload,
   type CourseStatus,
   type EducationProductModel,
@@ -35,6 +36,7 @@ import {
   submitEducationHlsJob,
 } from "@/lib/education-mediaconvert";
 import {
+  headEducationSourceObject,
   isEducationAwsConfigured,
   presignEducationSourcePut,
   putEducationSourceObject,
@@ -437,7 +439,7 @@ export async function presignEducationUpload(raw: unknown): Promise<{
   }
 
   try {
-    const url = await presignEducationSourcePut(key, checked.contentType);
+    const url = await presignEducationSourcePut(key, checked.contentType, parsed.data.byteLength);
     return { key, url };
   } catch (err) {
     if (err instanceof Error && /environment variable is not set/.test(err.message)) {
@@ -591,6 +593,11 @@ export async function attachEducationCover(raw: unknown): Promise<{ error?: stri
     .eq("id", parsed.data.courseId)
     .maybeSingle();
   if (!course) return { error: EDUCATION_ADMIN.missing };
+  const coverRejection = storedEducationObjectRejection(
+    parsed.data.key,
+    await headEducationSourceObject(parsed.data.key),
+  );
+  if (coverRejection) return { error: EDUCATION_ADMIN.invalid };
   const { error } = await admin
     .from("courses")
     .update({ cover_key: parsed.data.key })
@@ -715,6 +722,12 @@ export async function attachEducationLessonSource(raw: unknown): Promise<{ error
     .eq("id", parsed.data.lessonId)
     .maybeSingle();
   if (!lesson) return { error: EDUCATION_ADMIN.missing };
+
+  const sourceRejection = storedEducationObjectRejection(
+    parsed.data.key,
+    await headEducationSourceObject(parsed.data.key),
+  );
+  if (sourceRejection) return { error: EDUCATION_ADMIN.invalid };
 
   const now = new Date().toISOString();
   const { error } = await admin
