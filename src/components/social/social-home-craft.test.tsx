@@ -130,9 +130,14 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_COMPOSER_AFFORDANCE_CLASS).not.toContain("size-10");
     expect(SOCIAL_COMPOSER_AFFORDANCE_CLASS).toContain("text-ink-2");
     expect(SOCIAL_COMPOSER_AFFORDANCE_CLASS).not.toContain("bg-accent");
-    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("border-0");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("outline-none");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("shadow-");
+    expect(html).toContain("shadow-none");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
-    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("border-hairline");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-10");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("rounded-[20px]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("px-[var(--space-4)]");

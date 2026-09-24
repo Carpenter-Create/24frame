@@ -86,7 +86,7 @@ export function SocialHomeCenterSkeleton({
       <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
         <div className={SOCIAL_COMPOSER_ROW_CLASS}>
           <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
-          <Skeleton className={SOCIAL_COMPOSER_FIELD_CLASS} />
+          <Skeleton className={`${SOCIAL_COMPOSER_FIELD_CLASS} bg-surface-muted`} />
         </div>
         <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
           <Skeleton className="size-8 shrink-0 rounded-full" />

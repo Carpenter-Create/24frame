@@ -297,11 +297,12 @@ export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
 export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
 
 // Home composer share stage. Phone SoT; desktop uses this same row.
-// FB-row lock v1.1 tokens. Host stays white, hairline, radius 16, pad 16.
-// One row. Avatar 40, gap 12. Share something field is white with a
-// hairline (not muted fill), radius 20, height 40, pad H 16.
-// Photo then Camera: glyph 16, hit 32, gap 0, 8px after the field, ink-2.
-// No labels. No Live/Feeling strip.
+// FB-row lock v1.2 field. Host stays white, hairline, radius 16, pad 16.
+// One row. Avatar 40, gap 12. Share something is not a drawn pill:
+// transparent fill, no border, no shadow, no outline. Radius 20 is hit
+// geometry only. Height 40, pad H 16.
+// Photo then Camera stay v1.1: glyph 16, hit 32, gap 0, 8px after the
+// field, ink-2. No labels. No Live/Feeling strip.
 export const SOCIAL_COMPOSER_CLASS =
   `flex w-full items-center ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
 
@@ -316,7 +317,7 @@ export const SOCIAL_COMPOSER_AFFORDANCE_CLASS =
   "inline-flex size-8 shrink-0 items-center justify-center bg-transparent text-ink-2";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
-  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] border border-hairline bg-surface px-[var(--space-4)] t-body text-ink-2";
+  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] border-0 bg-transparent px-[var(--space-4)] t-body text-ink-2 outline-none";
 
 export const SOCIAL_COMPOSER_MEDIA_CLASS =
   "relative flex size-9 shrink-0 cursor-pointer items-center justify-center text-ink-2";
