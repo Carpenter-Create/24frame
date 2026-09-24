@@ -848,6 +848,7 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
   return (
     <form
       data-social-dm-form=""
+      data-social-dm-composer=""
       className={DM_THREAD_COMPOSER_CLASS}
       action={async (formData) => {
         setError("");

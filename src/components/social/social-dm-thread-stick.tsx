@@ -2,15 +2,12 @@
 
 import { useEffect } from "react";
 
-/** Newest sits at the bottom of the thread scroller. */
+/** Newest sits at the bottom of the thread's own scroller. */
 export function SocialDmThreadStick({ nonce }: { nonce: string }) {
   useEffect(() => {
-    const scroller = document.querySelector<HTMLElement>("[data-house-lead-scroll]");
-    if (scroller) {
-      scroller.scrollTop = scroller.scrollHeight;
-      return;
-    }
-    window.scrollTo(0, document.documentElement.scrollHeight);
+    const column = document.querySelector<HTMLElement>("[data-social-dm-column]");
+    if (!column) return;
+    column.scrollTop = column.scrollHeight;
   }, [nonce]);
   return null;
 }

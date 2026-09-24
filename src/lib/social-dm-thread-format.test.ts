@@ -9,6 +9,7 @@ import {
   DM_THREAD_BURST_GAP_MS,
   DM_THREAD_COLUMN_CLASS,
   DM_THREAD_COMPOSER_CLASS,
+  DM_THREAD_ROOT_CLASS,
   DM_THREAD_COMPOSER_FIELD_CLASS,
   DM_THREAD_COMPOSER_SEND_CLASS,
   DM_THREAD_DAY_CLASS,
@@ -150,7 +151,6 @@ describe("DM thread message format", () => {
     expect(DM_THREAD_COLUMN_CLASS).toContain("px-4");
     expect(DM_THREAD_COLUMN_CLASS).toContain("bg-[#FAFAFB]");
     expect(DM_THREAD_LIST_CLASS).toContain("gap-2");
-    expect(DM_THREAD_COMPOSER_CLASS).toContain("sticky");
     expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("h-10");
     expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("rounded-[20px]");
     expect(DM_THREAD_COMPOSER_SEND_CLASS).not.toContain("w-full");
@@ -167,6 +167,33 @@ describe("DM thread message format", () => {
       SOCIAL.dms.sentYouStory,
     );
     expect(dmThreadStorySystemLine({ mine: true, authorHandle: null, senderName: "Ada" })).toBeNull();
+  });
+
+  it("pins the composer to the bottom of the thread chrome", () => {
+    expect(DM_THREAD_ROOT_CLASS).toContain("h-[calc(100dvh-var(--header-height)-2rem)]");
+    expect(DM_THREAD_ROOT_CLASS).toContain("max-h-[calc(100dvh-var(--header-height)-2rem)]");
+    expect(DM_THREAD_ROOT_CLASS).toContain(
+      "max-md:h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))]",
+    );
+    expect(DM_THREAD_ROOT_CLASS).not.toContain("min-h-[calc(100dvh");
+    expect(DM_THREAD_ROOT_CLASS).toContain("overflow-hidden");
+    expect(DM_THREAD_COLUMN_CLASS).toContain("min-h-0");
+    expect(DM_THREAD_COLUMN_CLASS).toContain("flex-1");
+    expect(DM_THREAD_COLUMN_CLASS).toContain("overflow-y-auto");
+    expect(DM_THREAD_COMPOSER_CLASS).toContain("shrink-0");
+    expect(DM_THREAD_COMPOSER_CLASS).toContain("bg-[#FAFAFB]");
+    expect(DM_THREAD_COMPOSER_CLASS).not.toContain("sticky");
+    expect(DM_THREAD_COMPOSER_CLASS).not.toContain("bottom-[calc(6.5rem");
+    expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("h-10");
+    expect(DM_THREAD_COMPOSER_SEND_CLASS).not.toContain("w-full");
+
+    const stick = readFileSync("src/components/social/social-dm-thread-stick.tsx", "utf8");
+    expect(stick).toContain("[data-social-dm-column]");
+    expect(stick).toContain("scrollTop");
+    expect(stick).not.toContain("[data-house-lead-scroll]");
+    const page = readFileSync("src/app/(app)/social/dms/[id]/page.tsx", "utf8");
+    expect(page.indexOf("<SocialDmThread")).toBeLessThan(page.indexOf("<SocialDmCompose"));
+    expect(page.indexOf("<SocialAddPeopleForm")).toBeLessThan(page.indexOf("<SocialDmThread"));
   });
 
   it("does not center the story share in the thread view", () => {

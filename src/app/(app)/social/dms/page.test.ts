@@ -220,6 +220,11 @@ describe("social DMs", () => {
     expect(html).toContain(dmThreadDayLabel(priorAt, new Date()));
     expect(html).toContain(dmThreadTimeLabel(priorAt));
     expect(html).toContain(SOCIAL.dms.threadPlaceholder);
+    expect(html).toContain('data-social-dm-composer=""');
+    expect(html).toContain("shrink-0");
+    expect(html).toContain("overflow-y-auto");
+    expect(html).toContain("h-[calc(100dvh-var(--header-height)-2rem)]");
+    expect(html).not.toContain("bottom-[calc(6.5rem+env(safe-area-inset-bottom))]");
     expect(html).toContain("rounded-[20px]");
     expect(html).not.toContain(">Send<");
     const column = html.slice(html.indexOf("data-social-dm-column"), html.indexOf("data-social-dm-form"));

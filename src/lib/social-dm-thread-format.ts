@@ -11,13 +11,17 @@ export const DM_THREAD_BURST_GAP_MS = 5 * 60 * 1000;
 
 // Lock canvas #FAFAFB. House --bg and --surface are #FFFFFF.
 // --surface-muted is the mine bubble (#F4F4F6), not this canvas.
+// Lock E: the thread fills the house lead. A min-height column leaves
+// the composer in normal flow with empty space below it.
+// 2rem is the social frame's py-4. Phone dest clearance is the shell's
+// 6.5rem pad plus the safe area, on max-md only.
 export const DM_THREAD_ROOT_CLASS =
-  "flex min-h-[calc(100dvh-var(--header-height)-2rem)] flex-col max-md:min-h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))]";
+  "flex h-[calc(100dvh-var(--header-height)-2rem)] max-h-[calc(100dvh-var(--header-height)-2rem)] w-full flex-col overflow-hidden max-md:h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))] max-md:max-h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))]";
 
 export const DM_THREAD_COLUMN_CLASS =
-  "flex min-h-0 flex-1 flex-col bg-[#FAFAFB] px-4 text-ink";
+  "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-[#FAFAFB] px-4 text-ink";
 
-export const DM_THREAD_LIST_CLASS = "flex flex-1 flex-col gap-2";
+export const DM_THREAD_LIST_CLASS = "mt-auto flex flex-col gap-2";
 
 export const DM_THREAD_DAY_CLASS = "text-center t-body-sm text-ink-2";
 
@@ -36,7 +40,7 @@ export const DM_THREAD_SYSTEM_LINE_CLASS =
 export const DM_THREAD_AVATAR_CLASS = "size-7 shrink-0";
 
 export const DM_THREAD_COMPOSER_CLASS =
-  "sticky z-20 flex flex-col gap-2 bg-[#FAFAFB] px-4 py-2 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-0";
+  "shrink-0 flex flex-col gap-2 bg-[#FAFAFB] px-4 py-2";
 
 export const DM_THREAD_COMPOSER_ROW_CLASS = "flex items-center gap-2";
 
