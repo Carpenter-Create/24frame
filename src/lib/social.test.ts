@@ -26,6 +26,8 @@ import {
   quietDmAddError,
   SOCIAL,
   isSocialStoryCreatePath,
+  isSocialDmComposePath,
+  isSocialDmImmersivePath,
   isSocialDmThreadPath,
   isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
@@ -172,7 +174,18 @@ describe("social copy lock", () => {
     expect(isSocialDmThreadPath("/social/dms/thread-1/")).toBe(true);
     expect(isSocialDmThreadPath(SOCIAL_ROUTES.dms)).toBe(false);
     expect(isSocialDmThreadPath(`${SOCIAL_ROUTES.dms}/new`)).toBe(false);
+    expect(isSocialDmThreadPath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(false);
     expect(isSocialDmThreadPath(SOCIAL_ROUTES.home)).toBe(false);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new`)).toBe(true);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new/`)).toBe(true);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(true);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new/group/`)).toBe(true);
+    expect(isSocialDmComposePath(SOCIAL_ROUTES.dms)).toBe(false);
+    expect(isSocialDmComposePath("/social/dms/thread-1")).toBe(false);
+    expect(isSocialDmImmersivePath("/social/dms/thread-1")).toBe(true);
+    expect(isSocialDmImmersivePath(`${SOCIAL_ROUTES.dms}/new`)).toBe(true);
+    expect(isSocialDmImmersivePath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(true);
+    expect(isSocialDmImmersivePath(SOCIAL_ROUTES.dms)).toBe(false);
     expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
@@ -277,7 +290,16 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.roomFull).toContain("16");
     expect(SOCIAL.dms.addBatch).toContain("16");
     expect(SOCIAL.dms.chat).toBe("Chat");
+    expect(SOCIAL.dms.to).toBe("To:");
+    expect(SOCIAL.dms.search).toBe("Search");
+    expect(SOCIAL.dms.groupChat).toBe("Group chat");
+    expect(SOCIAL.dms.groupChatHint).toBe("Message up to 16 people");
+    expect(SOCIAL.dms.newGroupChat).toBe("New group chat");
+    expect(SOCIAL.dms.groupName).toBe("Group name (optional)");
+    expect(SOCIAL.dms.suggested).toBe("Suggested");
     expect(JSON.stringify(SOCIAL.dms)).not.toContain("Create group");
+    expect(JSON.stringify(SOCIAL.dms)).not.toContain("Channel");
+    expect(JSON.stringify(SOCIAL.dms)).not.toContain("AI chats");
     expect(SOCIAL.dms.olderPage).toContain("older");
     expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");

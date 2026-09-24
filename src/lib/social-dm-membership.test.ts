@@ -6,6 +6,8 @@ import {
   DM_COMPOSE_SEARCH_CLASS,
   DM_MEMBERSHIP_CAP,
   dmComposeCta,
+  dmDirectComposeCta,
+  dmGroupComposeCta,
   dmMembershipCanSelectMore,
   dmMembershipHelper,
 } from "@/lib/social-dm-membership";
@@ -24,6 +26,14 @@ describe("DM membership", () => {
     expect(dmComposeCta(2)).toBe("chat");
     expect(dmComposeCta(15)).toBe("chat");
     expect(dmComposeCta(16)).toBeNull();
+    expect(dmDirectComposeCta(0)).toBeNull();
+    expect(dmDirectComposeCta(1)).toBe("chat");
+    expect(dmDirectComposeCta(2)).toBeNull();
+    expect(dmGroupComposeCta(0)).toBeNull();
+    expect(dmGroupComposeCta(1)).toBeNull();
+    expect(dmGroupComposeCta(2)).toBe("chat");
+    expect(dmGroupComposeCta(15)).toBe("chat");
+    expect(dmGroupComposeCta(16)).toBeNull();
     expect(DM_COMPOSE_SEARCH_CLASS).toContain("h-10");
     expect(DM_COMPOSE_SEARCH_CLASS).toContain("rounded-[20px]");
     expect(DM_COMPOSE_CTA_CLASS).toContain("h-12");
@@ -44,8 +54,23 @@ describe("DM membership", () => {
     expect(inbox).toContain("${SOCIAL_ROUTES.dms}/new");
     expect(inbox).not.toContain("data-social-add-people");
     const picker = readFileSync("src/components/social/social-dm-compose-picker.tsx", "utf8");
+    const direct = readFileSync("src/app/(app)/social/dms/new/page.tsx", "utf8");
+    const group = readFileSync("src/app/(app)/social/dms/new/group/page.tsx", "utf8");
     expect(picker).toContain("SOCIAL.dms.chat");
+    expect(picker).toContain("SOCIAL.dms.groupChat");
+    expect(picker).toContain("SOCIAL.dms.groupChatHint");
+    expect(picker).toContain("dmDirectComposeCta");
+    expect(picker).toContain("dmGroupComposeCta");
+    expect(picker).toContain("dmMembershipHelper");
     expect(picker).not.toContain("createGroup");
     expect(picker).not.toContain("Create group");
+    expect(picker).not.toContain("Channel");
+    expect(picker).not.toContain("AI chats");
+    expect(direct).toContain('mode="direct"');
+    expect(direct).not.toContain("PageHeader");
+    expect(group).toContain('mode="group"');
+    expect(group).toContain("loadDmComposeRoster");
+    expect(actions).toContain("set_group_conversation_title");
+    expect(actions).toContain("open_or_get_direct_conversation");
   });
 });

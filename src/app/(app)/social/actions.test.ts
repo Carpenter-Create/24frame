@@ -783,9 +783,42 @@ describe("social actions", () => {
     form.append("peer_id", "u2");
     form.append("peer_id", "u3");
     await expect(startSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-g");
+    expect(rpc).toHaveBeenCalledTimes(1);
     expect(rpc).toHaveBeenCalledWith("create_group_conversation", { p_peers: ["u2", "u3"] });
     expect(from).not.toHaveBeenCalledWith("conversations");
     expect(from).not.toHaveBeenCalledWith("conversation_participants");
+  });
+
+  it("sets an optional name on a fresh multi-party DM and leaves a 1:1 untitled", async () => {
+    const named = stub({ profile: { id: "u1" }, rpcData: "conv-g" });
+    const form = new FormData();
+    form.append("peer_id", "u2");
+    form.append("peer_id", "u3");
+    form.set("title", "Desk room");
+    await expect(startSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-g");
+    expect(named.rpc).toHaveBeenNthCalledWith(1, "create_group_conversation", { p_peers: ["u2", "u3"] });
+    expect(named.rpc).toHaveBeenNthCalledWith(2, "set_group_conversation_title", {
+      p_conversation: "conv-g",
+      p_title: "Desk room",
+    });
+
+    const direct = stub({ profile: { id: "u1" }, rpcData: "conv-1" });
+    const one = new FormData();
+    one.append("peer_id", "u2");
+    one.set("title", "Nope");
+    await expect(startSocialDm(one)).rejects.toThrow("REDIRECT:/social/dms/conv-1");
+    expect(direct.rpc).toHaveBeenCalledTimes(1);
+    expect(direct.rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
+  });
+
+  it("rejects an overlong group name before creating a room", async () => {
+    const { rpc } = stub({ profile: { id: "u1" }, rpcData: "conv-g" });
+    const form = new FormData();
+    form.append("peer_id", "u2");
+    form.append("peer_id", "u3");
+    form.set("title", "x".repeat(81));
+    expect(await startSocialDm(form)).toEqual({ error: SOCIAL.dms.titleInvalid });
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("persists image and video keys on posts.media", async () => {
