@@ -242,21 +242,29 @@ export function storyUploadNotice(
   return SOCIAL.home.uploadFailed;
 }
 
-/** Timer via AbortController. Do not call the static timeout helper — older Safari throws. */
-export function storyUploadSignal(timeoutMs: number): { signal?: AbortSignal; cancel: () => void } {
-  if (typeof AbortController === "undefined") return { cancel() {} };
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return {
-    signal: controller.signal,
-    cancel() {
-      clearTimeout(timer);
-    },
-  };
+/** Why the story PUT became the store toast. No separate house sentence exists. */
+export type StoryStoreStop = "presign" | "reject" | "network";
+
+/**
+ * presign: the server action threw before a URL existed.
+ * reject: S3 returned a non-2xx.
+ * network: fetch threw. That is the CORS preflight on the media bucket.
+ * 24frame-media-source-prod (us-west-2) allows PUT from http://localhost:3000
+ * only. The eb56af preview origin gets 403 and no Access-Control-Allow-Origin,
+ * so the browser throws and the screen stays "The file could not be stored."
+ */
+export function storyStoreNotice(stop: StoryStoreStop): string {
+  switch (stop) {
+    case "presign":
+    case "reject":
+    case "network":
+      return SOCIAL.home.uploadFailed;
+  }
 }
 
-export function storyUploadTimeoutMs(): number {
-  return 120_000;
+/** True when an S3 preflight refused the browser origin. */
+export function storyPutBlockedByCors(input: { status: number; allowOrigin: string | null }): boolean {
+  return input.status === 403 && !input.allowOrigin;
 }
 
 /** Detached bytes. The review element must not be the upload body. */

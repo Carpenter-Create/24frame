@@ -23,7 +23,8 @@ import {
   prepareStoryUploadFile,
   storyUploadContentType,
   storyUploadNotice,
-  storyUploadSignal,
+  storyStoreNotice,
+  storyPutBlockedByCors,
   storyVideoInputCount,
   nextStoryStudioLive,
   storyRecorderVideoConstraints,
@@ -125,6 +126,17 @@ describe("story MediaRecorder mime probe", () => {
     expect(studio).toContain("stopStream(streamRef.current)");
     expect(studio).toContain("releaseLiveCamera()");
     expect(studio).not.toContain("AbortSignal.timeout");
+    expect(studio).not.toContain("signal:");
+    const uploadStart = studio.indexOf("async function uploadStoryMedia");
+    const uploadEnd = studio.indexOf("export function SocialStoryCompose");
+    const uploadBlock = studio.slice(uploadStart, uploadEnd);
+    expect(uploadBlock).toContain('headers: { "Content-Type": signed.contentType }');
+    expect(uploadBlock).toContain('console.error("story-put", put.status, await put.text())');
+    expect(uploadBlock).not.toContain("signal");
+    expect(uploadBlock).not.toContain("AbortSignal");
+    expect(uploadBlock).toContain('storyStoreNotice("presign")');
+    expect(uploadBlock).toContain('storyStoreNotice("reject")');
+    expect(uploadBlock).toContain('storyStoreNotice("network")');
     expect(studio).toContain('body.set("lane", "stories")');
     expect(studio).toContain('body.set("byte_length", String(prepared.size))');
     expect(studio).toContain("if (signed.error) return { error: signed.error }");
@@ -170,7 +182,7 @@ describe("story MediaRecorder mime probe", () => {
     expect(pickBlock).not.toContain("reviewArmRef.current = Date.now()");
   });
 
-  it("keeps the story upload type exact and splits store errors", () => {
+  it("keeps the story upload type exact and splits store errors", async () => {
     expect(storyUploadContentType("video/mp4")).toBe("video/mp4");
     expect(storyUploadContentType("video/webm")).toBe("video/webm");
     expect(storyUploadContentType("video/quicktime")).toBe("video/quicktime");
@@ -206,9 +218,26 @@ describe("story MediaRecorder mime probe", () => {
     expect(storyUploadNotice("store")).toBe("The file could not be stored.");
     expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("read"));
     expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("missing"));
-    const pending = storyUploadSignal(60_000);
-    expect(pending.signal).toBeInstanceOf(AbortSignal);
-    expect(() => pending.cancel()).not.toThrow();
+    expect(storyStoreNotice("presign")).toBe("The file could not be stored.");
+    expect(storyStoreNotice("reject")).toBe(storyStoreNotice("network"));
+    expect(storyStoreNotice("network")).toBe(storyUploadNotice("store"));
+    expect(storyStoreNotice("network")).not.toBe(storyUploadNotice("missing"));
+    expect(storyPutBlockedByCors({ status: 403, allowOrigin: null })).toBe(true);
+    expect(
+      storyPutBlockedByCors({ status: 200, allowOrigin: "http://localhost:3000" }),
+    ).toBe(false);
+    const recorded = new File([new Uint8Array([1, 2, 3, 4])], "story.mp4", {
+      type: "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+    });
+    const cloned = await cloneStoryUploadFile(recorded);
+    expect(cloned.size).toBe(recorded.size);
+    const preparedClip = prepareStoryUploadFile(cloned);
+    expect(preparedClip).not.toBe("missing");
+    expect(preparedClip).not.toBe("type");
+    if (preparedClip instanceof File) {
+      expect(preparedClip.size).toBe(4);
+      expect(preparedClip.type).toBe("video/mp4");
+    }
   });
 
   it("shows flash only when the track can torch, and counts cameras", async () => {

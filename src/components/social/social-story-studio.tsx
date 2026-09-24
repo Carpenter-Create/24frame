@@ -89,8 +89,7 @@ import {
   storyCameraSupportsTorch,
   storyRecorderVideoConstraints,
   storyUploadNotice,
-  storyUploadSignal,
-  storyUploadTimeoutMs,
+  storyStoreNotice,
   storyVideoInputCount,
   captureStoryStillFrame,
   storyStudioIsLive,
@@ -124,22 +123,25 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
   let signed: Awaited<ReturnType<typeof presignSocialMediaUpload>>;
   try {
     signed = await presignSocialMediaUpload(body);
-  } catch {
-    return { error: storyUploadNotice("store") };
+  } catch (error) {
+    console.error("story-put", "presign", error);
+    return { error: storyStoreNotice("presign") };
   }
   if (signed.error) return { error: signed.error };
   if (!signed.url || !signed.key || !signed.kind || !signed.contentType) {
-    return { error: storyUploadNotice("store") };
+    console.error("story-put", "presign", "missing-url");
+    return { error: storyStoreNotice("presign") };
   }
-  const pending = storyUploadSignal(storyUploadTimeoutMs());
   try {
     const put = await fetch(signed.url, {
       method: "PUT",
       headers: { "Content-Type": signed.contentType },
       body: prepared,
-      signal: pending.signal,
     });
-    if (!put.ok) return { error: storyUploadNotice("store") };
+    if (!put.ok) {
+      console.error("story-put", put.status, await put.text());
+      return { error: storyStoreNotice("reject") };
+    }
     const kind = socialMediaKindFor(prepared.type);
     if (kind !== "image" && kind !== "video") return { error: storyUploadNotice("type", kindHint) };
     return {
@@ -149,10 +151,9 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
         contentType: signed.contentType as SocialMediaContentType,
       },
     };
-  } catch {
-    return { error: storyUploadNotice("store") };
-  } finally {
-    pending.cancel();
+  } catch (error) {
+    console.error("story-put", error);
+    return { error: storyStoreNotice("network") };
   }
 }
 
