@@ -262,11 +262,22 @@ export function validateMediaUpload(input: {
   }
   const kind = socialMediaKindFor(input.contentType);
   if (!kind) return { ok: false, error: "type" };
-  if (!Number.isFinite(input.byteLength) || input.byteLength <= 0) {
+  if (!Number.isInteger(input.byteLength) || input.byteLength <= 0) {
     return { ok: false, error: "missing" };
   }
   if (input.byteLength > socialMediaMaxBytes(kind)) {
     return { ok: false, error: "tooLarge" };
   }
   return { ok: true, kind, contentType: input.contentType };
+}
+
+/** HeadObject must match the story row. Missing, empty, oversized, or a different type fails closed. */
+export function storedSocialMediaRejection(
+  item: { kind: SocialMediaKind; contentType: string },
+  head: { bytes: number; contentType: string | null } | null,
+): SocialMediaRuleError | null {
+  if (!head || !Number.isInteger(head.bytes) || head.bytes <= 0) return "missing";
+  if (head.bytes > socialMediaMaxBytes(item.kind)) return "tooLarge";
+  if (head.contentType && head.contentType !== item.contentType) return "type";
+  return null;
 }

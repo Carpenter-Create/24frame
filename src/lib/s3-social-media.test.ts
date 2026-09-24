@@ -25,13 +25,14 @@ vi.mock("@/lib/social-media-cloudfront", () => ({
   signSocialMediaCloudfrontUrl: vi.fn(),
 }));
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { isMediaCloudfrontConfigured, signSocialMediaCloudfrontUrl } from "@/lib/social-media-cloudfront";
 import {
   MEDIA_AWS_ENV,
   mediaOutputBucket,
   mediaSourceBucket,
+  headSocialMediaObject,
   presignSocialMediaGet,
   presignSocialMediaPut,
   signedSocialMediaItems,
@@ -98,13 +99,14 @@ describe("s3-social-media isolated lane", () => {
 
   it("presigns PUT/GET on the media source bucket, never S3_BUCKET", async () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/put");
-    await expect(presignSocialMediaPut(KEY, "image/jpeg")).resolves.toBe("https://s3.example/put");
+    await expect(presignSocialMediaPut(KEY, "image/jpeg", 1200)).resolves.toBe("https://s3.example/put");
     const putCmd = mockGetSignedUrl.mock.calls[0]?.[1] as PutObjectCommand;
     expect(putCmd).toBeInstanceOf(PutObjectCommand);
     expect(putCmd.input.Bucket).toBe("test-media-source-bucket");
     expect(putCmd.input.Bucket).not.toBe(process.env.S3_BUCKET);
     expect(putCmd.input.Key).toBe(KEY);
     expect(putCmd.input.ContentType).toBe("image/jpeg");
+    expect(putCmd.input.ContentLength).toBe(1200);
     expect(putCmd.input.CacheControl).toBeUndefined();
 
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/get");
@@ -133,8 +135,31 @@ describe("s3-social-media isolated lane", () => {
     expect(() => mediaOutputBucket()).toThrow(/24frame-media bucket, not S3_BUCKET/);
   });
 
+  it("does not sign a PUT whose length is outside the house cap", async () => {
+    const videoKey = `stories/${USER}/${OBJECT}.mp4`;
+    await expect(presignSocialMediaPut(KEY, "image/jpeg", 11 * 1024 * 1024)).rejects.toThrow(/content length/);
+    await expect(presignSocialMediaPut(KEY, "image/jpeg", 0)).rejects.toThrow(/content length/);
+    await expect(presignSocialMediaPut(KEY, "image/jpeg", 1.5)).rejects.toThrow(/content length/);
+    await expect(presignSocialMediaPut(videoKey, "video/mp4", 250 * 1024 * 1024 + 1)).rejects.toThrow(
+      /content length/,
+    );
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("heads a stored object on the media source bucket", async () => {
+    mockSend.mockResolvedValueOnce({ ContentLength: 4096, ContentType: "image/jpeg; charset=binary" });
+    await expect(headSocialMediaObject(KEY)).resolves.toEqual({ bytes: 4096, contentType: "image/jpeg" });
+    const cmd = mockSend.mock.calls[0]?.[0] as HeadObjectCommand;
+    expect(cmd).toBeInstanceOf(HeadObjectCommand);
+    expect(cmd.input.Bucket).toBe("test-media-source-bucket");
+    expect(cmd.input.Key).toBe(KEY);
+    mockSend.mockRejectedValueOnce(new Error("NoSuchKey"));
+    await expect(headSocialMediaObject(KEY)).resolves.toBeNull();
+    await expect(headSocialMediaObject(`orgs/${USER}/titles/${OBJECT}/master/a.mov`)).resolves.toBeNull();
+  });
+
   it("does not sign title-prefix keys", async () => {
-    await expect(presignSocialMediaPut(`orgs/${USER}/titles/${OBJECT}/master/a.mov`, "video/mp4")).rejects.toThrow(
+    await expect(presignSocialMediaPut(`orgs/${USER}/titles/${OBJECT}/master/a.mov`, "video/mp4", 1200)).rejects.toThrow(
       /not allowed/,
     );
     await expect(signedSocialMediaUrl(`orgs/${USER}/titles/${OBJECT}/master/a.mov`)).resolves.toBeNull();
@@ -258,7 +283,7 @@ describe("s3-social-media MEDIA_AWS env selection", () => {
 
   it("constructs S3Client from MEDIA_AWS_* even when title AWS_* is present", async () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/put");
-    await presignSocialMediaPut(KEY, "image/jpeg");
+    await presignSocialMediaPut(KEY, "image/jpeg", 1200);
     expect(S3Client).toHaveBeenCalledTimes(1);
     expect(S3Client).toHaveBeenCalledWith(expectedMediaClientConfig());
     const config = vi.mocked(S3Client).mock.calls[0]?.[0] as {
@@ -272,7 +297,7 @@ describe("s3-social-media MEDIA_AWS env selection", () => {
 
   it.each([...MEDIA_AWS_ENV])("refuses when %s is missing and does not use title AWS_*", async (name) => {
     delete process.env[name];
-    await expect(presignSocialMediaPut(KEY, "image/jpeg")).rejects.toThrow(
+    await expect(presignSocialMediaPut(KEY, "image/jpeg", 1200)).rejects.toThrow(
       new RegExp(`${name} environment variable is not set`),
     );
     expect(S3Client).not.toHaveBeenCalled();

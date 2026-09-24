@@ -24,9 +24,9 @@ describe("social media browser PUT presign", () => {
   });
 
   it("does not bind the empty sign-time CRC32 that S3 rejects on the JPEG", async () => {
-    const url = await presignSocialMediaPut(KEY, "image/jpeg");
+    const url = await presignSocialMediaPut(KEY, "image/jpeg", 1200);
     const params = new URL(url).searchParams;
-    expect(params.get("X-Amz-SignedHeaders")).toBe("host");
+    expect(params.get("X-Amz-SignedHeaders")?.split(";").sort()).toEqual(["content-length", "host"]);
     expect(params.get("x-amz-checksum-crc32")).toBeNull();
     expect(params.get("x-amz-sdk-checksum-algorithm")).toBeNull();
     expect(url.toLowerCase()).not.toContain("x-amz-checksum-");

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import type { CourseOutlineModule } from "@/lib/courses";
@@ -11,6 +11,7 @@ import {
   EDUCATION_S3_ENV,
   EDUCATION_SIGNED_URL_TTL_SECONDS,
   educationHlsPlaybackHref,
+  educationPutLengthAllowed,
   isEducationObjectKey,
   isForbiddenEducationKey,
   lessonPlaybackReady,
@@ -95,20 +96,41 @@ export async function putEducationSourceObject(
 export async function presignEducationSourcePut(
   key: string,
   contentType: EducationImageContentType | EducationVideoContentType,
+  contentLength: number,
 ): Promise<string> {
   assertEducationKey(key);
+  if (!educationPutLengthAllowed(key, contentType, contentLength)) {
+    throw new Error("Education content length is not allowed");
+  }
   const { bucket, s3 } = educationClient(educationSourceBucket());
-  // Browser fetch only sends Content-Type. Do not sign Cache-Control —
-  // a signed extra header 403s the PUT and the cover/source form hangs.
+  // Browser PUT sends Content-Type plus the Content-Length fetch adds for
+  // the body. Sign that length so a declared size cannot PUT a larger
+  // object. Do not sign Cache-Control — a signed extra header 403s the PUT.
   return getSignedUrl(
     s3,
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       ContentType: contentType,
+      ContentLength: contentLength,
     }),
     { expiresIn: EDUCATION_PUT_TTL_SECONDS },
   );
+}
+
+export async function headEducationSourceObject(
+  key: string,
+): Promise<{ bytes: number; contentType: string | null } | null> {
+  if (isForbiddenEducationKey(key) || !isEducationObjectKey(key)) return null;
+  try {
+    const { bucket, s3 } = educationClient(educationSourceBucket());
+    const out = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+    if (out.ContentLength == null || !Number.isFinite(out.ContentLength)) return null;
+    const contentType = out.ContentType?.split(";")[0]?.trim().toLowerCase() || null;
+    return { bytes: out.ContentLength, contentType };
+  } catch {
+    return null;
+  }
 }
 
 export async function presignEducationSourceGet(key: string): Promise<string> {

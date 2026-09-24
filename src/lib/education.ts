@@ -454,7 +454,7 @@ export function validateEducationUpload(input: {
 }):
   | { ok: true; contentType: EducationImageContentType | EducationVideoContentType }
   | { ok: false; error: "type" | "missing" | "tooLarge" } {
-  if (!Number.isFinite(input.byteLength) || input.byteLength <= 0) {
+  if (!Number.isInteger(input.byteLength) || input.byteLength <= 0) {
     return { ok: false, error: "missing" };
   }
   if (input.kind === "cover" || input.kind === "lesson_cover") {
@@ -465,6 +465,45 @@ export function validateEducationUpload(input: {
   if (!isEducationVideoContentType(input.contentType)) return { ok: false, error: "type" };
   if (input.byteLength > EDUCATION_VIDEO_MAX_BYTES) return { ok: false, error: "tooLarge" };
   return { ok: true, contentType: input.contentType };
+}
+
+/** Cover and lesson-source keys only. HLS manifests are not a browser PUT target. */
+export function educationContentTypeForObjectKey(
+  key: string,
+): EducationImageContentType | EducationVideoContentType | null {
+  if (!isEducationObjectKey(key)) return null;
+  if (/\/source\.mp4$/i.test(key)) return "video/mp4";
+  if (/\/source\.mov$/i.test(key)) return "video/quicktime";
+  if (/\/source\.webm$/i.test(key)) return "video/webm";
+  if (/\/cover\.png$/i.test(key)) return "image/png";
+  if (/\/cover\.webp$/i.test(key)) return "image/webp";
+  if (/\/cover\.jpe?g$/i.test(key)) return "image/jpeg";
+  return null;
+}
+
+export function educationPutLengthAllowed(
+  key: string,
+  contentType: string,
+  contentLength: number,
+): boolean {
+  const expected = educationContentTypeForObjectKey(key);
+  if (!expected || contentType !== expected) return false;
+  if (!Number.isInteger(contentLength) || contentLength <= 0) return false;
+  const max = isEducationImageContentType(expected) ? EDUCATION_IMAGE_MAX_BYTES : EDUCATION_VIDEO_MAX_BYTES;
+  return contentLength <= max;
+}
+
+/** HeadObject must match the education key. Missing, empty, oversized, or a different type fails closed. */
+export function storedEducationObjectRejection(
+  key: string,
+  head: { bytes: number; contentType: string | null } | null,
+): "missing" | "tooLarge" | "type" | null {
+  const expected = educationContentTypeForObjectKey(key);
+  if (!head || !expected || !Number.isInteger(head.bytes) || head.bytes <= 0) return "missing";
+  const max = isEducationImageContentType(expected) ? EDUCATION_IMAGE_MAX_BYTES : EDUCATION_VIDEO_MAX_BYTES;
+  if (head.bytes > max) return "tooLarge";
+  if (head.contentType && head.contentType !== expected) return "type";
+  return null;
 }
 
 export function lessonPlaybackReady(lesson: {
