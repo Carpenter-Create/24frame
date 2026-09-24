@@ -37,6 +37,9 @@ describe("SocialStorySendSheet", () => {
       }),
     );
     expect(html).toContain('data-social-story-send-host="ig-drawer"');
+    expect(html).toContain("z-[60]");
+    expect(html).toContain("items-end");
+    expect(html).not.toContain("md:items-center");
     expect(html).toContain("bg-[#181818]");
     expect(html).toContain("rounded-t-[16px]");
     expect(html).toContain("h-[70vh]");
@@ -121,6 +124,7 @@ describe("SocialStorySendSheet", () => {
     expect(src.slice(errAt)).not.toContain("onSent");
     expect(viewer).toContain("STORY_SEND_TOAST_MS");
     expect(viewer).toContain("setSentToast(true)");
+    expect(toastSrc).toContain("z-[60]");
     expect(toastSrc).toContain("inset-0");
     expect(toastSrc).toContain("items-center");
     expect(toastSrc).toContain("justify-center");

@@ -124,14 +124,14 @@ export function SocialStorySendSheet({
     <div
       data-social-story-send-sheet=""
       data-social-story-send-host="ig-drawer"
-      className="fixed inset-0 z-50 flex items-end justify-center md:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center"
     >
       <HouseScrim label={SOCIAL.stories.close} onClose={onClose} />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex h-[70vh] max-h-[90vh] w-full flex-col rounded-t-[16px] bg-[#181818] p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-none md:h-[min(70vh,640px)] md:max-w-[420px] md:rounded-[16px] md:pb-4"
+        className="relative z-10 flex h-[70vh] max-h-[90vh] w-full flex-col rounded-t-[16px] bg-[#181818] p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-none md:max-w-[420px]"
       >
         <h2 id={titleId} className="sr-only">
           {SOCIAL.stories.send}

@@ -50,6 +50,7 @@ describe("SocialDmStoryShare", () => {
     expect(mux).toContain("w-[168px]");
     expect(mux).toContain("aspect-[9/16]");
     expect(mux).toContain("rounded-[8px]");
+    expect(mux).toContain("border-hairline");
     expect(mux).toContain("p-[8px]");
     expect(mux).toContain("size-6");
     expect(mux).toContain("Ada Lovelace");

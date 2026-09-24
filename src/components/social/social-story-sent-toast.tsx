@@ -9,7 +9,7 @@ export function SocialStorySentToast() {
   const node = (
     <div
       data-social-story-sent-toast=""
-      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center"
     >
       <p
         data-social-story-sent=""

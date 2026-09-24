@@ -87,7 +87,7 @@ export function SocialDmStoryShare({
   return (
     <article
       data-social-dm-story-share=""
-      className="w-[168px] shrink-0 overflow-hidden rounded-[8px] bg-surface"
+      className="w-[168px] shrink-0 overflow-hidden rounded-[8px] border border-hairline bg-surface"
     >
       {media}
       {authorName ? (
