@@ -71,6 +71,15 @@ describe("SocialStoryCompose create stage", () => {
     expect(src).not.toMatch(/\scapture\s*=/);
     expect(src).toContain("data-social-story-photo-library");
     expect(src).toContain("data-social-story-photo-capture");
+    const photoFace = src.slice(src.indexOf('phase === "photo"'), src.indexOf('phase === "video"'));
+    expect(photoFace.indexOf("data-social-story-photo-capture")).toBeLessThan(
+      photoFace.indexOf("data-social-story-photo-library"),
+    );
+    const photoCamera = src.slice(src.indexOf("async function openPhotoCamera"), src.indexOf("async function takeStill"));
+    expect(photoCamera).toContain("SOCIAL.stories.photoUnavailable");
+    expect(photoCamera).toContain("SOCIAL.stories.photoPermission");
+    expect(photoCamera).not.toContain("SOCIAL.stories.unavailable");
+    expect(photoCamera).not.toContain("SOCIAL.stories.permission");
     expect(src).not.toContain("data-social-story-picker");
     expect(src).not.toContain("pickerHint");
     expect(src).not.toContain("footnote");

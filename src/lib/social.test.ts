@@ -172,6 +172,16 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.videoCard).toBe("Create a video story");
     expect(SOCIAL.stories.photoLibrary).toBe("Upload a photo");
     expect(SOCIAL.stories.photoCapture).toBe("Take a photo");
+    expect(SOCIAL.stories.photoUnavailable).toBe(
+      "The camera is not available in this browser. Upload a photo instead.",
+    );
+    expect(SOCIAL.stories.photoPermission).toBe("Camera access is needed to take a photo.");
+    expect(SOCIAL.stories.photoUnavailable).not.toMatch(/record|video/i);
+    expect(SOCIAL.stories.photoPermission).not.toMatch(/record|video/i);
+    expect(SOCIAL.stories.unavailable).toBe(
+      "Recording is not available in this browser. Upload a video instead.",
+    );
+    expect(SOCIAL.stories.permission).toBe("Camera access is needed to record.");
     expect(SOCIAL.stories.record).toBe("Record a video");
     expect(SOCIAL.stories.recordHint).toBe("Open in-app studio");
     expect(SOCIAL.stories.upload).toBe("Upload a video");

@@ -552,7 +552,7 @@ export function SocialStoryCompose({
   async function openPhotoCamera() {
     setError("");
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError(SOCIAL.stories.unavailable);
+      setError(SOCIAL.stories.photoUnavailable);
       return;
     }
     setStillMode(true);
@@ -570,7 +570,7 @@ export function SocialStoryCompose({
       releasePreview();
       setStillMode(false);
       setPhase("photo");
-      setError(SOCIAL.stories.permission);
+      setError(SOCIAL.stories.photoPermission);
     }
   }
 
@@ -847,24 +847,6 @@ export function SocialStoryCompose({
                   <h2 className="t-heading text-ink">{SOCIAL.stories.photoCard}</h2>
                   <button
                     type="button"
-                    data-social-story-photo-library=""
-                    className={SOCIAL_STORY_PICKER_ROW_CLASS}
-                    onClick={() => photoLibraryRef.current?.click()}
-                  >
-                    <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
-                      <SocialIcon name="image" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block t-body font-semibold text-ink whitespace-normal break-words">
-                        {SOCIAL.stories.photoLibrary}
-                      </span>
-                      <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
-                        {SOCIAL.stories.photoLibraryHint}
-                      </span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
                     data-social-story-photo-capture=""
                     className={SOCIAL_STORY_PICKER_ROW_CLASS}
                     onClick={() => void openPhotoCamera()}
@@ -878,6 +860,24 @@ export function SocialStoryCompose({
                       </span>
                       <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
                         {SOCIAL.stories.photoCaptureHint}
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    data-social-story-photo-library=""
+                    className={SOCIAL_STORY_PICKER_ROW_CLASS}
+                    onClick={() => photoLibraryRef.current?.click()}
+                  >
+                    <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+                      <SocialIcon name="image" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block t-body font-semibold text-ink whitespace-normal break-words">
+                        {SOCIAL.stories.photoLibrary}
+                      </span>
+                      <span className="block t-body-sm text-ink-2 whitespace-normal break-words">
+                        {SOCIAL.stories.photoLibraryHint}
                       </span>
                     </span>
                   </button>

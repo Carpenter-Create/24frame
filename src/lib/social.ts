@@ -565,6 +565,8 @@ export const SOCIAL = {
     photoLibraryHint: "Stills from your camera roll",
     photoCapture: "Take a photo",
     photoCaptureHint: "Open the camera",
+    photoUnavailable: "The camera is not available in this browser. Upload a photo instead.",
+    photoPermission: "Camera access is needed to take a photo.",
     photoMediaType: "Use a photo (JPEG, PNG, WebP, GIF).",
     photoMissing: "Choose a photo first.",
     back: "Back",
