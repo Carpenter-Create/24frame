@@ -243,7 +243,7 @@ export const SOCIAL_STORIES_EMPTY_ACTION_CLASS =
 export const SOCIAL_STORY_STAGE_CLASS =
   "fixed inset-0 z-50 bg-[#0A0A0B] text-band-ink";
 
-// Rich calm v1.1 — paint only. Durations live in globals.css.
+// Rich calm v1.2 — paint on the viewer and rail. Durations live in globals.css.
 // A still has no media duration; the fill uses this display interval.
 // Not a capture cap.
 export const SOCIAL_STORY_STILL_PROGRESS_MS = 5000;

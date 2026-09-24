@@ -12,12 +12,12 @@ import {
 } from "@/lib/social-chrome";
 
 const css = readFileSync("src/app/globals.css", "utf8");
-const motion = css.slice(css.indexOf("Rich calm v1.1"));
+const motion = css.slice(css.indexOf("Rich calm v1.2"));
 const viewer = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
 const rail = readFileSync("src/components/social/social-stories-rail.tsx", "utf8");
 const cover = readFileSync("src/components/social/social-story-rail-cover.tsx", "utf8");
 
-describe("rich calm visual register v1.1", () => {
+describe("rich calm visual register v1.2", () => {
   it("paints viewer and rail motion and leaves the create shutter at v1.5", () => {
     expect(SOCIAL_STORY_STAGE_IN_CLASS).toBe("social-story-stage-in");
     expect(SOCIAL_STORY_ACTIVATE_NEXT_CLASS).toBe("social-story-activate");
@@ -43,8 +43,15 @@ describe("rich calm visual register v1.1", () => {
     expect(viewer).not.toMatch(/shadow-/);
     expect(rail).not.toMatch(/shadow-/);
     expect(cover).not.toMatch(/autoPlay|autoplay/);
-    expect(readFileSync("docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md", "utf8")).toContain(
-      "Does not** reopen geometry",
+    const register = readFileSync(
+      "docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md",
+      "utf8",
     );
+    expect(register).toContain("rich calm v1.2");
+    expect(register).toContain("video + media");
+    expect(register).toContain("intentional hierarchy");
+    expect(register).toContain("No ornamental invent");
+    expect(register).toContain("Does not** reopen geometry");
+    expect(register).not.toContain("v1.1 folds");
   });
 });
