@@ -657,7 +657,8 @@ export function SocialStoryCompose({
       kind: resolved.kind,
     });
     setPlaying(false);
-    reviewArmRef.current = Date.now();
+    // Library pick has no shutter ghost-click. Post can run on the next click.
+    reviewArmRef.current = 0;
     setPhase("review");
   }
 

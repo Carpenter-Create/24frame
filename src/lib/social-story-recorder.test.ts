@@ -161,7 +161,13 @@ describe("story MediaRecorder mime probe", () => {
     const sealEnd = studio.indexOf("function stopRecording");
     const sealBlock = studio.slice(sealStart, sealEnd);
     expect(sealBlock.indexOf("releaseLiveCamera()")).toBeLessThan(sealBlock.lastIndexOf('setPhase("review")'));
+    expect(sealBlock).toContain("reviewArmRef.current = Date.now()");
     expect(sealBlock).not.toContain('setPhase("preview")');
+    const pickStart = studio.indexOf("function onPick");
+    const pickEnd = studio.indexOf("function restoreReviewPlayback");
+    const pickBlock = studio.slice(pickStart, pickEnd);
+    expect(pickBlock).toContain("reviewArmRef.current = 0");
+    expect(pickBlock).not.toContain("reviewArmRef.current = Date.now()");
   });
 
   it("keeps the story upload type exact and splits store errors", () => {
@@ -259,6 +265,22 @@ describe("story MediaRecorder mime probe", () => {
     expect(node.muted).toBe(true);
     expect(node.playsInline).toBe(true);
     expect(node.preload).toBe("auto");
+    bindStoryReviewVideo(node, "blob:https://24frame.local/clip");
+    expect(node.loads).toBe(1);
+    const painted = {
+      srcObject: null as unknown,
+      src: "blob:https://24frame.local/clip",
+      muted: true,
+      playsInline: true,
+      preload: "auto",
+      loads: 0,
+      load() {
+        this.loads += 1;
+      },
+    };
+    bindStoryReviewVideo(painted, "blob:https://24frame.local/clip");
+    expect(painted.loads).toBe(0);
+    expect(painted.srcObject).toBeNull();
     bindStoryReviewVideo(null, "blob:https://24frame.local/clip");
     bindStoryReviewVideo(node, "");
     expect(node.loads).toBe(1);

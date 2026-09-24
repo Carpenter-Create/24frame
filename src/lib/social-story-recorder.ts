@@ -149,11 +149,17 @@ export type StoryReviewVideo = {
 /** Camera stream loses. The recorded object URL becomes the media provider. */
 export function bindStoryReviewVideo(node: StoryReviewVideo | null, objectUrl: string): void {
   if (!node || !objectUrl) return;
+  const src = storyReviewMediaSrc(objectUrl);
+  const hadStream = node.srcObject != null;
   node.srcObject = null;
   node.muted = true;
   node.playsInline = true;
   node.preload = "auto";
-  node.src = storyReviewMediaSrc(objectUrl);
+  // A second load() aborts the in-flight blob fetch. Chromium then stays on a
+  // dark frame with the play control. Reload only when a camera stream was
+  // attached, or the element is not already pointed at this blob.
+  if (!hadStream && node.src === src) return;
+  node.src = src;
   node.load();
 }
 
