@@ -486,7 +486,8 @@ describe("ingest OG images", () => {
         persist,
         now: NOW,
         fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED),
-        fetchOgHtml: async () => `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+        fetchOgHtml: async () =>
+          `<meta property="og:image" content="https://www.hollywoodreporter.com/og.jpg" />`,
         fetchThumb: async () =>
           new Response(new Uint8Array(64).fill(1), {
             status: 200,
@@ -510,6 +511,7 @@ describe("ingest OG images", () => {
 
   it("keeps the remote thumb when the mirror PutObject fails", async () => {
     const persist = memoryNewsStore();
+    let puts = 0;
     const prevCf = process.env.CLOUDFRONT_DOMAIN;
     process.env.CLOUDFRONT_DOMAIN = "https://delivery.globalcontent.co";
     try {
@@ -517,13 +519,15 @@ describe("ingest OG images", () => {
         persist,
         now: NOW,
         fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED),
-        fetchOgHtml: async () => `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+        fetchOgHtml: async () =>
+          `<meta property="og:image" content="https://www.hollywoodreporter.com/og.jpg" />`,
         fetchThumb: async () =>
           new Response(new Uint8Array(64).fill(1), {
             status: 200,
             headers: { "content-type": "image/jpeg" },
           }),
         putThumb: async () => {
+          puts += 1;
           throw new Error("AccessDenied");
         },
       });
@@ -532,7 +536,8 @@ describe("ingest OG images", () => {
       else process.env.CLOUDFRONT_DOMAIN = prevCf;
     }
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
-    expect(rows[0]?.image_url).toBe("https://thr.com/og.jpg");
+    expect(puts).toBe(1);
+    expect(rows[0]?.image_url).toBe("https://hollywoodreporter.com/og.jpg");
   });
 });
 

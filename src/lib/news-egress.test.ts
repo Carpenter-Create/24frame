@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { NEWS_SOURCES } from "./news";
 import {
   NEWS_EGRESS_MAX_REDIRECTS,
   assertNewsEgressUrl,
+  isNewsEgressAllowlistedHost,
   isPublicIpAddress,
   newsEgressFetch,
 } from "./news-egress";
@@ -118,5 +120,99 @@ describe("news egress (P0-3)", () => {
         lookup: META_LOOKUP,
       }),
     ).rejects.toThrow(/private address/);
+  });
+
+  it("rejects public hosts outside the NEWS_SOURCES allowlist (GC-P2-5)", async () => {
+    await expect(
+      assertNewsEgressUrl("https://evil.example/og", { lookup: PUBLIC_LOOKUP }),
+    ).rejects.toThrow(/not allowlisted/);
+    await expect(
+      assertNewsEgressUrl("https://cdn.variety.com/thumb.jpg", { lookup: PUBLIC_LOOKUP }),
+    ).rejects.toThrow(/not allowlisted/);
+    await expect(
+      assertNewsEgressUrl("https://variety.com.evil.example/feed", { lookup: PUBLIC_LOOKUP }),
+    ).rejects.toThrow(/not allowlisted/);
+    await expect(assertNewsEgressUrl("https://8.8.8.8/latest")).rejects.toThrow(/not allowlisted/);
+
+    await expect(
+      assertNewsEgressUrl("https://variety.com/v/film/feed/", { lookup: PUBLIC_LOOKUP }),
+    ).resolves.toMatchObject({ hostname: "variety.com" });
+    await expect(
+      assertNewsEgressUrl("https://www.indiewire.com/feed/", { lookup: PUBLIC_LOOKUP }),
+    ).resolves.toMatchObject({ hostname: "www.indiewire.com" });
+    await expect(
+      assertNewsEgressUrl("https://indiewire.com/2026/feature", { lookup: PUBLIC_LOOKUP }),
+    ).resolves.toMatchObject({ hostname: "indiewire.com" });
+    await expect(
+      assertNewsEgressUrl("https://joblo.com/feed/", { lookup: PUBLIC_LOOKUP }),
+    ).resolves.toMatchObject({ hostname: "joblo.com" });
+    await expect(
+      assertNewsEgressUrl("https://www.joblo.com/feed/", { lookup: PUBLIC_LOOKUP }),
+    ).resolves.toMatchObject({ hostname: "www.joblo.com" });
+
+    const fetchEvil = vi.fn<typeof fetch>(
+      async () =>
+        new Response(null, {
+          status: 302,
+          headers: { location: "https://evil.example/og" },
+        }),
+    );
+    await expect(
+      newsEgressFetch("https://variety.com/og", {
+        fetchImpl: fetchEvil,
+        lookup: PUBLIC_LOOKUP,
+        request: {},
+      }),
+    ).rejects.toThrow(/not allowlisted/);
+    expect(fetchEvil).toHaveBeenCalledTimes(1);
+
+    const fetchFeed = vi.fn<typeof fetch>(async () => new Response("<rss/>", { status: 200 }));
+    await expect(
+      fetchNewsFeedXml("https://evil.example/feed", {
+        fetchImpl: fetchFeed,
+        lookup: PUBLIC_LOOKUP,
+      }),
+    ).rejects.toThrow(/not allowlisted/);
+    expect(fetchFeed).not.toHaveBeenCalled();
+
+    const fetchArticle = vi.fn<typeof fetch>(async () => new Response("<html/>", { status: 200 }));
+    expect(
+      await fetchNewsArticleHtml("https://evil.example/story", {
+        fetchImpl: fetchArticle,
+        lookup: PUBLIC_LOOKUP,
+      }),
+    ).toBeNull();
+    expect(fetchArticle).not.toHaveBeenCalled();
+
+    const fetchThumb = vi.fn<typeof fetch>(
+      async () =>
+        new Response(new Uint8Array(64).fill(1), {
+          status: 200,
+          headers: { "content-type": "image/jpeg" },
+        }),
+    );
+    await expect(
+      fetchNewsThumbBytes("https://evil.example/a.jpg", {
+        fetchImpl: fetchThumb,
+        lookup: PUBLIC_LOOKUP,
+      }),
+    ).rejects.toThrow(/not allowlisted/);
+    expect(fetchThumb).not.toHaveBeenCalled();
+  });
+
+  it("allowlists every NEWS_SOURCES feed host and its apex/www twin", () => {
+    for (const source of NEWS_SOURCES) {
+      for (const feedUrl of source.feedUrls) {
+        const feedHost = new URL(feedUrl).hostname.toLowerCase();
+        const apex = feedHost.startsWith("www.") ? feedHost.slice(4) : feedHost;
+        expect(apex.length).toBeGreaterThan(0);
+        expect(isNewsEgressAllowlistedHost(apex)).toBe(true);
+        expect(isNewsEgressAllowlistedHost(`www.${apex}`)).toBe(true);
+        expect(isNewsEgressAllowlistedHost(feedHost)).toBe(true);
+      }
+    }
+    expect(isNewsEgressAllowlistedHost("evil.example")).toBe(false);
+    expect(isNewsEgressAllowlistedHost("cdn.variety.com")).toBe(false);
+    expect(isNewsEgressAllowlistedHost("thr.com")).toBe(false);
   });
 });

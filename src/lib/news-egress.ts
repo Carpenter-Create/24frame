@@ -1,9 +1,15 @@
 import { lookup as dnsLookup } from "node:dns/promises";
 
-// P0-3 — news ingest egress. Feed / OG / thumb URLs may come from parsed
-// items, not only NEWS_SOURCES. HTTPS + public IP after DNS + redirect cap.
-// Do not invent NEWS_S3_*. Thumbs stay title S3_BUCKET + CLOUDFRONT_DOMAIN.
-// Residual: DNS rebinding between lookup and connect is not pinned.
+import { NEWS_SOURCES } from "@/lib/news";
+
+// P0-3 / GC-P2-5 — news ingest egress. Feed / OG / thumb URLs may come
+// from parsed items. HTTPS + public IP after DNS + redirect cap, then a
+// host allowlist from NEWS_SOURCES feed hosts and their apex/www twins
+// (canonicalize strips www; JoBlo media stays on www). Unknown hosts
+// never fetch. Literal public IPs are not publisher hosts. Do not invent
+// NEWS_S3_*. Mirrored thumbs stay title S3_BUCKET + CLOUDFRONT_DOMAIN
+// and skip this fetch. Residual: DNS rebinding between lookup and
+// connect is not pinned.
 
 export const NEWS_EGRESS_MAX_REDIRECTS = 3;
 
@@ -45,6 +51,39 @@ function isPublicIpv6(address: string): boolean {
   return true;
 }
 
+function newsEgressHostVariants(hostname: string): readonly string[] {
+  const host = hostname.trim().toLowerCase();
+  if (!host) return [];
+  if (host.startsWith("www.")) {
+    const apex = host.slice(4);
+    return apex ? [host, apex] : [host];
+  }
+  return [host, `www.${host}`];
+}
+
+/** Feed hosts from NEWS_SOURCES, plus the apex/www twin used in-tree. */
+function newsEgressAllowlist(): ReadonlySet<string> {
+  const hosts = new Set<string>();
+  for (const source of NEWS_SOURCES) {
+    for (const feedUrl of source.feedUrls) {
+      let hostname: string;
+      try {
+        hostname = new URL(feedUrl).hostname;
+      } catch {
+        continue;
+      }
+      for (const variant of newsEgressHostVariants(hostname)) hosts.add(variant);
+    }
+  }
+  return hosts;
+}
+
+const NEWS_EGRESS_ALLOWLIST = newsEgressAllowlist();
+
+export function isNewsEgressAllowlistedHost(hostname: string): boolean {
+  return NEWS_EGRESS_ALLOWLIST.has(hostname.trim().toLowerCase());
+}
+
 export async function assertNewsEgressUrl(
   raw: string,
   init: { lookup?: NewsDnsLookup } = {},
@@ -62,13 +101,18 @@ export async function assertNewsEgressUrl(
   if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) {
     throw new Error("news egress host is not public");
   }
-  if (isPublicIpAddress(host)) return parsed;
+  // Public literals are not allowlisted publisher hosts. Private literals
+  // stay "not public" so metadata IPs fail before any fetch.
+  if (isPublicIpAddress(host)) throw new Error("news egress host is not allowlisted");
   if (/^\d+\.\d+\.\d+\.\d+$/.test(host) || host.includes(":")) {
     throw new Error("news egress host is not public");
   }
   const lookupFn = init.lookup ?? dnsLookup;
   const { address } = await lookupFn(host);
   if (!isPublicIpAddress(address)) throw new Error("news egress resolved to a private address");
+  if (!isNewsEgressAllowlistedHost(host)) {
+    throw new Error("news egress host is not allowlisted");
+  }
   return parsed;
 }
 
