@@ -87,7 +87,11 @@ export function SocialStoryViewer({
           </Link>
         ) : null}
         {media.length > 0 ? (
-          <SocialPostMedia items={media} />
+          // The shell centers its flex item. The video is absolute, so a
+          // shrink-to-fit item has no in-flow size and the frame is 0×0.
+          <div data-social-story-frame="" className="w-full self-stretch">
+            <SocialPostMedia items={media} />
+          </div>
         ) : (
           <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-6)] text-center">
             {body ? <p className="t-body text-ink whitespace-pre-wrap">{body}</p> : null}
