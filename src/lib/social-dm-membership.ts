@@ -1,8 +1,8 @@
 import { SOCIAL_DM_ROOM_LIMIT } from "@/lib/social-dm-bounds";
 
-// DM vs group membership lock v1.
+// DM membership lock v1.1.
 // docs/design-locks/dm-vs-group-membership-lock-v1.md
-// Cap is the room limit: 32 people including the creator. Others ≤ 31.
+// Cap is 16 people including the creator. Others ≤ 15.
 
 export const DM_MEMBERSHIP_CAP = SOCIAL_DM_ROOM_LIMIT;
 
@@ -12,7 +12,7 @@ export function dmMembershipTotal(otherCount: number): number {
 
 export function dmMembershipHelper(otherCount: number, cap = DM_MEMBERSHIP_CAP): string {
   const total = Math.min(dmMembershipTotal(otherCount), cap);
-  if (dmMembershipTotal(otherCount) >= cap) return `${cap}/${cap} · Group is full`;
+  if (dmMembershipTotal(otherCount) >= cap) return `${cap}/${cap} · Chat is full`;
   return `${total}/${cap} selected`;
 }
 
@@ -20,10 +20,9 @@ export function dmMembershipCanSelectMore(otherCount: number, cap = DM_MEMBERSHI
   return dmMembershipTotal(otherCount) < cap;
 }
 
-export function dmComposeCta(otherCount: number, cap = DM_MEMBERSHIP_CAP): "chat" | "group" | null {
+export function dmComposeCta(otherCount: number, cap = DM_MEMBERSHIP_CAP): "chat" | null {
   const total = dmMembershipTotal(otherCount);
-  if (otherCount === 1 && total <= cap) return "chat";
-  if (otherCount >= 2 && total <= cap) return "group";
+  if (otherCount >= 1 && total <= cap) return "chat";
   return null;
 }
 

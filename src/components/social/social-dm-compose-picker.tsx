@@ -111,7 +111,7 @@ export function SocialDmComposePicker() {
       </ul>
       {error ? <p className="pt-2 t-body-sm text-ink-2">{error}</p> : null}
       <button type="submit" className={DM_COMPOSE_CTA_CLASS} disabled={cta === null}>
-        {cta === "group" ? SOCIAL.dms.createGroup : SOCIAL.dms.chat}
+        {SOCIAL.dms.chat}
       </button>
     </form>
   );

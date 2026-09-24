@@ -864,12 +864,11 @@ export const SOCIAL = {
   },
   dms: {
     title: "Messages",
-    subtitle: `One-to-one and group conversations in ${PRODUCT_NAME}.`,
+    subtitle: `One-to-one and multi-party messages in ${PRODUCT_NAME}.`,
     empty: "No conversations yet.",
     startCta: "Start a conversation",
     newMessage: "New message",
     chat: "Chat",
-    createGroup: "Create group",
     searchPeople: "Search people",
     membershipSealed: "People are chosen when the conversation starts.",
     membershipEmpty: "Choose someone to message.",

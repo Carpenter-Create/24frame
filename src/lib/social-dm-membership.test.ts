@@ -11,19 +11,19 @@ import {
 } from "@/lib/social-dm-membership";
 
 describe("DM membership", () => {
-  it("counts self in N/32 and stops at the cap", () => {
-    expect(DM_MEMBERSHIP_CAP).toBe(32);
-    expect(dmMembershipHelper(0)).toBe("1/32 selected");
-    expect(dmMembershipHelper(1)).toBe("2/32 selected");
-    expect(dmMembershipHelper(30)).toBe("31/32 selected");
-    expect(dmMembershipHelper(31)).toBe("32/32 · Group is full");
-    expect(dmMembershipCanSelectMore(30)).toBe(true);
-    expect(dmMembershipCanSelectMore(31)).toBe(false);
+  it("counts self in N/16 and stops at the cap", () => {
+    expect(DM_MEMBERSHIP_CAP).toBe(16);
+    expect(dmMembershipHelper(0)).toBe("1/16 selected");
+    expect(dmMembershipHelper(1)).toBe("2/16 selected");
+    expect(dmMembershipHelper(14)).toBe("15/16 selected");
+    expect(dmMembershipHelper(15)).toBe("16/16 · Chat is full");
+    expect(dmMembershipCanSelectMore(14)).toBe(true);
+    expect(dmMembershipCanSelectMore(15)).toBe(false);
     expect(dmComposeCta(0)).toBeNull();
     expect(dmComposeCta(1)).toBe("chat");
-    expect(dmComposeCta(2)).toBe("group");
-    expect(dmComposeCta(31)).toBe("group");
-    expect(dmComposeCta(32)).toBeNull();
+    expect(dmComposeCta(2)).toBe("chat");
+    expect(dmComposeCta(15)).toBe("chat");
+    expect(dmComposeCta(16)).toBeNull();
     expect(DM_COMPOSE_SEARCH_CLASS).toContain("h-10");
     expect(DM_COMPOSE_SEARCH_CLASS).toContain("rounded-[20px]");
     expect(DM_COMPOSE_CTA_CLASS).toContain("h-12");
@@ -43,5 +43,9 @@ describe("DM membership", () => {
     expect(actions).toContain("open_or_get_direct_conversation");
     expect(inbox).toContain("${SOCIAL_ROUTES.dms}/new");
     expect(inbox).not.toContain("data-social-add-people");
+    const picker = readFileSync("src/components/social/social-dm-compose-picker.tsx", "utf8");
+    expect(picker).toContain("SOCIAL.dms.chat");
+    expect(picker).not.toContain("createGroup");
+    expect(picker).not.toContain("Create group");
   });
 });

@@ -263,8 +263,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.explore.truncated).toContain("20");
     expect(SOCIAL.dms.truncatedInbox).toContain("50");
     expect(SOCIAL.dms.truncatedThread).toContain("50");
-    expect(SOCIAL.dms.roomFull).toContain("32");
-    expect(SOCIAL.dms.addBatch).toContain("32");
+    expect(SOCIAL.dms.roomFull).toContain("16");
+    expect(SOCIAL.dms.addBatch).toContain("16");
+    expect(SOCIAL.dms.chat).toBe("Chat");
+    expect(JSON.stringify(SOCIAL.dms)).not.toContain("Create group");
     expect(SOCIAL.dms.olderPage).toContain("older");
     expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");

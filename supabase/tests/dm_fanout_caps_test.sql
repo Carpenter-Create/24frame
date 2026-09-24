@@ -162,10 +162,10 @@ select is(
   2,
   'refused batch does not grow the room');
 
--- ---- room cap (fill to 32, then refuse) -----------------------------------
+-- ---- sealed room (fill to 16, then refuse another add) --------------------
 reset role;
 create temp table t_c6_extra (id uuid primary key);
-insert into t_c6_extra select gen_random_uuid() from generate_series(1, 30);
+insert into t_c6_extra select gen_random_uuid() from generate_series(1, 14);
 insert into auth.users (id) select id from t_c6_extra;
 insert into public.profiles (id, handle, display_name, birth_date)
 select id,
@@ -186,8 +186,8 @@ select is(
   (select count(*)::integer from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null),
-  32,
-  'fixture room is exactly 32');
+  16,
+  'fixture room is exactly 16');
 
 select throws_ok(
   format($sql$
@@ -201,8 +201,8 @@ select is(
   (select count(*)::integer from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null),
-  32,
-  'full room stays at 32');
+  16,
+  'sealed room stays at 16');
 
 select * from finish();
 rollback;

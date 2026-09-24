@@ -7,7 +7,8 @@ import { quotePostgrestValue } from "@/lib/social-home-bounds";
  * ACCESS PATH + CARDINALITY (independent caps; do not share PostgREST max_rows):
  *   add_conversation_participants  — refused. Membership is set when the
  *                                    thread is created. A 1:1 is not promoted.
- *   create_group_conversation      — fresh group. Others ≤ 31. Room ≤ 32.
+ *   create_group_conversation      — fresh multi-party DM. Others ≤ 15.
+ *                                    Room ≤ 16 including the creator.
  *   messages insert fan-out        — unread increment is one set-based UPDATE
  *                                    (cardinality = active room). Realtime inbox
  *                                    loop is LIMIT SOCIAL_DM_FANOUT_BATCH per
@@ -29,17 +30,17 @@ import { quotePostgrestValue } from "@/lib/social-home-bounds";
  * covers the time order; id is the unique tie-break.
  */
 
-/** Active people in one exclusive room, including the caller. */
-export const SOCIAL_DM_ROOM_LIMIT = 32;
+/** Active people in one DM, including the caller. Cap 16. */
+export const SOCIAL_DM_ROOM_LIMIT = 16;
 
-/** Peers in one add_conversation_participants call. Same as the room. */
+/** Others in one create. Add-into-existing is refused. Same number as the room. */
 export const SOCIAL_DM_ADD_BATCH_LIMIT = SOCIAL_DM_ROOM_LIMIT;
 
 /**
- * Realtime inbox: channels per message insert. Same as the room so a legal
- * room is fully notified and an oversized legacy room cannot loop unbounded.
+ * Realtime inbox loop in 20260914420000 is still LIMIT 32.
+ * That migration is not this apply. New rooms stop at SOCIAL_DM_ROOM_LIMIT.
  */
-export const SOCIAL_DM_FANOUT_BATCH = SOCIAL_DM_ROOM_LIMIT;
+export const SOCIAL_DM_FANOUT_BATCH = 32;
 
 /** Caller's inbox page. SQL least(..., 51) so the app can probe. */
 export const SOCIAL_DM_INBOX_LIMIT = 50;

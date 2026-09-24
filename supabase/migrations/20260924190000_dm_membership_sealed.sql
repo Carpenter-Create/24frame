@@ -1,8 +1,8 @@
 -- ============================================================================
 -- 20260924190000_dm_membership_sealed.sql
 --
--- INTENT: 1:1 membership is sealed. A group is a new conversation, never a
--- promoted direct thread. Cap stays 32 including the creator.
+-- INTENT: 1:1 membership is sealed. Multi-party DM is a new conversation,
+-- never a promoted 1:1. Cap is 16 including the creator (others ≤ 15).
 -- Draft only. Do not apply to production from this PR.
 --
 -- CREATE: create_group_conversation(uuid[]).
@@ -24,7 +24,7 @@ set search_path to 'public'
 as $$
 begin
   -- Membership is chosen when the thread is created. Adding into an
-  -- existing 1:1 or group would promote or grow it. Both are out.
+  -- existing 1:1 or multi-party DM would promote or grow it. Both are out.
   raise exception 'membership is set at create' using errcode = '22023';
 end;
 $$;
@@ -53,12 +53,12 @@ begin
   end if;
 
   if p_peers is null or cardinality(p_peers) < 2 then
-    raise exception 'a group needs at least two other people' using errcode = '22023';
+    raise exception 'a multi-party DM needs at least two other people' using errcode = '22023';
   end if;
 
-  -- ACCESS PATH: others in one create. Cardinality ≤ 31 so the room
-  -- including the creator stays ≤ 32. Not a silent truncate.
-  if cardinality(p_peers) > 31 then
+  -- ACCESS PATH: others in one create. Cardinality ≤ 15 so the room
+  -- including the creator stays ≤ 16. Not a silent truncate.
+  if cardinality(p_peers) > 15 then
     raise exception 'room is full' using errcode = '22023';
   end if;
 
@@ -71,12 +71,12 @@ begin
       and incoming.peer <> me
   ) incoming;
 
-  if v_count > 31 then
+  if v_count > 15 then
     raise exception 'room is full' using errcode = '22023';
   end if;
 
   if v_count < 2 then
-    raise exception 'a group needs at least two other people' using errcode = '22023';
+    raise exception 'a multi-party DM needs at least two other people' using errcode = '22023';
   end if;
 
   foreach peer in array p_peers
@@ -121,7 +121,7 @@ end;
 $$;
 
 comment on function public.create_group_conversation(uuid[]) is
-  'Fresh group. Others ≤31. Active room ≤32 including creator. Does not touch a direct thread. Mapping C: no org_id.';
+  'Fresh multi-party DM. Others ≤15. Active room ≤16 including creator. Does not touch a 1:1. Mapping C: no org_id.';
 
 revoke execute on function public.create_group_conversation(uuid[])
   from public, anon;
@@ -154,6 +154,10 @@ begin
 
   if v_create is null or v_create not ilike '%room is full%' then
     raise exception 'create_group_conversation must name the room cap';
+  end if;
+
+  if v_create ilike '%32%' or v_create not ilike '%15%' then
+    raise exception 'create_group_conversation cap must be 16 (others ≤ 15)';
   end if;
 
   select string_agg(p.proname, ', ' order by p.proname) into v_staff
