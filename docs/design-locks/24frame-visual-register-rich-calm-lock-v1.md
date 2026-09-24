@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-24 (CT)  
 **Status:** **LOCKED** · **Own→READY** (v1.3 — **G0** rich video/media **REQUIRED**, peer-grade · Coinbase / professional / 24Frame / **thoughtful** stay · primary richness is **video + media** · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
-**Version:** v1.3 supersedes v1.2 wording (same path). Thoughtful stays IN.  
+**Version:** Cite **v1.3 only**. Supersedes v1.2. Do not paint against v1.2. Thoughtful stays IN.  
 **Scope:** House visual register for **24Frame** — **Social + Stories first**. Amends feel bar only. **Does not** reopen geometry. Stories geometry is closed.  
 **Cites (geometry stays):**  
 - `stories-home-rail-fb-card-lock-v1.md`  
@@ -100,5 +100,5 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 
 ## Repo citation
 
-CoS seeds: `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` (v1.3 wording)  
+CoS seeds: `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` (v1.3 only; supersedes v1.2)  
 Box: `/workspace/24frame-agg-ux/24frame-visual-register-rich-calm-lock-v1.md`

@@ -48,6 +48,10 @@ describe("rich calm visual register v1.3", () => {
       "utf8",
     );
     expect(register).toContain("rich calm v1.3");
+    expect(register).toContain("Cite **v1.3 only**");
+    expect(register).toContain("Supersedes v1.2");
+    expect(register).toContain("Do not paint against v1.2");
+    expect(register).not.toContain("rich calm v1.2");
     expect(register).toContain("**G0.**");
     expect(register).toContain("peer-grade");
     expect(register).toContain("good enough chrome");
