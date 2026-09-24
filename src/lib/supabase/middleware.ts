@@ -6,7 +6,8 @@ import { socialProfileLegacyPublicRedirect, socialProfileRewriteTarget } from "@
 import type { Database } from "./database.types";
 
 // Refreshes the auth session on every request and gates protected routes.
-// Public paths: /login and /auth/* (magic-link callback). Everything else requires a session.
+// Public paths skip the session redirect only. Token, signature, and bearer
+// checks stay in the handler — this list is not authorization.
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -44,6 +45,10 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/portal") ||       // account-less asset-access portal (token-gated)
     path.startsWith("/api/portal") ||   // portal route handlers (token/OTP/session gated in-handler)
     path.startsWith("/api/mobile") ||   // mobile sign-in mint/send (rate-limited in-handler)
+    // Vercel cron sends Authorization: Bearer CRON_SECRET and no session cookie.
+    // Trailing slash keeps the exemption on /api/cron/*; the handler stays
+    // fail-closed on that secret (a session is not a substitute).
+    path.startsWith("/api/cron/") ||
     // Stripe webhook authenticates by signature, not a user session — must not be
     // redirected to /login (it has no cookies).
     path === "/api/stripe/webhook" ||
