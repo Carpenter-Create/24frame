@@ -28,7 +28,11 @@ describe("SocialStoryRailFace", () => {
     expect(src).toContain("socialInitials(name)");
     expect(src).not.toContain("<img");
     expect(rail).toContain("SocialStoryRailFace");
+    expect(rail).toContain("SocialStoryRailCover");
     expect(rail).not.toContain("SocialMediaImage");
-    expect((rail.match(/<SocialStoryRailFace /g) ?? []).length).toBe(2);
+    expect((rail.match(/<SocialStoryRailFace /g) ?? []).length).toBe(1);
+    const home = rail.slice(rail.indexOf("function HomeTallStoriesRail"), rail.indexOf("export function SocialStoriesRail"));
+    expect(home).toContain("SocialStoryRailCover");
+    expect(home).not.toContain("SocialStoryRailFace");
   });
 });

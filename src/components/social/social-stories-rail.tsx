@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
+import { SocialStoryRailCover } from "@/components/social/social-story-rail-cover";
 import { SocialStoryRailFace } from "@/components/social/social-story-rail-face";
 import { cn } from "@/lib/cn";
 import {
@@ -63,7 +64,7 @@ function HomeTallStoriesRail({
       data-social-stories-tall=""
       className="overflow-x-auto"
     >
-      <div className="flex w-max gap-2 pb-2">
+      <div className="flex w-max gap-2 pr-4 pb-2">
         {canCreate ? (
           <Link
             href={SOCIAL_ROUTES.storiesNew}
@@ -75,7 +76,7 @@ function HomeTallStoriesRail({
               <SocialAvatar
                 name={createName ?? SOCIAL.home.you}
                 photoUrl={createPhotoUrl}
-                size="lg"
+                className="absolute inset-0 size-full rounded-none"
               />
             </span>
             <span className={SOCIAL_HOME_STORY_PLUS_CLASS}>
@@ -100,7 +101,7 @@ function HomeTallStoriesRail({
               className={SOCIAL_HOME_STORY_CARD_CLASS}
             >
               <span data-social-story-media="" className="absolute inset-0 bg-surface-muted">
-                <SocialStoryRailFace name={name} photoUrl={photo ?? null} />
+                <SocialStoryRailCover media={card.latest.media} authorId={card.authorId} />
               </span>
               <span
                 className={cn(

@@ -1,10 +1,9 @@
 import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialForYouRail } from "@/components/social/social-for-you";
-import { SocialStoriesRail } from "@/components/social/social-stories-rail";
-import { SocialStoryViewer } from "@/components/social/social-story-viewer";
-import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
+import { SocialStoryViewer, type SocialStoryNeighbor } from "@/components/social/social-story-viewer";
+import { SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
+import { socialStoryRailCover } from "@/lib/social-edge";
 import { followingAuthorIds } from "@/lib/social-home";
 import { isStoryLive } from "@/lib/social-stories";
 import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
@@ -14,8 +13,8 @@ import {
   loadLiveStories,
   loadProfilesByIds,
   loadStoryById,
-  loadSuggestedPeople,
   loadViewedStoryIds,
+  type SocialStoryRailCard,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
@@ -60,13 +59,9 @@ export default async function SocialStoryPage({
   ]);
   if (profile) await markSocialStoryViewed(story.id);
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
-  const [authorStoriesPage, railPage, suggested] = await Promise.all([
+  const [authorStoriesPage, railPage] = await Promise.all([
     loadLiveStories(supabase, [story.author_id]),
     loadLiveStories(supabase, authorIds),
-    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], {
-      topics: profile?.topics ?? [],
-      crafts: profile?.crafts ?? [],
-    }),
   ]);
   const sequence = [...authorStoriesPage.stories].sort(
     (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at) || a.id.localeCompare(b.id),
@@ -79,7 +74,6 @@ export default async function SocialStoryPage({
       story.author_id,
       ctx.user.id,
       ...railPage.stories.map((row) => row.author_id),
-      ...suggested.map((person) => person.id),
     ]),
   ];
   const [viewed, authors, photoUrl, media, faces] = await Promise.all([
@@ -101,34 +95,44 @@ export default async function SocialStoryPage({
     handle: author?.handle ?? "",
     displayName: author?.display_name,
   });
+  const authorAt = rail.findIndex((card) => card.authorId === story.author_id);
+  const neighbor = (card: SocialStoryRailCard | undefined): SocialStoryNeighbor | null => {
+    if (!card) return null;
+    const person = authors.get(card.authorId);
+    const cover = socialStoryRailCover(card.latest.media, card.authorId);
+    return {
+      storyId: card.latest.id,
+      authorName: socialPersonLabel({
+        handle: person?.handle ?? "",
+        displayName: person?.display_name,
+      }),
+      authorPhotoUrl: faces.get(card.authorId) ?? null,
+      createdAt: card.latest.created_at,
+      unseen: card.unseen,
+      coverUrl: cover?.url ?? null,
+      coverKind: cover?.kind ?? null,
+    };
+  };
 
   return (
-    <div data-social-story={story.id} className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <h1 className="sr-only">{name}</h1>
-        <SocialStoriesRail
-          cards={rail}
-          authors={authors}
-          faces={faces}
-          canCreate={!!profile}
-          surface="stories"
-        />
-        <SocialStoryViewer
-          storyId={story.id}
-          authorId={story.author_id}
-          authorName={name}
-          authorPhotoUrl={photoUrl}
-          createdAt={story.created_at}
-          body={story.body}
-          media={media}
-          prevId={prevId}
-          nextId={nextId}
-          index={index}
-          total={Math.max(sequence.length, 1)}
-          canReply={!!profile && story.author_id !== ctx.user.id}
-        />
-      </div>
-      <SocialForYouRail people={suggested} faces={faces} />
+    <div data-social-story={story.id}>
+      <h1 className="sr-only">{name}</h1>
+      <SocialStoryViewer
+        storyId={story.id}
+        authorId={story.author_id}
+        authorName={name}
+        authorPhotoUrl={photoUrl}
+        createdAt={story.created_at}
+        body={story.body}
+        media={media}
+        prevId={prevId}
+        nextId={nextId}
+        prevAuthor={neighbor(authorAt > 0 ? rail[authorAt - 1] : undefined)}
+        nextAuthor={neighbor(authorAt >= 0 ? rail[authorAt + 1] : undefined)}
+        index={index}
+        total={Math.max(sequence.length, 1)}
+        canReply={!!profile && story.author_id !== ctx.user.id}
+      />
     </div>
   );
 }

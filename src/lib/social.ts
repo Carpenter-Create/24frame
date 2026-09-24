@@ -58,6 +58,15 @@ export function isSocialStoryCreatePath(pathname: string): boolean {
   return path === SOCIAL_ROUTES.storiesNew;
 }
 
+/** Open story viewer. Not the index, not the create stage. */
+export function isSocialStoryOpenPath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  if (path === SOCIAL_ROUTES.stories || path === SOCIAL_ROUTES.storiesNew) return false;
+  if (!path.startsWith(`${SOCIAL_ROUTES.stories}/`)) return false;
+  const id = path.slice(SOCIAL_ROUTES.stories.length + 1);
+  return id.length > 0 && !id.includes("/");
+}
+
 /** Header Search people discovery. Not a dock tab. Not Explore. */
 export const SOCIAL_SEARCH_INTENT_PARAM = "intent";
 export const SOCIAL_SEARCH_PEOPLE_INTENT = "people";
@@ -592,6 +601,12 @@ export const SOCIAL = {
     cameraMode: "STORY",
     close: "Close",
     play: "Play",
+    pause: "Pause",
+    mute: "Mute",
+    unmute: "Unmute",
+    previous: "Previous story",
+    next: "Next story",
+    replyTo: (name: string) => `Reply to ${name}…`,
     unavailable: "Recording is not available in this browser. Upload a video instead.",
     permission: "Camera access is needed to record.",
     emptyRail: "No stories yet",

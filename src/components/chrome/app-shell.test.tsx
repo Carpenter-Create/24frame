@@ -610,7 +610,9 @@ describe("AppShell /activity account chrome", () => {
     }
     expect(shellSrc).toContain("isAccountChromeNoRailPath");
     expect(shellSrc).toContain("homeChrome || accountChromeNoRail");
-    expect(shellSrc).toContain("const hideDestRail = hideProductRail || storyCreateStage");
+    expect(shellSrc).toContain(
+      "const hideDestRail = hideProductRail || storyCreateStage || storyOpenStage",
+    );
     expect(shellSrc).toContain("{hideDestRail ? null : (");
     expect(shellSrc).toContain("settingsPage ? (");
     expect(shellSrc).toContain("<SettingsRail />");
@@ -1179,6 +1181,18 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("h-dvh");
     expect(html).toContain("overflow-hidden");
     expect(html).toContain("overflow-y-auto");
+  });
+
+  it("hides the Social shell on an open story", () => {
+    navigation.pathname = "/social/stories/story-1";
+    const html = renderShell();
+    expect(html).toContain('data-social-story-open=""');
+    expect(html).toContain("data-social-workspace");
+    expect(html).not.toContain("data-house-lead-chrome");
+    expect(html).not.toContain("data-social-rail");
+    expect(html).not.toContain("data-app-rail");
+    expect(html).not.toContain("data-house-phone-bottom-nav");
+    expect(html).toContain("min-h-full w-full");
   });
 
   it("drops the Social dest-rail on the create-story stage and keeps the house lead", () => {

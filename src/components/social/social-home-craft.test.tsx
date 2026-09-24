@@ -183,7 +183,9 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("md:h-[200px]");
     expect(html).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("bg-accent");
-    expect(html).toContain("bg-band/55");
+    expect(html).toContain("bg-gradient-to-t");
+    expect(html).toContain("from-band/72");
+    expect(html).not.toContain("bg-band/55");
     expect(html).toContain("md:h-[120px]");
     expect(html).toContain("md:h-20");
     expect(html).toContain("md:top-[100px]");
@@ -340,6 +342,67 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(html).toContain("bg-hairline");
     expect(html).toContain("bg-accent");
     expect(html).toContain("p-[3px]");
+  });
+
+  it("fills the home story card with story media, not the profile photo", () => {
+    const authorId = "11111111-1111-4111-8111-111111111111";
+    const objectId = "22222222-2222-4222-8222-222222222222";
+    const imageKey = `stories/${authorId}/${objectId}.jpg`;
+    const videoKey = `stories/${authorId}/${objectId}.mp4`;
+    const image = renderToStaticMarkup(
+      <SocialStoriesRail
+        authors={new Map([[authorId, { display_name: "Maya Chen", handle: "maya" }]])}
+        faces={faces}
+        canCreate={false}
+        cards={[
+          {
+            authorId,
+            storyIds: ["s1"],
+            unseen: true,
+            latest: {
+              id: "s1",
+              author_id: authorId,
+              body: null,
+              media: [{ kind: "image", key: imageKey, contentType: "image/jpeg" }],
+              expires_at: "2099-01-01T00:00:00.000Z",
+              created_at: "2026-09-14T12:00:00.000Z",
+            },
+          },
+        ]}
+      />,
+    );
+    const media = image.slice(image.indexOf("data-social-story-media"), image.indexOf("data-social-avatar"));
+    expect(media).toContain("/api/social/media?key=");
+    expect(media).toContain(encodeURIComponent(imageKey));
+    expect(media).not.toContain("signed-avatar");
+    expect(image).toContain("Maya C.");
+    const video = renderToStaticMarkup(
+      <SocialStoriesRail
+        authors={new Map([[authorId, { display_name: "Maya Chen", handle: "maya" }]])}
+        faces={new Map()}
+        canCreate={false}
+        cards={[
+          {
+            authorId,
+            storyIds: ["s1"],
+            unseen: false,
+            latest: {
+              id: "s1",
+              author_id: authorId,
+              body: null,
+              media: [{ kind: "video", key: videoKey, contentType: "video/mp4" }],
+              expires_at: "2099-01-01T00:00:00.000Z",
+              created_at: "2026-09-14T12:00:00.000Z",
+            },
+          },
+        ]}
+      />,
+    );
+    expect(video).toContain("data-social-story-cover");
+    expect(video).toContain("#t=0.1");
+    expect(video).not.toContain("autoplay");
+    expect(video).toContain("border-hairline");
+    expect(video).not.toContain("border-accent");
   });
 
   it("keeps Home rail tall FB-style and Create story when surface is home", () => {

@@ -190,14 +190,16 @@ export const SOCIAL_STORY_MEDIA_CLASS =
 export const SOCIAL_HOME_STORY_CARD_CLASS =
   `relative h-[192px] w-[108px] shrink-0 overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface md:h-[200px] md:w-[112px]`;
 
+// Upper profile. Plate is 72 phone / 80 md, so the seam is 120 on both sizes.
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
-  "absolute inset-x-0 top-0 flex h-[114px] items-center justify-center overflow-hidden bg-surface-muted md:h-[120px]";
+  "absolute inset-x-0 top-0 h-[120px] overflow-hidden bg-surface-muted md:h-[120px]";
 
 // Accent circle + white plus glyph. Not a white-fill well (Plus fill
 // knockout reads as white disc / blue +). border-surface is the seam
 // ring only — not the well fill. Phone + desktop share this class.
+// Centered on the photo/plate seam (120). 36 phone / 40 md.
 export const SOCIAL_HOME_STORY_PLUS_CLASS =
-  "absolute left-1/2 top-[96px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[100px] md:size-10";
+  "absolute left-1/2 top-[102px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[100px] md:size-10";
 
 // Adam 2026-09-20 — Create Story is Social chrome, not an eyebrow.
 // t-label uppercase + 0.12em track stacked CREATE / STORY as a
@@ -207,16 +209,17 @@ export const SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS =
   "t-body-sm font-medium text-ink";
 
 export const SOCIAL_HOME_STORY_CREATE_LABEL_CLASS =
-  `absolute inset-x-0 bottom-0 flex h-[78px] items-center justify-center bg-surface px-2 text-center ${SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS} md:h-20`;
+  `absolute inset-x-0 bottom-0 flex h-[72px] items-center justify-center bg-surface px-2 text-center ${SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS} md:h-20`;
 
 export const SOCIAL_HOME_STORY_FACE_RING_CLASS =
-  "absolute left-2 top-2 z-10 flex size-8 items-center justify-center overflow-hidden rounded-full border-2 bg-surface p-[2px] md:left-[9px] md:top-[9px] md:size-9";
+  "absolute left-2 top-2 z-10 flex size-8 items-center justify-center overflow-hidden rounded-full border-2 bg-surface p-[2px] md:size-9";
 
 export const SOCIAL_HOME_STORY_FACE_CLASS =
   "flex size-full items-center justify-center overflow-hidden rounded-full bg-surface t-label font-semibold text-ink";
 
+// Transparent → band @ 72%. Not a flat band bar. White label. CSS truncate.
 export const SOCIAL_HOME_STORY_NAME_CLASS =
-  "absolute inset-x-0 bottom-0 flex h-10 items-center bg-band/55 px-2 t-label font-medium text-band-ink md:h-12 md:px-2.5";
+  "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 truncate bg-gradient-to-t from-band/72 to-transparent px-2 t-label font-medium leading-[48px] text-band-ink";
 
 export const SOCIAL_STORIES_CARD_CLASS =
   `flex h-[168px] w-[112px] shrink-0 items-center justify-center ${SOCIAL_SURFACE_RADIUS_CLASS} p-[3px]`;
@@ -234,13 +237,25 @@ export const SOCIAL_STORIES_PLUS_WELL_CLASS =
 export const SOCIAL_STORIES_EMPTY_ACTION_CLASS =
   "inline-flex items-center justify-center gap-2 rounded-full bg-accent px-[var(--space-4)] py-[10px] t-body-sm font-medium text-accent-contrast";
 
-export const SOCIAL_STORY_VIEWER_CLASS =
-  "mx-auto flex w-full max-w-[420px] flex-col gap-[var(--space-4)] rounded-[16px] border border-hairline bg-surface p-[var(--space-4)] md:max-w-[420px]";
+// Desktop open lock: full-viewport near-black stage. The light 420px
+// column card is out. #0A0A0B has no house token (--bg and --text flip;
+// --band is #1b1f23). One class, not hex in the component.
+export const SOCIAL_STORY_STAGE_CLASS =
+  "fixed inset-0 z-50 bg-[#0A0A0B] text-band-ink";
 
-export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-[3px] flex-1 rounded-full";
+export const SOCIAL_STORY_ACTIVE_CARD_CLASS =
+  "relative h-full w-full overflow-hidden bg-[#0A0A0B] md:h-[min(90vh-16px,840px)] md:w-[calc(min(90vh-16px,840px)*9/16)] md:shrink-0 md:rounded-[16px]";
+
+export const SOCIAL_STORY_NEIGHBOR_CARD_CLASS =
+  "relative hidden h-[calc(min(90vh-16px,840px)*0.72)] w-[calc(min(90vh-16px,840px)*0.72*9/16)] shrink-0 overflow-hidden rounded-[16px] bg-[#0A0A0B] opacity-45 md:block";
+
+export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-0.5 flex-1 rounded-full";
 
 export const SOCIAL_STORY_CARET_CLASS =
-  "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
+  "absolute top-1/2 z-30 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-band-ink/12 text-band-ink md:flex";
+
+export const SOCIAL_STORY_REPLY_PILL_CLASS =
+  "flex h-11 w-full items-center rounded-full border border-band-ink/45 bg-transparent px-4 text-left t-body-sm text-band-ink";
 
 // Home composer — airy canvas register. Adam 2026-09-22
 // lock_topics_composer_stories_wall. Supersedes the 2026-09-20 phone

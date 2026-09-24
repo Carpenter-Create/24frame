@@ -41,7 +41,7 @@ import {
   SOCIAL_RAIL_PANEL_CLASS,
 } from "@/lib/social-chrome";
 import { isCoProductionsPath } from "@/lib/co-productions";
-import { isSocialStoryCreatePath } from "@/lib/social";
+import { isSocialStoryCreatePath, isSocialStoryOpenPath } from "@/lib/social";
 import { isHomeOwnedPath, OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { QUEUE_HREF } from "@/lib/queue";
 import { TITLES_HREF } from "@/lib/title-public-id";
@@ -181,13 +181,15 @@ export function AppShell({
   // Create-story lock v1.1: dedicated stage. House lead stays.
   // Social dest-rail does not sit beside the Your story rail.
   const storyCreateStage = isSocialStoryCreatePath(pathname);
-  const hideDestRail = hideProductRail || storyCreateStage;
+  const storyOpenStage = isSocialStoryOpenPath(pathname);
+  const hideDestRail = hideProductRail || storyCreateStage || storyOpenStage;
   const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
   const homeOwned = isHomeOwnedPath(pathname);
   const coProductions = isCoProductionsPath(pathname);
   const accountChrome = settingsPage || helpPage || activityPage;
   const phoneDestDock =
     !storyCreateStage &&
+    !storyOpenStage &&
     housePhoneShowsBottomDests({
       workspace,
       homeOwned,
@@ -289,6 +291,7 @@ export function AppShell({
           leftover `/messages` path (retired — 404), and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Do not invent Move chrome or a
           second phone switcher. Studio secondary rail stays HOLD. */}
+      {storyOpenStage ? null : (
       <HouseLeadChromeSlot
         chrome={chrome}
         isGcStaff={isGcStaff}
@@ -327,16 +330,20 @@ export function AppShell({
           />
         }
       />
+      )}
 
       <main
         className={cn(HOUSE_LEAD_SCROLL_CLASS, phoneDestPad)}
         data-app-social-frame={socialChrome ? "" : undefined}
+        data-social-story-open={storyOpenStage ? "" : undefined}
         data-house-lead-scroll=""
         style={{ marginLeft: "var(--sidebar-width)" }}
       >
         <div
           className={
-            storyCreateStage
+            storyOpenStage
+              ? "min-h-full w-full"
+              : storyCreateStage
               ? "flex min-h-full w-full flex-col"
               : socialChrome
               ? SOCIAL_DESKTOP_FRAME_PAD_CLASS
