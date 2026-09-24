@@ -49,7 +49,11 @@ describe("rich calm visual register v1.2", () => {
     );
     expect(register).toContain("rich calm v1.2");
     expect(register).toContain("video + media");
+    expect(register).toContain("and thoughtful");
     expect(register).toContain("intentional hierarchy");
+    expect(register).toContain("Thoughtful is **IN** at v1.2");
+    expect(register).toContain("film/media community");
+    expect(register).toContain("rich media bar is **required**, not optional polish");
     expect(register).toContain("No ornamental invent");
     expect(register).toContain("Does not** reopen geometry");
     expect(register).not.toContain("v1.1 folds");

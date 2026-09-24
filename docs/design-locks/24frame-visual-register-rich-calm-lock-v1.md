@@ -1,14 +1,14 @@
 # [GC][24Frame] LOCK — Visual register · rich calm v1.2
 
 **Date:** 2026-09-24 (CT)  
-**Status:** **LOCKED** · **Own→READY** (v1.2 — primary richness is **video + media** · Coinbase chrome stays professional · **thoughtful** = intentional hierarchy, restraint with presence, considered media · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
-**Version:** v1.2 supersedes v1.1 wording (same path)  
+**Status:** **LOCKED** · **FINAL v1.2** (Design confirmed **thoughtful IN** — no v1.3 wait · primary richness is **video + media** · Coinbase chrome stays professional · **no ornamental invent**) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
+**Version:** v1.2 supersedes v1.1 wording (same path). Thoughtful is in this version.  
 **Scope:** House visual register for **24Frame** — **Social + Stories first**. Amends feel bar only. **Does not** reopen geometry. Stories geometry is closed.  
 **Cites (geometry stays):**  
 - `stories-home-rail-fb-card-lock-v1.md`  
 - `stories-viewer-desktop-ig-carousel-lock-v1.md`  
 - `create-story-photo-video-fb-layout-lock-v1.5.md`  
-**Gospels:** E8 highest-bar exclusive · Stories FB/IG grade exclusive · never soft-grade  
+**Gospels:** E8 highest-bar exclusive · Stories FB/IG grade exclusive · never soft-grade · film/media community audience · rich media bar is **required**, not optional polish  
 
 ---
 
@@ -20,7 +20,9 @@
 
 **Coinbase register stays:** Geist · greyscale surfaces · one accent Sporty Blue `#1769FF` · hairlines · spacing **8 / 16 / 24 / 48** · **no drop shadows** · quiet type · Coinbase-calm **institutional trust**. Chrome is professional Coinbase calm: interesting, not flat, not boring. **No ornamental invent.**
 
-**24Frame brand + thoughtful.** Thoughtful means **intentional hierarchy**, **restraint with presence**, and **considered media**. It does not mean decorative noise.
+**Register.** Coinbase / professional / 24Frame **and thoughtful** (intentional hierarchy · restraint with presence · considered media). Thoughtful is **IN** at v1.2. Design confirmed. No v1.3 wait.
+
+**Standing gospel.** The audience is a film/media community, so the rich media bar is **required**, not optional polish.
 
 **Primary richness is video + media.** Interesting + rich means presence, fill, and immersion — FB/IG-grade playback and viewer — **not** flat empty plates, **not** boring sparse “settings energy” on Social/Stories, and **not** chrome invented past the locked levers.
 
@@ -91,7 +93,8 @@ This route paints the **viewer and home rail only**. Create-story geometry, incl
 **G5.** Motion only at listed durations; no bounce.  
 **G6.** Cited Stories geometry locks unchanged by this file. Stories geometry is closed.  
 **G7.** Design no PR — CoS routes Dev.  
-**G8.** Thoughtful = intentional hierarchy, restraint with presence, considered media. Inventing chrome past the locked levers = FAIL.
+**G8.** Thoughtful is IN at v1.2: intentional hierarchy, restraint with presence, considered media. Inventing chrome past the locked levers = FAIL.  
+**G9.** Film/media community audience: the rich media bar is required, not optional polish.
 
 ## Repo citation
 
