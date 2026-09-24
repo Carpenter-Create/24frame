@@ -38,7 +38,7 @@ describe("rich calm visual register v1.4", () => {
     expect(SOCIAL_STORY_SHUTTER_CLASS).toContain("size-[72px]");
     expect(SOCIAL_STORY_SHUTTER_CLASS).not.toMatch(/shadow/);
     expect(SOCIAL_STORY_STAGE_CLASS).not.toMatch(/shadow/);
-    expect(viewer).toContain("markStoryEnter");
+    expect(viewer).toContain("paintStoryEnter");
     expect(viewer).toContain("SOCIAL_STORY_STILL_PROGRESS_MS");
     expect(viewer).toContain("currentTime / node.duration");
     expect(viewer).not.toMatch(/shadow-/);

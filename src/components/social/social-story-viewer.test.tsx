@@ -108,6 +108,10 @@ describe("SocialStoryViewer", () => {
     expect(src).toContain("node.pause()");
     expect(src).toContain("onForcedMute");
     expect(src).toContain("consumeStoryEnter");
+    expect(src).toContain("storyTrayStep");
+    expect(src).toContain("w-2/3");
+    expect(src).toContain("SOCIAL_STORY_PROGRESS_ROW_CLASS");
+    expect(src).toContain("onEnded={() => onComplete()}");
     expect(src).not.toContain("requestAnimationFrame(() => setEnter");
     const catchAt = src.indexOf("void node.play().catch");
     const retryAt = src.indexOf("void node.play()", catchAt + 1);
@@ -125,7 +129,8 @@ describe("SocialStoryViewer", () => {
     expect(src).toContain("void stage.offsetWidth");
     const onKey = src.slice(src.indexOf("function onKey"), src.indexOf('addEventListener("keydown"'));
     expect(onKey).toContain("storyPlaybackHeld(screen, false)");
-    expect(onKey.indexOf("storyPlaybackHeld(screen, false)")).toBeLessThan(onKey.indexOf("router.push"));
+    expect(onKey.indexOf("storyPlaybackHeld(screen, false)")).toBeLessThan(onKey.indexOf('go("prev"'));
+    expect(onKey).not.toContain("router.push");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");

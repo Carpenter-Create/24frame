@@ -19,6 +19,7 @@ import {
   type SocialStoryRailCard,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { sortStoryTrayOldestFirst, type SocialStoryTrayAuthor } from "@/lib/social-story-tray";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { requireSocialSession } from "@/lib/social-session";
 
@@ -106,6 +107,47 @@ export default async function SocialStoryPage({
     signedAvatarUrls(peopleIds),
   ]);
   const rail = groupStoryRail(railPage.stories, viewed);
+  const storyRows = new Map(railPage.stories.map((row) => [row.id, row]));
+  for (const row of authorStoriesPage.stories) storyRows.set(row.id, row);
+  storyRows.set(story.id, story);
+  const signedEntries = await Promise.all(
+    [...storyRows.values()].map(async (row) => ({
+      id: row.id,
+      media: await signedSocialMediaItems(row.media, row.author_id, "stories"),
+    })),
+  );
+  const mediaById = new Map(signedEntries.map((entry) => [entry.id, entry.media]));
+  const railIds = rail.map((card) => card.authorId);
+  const authorOrder = railIds.includes(story.author_id) ? railIds : [story.author_id, ...railIds];
+  const tray: SocialStoryTrayAuthor[] = authorOrder.flatMap((id) => {
+    const rows = [...storyRows.values()].filter((row) => row.author_id === id);
+    if (rows.length === 0) return [];
+    const card = rail.find((entry) => entry.authorId === id);
+    const person = authors.get(id);
+    const coverSource = card?.latest ?? rows[0];
+    const cover = coverSource ? socialStoryRailCover(coverSource.media, id) : null;
+    return [
+      {
+        authorId: id,
+        authorName: socialPersonLabel({
+          handle: person?.handle ?? "",
+          displayName: person?.display_name,
+        }),
+        authorPhotoUrl: faces.get(id) ?? null,
+        unseen: card?.unseen ?? false,
+        coverUrl: cover?.url ?? null,
+        coverKind: cover?.kind ?? null,
+        items: sortStoryTrayOldestFirst(
+          rows.map((row) => ({
+            id: row.id,
+            createdAt: row.created_at,
+            body: row.body,
+            media: mediaById.get(row.id) ?? [],
+          })),
+        ),
+      },
+    ];
+  });
   const author = authors.get(story.author_id);
   const name = socialPersonLabel({
     handle: author?.handle ?? "",
@@ -148,7 +190,9 @@ export default async function SocialStoryPage({
         nextAuthor={neighbor(authorAt >= 0 ? rail[authorAt + 1] : undefined)}
         index={index}
         total={Math.max(sequence.length, 1)}
-        canReply={!!profile && story.author_id !== ctx.user.id}
+        canReply={!!profile}
+        tray={tray}
+        selfId={ctx.user.id}
       />
     </div>
   );

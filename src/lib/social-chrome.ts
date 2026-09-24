@@ -259,6 +259,8 @@ export const SOCIAL_STORY_NEIGHBOR_CARD_CLASS =
   "relative hidden h-[calc(min(90vh-16px,840px)*0.72)] w-[calc(min(90vh-16px,840px)*0.72*9/16)] shrink-0 overflow-hidden rounded-[16px] bg-[#0A0A0B] opacity-45 md:block";
 
 export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-0.5 flex-1 rounded-full";
+// Instagram parity v1: 2px track and 2px gap. h-0.5 / gap-0.5 are 2px.
+export const SOCIAL_STORY_PROGRESS_ROW_CLASS = "flex gap-0.5";
 
 export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-30 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-band-ink/12 text-band-ink md:flex";
