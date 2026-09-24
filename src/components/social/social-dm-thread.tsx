@@ -12,6 +12,7 @@ import {
   DM_THREAD_SYSTEM_LINE_CLASS,
   DM_THREAD_TIME_CLASS,
   dmThreadAlign,
+  dmThreadBlockGapClass,
   dmThreadBubbleClass,
   dmThreadSideClass,
   dmThreadStackClass,
@@ -56,7 +57,7 @@ function ThreadMessage({ message }: { message: DmThreadViewMessage }) {
     return (
       <div
         data-social-dm-story-group=""
-        className={cn("flex flex-col gap-1", message.mine ? "items-end" : "items-start")}
+        className={cn("flex flex-col gap-2", message.mine ? "items-end" : "items-start")}
       >
         {story.comment ? <Bubble mine={message.mine} text={story.comment} marker="comment" /> : null}
         {story.line ? (
@@ -96,17 +97,38 @@ export function SocialDmThread({
   return (
     <div data-social-dm-column="" className={DM_THREAD_COLUMN_CLASS}>
       <ol data-social-dm-messages="" className={DM_THREAD_LIST_CLASS}>
-        {blocks.map((block) => {
+        {blocks.map((block, index) => {
+          const previousBlock = index > 0 ? blocks[index - 1] : null;
+          const previous = previousBlock
+            ? {
+                kind: previousBlock.kind === "group" ? ("group" as const) : ("separator" as const),
+                senderId: previousBlock.kind === "group" ? previousBlock.messages[0].senderId : null,
+              }
+            : null;
           if (block.kind === "day") {
             return (
-              <li key={block.key} data-social-dm-day="" className={DM_THREAD_DAY_CLASS}>
+              <li
+                key={block.key}
+                data-social-dm-day=""
+                className={cn(
+                  DM_THREAD_DAY_CLASS,
+                  dmThreadBlockGapClass({ kind: "day", senderId: null, previous }),
+                )}
+              >
                 {block.label}
               </li>
             );
           }
           if (block.kind === "time") {
             return (
-              <li key={block.key} data-social-dm-time="" className={DM_THREAD_TIME_CLASS}>
+              <li
+                key={block.key}
+                data-social-dm-time=""
+                className={cn(
+                  DM_THREAD_TIME_CLASS,
+                  dmThreadBlockGapClass({ kind: "time", senderId: null, previous }),
+                )}
+              >
                 {block.label}
               </li>
             );
@@ -117,7 +139,10 @@ export function SocialDmThread({
               key={block.key}
               data-social-dm-group=""
               data-social-dm-align={dmThreadAlign(block.mine)}
-              className={dmThreadSideClass(block.mine)}
+              className={cn(
+                dmThreadSideClass(block.mine),
+                dmThreadBlockGapClass({ kind: "group", senderId: first.senderId, previous }),
+              )}
             >
               {block.showAvatar ? (
                 <SocialAvatar

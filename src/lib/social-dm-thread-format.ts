@@ -16,19 +16,39 @@ import { storySendSystemLine } from "@/lib/social-dm-story";
 export const DM_THREAD_ZONE = "America/Chicago";
 export const DM_THREAD_BURST_GAP_MS = 5 * 60 * 1000;
 
-// Lock canvas #FAFAFB. House --bg and --surface are #FFFFFF.
-// --surface-muted is the mine bubble (#F4F4F6), not this canvas.
-// Lock E: the thread fills the house lead. A min-height column leaves
-// the composer in normal flow with empty space below it.
-// 2rem is the social frame's py-4. Phone dest clearance is the shell's
-// 6.5rem pad plus the safe area, on max-md only.
+// Immersive thread lock v1. Social header and phone dock are gone on
+// this route, so the column is the viewport. Desktop stays 680 centered.
+// docs/design-locks/dm-thread-immersive-real-estate-lock-v1.md
 export const DM_THREAD_ROOT_CLASS =
-  "flex h-[calc(100dvh-var(--header-height)-2rem)] max-h-[calc(100dvh-var(--header-height)-2rem)] w-full flex-col overflow-hidden max-md:h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))] max-md:max-h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))]";
+  "mx-auto flex h-dvh max-h-dvh w-full max-w-[680px] flex-col overflow-hidden";
 
 export const DM_THREAD_COLUMN_CLASS =
   "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-[#FAFAFB] px-4 text-ink";
 
-export const DM_THREAD_LIST_CLASS = "mt-auto flex flex-col gap-2";
+export const DM_THREAD_LIST_CLASS = "mt-auto flex flex-col";
+
+// House scale: 8 same-author, 16 other-author and day/time separators.
+export const DM_THREAD_SAME_AUTHOR_GAP_CLASS = "mt-2";
+export const DM_THREAD_OTHER_AUTHOR_GAP_CLASS = "mt-4";
+export const DM_THREAD_SEPARATOR_GAP_CLASS = "mt-4";
+
+export function dmThreadBlockGapClass(input: {
+  kind: "day" | "time" | "group";
+  senderId: string | null;
+  previous: { kind: "separator" | "group"; senderId: string | null } | null;
+}): string {
+  const { previous } = input;
+  if (!previous) return "";
+  if (input.kind === "day" || input.kind === "time") {
+    return previous.kind === "separator"
+      ? DM_THREAD_SAME_AUTHOR_GAP_CLASS
+      : DM_THREAD_SEPARATOR_GAP_CLASS;
+  }
+  if (previous.kind === "separator") return DM_THREAD_SEPARATOR_GAP_CLASS;
+  return previous.senderId === input.senderId
+    ? DM_THREAD_SAME_AUTHOR_GAP_CLASS
+    : DM_THREAD_OTHER_AUTHOR_GAP_CLASS;
+}
 
 export const DM_THREAD_DAY_CLASS = "text-center t-body-sm text-ink-2";
 
@@ -46,10 +66,12 @@ export const DM_THREAD_SYSTEM_LINE_CLASS =
 
 export const DM_THREAD_AVATAR_CLASS = "size-7 shrink-0";
 
+// Composer strip is 48 (field row) + 8/8 before the safe-area inset.
+// Surface is white. No phone dock sits under it.
 export const DM_THREAD_COMPOSER_CLASS =
-  "shrink-0 flex flex-col gap-2 bg-[#FAFAFB] px-4 py-2";
+  "shrink-0 border-t border-hairline bg-surface px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]";
 
-export const DM_THREAD_COMPOSER_ROW_CLASS = "flex items-center gap-2";
+export const DM_THREAD_COMPOSER_ROW_CLASS = "flex h-12 items-center gap-2";
 
 export const DM_THREAD_COMPOSER_FIELD_CLASS =
   "flex h-10 min-w-0 flex-1 items-center rounded-[20px] border border-hairline bg-surface-muted px-3";
@@ -57,12 +79,12 @@ export const DM_THREAD_COMPOSER_FIELD_CLASS =
 export const DM_THREAD_COMPOSER_SEND_CLASS =
   "flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast";
 
-// Header density lock v1. Phone and desktop share this row.
-// docs/design-locks/dm-thread-header-density-lock-v1.md
-// Surface #FFFFFF and hairline #ECEDF0 are bg-surface / border-hairline.
-// Ink is text-ink. 0.9375rem is t-body-sm. Truncate is this label only.
-export const DM_THREAD_HEADER_CLASS =
-  "sticky top-0 z-10 flex h-12 w-full shrink-0 items-center gap-2 border-b border-hairline bg-surface px-4 shadow-none";
+// Header density geometry, hosted at the top of the thread viewport.
+// Safe-area sits above the 48 row. Surface #FFFFFF is bg-surface.
+export const DM_THREAD_HEADER_HOST_CLASS =
+  "sticky top-0 z-10 w-full shrink-0 border-b border-hairline bg-surface pt-[env(safe-area-inset-top)] shadow-none";
+
+export const DM_THREAD_HEADER_CLASS = "flex h-12 w-full items-center gap-2 px-4";
 
 export const DM_THREAD_HEADER_BACK_CLASS =
   "inline-flex size-10 shrink-0 items-center justify-center text-ink";
@@ -151,8 +173,8 @@ export function dmThreadSideClass(mine: boolean): string {
 
 export function dmThreadStackClass(mine: boolean): string {
   return mine
-    ? "flex min-w-0 w-full flex-col items-end gap-1"
-    : "flex min-w-0 flex-1 flex-col items-start gap-1";
+    ? "flex min-w-0 w-full flex-col items-end gap-2"
+    : "flex min-w-0 flex-1 flex-col items-start gap-2";
 }
 
 export function dmThreadBubbleClass(mine: boolean): string {

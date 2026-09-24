@@ -63,6 +63,15 @@ export function isSocialStoryCreatePath(pathname: string): boolean {
   return path === SOCIAL_ROUTES.storiesNew;
 }
 
+/** Open DM thread. Not the inbox, not New message. */
+export function isSocialDmThreadPath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  const prefix = `${SOCIAL_ROUTES.dms}/`;
+  if (!path.startsWith(prefix)) return false;
+  const id = path.slice(prefix.length);
+  return id.length > 0 && !id.includes("/") && id !== "new";
+}
+
 /** Open story viewer. Not the index, not the create stage. */
 export function isSocialStoryOpenPath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;

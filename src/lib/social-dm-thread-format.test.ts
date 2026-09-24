@@ -15,17 +15,22 @@ import {
   DM_THREAD_HEADER_AVATAR_CLASS,
   DM_THREAD_HEADER_BACK_CLASS,
   DM_THREAD_HEADER_CLASS,
+  DM_THREAD_HEADER_HOST_CLASS,
   DM_THREAD_HEADER_LABEL_CLASS,
   DM_THREAD_DAY_CLASS,
   DM_THREAD_LIST_CLASS,
+  DM_THREAD_OTHER_AUTHOR_GAP_CLASS,
+  DM_THREAD_SAME_AUTHOR_GAP_CLASS,
   DM_THREAD_SYSTEM_LINE_CLASS,
   DM_THREAD_TIME_CLASS,
   dmThreadAlign,
+  dmThreadBlockGapClass,
   dmThreadBubbleClass,
   dmThreadDayLabel,
   dmThreadHeaderModel,
   dmThreadShowsAvatar,
   dmThreadSideClass,
+  dmThreadStackClass,
   dmThreadStorySystemLine,
   dmThreadSystemLineAlignClass,
   dmThreadTimeLabel,
@@ -155,7 +160,32 @@ describe("DM thread message format", () => {
     expect(DM_THREAD_TIME_CLASS).toContain("text-center");
     expect(DM_THREAD_COLUMN_CLASS).toContain("px-4");
     expect(DM_THREAD_COLUMN_CLASS).toContain("bg-[#FAFAFB]");
-    expect(DM_THREAD_LIST_CLASS).toContain("gap-2");
+    expect(DM_THREAD_LIST_CLASS).not.toContain("gap-2");
+    expect(DM_THREAD_SAME_AUTHOR_GAP_CLASS).toBe("mt-2");
+    expect(DM_THREAD_OTHER_AUTHOR_GAP_CLASS).toBe("mt-4");
+    expect(dmThreadBlockGapClass({ kind: "group", senderId: "a", previous: null })).toBe("");
+    expect(
+      dmThreadBlockGapClass({
+        kind: "group",
+        senderId: "a",
+        previous: { kind: "group", senderId: "a" },
+      }),
+    ).toBe("mt-2");
+    expect(
+      dmThreadBlockGapClass({
+        kind: "group",
+        senderId: "b",
+        previous: { kind: "group", senderId: "a" },
+      }),
+    ).toBe("mt-4");
+    expect(
+      dmThreadBlockGapClass({
+        kind: "day",
+        senderId: null,
+        previous: { kind: "group", senderId: "a" },
+      }),
+    ).toBe("mt-4");
+    expect(dmThreadStackClass(true)).toContain("gap-2");
     expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("h-10");
     expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("rounded-[20px]");
     expect(DM_THREAD_COMPOSER_SEND_CLASS).not.toContain("w-full");
@@ -175,18 +205,21 @@ describe("DM thread message format", () => {
   });
 
   it("pins the composer to the bottom of the thread chrome", () => {
-    expect(DM_THREAD_ROOT_CLASS).toContain("h-[calc(100dvh-var(--header-height)-2rem)]");
-    expect(DM_THREAD_ROOT_CLASS).toContain("max-h-[calc(100dvh-var(--header-height)-2rem)]");
-    expect(DM_THREAD_ROOT_CLASS).toContain(
-      "max-md:h-[calc(100dvh-var(--header-height)-2rem-6.5rem-env(safe-area-inset-bottom))]",
-    );
+    expect(DM_THREAD_ROOT_CLASS).toContain("h-dvh");
+    expect(DM_THREAD_ROOT_CLASS).toContain("max-h-dvh");
+    expect(DM_THREAD_ROOT_CLASS).toContain("max-w-[680px]");
+    expect(DM_THREAD_ROOT_CLASS).not.toContain("header-height");
+    expect(DM_THREAD_ROOT_CLASS).not.toContain("6.5rem");
     expect(DM_THREAD_ROOT_CLASS).not.toContain("min-h-[calc(100dvh");
     expect(DM_THREAD_ROOT_CLASS).toContain("overflow-hidden");
     expect(DM_THREAD_COLUMN_CLASS).toContain("min-h-0");
     expect(DM_THREAD_COLUMN_CLASS).toContain("flex-1");
     expect(DM_THREAD_COLUMN_CLASS).toContain("overflow-y-auto");
     expect(DM_THREAD_COMPOSER_CLASS).toContain("shrink-0");
-    expect(DM_THREAD_COMPOSER_CLASS).toContain("bg-[#FAFAFB]");
+    expect(DM_THREAD_COMPOSER_CLASS).toContain("bg-surface");
+    expect(DM_THREAD_COMPOSER_CLASS).toContain("border-hairline");
+    expect(DM_THREAD_COMPOSER_CLASS).toContain("pt-2");
+    expect(DM_THREAD_COMPOSER_CLASS).toContain("env(safe-area-inset-bottom)");
     expect(DM_THREAD_COMPOSER_CLASS).not.toContain("sticky");
     expect(DM_THREAD_COMPOSER_CLASS).not.toContain("bottom-[calc(6.5rem");
     expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("h-10");
@@ -203,13 +236,14 @@ describe("DM thread message format", () => {
   });
 
   it("keeps the peer header to one truncated name", () => {
-    expect(DM_THREAD_HEADER_CLASS).toContain("sticky");
-    expect(DM_THREAD_HEADER_CLASS).toContain("top-0");
+    expect(DM_THREAD_HEADER_HOST_CLASS).toContain("sticky");
+    expect(DM_THREAD_HEADER_HOST_CLASS).toContain("top-0");
+    expect(DM_THREAD_HEADER_HOST_CLASS).toContain("bg-surface");
+    expect(DM_THREAD_HEADER_HOST_CLASS).toContain("border-hairline");
+    expect(DM_THREAD_HEADER_HOST_CLASS).toContain("pt-[env(safe-area-inset-top)]");
+    expect(DM_THREAD_HEADER_HOST_CLASS).toContain("shadow-none");
     expect(DM_THREAD_HEADER_CLASS).toContain("h-12");
-    expect(DM_THREAD_HEADER_CLASS).toContain("bg-surface");
-    expect(DM_THREAD_HEADER_CLASS).toContain("border-hairline");
     expect(DM_THREAD_HEADER_CLASS).toContain("px-4");
-    expect(DM_THREAD_HEADER_CLASS).toContain("shadow-none");
     expect(DM_THREAD_HEADER_CLASS).not.toContain("max-md:");
     expect(DM_THREAD_HEADER_CLASS).not.toContain("md:");
     expect(DM_THREAD_HEADER_BACK_CLASS).toContain("size-10");

@@ -6,6 +6,7 @@ import {
   DM_THREAD_HEADER_AVATAR_CLASS,
   DM_THREAD_HEADER_BACK_CLASS,
   DM_THREAD_HEADER_CLASS,
+  DM_THREAD_HEADER_HOST_CLASS,
   DM_THREAD_HEADER_LABEL_CLASS,
   DM_THREAD_HEADER_PEER_CLASS,
 } from "@/lib/social-dm-thread-format";
@@ -40,23 +41,25 @@ export function SocialDmThreadHeader({
     </>
   );
   return (
-    <header data-social-dm-header="" className={DM_THREAD_HEADER_CLASS}>
-      <Link
-        href={SOCIAL_ROUTES.dms}
-        aria-label={SOCIAL.dms.title}
-        className={DM_THREAD_HEADER_BACK_CLASS}
-      >
-        <SocialIcon name="caret-left" size={20} />
-      </Link>
-      {href ? (
-        <Link href={href} data-social-dm-peer="" className={DM_THREAD_HEADER_PEER_CLASS}>
-          {peer}
+    <header data-social-dm-header="" className={DM_THREAD_HEADER_HOST_CLASS}>
+      <div className={DM_THREAD_HEADER_CLASS}>
+        <Link
+          href={SOCIAL_ROUTES.dms}
+          aria-label={SOCIAL.dms.title}
+          className={DM_THREAD_HEADER_BACK_CLASS}
+        >
+          <SocialIcon name="caret-left" size={20} />
         </Link>
-      ) : (
-        <div data-social-dm-peer="" className={DM_THREAD_HEADER_PEER_CLASS}>
-          {peer}
-        </div>
-      )}
+        {href ? (
+          <Link href={href} data-social-dm-peer="" className={DM_THREAD_HEADER_PEER_CLASS}>
+            {peer}
+          </Link>
+        ) : (
+          <div data-social-dm-peer="" className={DM_THREAD_HEADER_PEER_CLASS}>
+            {peer}
+          </div>
+        )}
+      </div>
     </header>
   );
 }

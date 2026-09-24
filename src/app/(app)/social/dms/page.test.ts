@@ -230,7 +230,9 @@ describe("social DMs", () => {
     expect(html).toContain('data-social-dm-composer=""');
     expect(html).toContain("shrink-0");
     expect(html).toContain("overflow-y-auto");
-    expect(html).toContain("h-[calc(100dvh-var(--header-height)-2rem)]");
+    expect(html).toContain("h-dvh");
+    expect(html).toContain("max-w-[680px]");
+    expect(html).not.toContain("h-[calc(100dvh-var(--header-height)-2rem)]");
     expect(html).not.toContain("bottom-[calc(6.5rem+env(safe-area-inset-bottom))]");
     expect(html).toContain("rounded-[20px]");
     expect(html).not.toContain(">Send<");

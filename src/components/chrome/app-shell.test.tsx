@@ -1183,6 +1183,30 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("overflow-y-auto");
   });
 
+  it("hides the Social shell and phone dock on a DM thread", () => {
+    navigation.pathname = "/social/dms/thread-1";
+    const html = renderShell();
+    expect(html).toContain('data-social-dm-thread=""');
+    expect(html).not.toContain("data-house-lead-chrome");
+    expect(html).not.toContain("data-house-phone-bottom-nav");
+    expect(html).toContain("min-h-full w-full");
+    expect(html).toContain("data-app-rail");
+  });
+
+  it("keeps Social chrome on the DM inbox and new message", () => {
+    navigation.pathname = "/social/dms";
+    const inbox = renderShell();
+    expect(inbox).not.toContain("data-social-dm-thread");
+    expect(inbox).toContain("data-house-lead-chrome");
+    expect(inbox).toContain("data-house-phone-bottom-nav");
+
+    navigation.pathname = "/social/dms/new";
+    const compose = renderShell();
+    expect(compose).not.toContain("data-social-dm-thread");
+    expect(compose).toContain("data-house-lead-chrome");
+    expect(compose).toContain("data-house-phone-bottom-nav");
+  });
+
   it("hides the Social shell on an open story", () => {
     navigation.pathname = "/social/stories/story-1";
     const html = renderShell();

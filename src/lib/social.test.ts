@@ -25,6 +25,7 @@ import {
   quietDmAddError,
   SOCIAL,
   isSocialStoryCreatePath,
+  isSocialDmThreadPath,
   isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
@@ -166,6 +167,11 @@ describe("social copy lock", () => {
     expect(isSocialStoryOpenPath(SOCIAL_ROUTES.stories)).toBe(false);
     expect(isSocialStoryOpenPath(SOCIAL_ROUTES.storiesNew)).toBe(false);
     expect(isSocialStoryOpenPath(SOCIAL_ROUTES.home)).toBe(false);
+    expect(isSocialDmThreadPath("/social/dms/thread-1")).toBe(true);
+    expect(isSocialDmThreadPath("/social/dms/thread-1/")).toBe(true);
+    expect(isSocialDmThreadPath(SOCIAL_ROUTES.dms)).toBe(false);
+    expect(isSocialDmThreadPath(`${SOCIAL_ROUTES.dms}/new`)).toBe(false);
+    expect(isSocialDmThreadPath(SOCIAL_ROUTES.home)).toBe(false);
     expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
