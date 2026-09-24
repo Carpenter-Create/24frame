@@ -109,6 +109,20 @@ describe("SocialStoryViewer", () => {
     expect(src).toContain("onForcedMute");
     expect(src).toContain("consumeStoryEnter");
     expect(src).not.toContain("requestAnimationFrame(() => setEnter");
+    const catchAt = src.indexOf("void node.play().catch");
+    const retryAt = src.indexOf("void node.play()", catchAt + 1);
+    expect(catchAt).toBeGreaterThan(-1);
+    expect(retryAt).toBeGreaterThan(catchAt);
+    const beforeRetry = src.slice(catchAt, retryAt);
+    expect(beforeRetry).toContain("storyPlaybackHeld(screen, paused)");
+    expect(beforeRetry).toContain("node.pause()");
+    expect(src).toContain('screen?.hasAttribute("hidden")');
+    const warm = src.slice(src.lastIndexOf("new MutationObserver"));
+    expect(warm).toContain("paintStoryEnter");
+    expect(src.indexOf("flushSync(() => apply(null))")).toBeLessThan(
+      src.indexOf("flushSync(() => apply(direction))"),
+    );
+    expect(src).toContain("void stage.offsetWidth");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");

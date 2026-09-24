@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { flushSync } from "react-dom";
 
 import { SocialStoryReply } from "@/components/social/social-forms";
 import { SocialAvatar } from "@/components/social/social-avatar";
@@ -63,6 +64,22 @@ function consumeStoryEnter(): "next" | "prev" | null {
 function storyScreen(node: HTMLElement): HTMLElement | null {
   const screen = node.closest(`[${HOUSE_CLIENT_SHELL.screenAttr}]`);
   return screen instanceof HTMLElement ? screen : null;
+}
+
+function storyPlaybackHeld(screen: HTMLElement | null, paused: boolean): boolean {
+  return paused || screen?.hasAttribute("hidden") === true;
+}
+
+function paintStoryEnter(
+  stage: HTMLElement | null,
+  direction: "next" | "prev",
+  apply: (value: "open" | "next" | "prev" | null) => void,
+) {
+  // A keep-alive unhide is already in the DOM. Commit the slide class, and
+  // restart it when the last hop used the same direction, before paint.
+  flushSync(() => apply(null));
+  if (stage) void stage.offsetWidth;
+  flushSync(() => apply(direction));
 }
 
 function neighborHref(neighbor: SocialStoryNeighbor | null, itemId: string | null): string | null {
@@ -168,9 +185,20 @@ function StoryVideo({
       node.muted = muted;
       void node.play().catch(() => {
         if (!live) return;
+        // A hide can abort this play(). Do not resume it under the next story.
+        if (storyPlaybackHeld(screen, paused)) {
+          node.pause();
+          return;
+        }
         onForcedMute();
         node.muted = true;
-        void node.play().catch(() => undefined);
+        if (!live || storyPlaybackHeld(screen, paused)) {
+          node.pause();
+          return;
+        }
+        void node.play().catch(() => {
+          if (storyPlaybackHeld(screen, paused)) node.pause();
+        });
       });
     };
     sync();
@@ -260,7 +288,7 @@ export function SocialStoryViewer({
     const observer = new MutationObserver(() => {
       if (screen.hasAttribute("hidden")) return;
       const direction = consumeStoryEnter();
-      if (direction) setEnter(direction);
+      if (direction) paintStoryEnter(stage, direction, setEnter);
     });
     observer.observe(screen, { attributes: true, attributeFilter: ["hidden"] });
     return () => observer.disconnect();
