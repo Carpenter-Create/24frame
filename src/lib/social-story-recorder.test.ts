@@ -132,8 +132,9 @@ describe("story MediaRecorder mime probe", () => {
     const uploadBlock = studio.slice(uploadStart, uploadEnd);
     expect(uploadBlock).toContain('headers: { "Content-Type": signed.contentType }');
     expect(uploadBlock).toContain('console.error("story-put", put.status, put.statusText, await put.text())');
-    expect(uploadBlock).not.toContain("signal");
-    expect(uploadBlock).not.toContain("AbortSignal");
+    expect(uploadBlock).toMatch(/body: prepared,\s*signal,/);
+    expect(uploadBlock).toContain("if (signal?.aborted) return {}");
+    expect(uploadBlock).not.toContain("AbortSignal.timeout");
     expect(uploadBlock).toContain('storyStoreNotice("presign")');
     expect(uploadBlock).toContain('storyStoreNotice("reject")');
     expect(uploadBlock).toContain('storyStoreNotice("network")');
@@ -168,7 +169,23 @@ describe("story MediaRecorder mime probe", () => {
     expect(postBlock).toContain('storyUploadNotice("read")');
     expect(postBlock).toContain('storyUploadNotice("missing", clip.kind)');
     expect(postBlock).toContain("postingRef.current = true");
+    expect(postBlock.indexOf("if (posting || postingRef.current) return")).toBeLessThan(
+      postBlock.indexOf("postingRef.current = true"),
+    );
+    expect(postBlock).toContain("new AbortController()");
+    expect(postBlock).toContain("uploadAbort.signal");
+    expect(postBlock).toContain("uploadAbort.signal.aborted");
     expect(postBlock).toContain("setError(result.error)");
+    const closeStart = studio.indexOf("function closeStudio");
+    const closeEnd = studio.indexOf("async function openPhotoCamera");
+    const closeBlock = studio.slice(closeStart, closeEnd);
+    expect(closeBlock.indexOf("nextStoryStudioLive(postRef.current)")).toBeLessThan(
+      closeBlock.indexOf("uploadAbortRef.current?.abort()"),
+    );
+    expect(closeBlock).toContain("postingRef.current = false");
+    const unmount = studio.slice(studio.indexOf("useEffect(() => {"), studio.indexOf("}, []);"));
+    expect(unmount).toContain("postRef.current = nextStoryStudioLive(postRef.current)");
+    expect(unmount).toContain("uploadAbortRef.current?.abort()");
     const start = studio.indexOf("function startRecording");
     const startEnd = studio.indexOf("function releaseLiveCamera");
     const startBlock = studio.slice(start, startEnd);

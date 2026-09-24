@@ -111,7 +111,10 @@ function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
 }
 
-async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; error?: string }> {
+async function uploadStoryMedia(
+  file: File,
+  signal?: AbortSignal,
+): Promise<{ item?: SocialMediaItem; error?: string }> {
   const kindHint = file.type.split(";")[0]?.trim().toLowerCase().startsWith("image/") ? "image" : "video";
   const prepared = prepareStoryUploadFile(file);
   if (prepared === "missing") return { error: storyUploadNotice("missing", kindHint) };
@@ -137,6 +140,7 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
       method: "PUT",
       headers: { "Content-Type": signed.contentType },
       body: prepared,
+      signal,
     });
     if (!put.ok) {
       console.error("story-put", put.status, put.statusText, await put.text());
@@ -152,6 +156,7 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
       },
     };
   } catch (error) {
+    if (signal?.aborted) return {};
     console.error("story-put", error);
     return { error: storyStoreNotice("network") };
   }
@@ -182,6 +187,7 @@ export function SocialStoryCompose({
   const liveRef = useRef(0);
   const postRef = useRef(0);
   const postingRef = useRef(false);
+  const uploadAbortRef = useRef<AbortController | null>(null);
   const reviewArmRef = useRef(0);
 
   const [phase, setPhase] = useState<StudioPhase>("stage");
@@ -248,6 +254,8 @@ export function SocialStoryCompose({
 
   useEffect(() => {
     return () => {
+      postRef.current = nextStoryStudioLive(postRef.current);
+      uploadAbortRef.current?.abort();
       releasePreview();
       if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
     };
@@ -531,6 +539,8 @@ export function SocialStoryCompose({
 
   function closeStudio() {
     postRef.current = nextStoryStudioLive(postRef.current);
+    uploadAbortRef.current?.abort();
+    postingRef.current = false;
     setPosting(false);
     const photo = stillRef.current;
     releasePreview();
@@ -696,6 +706,9 @@ export function SocialStoryCompose({
     const postId = nextStoryStudioLive(postRef.current);
     postRef.current = postId;
     const objectUrl = clip.url;
+    const uploadAbort = new AbortController();
+    uploadAbortRef.current?.abort();
+    uploadAbortRef.current = uploadAbort;
     setError("");
     postingRef.current = true;
     setPosting(true);
@@ -711,17 +724,19 @@ export function SocialStoryCompose({
       try {
         body = await cloneStoryUploadFile(clip.file);
       } catch {
+        if (!storyStudioIsLive(postRef.current, postId)) return;
         setError(storyUploadNotice("read"));
         restoreReviewPlayback(objectUrl);
         return;
       }
+      if (!storyStudioIsLive(postRef.current, postId)) return;
       if (body.size <= 0) {
         setError(storyUploadNotice("missing", clip.kind));
         restoreReviewPlayback(objectUrl);
         return;
       }
-      const uploaded = await uploadStoryMedia(body);
-      if (!storyStudioIsLive(postRef.current, postId)) return;
+      const uploaded = await uploadStoryMedia(body, uploadAbort.signal);
+      if (!storyStudioIsLive(postRef.current, postId) || uploadAbort.signal.aborted) return;
       if (uploaded.error || !uploaded.item) {
         setError(uploaded.error ?? SOCIAL.home.uploadFailed);
         restoreReviewPlayback(objectUrl);
