@@ -15,6 +15,7 @@ import {
   DM_COMPOSE_ROW_CLASS,
   DM_COMPOSE_SEARCH_CLASS,
   dmComposeCta,
+  dmComposeVisiblePeople,
   dmMembershipCanSelectMore,
   dmMembershipHelper,
 } from "@/lib/social-dm-membership";
@@ -35,6 +36,7 @@ export function SocialDmComposePicker() {
   const cta = dmComposeCta(others);
   const helper = dmMembershipHelper(others);
   const canSelectMore = dmMembershipCanSelectMore(others);
+  const visible = dmComposeVisiblePeople(selected, people);
 
   function toggle(person: DmComposePerson) {
     setSelected((current) => {
@@ -80,7 +82,7 @@ export function SocialDmComposePicker() {
         {helper}
       </p>
       <ul className="flex flex-col">
-        {people.map((person) => {
+        {visible.map((person) => {
           const on = selected.some((item) => item.id === person.id);
           const disabled = !on && !canSelectMore;
           return (

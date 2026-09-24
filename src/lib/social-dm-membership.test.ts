@@ -6,6 +6,7 @@ import {
   DM_COMPOSE_SEARCH_CLASS,
   DM_MEMBERSHIP_CAP,
   dmComposeCta,
+  dmComposeVisiblePeople,
   dmMembershipCanSelectMore,
   dmMembershipHelper,
 } from "@/lib/social-dm-membership";
@@ -29,6 +30,15 @@ describe("DM membership", () => {
     expect(DM_COMPOSE_CTA_CLASS).toContain("h-12");
     expect(DM_COMPOSE_CTA_CLASS).toContain("w-full");
     expect(DM_COMPOSE_CTA_CLASS).toContain("bg-accent");
+  });
+
+  it("keeps chosen peers visible when the search list changes", () => {
+    const ada = { id: "ada" };
+    const bea = { id: "bea" };
+    const cam = { id: "cam" };
+    expect(dmComposeVisiblePeople([ada, bea], [cam])).toEqual([ada, bea, cam]);
+    expect(dmComposeVisiblePeople([ada, bea], [])).toEqual([ada, bea]);
+    expect(dmComposeVisiblePeople([ada], [ada, cam])).toEqual([ada, cam]);
   });
 
   it("keeps add-people off the thread and creates a fresh group", () => {

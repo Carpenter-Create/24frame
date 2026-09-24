@@ -26,6 +26,14 @@ export function dmComposeCta(otherCount: number, cap = DM_MEMBERSHIP_CAP): "chat
   return null;
 }
 
+export function dmComposeVisiblePeople<T extends { id: string }>(
+  selected: readonly T[],
+  hits: readonly T[],
+): T[] {
+  const chosen = new Set(selected.map((person) => person.id));
+  return [...selected, ...hits.filter((person) => !chosen.has(person.id))];
+}
+
 export const DM_COMPOSE_HOST_CLASS = "flex flex-col p-4";
 
 export const DM_COMPOSE_SEARCH_CLASS =
