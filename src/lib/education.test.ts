@@ -5,9 +5,9 @@ import {
   EDUCATION_AWS_REGION,
   EDUCATION_BUCKETS,
   EDUCATION_ADMIN,
+  EDUCATION_HREF,
   EDUCATION_IMAGE_MAX_BYTES,
   EDUCATION_VIDEO_MAX_BYTES,
-  EDUCATION_HREF,
   assertEducationBucketName,
   educationCoverKey,
   educationCourseHref,
@@ -159,6 +159,20 @@ describe("education names and keys", () => {
       ok: false,
       error: "missing",
     });
+    expect(
+      validateEducationUpload({
+        kind: "source",
+        contentType: "video/mp4",
+        byteLength: EDUCATION_VIDEO_MAX_BYTES,
+      }),
+    ).toMatchObject({ ok: true });
+    expect(
+      validateEducationUpload({
+        kind: "source",
+        contentType: "video/mp4",
+        byteLength: EDUCATION_VIDEO_MAX_BYTES + 1,
+      }),
+    ).toEqual({ ok: false, error: "tooLarge" });
     expect(
       validateEducationUpload({
         kind: "cover",

@@ -150,7 +150,8 @@ describe("education isolation", () => {
     expect(actions).toContain("putEducationSourceObject");
     expect(actions).toContain("cover_key");
     expect(actions).toContain("source_key");
-    expect(nextConfig).toContain('bodySizeLimit: "3gb"');
+    expect(nextConfig).toContain("bodySizeLimit: SERVER_ACTION_BODY_SIZE_LIMIT_BYTES");
+    expect(nextConfig).not.toMatch(/bodySizeLimit:\s*["']3gb["']/);
   });
 
   it("locks catalog_code, instructors, and education_videos off media_assets and is_gc_staff", () => {

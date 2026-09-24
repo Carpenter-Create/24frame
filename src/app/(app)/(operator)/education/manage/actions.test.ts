@@ -442,6 +442,19 @@ describe("uploadEducationLessonSource", () => {
     vi.mocked(putEducationSourceObject).mockResolvedValue(undefined);
   });
 
+  it("refuses a lesson source over the house byte cap before any PUT", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = sourceAdminClient();
+    const file = new File([new Uint8Array([1])], "huge.mp4", { type: "video/mp4" });
+    Object.defineProperty(file, "size", { value: EDUCATION_VIDEO_MAX_BYTES + 1 });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.invalid,
+    });
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("PUTs source bytes then sets source_key and does not hang on a browser PUT", async () => {
     staffClient({ user_id: USER.id });
     vi.mocked(isEducationAwsConfigured).mockReturnValue(true);

@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
 import { imageRemotePatterns } from "./src/lib/image-remote-hosts";
+import { SERVER_ACTION_BODY_SIZE_LIMIT_BYTES } from "./src/lib/server-action-body-limit";
 
 // Artwork + Social faces/media are served from CloudFront in production and
 // from presigned S3 in local/preview. next/image only optimises hosts listed
@@ -42,10 +43,12 @@ const nextConfig: NextConfig = {
     // Lets instrumentation-client.ts export onRouterTransitionStart so Sentry
     // can attach client navigation spans. Off by default in Next 16.3.
     instrumentationClientRouterTransitionEvents: true,
-    // Education staff uploads PUT server-side (avatars pattern). Cover ≤10MB,
-    // lesson source ≤2GB. Default 1MB would reject a valid file before attach.
-    // 3gb leaves FormData headroom over EDUCATION_VIDEO_MAX_BYTES.
-    serverActions: { bodySizeLimit: "3gb" },
+    // Education lesson sources PUT server-side (avatars pattern). The file cap
+    // is 2GiB. Stories, social, and title bytes do not travel through this
+    // parser. Default 1MB would reject a valid lesson source before attach.
+    // The ceiling is that cap plus multipart headroom — see
+    // SERVER_ACTION_BODY_SIZE_LIMIT_BYTES. `"3gb"` was 3GiB.
+    serverActions: { bodySizeLimit: SERVER_ACTION_BODY_SIZE_LIMIT_BYTES },
   },
 
   images: {
