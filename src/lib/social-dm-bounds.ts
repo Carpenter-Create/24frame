@@ -5,8 +5,9 @@ import { quotePostgrestValue } from "@/lib/social-home-bounds";
  * Exclusive rooms are multi-party DMs (iMessage model), not gated groups.
  *
  * ACCESS PATH + CARDINALITY (independent caps; do not share PostgREST max_rows):
- *   add_conversation_participants  — one RPC batch. Cap SOCIAL_DM_ADD_BATCH_LIMIT.
- *                                    Resulting active room ≤ SOCIAL_DM_ROOM_LIMIT.
+ *   add_conversation_participants  — refused. Membership is set when the
+ *                                    thread is created. A 1:1 is not promoted.
+ *   create_group_conversation      — fresh group. Others ≤ 31. Room ≤ 32.
  *   messages insert fan-out        — unread increment is one set-based UPDATE
  *                                    (cardinality = active room). Realtime inbox
  *                                    loop is LIMIT SOCIAL_DM_FANOUT_BATCH per

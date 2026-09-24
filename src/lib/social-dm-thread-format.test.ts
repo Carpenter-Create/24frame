@@ -198,8 +198,8 @@ describe("DM thread message format", () => {
     expect(stick).not.toContain("[data-house-lead-scroll]");
     const page = readFileSync("src/app/(app)/social/dms/[id]/page.tsx", "utf8");
     expect(page.indexOf("<SocialDmThread\n")).toBeLessThan(page.indexOf("<SocialDmCompose"));
-    expect(page.indexOf("<SocialAddPeopleForm")).toBeLessThan(page.indexOf("<SocialDmThread\n"));
-    expect(page.indexOf("<SocialDmThreadHeader")).toBeLessThan(page.indexOf("<SocialAddPeopleForm"));
+    expect(page.indexOf("<SocialDmThreadHeader")).toBeLessThan(page.indexOf("<SocialDmThread\n"));
+    expect(page).not.toContain("<SocialAddPeopleForm");
   });
 
   it("keeps the peer header to one truncated name", () => {
@@ -236,13 +236,14 @@ describe("DM thread message format", () => {
 
     const room = dmThreadHeaderModel({
       peers: [
-        { handle: "bob", displayName: "Bob One" },
+        { handle: "bob", displayName: "Bob One", photoUrl: "bob.jpg" },
         { handle: "carol", displayName: "Carol One" },
       ],
     });
     expect(room.label).toBe("Bob One, Carol One");
     expect(room.href).toBeNull();
-    expect(room.photoUrl).toBeNull();
+    expect(room.photoUrl).toBe("bob.jpg");
+    expect(room.avatarName).toBe("Bob One");
     expect(room.label).not.toContain("@");
 
     const titled = dmThreadHeaderModel({

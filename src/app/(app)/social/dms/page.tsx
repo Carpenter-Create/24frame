@@ -58,12 +58,14 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
           {SOCIAL.dms.truncatedInbox}
         </InlineNotice>
       ) : null}
+      {profile ? (
+        <TextAction href={`${SOCIAL_ROUTES.dms}/new`} data-social-dms-start="">
+          {SOCIAL.dms.startCta}
+        </TextAction>
+      ) : null}
       {profile && rows.length === 0 ? (
         <div data-social-dms-empty="" className="flex flex-col gap-3">
           <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty>
-          <TextAction href={SOCIAL_ROUTES.explore} data-social-dms-start="">
-            {SOCIAL.dms.startCta}
-          </TextAction>
         </div>
       ) : null}
       <ul className="flex flex-col">

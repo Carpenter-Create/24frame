@@ -3326,6 +3326,10 @@ export type Database = {
         Args: { p_conversation: string; p_peers: string[] }
         Returns: string
       }
+      create_group_conversation: {
+        Args: { p_peers: string[] }
+        Returns: string
+      }
       add_rights_grant: {
         Args: {
           p_effective_from?: string

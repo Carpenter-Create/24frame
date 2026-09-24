@@ -107,14 +107,17 @@ export function dmThreadHeaderModel(input: {
       avatarName: identity.avatarName,
     };
   }
+  const first = peers[0];
   return {
     label: conversationRoomLabel(
       input.title,
       peers.map((peer) => socialPersonLabel({ handle: peer.handle, displayName: peer.displayName })),
     ),
     href: null,
-    photoUrl: null,
-    avatarName: "",
+    photoUrl: first?.photoUrl ?? null,
+    avatarName: first
+      ? socialPersonLabel({ handle: first.handle, displayName: first.displayName })
+      : "",
   };
 }
 

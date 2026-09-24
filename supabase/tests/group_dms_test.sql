@@ -1,10 +1,10 @@
 -- group_dms_test.sql
--- iMessage-style group rooms on the Pack 4 spine. Same conversation id
--- converts on the first extra participant. Client cannot INSERT
+-- Group rooms start as a new conversation. Adding into an existing
+-- thread is refused, so a 1:1 is never promoted. Client cannot INSERT
 -- participants. Mapping C. Do not touch groups.min_level.
 
 begin;
-select plan(34);
+select plan(39);
 
 select set_config('t.alice',  gen_random_uuid()::text, false);
 select set_config('t.bob',    gen_random_uuid()::text, false);
@@ -138,7 +138,7 @@ select lives_ok(
   $sql$, current_setting('t.conv'), current_setting('t.alice')),
   'alice can send before convert');
 
--- ---- non-participant cannot add -------------------------------------------
+-- ---- add into an existing thread is refused --------------------------------
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.eve'), 'role', 'authenticated')::text,
   true);
@@ -146,61 +146,90 @@ select throws_ok(
   format($sql$
     select public.add_conversation_participants(%L, array[%L]::uuid[])
   $sql$, current_setting('t.conv'), current_setting('t.carol')),
-  '42501',
-  'not a participant',
-  'non-participant cannot add');
+  '22023',
+  'membership is set at create',
+  'non-participant cannot add into an existing thread');
 
--- ---- convert same id on first extra person --------------------------------
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.alice'), 'role', 'authenticated')::text,
   true);
-
-select is(
-  public.add_conversation_participants(
-    current_setting('t.conv')::uuid,
-    array[current_setting('t.carol')::uuid]
-  )::text,
-  current_setting('t.conv'),
-  'add returns the same conversation id');
-
+select throws_ok(
+  format($sql$
+    select public.add_conversation_participants(%L, array[%L]::uuid[])
+  $sql$, current_setting('t.conv'), current_setting('t.carol')),
+  '22023',
+  'membership is set at create',
+  'a 1:1 cannot be promoted by adding');
 select is(
   (select kind::text from public.conversations
     where id = current_setting('t.conv')::uuid),
-  'group',
-  'first extra participant converts kind to group');
+  'direct',
+  '1:1 stays direct');
 select ok(
   (select dm_key from public.conversations
-    where id = current_setting('t.conv')::uuid) is null,
-  'converted group clears dm_key');
+    where id = current_setting('t.conv')::uuid) is not null,
+  '1:1 keeps its dm_key');
 select is(
   (select count(*) from public.conversation_participants
     where conversation_id = current_setting('t.conv')::uuid
       and left_at is null)::int,
+  2,
+  '1:1 stays two people');
+
+-- ---- fresh group, new id ---------------------------------------------------
+select lives_ok(
+  format($sql$
+    select set_config(
+      't.group',
+      public.create_group_conversation(array[%L, %L]::uuid[])::text,
+      true)
+  $sql$, current_setting('t.bob'), current_setting('t.carol')),
+  'alice starts a fresh group');
+select ok(
+  current_setting('t.group') <> current_setting('t.conv'),
+  'group is a new conversation id');
+select is(
+  (select kind::text from public.conversations
+    where id = current_setting('t.group')::uuid),
+  'group',
+  'fresh thread is kind=group');
+select ok(
+  (select dm_key from public.conversations
+    where id = current_setting('t.group')::uuid) is null,
+  'group has no dm_key');
+select is(
+  (select count(*) from public.conversation_participants
+    where conversation_id = current_setting('t.group')::uuid
+      and left_at is null)::int,
   3,
   'group has three active participants');
 
--- ---- new member reads prior messages --------------------------------------
+select lives_ok(
+  format($sql$
+    insert into public.messages (conversation_id, sender_id, body)
+    values (%L, %L, 'group hello')
+  $sql$, current_setting('t.group'), current_setting('t.alice')),
+  'alice can send in the new group');
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.carol'), 'role', 'authenticated')::text,
   true);
 select is(
   (select count(*) from public.messages
-    where conversation_id = current_setting('t.conv')::uuid
-      and body = 'prior hello')::int,
+    where conversation_id = current_setting('t.group')::uuid
+      and body = 'group hello')::int,
   1,
-  'new member can read messages from before they joined');
+  'a starting member can read the group message');
 
--- ---- inbox lists the group room -------------------------------------------
 select ok(
   exists (
     select 1 from public.get_dm_inbox(10)
-    where conversation_id = current_setting('t.conv')::uuid
+    where conversation_id = current_setting('t.group')::uuid
       and kind = 'group'
       and peer_id is null
       and current_setting('t.alice')::uuid = any(participant_ids)
       and current_setting('t.bob')::uuid = any(participant_ids)
   ),
-  'carol inbox lists the group room with participant ids');
+  'carol inbox lists the fresh group');
 
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.alice'), 'role', 'authenticated')::text,
@@ -208,13 +237,13 @@ select set_config('request.jwt.claims',
 select ok(
   exists (
     select 1 from public.get_dm_inbox(10)
-    where conversation_id = current_setting('t.conv')::uuid
+    where conversation_id = current_setting('t.group')::uuid
       and kind = 'group'
       and current_setting('t.carol')::uuid = any(participant_ids)
   ),
-  'alice inbox lists the converted group room');
+  'alice inbox lists the fresh group');
 
--- ---- blocked peer cannot be added -----------------------------------------
+-- ---- blocked peer cannot join a new group ---------------------------------
 select lives_ok(
   format($sql$
     insert into public.blocks (blocker_id, blocked_id)
@@ -223,48 +252,40 @@ select lives_ok(
   'alice can block dave');
 select throws_ok(
   format($sql$
-    select public.add_conversation_participants(%L, array[%L]::uuid[])
-  $sql$, current_setting('t.conv'), current_setting('t.dave')),
+    select public.create_group_conversation(array[%L, %L]::uuid[])
+  $sql$, current_setting('t.bob'), current_setting('t.dave')),
   '42501',
   'blocked',
-  'adding a blocked peer fails');
+  'a blocked peer cannot join a new group');
 
--- ---- optional title on group; not on a later 1:1 --------------------------
+-- ---- optional title on the group; not on the sealed 1:1 -------------------
 select lives_ok(
   format($sql$
     select public.set_group_conversation_title(%L, 'Desk room')
-  $sql$, current_setting('t.conv')),
+  $sql$, current_setting('t.group')),
   'participant can set a group title');
 select is(
   (select title from public.conversations
-    where id = current_setting('t.conv')::uuid),
+    where id = current_setting('t.group')::uuid),
   'Desk room',
   'group title is stored');
-
-select lives_ok(
-  format($sql$
-    select set_config(
-      't.direct2',
-      public.open_or_get_direct_conversation(%L)::text,
-      true)
-  $sql$, current_setting('t.bob')),
-  'a new 1:1 with the original peer can open after convert');
-select ok(
-  current_setting('t.direct2') <> current_setting('t.conv'),
-  'post-convert 1:1 is a new conversation id');
+select is(
+  public.open_or_get_direct_conversation(current_setting('t.bob')::uuid)::text,
+  current_setting('t.conv'),
+  'the sealed 1:1 is still the same conversation');
 select is(
   (select kind::text from public.conversations
-    where id = current_setting('t.direct2')::uuid),
+    where id = current_setting('t.conv')::uuid),
   'direct',
-  'post-convert 1:1 is kind=direct');
+  'sealed thread stays kind=direct');
 select ok(
   (select dm_key from public.conversations
-    where id = current_setting('t.direct2')::uuid) is not null,
-  'post-convert 1:1 has a dm_key');
+    where id = current_setting('t.conv')::uuid) is not null,
+  'sealed 1:1 keeps its dm_key');
 select throws_ok(
   format($sql$
     select public.set_group_conversation_title(%L, 'Nope')
-  $sql$, current_setting('t.direct2')),
+  $sql$, current_setting('t.conv')),
   '22023',
   'title is for group threads',
   'title update is refused on a 1:1');
@@ -290,8 +311,8 @@ select throws_ok(
     select public.add_conversation_participants(%L, array[%L]::uuid[])
   $sql$, current_setting('t.conv'), current_setting('t.alice')),
   '22023',
-  'cannot add yourself',
-  'self add is rejected');
+  'membership is set at create',
+  'add into an existing thread is refused');
 select throws_ok(
   format($sql$
     insert into public.conversation_participants (conversation_id, user_id)

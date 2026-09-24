@@ -633,7 +633,8 @@ describe("social writes stay on the live spine", () => {
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");
     expect(actions).not.toContain("from \"@/lib/mediaconvert\"");
     expect(actions).toContain("open_or_get_direct_conversation");
-    expect(actions).toContain("add_conversation_participants");
+    expect(actions).toContain("create_group_conversation");
+    expect(actions).not.toContain("add_conversation_participants");
     expect(actions).toContain("set_group_conversation_title");
     expect(actions).toContain("mark_direct_conversation_read");
     expect(actions).not.toContain("min_level");

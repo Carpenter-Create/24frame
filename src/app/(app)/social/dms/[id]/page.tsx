@@ -1,7 +1,7 @@
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialAddPeopleForm, SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
+import { SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
 import { SocialDmThread, type DmThreadViewMessage } from "@/components/social/social-dm-thread";
 import { SocialDmThreadHeader } from "@/components/social/social-dm-thread-header";
 import { SocialDmThreadStick } from "@/components/social/social-dm-thread-stick";
@@ -173,7 +173,6 @@ export default async function SocialDmThreadPage({
         photoUrl={header.photoUrl}
         avatarName={header.avatarName}
       />
-      {profile ? <SocialAddPeopleForm conversationId={conversation.id} /> : null}
       {profile && conversation.kind === "group" ? (
         <SocialGroupTitleForm conversationId={conversation.id} title={conversation.title} />
       ) : null}

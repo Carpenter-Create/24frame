@@ -145,7 +145,7 @@ describe("social DMs", () => {
     expect(html).toContain(SOCIAL.dms.empty);
     expect(html).toContain("data-social-dms-start");
     expect(html).toContain(SOCIAL.dms.startCta);
-    expect(html).toContain('href="/social/explore"');
+    expect(html).toContain('href="/social/dms/new"');
   });
 
   it("names the inbox bound when the probe row comes back", async () => {
@@ -214,10 +214,11 @@ describe("social DMs", () => {
     expect(html).toContain("data-social-dm-header");
     expect(html).toContain("h-12");
     expect(html).toContain("Bob One, Carol One");
-    const peerHeader = html.slice(html.indexOf("data-social-dm-header"), html.indexOf("data-social-add-people"));
+    const peerHeader = html.slice(html.indexOf("data-social-dm-header"), html.indexOf("data-social-group-title"));
     expect(peerHeader).not.toContain("@");
     expect(peerHeader).not.toContain("t-title");
     expect(peerHeader).toContain("truncate");
+    expect(peerHeader).toContain("size-8");
     expect(html).toContain("prior hello");
     expect(html).toContain('data-social-dm-align="mine"');
     expect(html).toContain("data-social-dm-day");
@@ -236,8 +237,8 @@ describe("social DMs", () => {
     const column = html.slice(html.indexOf("data-social-dm-column"), html.indexOf("data-social-dm-form"));
     expect(column).not.toContain("justify-center");
     expect(column).toContain("justify-end");
-    expect(html).toContain("data-social-add-people");
-    expect(html).toContain(SOCIAL.dms.addPeople);
+    expect(html).not.toContain("data-social-add-people");
+    expect(html).not.toContain(SOCIAL.dms.addPeople);
     expect(html).toContain("data-social-group-title");
     expect(html).not.toContain(">AL<");
     expect(html).not.toContain("data-social-dm-missing");
@@ -407,7 +408,7 @@ describe("social DMs", () => {
     });
     vi.mocked(createClient).mockResolvedValue({ from: threadFrom, rpc: vi.fn() } as never);
     const thread = renderToStaticMarkup(await SocialDmThreadPage({ params: Promise.resolve({ id: "c1" }) }));
-    const peerHeader = thread.slice(thread.indexOf("data-social-dm-header"), thread.indexOf("data-social-add-people"));
+    const peerHeader = thread.slice(thread.indexOf("data-social-dm-header"), thread.indexOf("data-social-dm-column"));
     expect(peerHeader).toContain("Bob One");
     expect(peerHeader).toContain('href="/social/u/bob"');
     expect(peerHeader).toContain("size-8");

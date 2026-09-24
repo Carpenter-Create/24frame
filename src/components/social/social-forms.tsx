@@ -67,7 +67,6 @@ import { SocialAvatar } from "./social-avatar";
 import { SocialHandleField } from "./social-handle-field";
 import { SocialIcon } from "./social-icon";
 import {
-  addSocialDmPeople,
   createSocialGroup,
   createSocialProfile,
   joinSocialGroup,
@@ -878,37 +877,6 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
         </button>
       </div>
       <FormError error={error} />
-    </form>
-  );
-}
-
-export function SocialAddPeopleForm({ conversationId }: { conversationId: string }) {
-  const [error, setError] = useState("");
-  return (
-    <form
-      data-social-add-people=""
-      className="flex max-w-md flex-col gap-[var(--space-3)]"
-      action={async (formData) => {
-        setError("");
-        const result = await addSocialDmPeople(formData);
-        if (result.error) setError(result.error);
-      }}
-    >
-      <input type="hidden" name="conversation_id" value={conversationId} />
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="social-add-handles">{SOCIAL.dms.addPeople}</Label>
-        <Input
-          id="social-add-handles"
-          name="handles"
-          autoComplete="off"
-          required
-          placeholder={SOCIAL.dms.addHandle}
-        />
-      </div>
-      <FormError error={error} />
-      <Button type="submit" variant="secondary">
-        {SOCIAL.dms.addSubmit}
-      </Button>
     </form>
   );
 }

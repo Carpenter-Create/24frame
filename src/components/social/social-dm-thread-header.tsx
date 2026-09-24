@@ -24,7 +24,21 @@ export function SocialDmThreadHeader({
   photoUrl: string | null;
   avatarName: string;
 }) {
+  const face = avatarName ? (
+    <SocialAvatar
+      name={avatarName}
+      photoUrl={photoUrl}
+      size="sm"
+      className={DM_THREAD_HEADER_AVATAR_CLASS}
+    />
+  ) : null;
   const name = <span className={DM_THREAD_HEADER_LABEL_CLASS}>{label}</span>;
+  const peer = (
+    <>
+      {face}
+      {name}
+    </>
+  );
   return (
     <header data-social-dm-header="" className={DM_THREAD_HEADER_CLASS}>
       <Link
@@ -36,17 +50,11 @@ export function SocialDmThreadHeader({
       </Link>
       {href ? (
         <Link href={href} data-social-dm-peer="" className={DM_THREAD_HEADER_PEER_CLASS}>
-          <SocialAvatar
-            name={avatarName}
-            photoUrl={photoUrl}
-            size="sm"
-            className={DM_THREAD_HEADER_AVATAR_CLASS}
-          />
-          {name}
+          {peer}
         </Link>
       ) : (
         <div data-social-dm-peer="" className={DM_THREAD_HEADER_PEER_CLASS}>
-          {name}
+          {peer}
         </div>
       )}
     </header>
