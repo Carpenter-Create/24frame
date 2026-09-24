@@ -892,6 +892,8 @@ export const SOCIAL = {
     sentStory: "Sent a story",
     sentYouStory: "Sent you a story",
     youSentStory: (handle: string) => `You sent @${handle}'s story`,
+    theySentAuthorStory: (name: string, handle: string) => `${name} sent @${handle}'s story`,
+    threadPlaceholder: "Message…",
     storyUnavailable: "Story unavailable",
     storyMeta: "Story",
   },

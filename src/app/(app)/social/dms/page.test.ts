@@ -7,6 +7,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
+import { dmThreadDayLabel, dmThreadTimeLabel } from "@/lib/social-dm-thread-format";
 import SocialDmsPage from "./page";
 import SocialDmThreadPage from "./[id]/page";
 
@@ -212,10 +213,22 @@ describe("social DMs", () => {
     expect(html).toContain('data-social-dm-kind="group"');
     expect(html).toContain("Bob One, Carol One");
     expect(html).toContain("prior hello");
+    expect(html).toContain('data-social-dm-align="mine"');
+    expect(html).toContain("data-social-dm-day");
+    expect(html).toContain("data-social-dm-time");
+    const priorAt = new Date("2026-09-12T14:00:00.000Z");
+    expect(html).toContain(dmThreadDayLabel(priorAt, new Date()));
+    expect(html).toContain(dmThreadTimeLabel(priorAt));
+    expect(html).toContain(SOCIAL.dms.threadPlaceholder);
+    expect(html).toContain("rounded-[20px]");
+    expect(html).not.toContain(">Send<");
+    const column = html.slice(html.indexOf("data-social-dm-column"), html.indexOf("data-social-dm-form"));
+    expect(column).not.toContain("justify-center");
+    expect(column).toContain("justify-end");
     expect(html).toContain("data-social-add-people");
     expect(html).toContain(SOCIAL.dms.addPeople);
     expect(html).toContain("data-social-group-title");
-    expect(html).toContain("AL");
+    expect(html).not.toContain(">AL<");
     expect(html).not.toContain("data-social-dm-missing");
     expect(html).not.toContain("min_level");
     expect(html).not.toContain("data-social-dm-thread-truncated");
@@ -384,9 +397,21 @@ describe("social DMs", () => {
     vi.mocked(createClient).mockResolvedValue({ from: threadFrom, rpc: vi.fn() } as never);
     const thread = renderToStaticMarkup(await SocialDmThreadPage({ params: Promise.resolve({ id: "c1" }) }));
     expect(thread).toContain("data-social-dm-story-share");
+    expect(thread).toContain("w-[168px]");
+    expect(thread).toContain("aspect-[9/16]");
     expect(thread).toContain(SOCIAL.dms.storyUnavailable);
+    expect(thread).toContain('data-social-dm-align="theirs"');
+    expect(thread).toContain("Bob One sent @bob");
+    const storyAt = new Date("2026-09-24T12:00:00.000Z");
+    expect(thread).toContain(dmThreadTimeLabel(storyAt));
+    expect(thread).toContain(dmThreadDayLabel(storyAt, new Date()));
     expect(thread).not.toContain("/social/stories");
-    expect(thread).not.toContain("Sent a story");
+    expect(thread).not.toMatch(/>Sent a story</);
+    const line = thread.match(/data-social-dm-story-line=""[^>]*/);
+    expect(line?.[0]).toBeTruthy();
+    expect(line?.[0]).not.toContain("text-center");
+    expect(line?.[0]).toContain("text-left");
+    expect(line?.[0]).toContain("max-w-[168px]");
   });
 
   it("does not touch gated community group create fields", () => {

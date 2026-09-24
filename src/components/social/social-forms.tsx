@@ -13,6 +13,12 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
+  DM_THREAD_COMPOSER_CLASS,
+  DM_THREAD_COMPOSER_FIELD_CLASS,
+  DM_THREAD_COMPOSER_ROW_CLASS,
+  DM_THREAD_COMPOSER_SEND_CLASS,
+} from "@/lib/social-dm-thread-format";
+import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_CREATE_AVATAR_CLASS,
   SOCIAL_PERSON_PRIMARY_CLASS,
@@ -842,7 +848,7 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
   return (
     <form
       data-social-dm-form=""
-      className="flex flex-col gap-[var(--space-3)]"
+      className={DM_THREAD_COMPOSER_CLASS}
       action={async (formData) => {
         setError("");
         const result = await sendSocialDm(formData);
@@ -850,18 +856,27 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
       }}
     >
       <input type="hidden" name="conversation_id" value={conversationId} />
-      <label className="sr-only" htmlFor="social-dm-body">
-        {SOCIAL.dms.compose}
-      </label>
-      <Textarea
-        id="social-dm-body"
-        name="body"
-        rows={3}
-        required
-        placeholder={SOCIAL.dms.compose}
-      />
+      <div className={DM_THREAD_COMPOSER_ROW_CLASS}>
+        <label className="sr-only" htmlFor="social-dm-body">
+          {SOCIAL.dms.compose}
+        </label>
+        <div className={DM_THREAD_COMPOSER_FIELD_CLASS}>
+          <Input
+            id="social-dm-body"
+            name="body"
+            variant="bare"
+            required
+            autoComplete="off"
+            enterKeyHint="send"
+            placeholder={SOCIAL.dms.threadPlaceholder}
+            className="w-full"
+          />
+        </div>
+        <button type="submit" aria-label={SOCIAL.dms.submit} className={DM_THREAD_COMPOSER_SEND_CLASS}>
+          <SocialIcon name="paper-plane-tilt" size={18} />
+        </button>
+      </div>
       <FormError error={error} />
-      <Button type="submit">{SOCIAL.dms.submit}</Button>
     </form>
   );
 }
