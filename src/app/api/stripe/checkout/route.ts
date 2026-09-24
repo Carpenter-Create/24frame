@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
+import { resolveDashboardOrigin } from "@/lib/auth-magic-link";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { stripe } from "@/lib/stripe/server";
@@ -40,7 +41,7 @@ export async function POST() {
   }
   const tier = rawTier; // narrowed to "pro" | "premium"
   const m = TIER_META[tier];
-  const origin = (await headers()).get("origin") ?? "http://localhost:3000";
+  const origin = resolveDashboardOrigin((await headers()).get("origin"));
   try {
     const session = await stripe.checkout.sessions.create({
       ui_mode: "elements",
