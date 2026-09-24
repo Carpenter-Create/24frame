@@ -218,13 +218,16 @@ select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.alice'), 'role', 'authenticated')::text,
   true);
 
-select throws_ok(
+select lives_ok(
   format($sql$
-    select public.open_or_get_direct_conversation(%L)
+    select set_config('t.self', public.open_or_get_direct_conversation(%L)::text, true)
   $sql$, current_setting('t.alice')),
-  '22023',
-  'cannot message yourself',
-  'self-DM is rejected');
+  'self is a valid direct recipient');
+
+select is(
+  public.open_or_get_direct_conversation(current_setting('t.alice')::uuid)::text,
+  current_setting('t.self'),
+  'self-DM is idempotent via dm_key');
 
 select throws_ok(
   format($sql$

@@ -25,8 +25,13 @@ const author = {
 describe("SocialDmStoryShare", () => {
   it("plays Mux and native video through SocialFeedVideo, not a poster or a lightbox", () => {
     const src = readFileSync("src/components/social/social-dm-story-share.tsx", "utf8");
+    const host = readFileSync("src/lib/social-dm-story-fullscreen.ts", "utf8");
     expect(src).toContain("SocialFeedVideo");
-    expect(src).toContain("requestFullscreen");
+    expect(src).toContain('querySelector("video")');
+    expect(src).toContain('querySelector("mux-player")');
+    expect(src).not.toContain("[data-social-mux-player], video");
+    expect(host).toContain("webkitEnterFullscreen");
+    expect(host).toContain("requestFullscreen");
     expect(src).not.toContain("SocialMuxPlayer");
     expect(src).not.toContain("HouseOverlay");
     expect(src).not.toContain("poster=");

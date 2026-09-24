@@ -10,8 +10,14 @@ import {
   parseDmThreadCursorParam,
   socialDmThreadHref,
 } from "@/lib/social-dm-bounds";
-import { conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
-import { parseDmStoryShare, presentDmStoryShare, type DmStoryLive } from "@/lib/social-dm-story";
+import { bareHandle, conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
+import {
+  dmStoryComment,
+  parseDmStoryShare,
+  presentDmStoryShare,
+  storySendSystemLine,
+  type DmStoryLive,
+} from "@/lib/social-dm-story";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -165,19 +171,33 @@ export default async function SocialDmThreadPage({
                 live: parsed.legacy && parsed.storyId ? liveById.get(parsed.storyId) ?? null : null,
               })
             : null;
-          const author = card?.authorId ? people.get(card.authorId) : null;
-          const authorName = author
-            ? socialPersonLabel({ handle: author.handle, displayName: author.display_name })
-            : "";
-          return (
-            <li key={message.id} className="flex gap-[var(--space-3)]">
-              <SocialAvatar
-                name={name}
-                photoUrl={message.sender_id ? faces.get(message.sender_id) ?? null : null}
-              />
-              <div className="min-w-0">
-                <p className="t-body-sm text-ink-3">{name}</p>
-                {card ? (
+          if (card) {
+            const author = card.authorId ? people.get(card.authorId) : null;
+            const authorHandle = author?.handle || parsed?.authorHandle || "";
+            const authorName = authorHandle ? bareHandle(authorHandle) : "";
+            const comment = dmStoryComment(message);
+            const line = authorHandle ? storySendSystemLine(authorHandle) : null;
+            const mine = message.sender_id === ctx.user.id;
+            return (
+              <li key={message.id} data-social-dm-story-group="" className="flex flex-col gap-2">
+                {comment ? (
+                  <p
+                    data-social-dm-story-comment=""
+                    className={
+                      mine
+                        ? "ml-auto max-w-[240px] rounded-[16px] bg-surface-muted px-4 py-2 t-body text-ink whitespace-pre-wrap"
+                        : "mr-auto max-w-[240px] rounded-[16px] bg-surface-muted px-4 py-2 t-body text-ink whitespace-pre-wrap"
+                    }
+                  >
+                    {comment}
+                  </p>
+                ) : null}
+                {line ? (
+                  <p data-social-dm-story-line="" className="text-center t-body-sm text-ink-2">
+                    {line}
+                  </p>
+                ) : null}
+                <div className="flex justify-center">
                   <SocialDmStoryShare
                     authorName={authorName}
                     authorPhotoUrl={card.authorId ? faces.get(card.authorId) ?? null : null}
@@ -187,9 +207,19 @@ export default async function SocialDmThreadPage({
                     playbackId={card.playbackId}
                     href={card.href}
                   />
-                ) : (
-                  <p className="t-body text-ink whitespace-pre-wrap">{message.body}</p>
-                )}
+                </div>
+              </li>
+            );
+          }
+          return (
+            <li key={message.id} className="flex gap-[var(--space-3)]">
+              <SocialAvatar
+                name={name}
+                photoUrl={message.sender_id ? faces.get(message.sender_id) ?? null : null}
+              />
+              <div className="min-w-0">
+                <p className="t-body-sm text-ink-3">{name}</p>
+                <p className="t-body text-ink whitespace-pre-wrap">{message.body}</p>
               </div>
             </li>
           );

@@ -1,121 +1,136 @@
-# [GC][24Frame] LOCK — Stories send DM craft v1.1
+# [GC][24Frame] LOCK — Stories send DM craft v1.4
 
 **Date:** 2026-09-24 (CT)  
-**Status:** **LOCKED** (Adam product override 2026-09-24 CT — send craft is the card and a calm sent toast, not a URL and not a poster pretending to be video) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS routes Dev  
-**Repo citation (ship):** `docs/design-locks/stories-send-dm-craft-lock-v1.md`  
-**Supersedes:** poster-only send craft v1 (a still, or the story URL, standing in for the story). Heart, reply, and the viewer bottom row stay on `docs/design-locks/stories-viewer-ig-actions-lock-v1.md`.  
-**Scope:** What happens **after** Send story succeeds, and how that message looks in the DM thread and inbox.  
-**Not in scope:** #664 IG parity / hold-pause · heart like · public comments · thumbs · a new video player · a new video lightbox · prod SQL  
-**Gospels:** Instagram craft bar · Coinbase calm + rich-media · rich-calm v1.4 · **no** playful/gimmick · no drop shadows · no green success · no confetti  
-**House register:** Geist · Sporty Blue `#1769FF` · spacing **8 / 16 / 24 / 48** · ink / secondary / hairline as house SoT · InlineNotice for status
+**Status:** **LOCKED** (Adam HARDEN 2026-09-24 — *“parody, but literally do everything precisely like that including the design”* · sheet morph · optional comment) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · CoS re-routes Dev  
+**Repo citation:** `docs/design-locks/stories-send-dm-craft-lock-v1.md`  
+**Box draft:** `/workspace/24frame-agg-ux/stories-send-dm-craft-lock-v1.md`  
+**Pixel SoT (Adam IG, order 1→6):**  
+`/workspace/24frame-agg-ux/ig-send-refs/01-viewer-paper-plane.png`  
+`…/02-share-sheet-grid.png`  
+`…/03-search-self.png`  
+`…/04-select-message-send.png`  
+`…/05-centered-sent-toast.png`  
+`…/06-dm-story-card.png`  
+**Bar:** Precise Instagram parity for Stories **Send** — workflow **and** visual. **Not** house-soft approximation. **Not** “inspired by.” Fail = soft-grade. E8 / FB-IG highest commercial grade.  
+**Supersedes:** v1.3 white AppSheet soft sheet · bottom toast (already out) · list-only picker · missing same-sheet morph · missing DM comment placement  
+**Keeps:** self recipient · live `SocialFeedVideo` / same-host fullscreen · no raw URL · #677 · heart untouched · no #664  
+**Accent parody:** IG blue → house **Sporty Blue `#1769FF`** only (Send CTA · selection check). Everything else matches IG dark send chrome from refs.  
+**Out of scope:** #664 · thumbs · public comments thread · share-to-feed / Copy link / Add to story / Facebook / OS Share row · inventing a **second** modal after select
 
 ---
 
 ## One lock
 
-A sent story is a **168-wide story card** in the DM. Video plays through the existing **SocialFeedVideo** host. Photo is a still in the same card and opens the Stories viewer. The message body is the calm line **Sent a story**. The raw story URL is never stored and never shown.
+Paper plane opens one **IG-dark share drawer** over the story. Recipient select **morphs that same drawer** (checkmark · Write a message… · Send) — **never** a different modal. Success → **centered dark Sent** toast on the undimmed story. DM shows optional comment + **You sent @{author}’s story** + live story card.
 
 ---
 
-## Sent toast
+## A) Sheet — one host, two states (morph)
+
+**Host:** one bottom drawer over the Stories viewer for the whole send. Phone: bottom sheet. Desktop: same visual grammar centered/docked as a single overlay — **still one host**, not Dialog-then-another-Dialog.  
+**Motion:** expand/collapse footer on select **≤220 ms** ease · no remount flash · no route change.
+
+### Measured chrome (from refs 02 / 04 · ~1206×2622)
+
+| Token | Lock (precise) |
+|-------|----------------|
+| Sheet fill | Near-black **`#181818`** (sampled ~`#181818` / `#282830`) · slight translucency OK · story visible above |
+| Top radius | **16** |
+| Grab | Centered pill ~**36×4** · white @ ~40% |
+| Height | ~**65–75%** viewport (content) · max **90vh** · body scrolls |
+| Scrim above sheet | Story dimmed while sheet open (ink @ ~**40%**) |
+| Pad | Horizontal **16** · top under grab **16** · bottom **16** + safe-area |
+| Shadow | **None** |
+
+### State 0 — pick (refs 02 · 03)
 
 | Token | Lock |
 |-------|------|
-| When | Only after the send **succeeds** and the house sheet **closes** |
-| Duration | **2000ms**, then gone |
-| Host | Existing **InlineNotice** grammar. Not a new toast system |
-| Place | **Bottom-center** · inset bottom **24** · max-width **280** |
+| Search row | Height **40** · radius **20** (pill) · fill `#2A2A2E` · icon + placeholder **Search** white/secondary · trailing **create-group** control hit **40** (people+ icon) — precise IG affordance |
+| People | **3-column** grid · column gap **16** · row gap **16** |
+| Avatar | **56** circle |
+| Name | Under avatar · `t-body-sm` · white · 1-line truncate · center |
+| Self | **Required** in grid + searchable (note-to-self) · same cell · no special badge except selection check |
+| Search results | List rows when query active (ref 03): avatar **40** · display `t-body` medium · `@handle` `t-body-sm` secondary · Cancel trailing · includes self hits |
+| Meta platform row | **OUT** (Copy link / Add to story / Facebook / Share to…) — paper plane = send-via-DM only |
+
+### State 1 — selected (ref 04) — **same drawer morphs**
+
+| Token | Lock |
+|-------|------|
+| Trigger | Tap a person (incl. self) |
+| Forbidden | Opening a **new** modal/sheet/page for compose |
+| Check | Sporty Blue `#1769FF` circle **20** · white check · avatar **bottom-right** |
+| Select rule | **Single** recipient (one check); tap other moves check; tap same clears → back to State 0 |
+| Grid | Stays visible (may compress/scroll) — IG-like context retained |
+| Message field | **Appears** in sheet footer · placeholder **Write a message…** · height **40** · radius **20** pill · fill `#2A2A2E` · white text · **optional** |
+| Send CTA | Full width · height **48** · radius **24** (pill) · bg **Sporty Blue `#1769FF`** · label **Send** white medium · disabled until one recipient selected |
+| Empty comment | **Send still works** — story card only in DM |
+
+---
+
+## B) Sent toast (ref 05) — supersedes any bottom toast
+
+| Token | Lock |
+|-------|------|
+| When | Success only · after sheet fully dismissed |
+| Placement | **Exact center** of viewport over Stories viewer |
+| Story | **Visible + undimmed** (scrim gone) |
+| Shape | Capsule · content-hug · pad **8** / **16** · radius **8** (full pill OK) |
+| Fill | Ink-dark **`#181820`** (sampled near `#181820` / `#404040` edge) |
+| Type | **Sent** · white · `t-body-sm font-medium` · **no** icon |
+| Life | **2000 ms** autodismiss |
 | A11y | `role="status"` · `aria-live="polite"` |
-| Paint | House ink on the notice surface. **No** green. **No** confetti. **No** shadow |
-| Fail | Sheet **stays open**. Inline error on the sheet. **No** success toast |
-| Dismiss | Sheet dismiss (X / scrim) sends nothing and shows no toast |
+| OUT | Bottom `InlineNotice` · green success · checkburst · recipient name in toast |
 
 ---
 
-## Message body
+## C) DM thread (ref 06 + optional comment ADD)
+
+Order in the outgoing send group (**top → bottom**):
+
+| # | Element | Lock |
+|---|---------|------|
+| 1 | Optional comment | If non-empty: **sender text bubble** (house DM bubble · mine alignment) with the typed comment · `t-body` · **above** the story share |
+| 2 | System line | **You sent @{authorHandle}’s story** · `t-body-sm` · `text-ink-2` / secondary-on-dark · **centered** above the card (IG) |
+| 3 | Story card | Width **168** · media **9:16** `object-cover` · radius **8** · hairline · **live** `SocialFeedVideo` for video · photo cover for still · author chip on card (avatar **24** + handle + meta **Story** or duration) |
+| 4 | Tap | Video → fullscreen via **same** `SocialFeedVideo` / Mux / native host only · Photo → Stories viewer |
 
 | Token | Lock |
 |-------|------|
-| Stored body | Calm **Sent a story**. Not `socialStoryHref`. Not a raw URL |
-| Media | **Keep** the story media on the message. Load **media**, not body-only |
-| Story meta | Author, story id, and expiry ride with that media so the card can render after the URL is gone. No new column. No prod SQL |
-| Inbox, you sent | **Sent a story** |
-| Inbox, they sent | **Sent you a story** |
-| Expired | **Story unavailable**. Still no URL |
-| Forbidden | URL text in the thread, the inbox excerpt, the toast, or the unavailable line |
+| Empty comment | Skip row 1 — system line + card only |
+| Inbox excerpt | Prefer comment trunc · else **You sent @{author}’s story** · never raw URL |
+| Raw URL body | **OUT** |
 
 ---
 
-## Story card
+## D) Entry (ref 01)
 
-| Token | Lock |
-|-------|------|
-| Hook | `data-social-dm-story-share` |
-| Width | **168** |
-| Media well | **9:16** · cover · the well clips the frame |
-| Radius | **8** |
-| Footer pad | **8** |
-| Footer | Author avatar **24** + name + meta **Story** |
-| Shadow | None |
-
-Phone wraps the name. Do not ellipsize it into a truncated stub.
-
----
-
-## Video
-
-| Token | Lock |
-|-------|------|
-| Host | Existing **SocialFeedVideo** inside the card. No new player |
-| Mux | **SocialMuxPlayer** when the item has `playbackId` |
-| File | Native `<video controls playsInline>` when it does not |
-| Load | The message **media**, not a body-only read and not a rail poster |
-| Tap | Fullscreen **that same host only** (`requestFullscreen` on the video or Mux host already in the card) |
-| OUT | Poster-only pretending to be video · URL text · a new player · a new HouseOverlay video lightbox · a cousin player |
-
----
-
-## Photo
-
-| Token | Lock |
-|-------|------|
-| Frame | Same **9:16** card. Still image. Cover |
-| Tap | Stories viewer via `socialStoryHref` |
-| OUT | Opening a video lightbox for a photo · printing the href as text |
-
----
-
-## Expired
-
-| Token | Lock |
-|-------|------|
-| Copy | **Story unavailable** |
-| Media | Do not play or link the dead story |
-| URL | Still none |
-
----
-
-## Keep closed (cite)
-
-- `docs/design-locks/stories-viewer-ig-actions-lock-v1.md` — reply, heart, send sheet, bottom row. Heart is untouched here  
-- `docs/design-locks/house-overlay-dual-host-v1.md` — the send sheet host. Do not add a video lightbox  
-- `docs/design-locks/24frame-visual-register-rich-calm-lock-v1.md` — paint only  
+Viewer bottom: keep reply pill · heart · **paper plane** (IG actions lock). Paper plane → this sheet State 0.
 
 ---
 
 ## Dev ship checklist (one line)
 
-**Ship:** success closes the sheet then a 2000ms InlineNotice toast (bottom-center, inset 24, max-width 280, status/polite, no green/confetti/shadow); failure keeps the sheet and the inline error and shows no toast; body is **Sent a story** with media kept; thread card is `data-social-dm-story-share` at 168 with a 9:16 cover well, radius 8, footer pad 8, avatar 24 + name + Story; video is live SocialFeedVideo (Mux or native controls) and tap fullscreens that host; photo tap opens the story; inbox says Sent a story / Sent you a story; expired says Story unavailable; never a raw URL; heart untouched; no undraft; no prod SQL.
+**Ship:** one IG-dark `#181818` drawer over story · Search+3-col+self+create-group icon · **same-sheet morph** on select (check · Write a message… · Sporty Blue Send pill 48) · empty comment OK · success → **centered** dark **Sent** 2000ms · DM = optional bubble → You sent @{author}’s story → 168/9:16 live card · same-host fullscreen · no second modal · no Meta share row · #677 only.
 
 ---
 
 ## FAIL / PASS
 
-**PASS:** Toast only after a real send · card matches the geometry · video is the live host · photo opens the viewer · inbox and body stay calm · expired stays calm · heart unchanged.  
-**FAIL:** Sheet stays open on success · toast on failure · raw URL anywhere · poster standing in for video · a new player or video lightbox · URL in the inbox · heart rewritten · SQL applied.
+**PASS:** Pixel-close to refs 01–06 · same drawer morphs · self works · centered Sent · comment appears with card when typed · live video card.  
+**FAIL:** White soft house sheet as the SoT · new modal after select · bottom toast · missing comment path · raw URL · soft-grade “inspired by.”
+
+---
+
+## Keep closed
+
+- `stories-viewer-ig-actions-lock-v1.md` — heart / reply / plane entry  
+- `stories-viewer-ig-parity-lock-v1.md` — #664  
+- `SocialFeedVideo` / `SocialMuxPlayer` — fullscreen host  
 
 ---
 
 ## Label
 
-**[Global Content][24Frame]** Stories send DM craft v1.1
+**[Global Content][24Frame]** Stories send DM craft v1.4 — precise IG parody

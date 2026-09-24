@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
 import {
+  dmStoryComment,
   dmStoryInboxExcerpt,
   presentDmStoryShare,
   storyDmInsertRow,
+  storySendSystemLine,
 } from "@/lib/social-dm-story";
 
 const author = "11111111-1111-4111-8111-111111111111";
@@ -69,7 +71,23 @@ describe("story DM card", () => {
     expect(JSON.stringify(expired)).not.toMatch(/\/social\/stories/);
   });
 
-  it("inbox lines never echo a story URL", () => {
+  it("stores an optional note above the system line and never a URL", () => {
+    const row = storyDmInsertRow({
+      senderId: "u1",
+      conversationId: "conv-1",
+      storyId: "s1",
+      authorId: author,
+      authorHandle: "ada",
+      note: "  watch this  ",
+      expiresAt: "2099-01-01T00:00:00.000Z",
+      media: [video],
+    });
+    expect(row.body).toBe("watch this");
+    expect(row.media).toContainEqual(expect.objectContaining({ authorHandle: "ada" }));
+    expect(JSON.stringify(row)).not.toMatch(/\/social\/stories/);
+  });
+
+  it("inbox lines prefer the note, then the system line, and never a URL", () => {
     expect(
       dmStoryInboxExcerpt({
         body: "https://24frame.co/social/stories/s1",
@@ -104,5 +122,52 @@ describe("story DM card", () => {
     expect(SOCIAL.dms.sentStory).not.toMatch(/\/social\/stories|https?:/);
     expect(SOCIAL.dms.sentYouStory).not.toMatch(/\/social\/stories|https?:/);
     expect(SOCIAL.dms.storyUnavailable).toBe("Story unavailable");
+    expect(storySendSystemLine("ada")).toBe("You sent @ada's story");
+    expect(
+      dmStoryInboxExcerpt({
+        body: "watch this",
+        media: [
+          {
+            kind: "story-share",
+            storyId: "s1",
+            authorId: author,
+            authorHandle: "ada",
+            expiresAt: "2099-01-01T00:00:00.000Z",
+          },
+        ],
+        senderId: "u1",
+        viewerId: "u2",
+      }),
+    ).toBe("watch this");
+    expect(
+      dmStoryInboxExcerpt({
+        body: "You sent @ada's story",
+        media: [
+          {
+            kind: "story-share",
+            storyId: "s1",
+            authorId: author,
+            authorHandle: "ada",
+            expiresAt: "2099-01-01T00:00:00.000Z",
+          },
+        ],
+        senderId: "u1",
+        viewerId: "u1",
+      }),
+    ).toBe("You sent @ada's story");
+    expect(
+      dmStoryComment({
+        body: "You sent @ada's story",
+        media: [
+          {
+            kind: "story-share",
+            storyId: "s1",
+            authorId: author,
+            authorHandle: "ada",
+            expiresAt: "2099-01-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    ).toBeNull();
   });
 });

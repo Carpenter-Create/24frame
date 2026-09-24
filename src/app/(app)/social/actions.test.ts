@@ -622,7 +622,7 @@ describe("social actions", () => {
         row: {
           sender_id: "u1",
           conversation_id: "conv-1",
-          body: "Sent a story",
+          body: "You sent @ada's story",
           media: [
             ...media,
             {
@@ -630,12 +630,22 @@ describe("social actions", () => {
               storyId: "s1",
               authorId: author,
               expiresAt: "2099-01-01T00:00:00.000Z",
+              authorHandle: "ada",
             },
           ],
           status: "active",
         },
       },
     ]);
+
+    form.set("peer_id", "u1");
+    expect(await sendSocialStoryItem(form)).toEqual({});
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u1" });
+    expect(inserts).toHaveLength(2);
+    expect(inserts[1]).toMatchObject({
+      table: "messages",
+      row: { sender_id: "u1", conversation_id: "conv-1", body: "You sent @ada's story" },
+    });
   });
 
   it("creates a comment when a profile exists", async () => {

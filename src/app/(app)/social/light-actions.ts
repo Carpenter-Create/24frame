@@ -152,7 +152,7 @@ export async function sendSocialStoryItem(formData: FormData): Promise<ActionRes
 
   const storyId = String(formData.get("story_id") ?? "").trim();
   const peerId = String(formData.get("peer_id") ?? "").trim();
-  if (!storyId || !peerId || peerId === user.id) return { error: SOCIAL.stories.sendFailed };
+  if (!storyId || !peerId) return { error: SOCIAL.stories.sendFailed };
 
   const { data: story, error: storyError } = await supabase
     .from("stories")
@@ -161,6 +161,13 @@ export async function sendSocialStoryItem(formData: FormData): Promise<ActionRes
     .eq("status", "active")
     .maybeSingle();
   if (storyError || !story || !isStoryLive(story.expires_at)) return { error: SOCIAL.stories.missing };
+
+  const note = String(formData.get("note") ?? "").trim();
+  const { data: authorProfile } = await supabase
+    .from("profiles")
+    .select("handle")
+    .eq("id", story.author_id)
+    .maybeSingle();
 
   const { data, error: openError } = await supabase.rpc("open_or_get_direct_conversation", {
     p_peer: peerId,
@@ -175,6 +182,8 @@ export async function sendSocialStoryItem(formData: FormData): Promise<ActionRes
       storyId: story.id,
       authorId: story.author_id,
       expiresAt: story.expires_at,
+      authorHandle: authorProfile?.handle ?? "",
+      note,
       media: ownedMediaItems(story.media, story.author_id, "stories"),
     }),
   );

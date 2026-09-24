@@ -45,7 +45,7 @@ export function storySendToast(
   return { show: true, ms: STORY_SEND_TOAST_MS };
 }
 
-/** Recent direct peers first, then people you follow. One id each. Never self. */
+/** Recent direct peers first, then people you follow, then self if still missing. One id each. */
 export function storySendPeopleOrder(input: {
   recentPeerIds: readonly (string | null)[];
   followeeIds: readonly string[];
@@ -53,8 +53,8 @@ export function storySendPeopleOrder(input: {
 }): string[] {
   const seen = new Set<string>();
   const ids: string[] = [];
-  for (const id of [...input.recentPeerIds, ...input.followeeIds]) {
-    if (!id || id === input.selfId || seen.has(id)) continue;
+  for (const id of [...input.recentPeerIds, ...input.followeeIds, input.selfId]) {
+    if (!id || seen.has(id)) continue;
     seen.add(id);
     ids.push(id);
   }

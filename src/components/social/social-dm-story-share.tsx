@@ -6,18 +6,30 @@ import Link from "next/link";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialFeedVideo } from "@/components/social/social-feed-video";
 import { SocialMediaImage } from "@/components/social/social-media-image";
+import {
+  callStoryShareHostFullscreen,
+  storyShareFullscreenHost,
+  type StoryShareFullscreenHost,
+} from "@/lib/social-dm-story-fullscreen";
 import { SOCIAL } from "@/lib/social";
 
-// Send-story DM craft v1.1. One card. Video is SocialFeedVideo — Mux when
-// the item has a playback id, otherwise the native video that host already
-// renders. Tap fullscreens that host. No second player. No lightbox.
+// Send-story DM craft v1.2. Video stays SocialFeedVideo. Tap fullscreens
+// that host: iOS webkitEnterFullscreen on the video / Mux media, otherwise
+// requestFullscreen on that same node. Not the card wrapper. No lightbox.
+
+function asFullscreenHost(node: Element | null): StoryShareFullscreenHost | null {
+  if (!node || !(node instanceof HTMLElement)) return null;
+  return node as HTMLElement & StoryShareFullscreenHost;
+}
 
 function fullscreenSameHost(well: HTMLElement) {
-  const player = well.querySelector("[data-social-mux-player], video");
-  const node = player instanceof HTMLElement ? player : well;
-  if (typeof node.requestFullscreen === "function") {
-    void node.requestFullscreen();
-  }
+  const mux = well.querySelector("mux-player");
+  callStoryShareHostFullscreen(
+    storyShareFullscreenHost({
+      video: asFullscreenHost(well.querySelector("video")),
+      mux: asFullscreenHost(mux),
+    }),
+  );
 }
 
 export function SocialDmStoryShare({

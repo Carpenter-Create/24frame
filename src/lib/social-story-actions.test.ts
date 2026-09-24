@@ -50,14 +50,21 @@ describe("send story", () => {
     });
   });
 
-  it("orders recent direct peers ahead of following and drops self", () => {
+  it("orders recent direct peers ahead of following and keeps self", () => {
     expect(
       storySendPeopleOrder({
         recentPeerIds: ["u2", null, "u1"],
         followeeIds: ["u3", "u2", "u1"],
         selfId: "u1",
       }),
-    ).toEqual(["u2", "u3"]);
+    ).toEqual(["u2", "u1", "u3"]);
+    expect(
+      storySendPeopleOrder({
+        recentPeerIds: ["u2"],
+        followeeIds: ["u3"],
+        selfId: "u1",
+      }),
+    ).toEqual(["u2", "u3", "u1"]);
   });
 
   it("filters the people already loaded", () => {

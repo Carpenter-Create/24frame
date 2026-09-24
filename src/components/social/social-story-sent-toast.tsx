@@ -2,23 +2,23 @@
 
 import { createPortal } from "react-dom";
 
-import { InlineNotice } from "@/components/ui/inline-notice";
 import { SOCIAL } from "@/lib/social";
 
-// --space-6 is 24px. Bottom-center, max 280, house notice. No green, no shadow.
+// Send craft v1.4. Exact viewport center. Dark capsule. Story stays undimmed.
 export function SocialStorySentToast() {
   const node = (
     <div
       data-social-story-sent-toast=""
-      className="pointer-events-none fixed inset-x-0 bottom-[var(--space-6)] z-50 flex justify-center px-[var(--space-4)]"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
     >
-      <InlineNotice
+      <p
         data-social-story-sent=""
+        role="status"
         aria-live="polite"
-        className="w-full max-w-[280px] text-center shadow-none"
+        className="rounded-[8px] bg-[#181820] px-4 py-2 t-body-sm font-medium text-white shadow-none"
       >
         {SOCIAL.stories.sent}
-      </InlineNotice>
+      </p>
     </div>
   );
   return typeof document !== "undefined" ? createPortal(node, document.body) : node;
