@@ -1,6 +1,8 @@
 import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_VIDEO_CONTENT_TYPES,
+  isSocialMediaContentType,
+  type SocialMediaContentType,
   type SocialVideoContentType,
 } from "@/lib/social-media";
 
@@ -193,9 +195,20 @@ export function storyVideoInputCount(devices: ReadonlyArray<{ kind: string }>): 
   return devices.filter((device) => device.kind === "videoinput").length;
 }
 
-/** House video type with no codecs suffix. Null when the base type is not allowlisted. */
-export function storyUploadContentType(raw: string): SocialVideoContentType | null {
-  return storyRecorderContentType(raw);
+/** House image or video type with no codecs suffix. Null when the base type is not allowlisted. */
+export function storyUploadContentType(raw: string): SocialMediaContentType | null {
+  const base = raw.split(";")[0]?.trim().toLowerCase() ?? "";
+  return isSocialMediaContentType(base) ? base : null;
+}
+
+function storyUploadFileName(type: SocialMediaContentType): string {
+  if (type === "video/mp4" || type === "video/webm" || type === "video/quicktime") {
+    return storyRecorderFileName(type);
+  }
+  if (type === "image/png") return "story.png";
+  if (type === "image/webp") return "story.webp";
+  if (type === "image/gif") return "story.gif";
+  return "story.jpg";
 }
 
 export function prepareStoryUploadFile(file: File): File | "missing" | "type" {
@@ -203,15 +216,22 @@ export function prepareStoryUploadFile(file: File): File | "missing" | "type" {
   const type = storyUploadContentType(file.type);
   if (!type) return "type";
   if (file.type === type) return file;
-  return new File([file], file.name || storyRecorderFileName(type), {
+  return new File([file], file.name || storyUploadFileName(type), {
     type,
     lastModified: file.lastModified,
   });
 }
 
-export function storyUploadNotice(reason: "missing" | "type" | "read" | "store"): string {
-  if (reason === "missing") return SOCIAL.stories.mediaMissing;
-  if (reason === "type") return SOCIAL.stories.mediaType;
+export function storyUploadNotice(
+  reason: "missing" | "type" | "read" | "store",
+  kind: "image" | "video" = "video",
+): string {
+  if (reason === "missing") {
+    return kind === "image" ? SOCIAL.stories.photoMissing : SOCIAL.stories.mediaMissing;
+  }
+  if (reason === "type") {
+    return kind === "image" ? SOCIAL.stories.photoMediaType : SOCIAL.stories.mediaType;
+  }
   if (reason === "read") return SOCIAL.home.mediaForbidden;
   return SOCIAL.home.uploadFailed;
 }

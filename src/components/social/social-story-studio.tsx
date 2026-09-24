@@ -113,9 +113,10 @@ function stopStream(stream: MediaStream | null) {
 }
 
 async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; error?: string }> {
+  const kindHint = file.type.split(";")[0]?.trim().toLowerCase().startsWith("image/") ? "image" : "video";
   const prepared = prepareStoryUploadFile(file);
-  if (prepared === "missing") return { error: storyUploadNotice("missing") };
-  if (prepared === "type") return { error: storyUploadNotice("type") };
+  if (prepared === "missing") return { error: storyUploadNotice("missing", kindHint) };
+  if (prepared === "type") return { error: storyUploadNotice("type", kindHint) };
   const body = new FormData();
   body.set("content_type", prepared.type);
   body.set("byte_length", String(prepared.size));
@@ -140,7 +141,7 @@ async function uploadStoryMedia(file: File): Promise<{ item?: SocialMediaItem; e
     });
     if (!put.ok) return { error: storyUploadNotice("store") };
     const kind = socialMediaKindFor(prepared.type);
-    if (kind !== "image" && kind !== "video") return { error: storyUploadNotice("type") };
+    if (kind !== "image" && kind !== "video") return { error: storyUploadNotice("type", kindHint) };
     return {
       item: {
         kind,
@@ -179,6 +180,7 @@ export function SocialStoryCompose({
   const clipUrlRef = useRef<string | null>(null);
   const liveRef = useRef(0);
   const postRef = useRef(0);
+  const postingRef = useRef(false);
   const reviewArmRef = useRef(0);
 
   const [phase, setPhase] = useState<StudioPhase>("stage");
@@ -406,9 +408,11 @@ export function SocialStoryCompose({
       setError(SOCIAL.stories.unavailable);
       return;
     }
+    // A pending seal from the previous take must not read this take's chunks.
+    const live = nextStoryStudioLive(liveRef.current);
+    liveRef.current = live;
     mimeRef.current = probed.mimeType;
     chunksRef.current = [];
-    const live = liveRef.current;
     let recorder: MediaRecorder;
     try {
       recorder = new MediaRecorder(stream, { mimeType: probed.raw });
@@ -662,6 +666,7 @@ export function SocialStoryCompose({
   }
 
   function playReview() {
+    if (postingRef.current) return;
     const url = clipUrlRef.current;
     const node = reviewRef.current;
     if (!url || !node) {
@@ -676,16 +681,17 @@ export function SocialStoryCompose({
   }
 
   async function postClip() {
-    if (posting) return;
+    if (posting || postingRef.current) return;
     if (Date.now() - reviewArmRef.current < storyReviewArmMs()) return;
     if (!clip?.file || clip.file.size <= 0) {
-      setError(SOCIAL.stories.mediaMissing);
+      setError(clip?.kind === "image" ? SOCIAL.stories.photoMissing : SOCIAL.stories.mediaMissing);
       return;
     }
     const postId = nextStoryStudioLive(postRef.current);
     postRef.current = postId;
     const objectUrl = clip.url;
     setError("");
+    postingRef.current = true;
     setPosting(true);
     const reviewNode = reviewRef.current;
     if (reviewNode) {
@@ -704,7 +710,7 @@ export function SocialStoryCompose({
         return;
       }
       if (body.size <= 0) {
-        setError(storyUploadNotice("missing"));
+        setError(storyUploadNotice("missing", clip.kind));
         restoreReviewPlayback(objectUrl);
         return;
       }
@@ -732,7 +738,10 @@ export function SocialStoryCompose({
       setError(storyUploadNotice("store"));
       restoreReviewPlayback(objectUrl);
     } finally {
-      if (storyStudioIsLive(postRef.current, postId)) setPosting(false);
+      if (storyStudioIsLive(postRef.current, postId)) {
+        postingRef.current = false;
+        setPosting(false);
+      }
     }
   }
 

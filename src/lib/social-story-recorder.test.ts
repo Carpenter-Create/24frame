@@ -136,6 +136,7 @@ describe("story MediaRecorder mime probe", () => {
     const playEnd = studio.indexOf("async function postClip");
     const playBlock = studio.slice(playStart, playEnd);
     expect(playBlock).toContain("bindStoryReviewVideo");
+    expect(playBlock.indexOf("postingRef.current")).toBeLessThan(playBlock.indexOf("bindStoryReviewVideo"));
     expect(playBlock).not.toContain("attachPreview");
     expect(playBlock).not.toContain("getUserMedia");
     expect(playBlock).not.toContain('setPhase("preview")');
@@ -148,7 +149,14 @@ describe("story MediaRecorder mime probe", () => {
     expect(postBlock.indexOf("clip.file.size")).toBeLessThan(postBlock.indexOf("setPosting(true)"));
     expect(postBlock).toContain("SOCIAL.stories.mediaMissing");
     expect(postBlock).toContain('storyUploadNotice("read")');
-    expect(postBlock).toContain('storyUploadNotice("missing")');
+    expect(postBlock).toContain('storyUploadNotice("missing", clip.kind)');
+    expect(postBlock).toContain("postingRef.current = true");
+    const start = studio.indexOf("function startRecording");
+    const startEnd = studio.indexOf("function releaseLiveCamera");
+    const startBlock = studio.slice(start, startEnd);
+    expect(startBlock.indexOf("nextStoryStudioLive(liveRef.current)")).toBeLessThan(
+      startBlock.indexOf("chunksRef.current = []"),
+    );
     const sealStart = studio.indexOf("function sealRecording");
     const sealEnd = studio.indexOf("function stopRecording");
     const sealBlock = studio.slice(sealStart, sealEnd);
@@ -162,9 +170,15 @@ describe("story MediaRecorder mime probe", () => {
     expect(storyUploadContentType("video/quicktime")).toBe("video/quicktime");
     expect(storyUploadContentType("video/mp4;codecs=avc1.42E01E,mp4a.40.2")).toBe("video/mp4");
     expect(storyUploadContentType("video/ogg")).toBeNull();
+    expect(storyUploadContentType("image/jpeg")).toBe("image/jpeg");
+    expect(storyUploadContentType("image/png")).toBe("image/png");
+    expect(storyUploadContentType("image/webp")).toBe("image/webp");
+    expect(storyUploadContentType("image/gif")).toBe("image/gif");
     const exact = new File([new Uint8Array([1, 2, 3])], "story.mp4", { type: "video/mp4" });
     const kept = prepareStoryUploadFile(exact);
     expect(kept).toBe(exact);
+    const jpeg = new File([new Uint8Array([9, 9])], "story.jpg", { type: "image/jpeg" });
+    expect(prepareStoryUploadFile(jpeg)).toBe(jpeg);
     const suffixed = new File([new Uint8Array([4, 5])], "clip.mp4", {
       type: "video/mp4;codecs=avc1",
     });
@@ -179,7 +193,9 @@ describe("story MediaRecorder mime probe", () => {
       "type",
     );
     expect(storyUploadNotice("missing")).toBe("Choose a video first.");
+    expect(storyUploadNotice("missing", "image")).toBe("Choose a photo first.");
     expect(storyUploadNotice("type")).toBe("Use a video (MP4, QuickTime, WebM).");
+    expect(storyUploadNotice("type", "image")).toBe("Use a photo (JPEG, PNG, WebP, GIF).");
     expect(storyUploadNotice("read")).toBe("That file cannot be attached.");
     expect(storyUploadNotice("store")).toBe("The file could not be stored.");
     expect(storyUploadNotice("store")).not.toBe(storyUploadNotice("read"));
