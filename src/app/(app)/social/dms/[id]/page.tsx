@@ -1,6 +1,7 @@
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { SocialDmStoryShare } from "@/components/social/social-dm-story-share";
 import { SocialAddPeopleForm, SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
 import { SocialAvatar } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
@@ -10,6 +11,7 @@ import {
   socialDmThreadHref,
 } from "@/lib/social-dm-bounds";
 import { conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
+import { parseDmStoryShare, presentDmStoryShare, type DmStoryLive } from "@/lib/social-dm-story";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -54,11 +56,40 @@ export default async function SocialDmThreadPage({
     loadDmParticipants(supabase, conversation.id),
   ]);
   const messages = thread.messages;
+  const legacyIds = [
+    ...new Set(
+      messages.flatMap((message) => {
+        const parsed = parseDmStoryShare(message);
+        if (!parsed?.legacy || !parsed.storyId) return [];
+        return [parsed.storyId];
+      }),
+    ),
+  ];
+  const liveById = new Map<string, DmStoryLive>();
+  if (legacyIds.length > 0) {
+    const { data: storyRows } = await supabase
+      .from("stories")
+      .select("id, author_id, status, expires_at")
+      .in("id", legacyIds);
+    for (const row of storyRows ?? []) {
+      liveById.set(row.id, {
+        status: row.status,
+        expiresAt: row.expires_at,
+        authorId: row.author_id,
+      });
+    }
+  }
   const activeIds = members.rows.map((row) => row.user_id);
   const peopleIds = [
     ...new Set([
       ...activeIds,
       ...messages.map((row) => row.sender_id).filter((id): id is string => !!id),
+      ...messages.flatMap((message) => {
+        const parsed = parseDmStoryShare(message);
+        const live = parsed?.storyId ? liveById.get(parsed.storyId) : undefined;
+        const authorId = parsed?.authorId ?? live?.authorId;
+        return authorId ? [authorId] : [];
+      }),
     ]),
   ];
   const [people, faces] = await Promise.all([
@@ -126,15 +157,39 @@ export default async function SocialDmThreadPage({
             handle: sender?.handle ?? "",
             displayName: sender?.display_name,
           });
+          const parsed = parseDmStoryShare(message);
+          const card = parsed
+            ? presentDmStoryShare({
+                body: message.body,
+                media: message.media,
+                live: parsed.legacy && parsed.storyId ? liveById.get(parsed.storyId) ?? null : null,
+              })
+            : null;
+          const author = card?.authorId ? people.get(card.authorId) : null;
+          const authorName = author
+            ? socialPersonLabel({ handle: author.handle, displayName: author.display_name })
+            : "";
           return (
             <li key={message.id} className="flex gap-[var(--space-3)]">
               <SocialAvatar
                 name={name}
                 photoUrl={message.sender_id ? faces.get(message.sender_id) ?? null : null}
               />
-              <div>
+              <div className="min-w-0">
                 <p className="t-body-sm text-ink-3">{name}</p>
-                <p className="t-body text-ink whitespace-pre-wrap">{message.body}</p>
+                {card ? (
+                  <SocialDmStoryShare
+                    authorName={authorName}
+                    authorPhotoUrl={card.authorId ? faces.get(card.authorId) ?? null : null}
+                    unavailable={card.unavailable}
+                    kind={card.kind}
+                    url={card.url}
+                    playbackId={card.playbackId}
+                    href={card.href}
+                  />
+                ) : (
+                  <p className="t-body text-ink whitespace-pre-wrap">{message.body}</p>
+                )}
               </div>
             </li>
           );

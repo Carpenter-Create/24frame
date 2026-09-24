@@ -617,6 +617,7 @@ export const SOCIAL = {
     send: "Send story",
     sendEmpty: "No people yet.",
     sendFailed: "Could not send this story.",
+    sent: "Sent",
     unavailable: "Recording is not available in this browser. Upload a video instead.",
     permission: "Camera access is needed to record.",
     emptyRail: "No stories yet",
@@ -883,6 +884,10 @@ export const SOCIAL = {
     titleHint: "Optional. Names stay first.",
     titleSave: "Save title",
     titleInvalid: "Enter a shorter title.",
+    sentStory: "Sent a story",
+    sentYouStory: "Sent you a story",
+    storyUnavailable: "Story unavailable",
+    storyMeta: "Story",
   },
   leaderboard: {
     title: "Leaderboard",
@@ -1295,22 +1300,6 @@ export function messageInsertRow(input: {
     sender_id: input.senderId,
     conversation_id: input.conversationId,
     body: input.body,
-    status: "active" as const,
-  };
-}
-
-/** One story item in an existing direct thread: link in the body, media keys as the attachment. */
-export function storyDmInsertRow(input: {
-  senderId: string;
-  conversationId: string;
-  storyId: string;
-  media: SocialMediaItem[];
-}) {
-  return {
-    sender_id: input.senderId,
-    conversation_id: input.conversationId,
-    body: socialStoryHref(input.storyId),
-    media: input.media,
     status: "active" as const,
   };
 }

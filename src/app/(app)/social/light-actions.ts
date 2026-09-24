@@ -17,9 +17,9 @@ import {
   socialPersonLabel,
   socialPostHref,
   socialStoryHref,
-  storyDmInsertRow,
   storyLikeInsertRow,
 } from "@/lib/social";
+import { storyDmInsertRow } from "@/lib/social-dm-story";
 import { socialAvatarHref } from "@/lib/social-edge";
 import { loadDmInbox } from "@/lib/social-dms";
 import { loadFolloweeIds, loadProfilesByIds } from "@/lib/social-feed";
@@ -173,6 +173,8 @@ export async function sendSocialStoryItem(formData: FormData): Promise<ActionRes
       senderId: user.id,
       conversationId,
       storyId: story.id,
+      authorId: story.author_id,
+      expiresAt: story.expires_at,
       media: ownedMediaItems(story.media, story.author_id, "stories"),
     }),
   );

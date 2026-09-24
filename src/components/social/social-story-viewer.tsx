@@ -17,6 +17,7 @@ import { flushSync } from "react-dom";
 
 import { SocialStoryReply } from "@/components/social/social-forms";
 import { SocialStorySendSheet } from "@/components/social/social-story-send-sheet";
+import { SocialStorySentToast } from "@/components/social/social-story-sent-toast";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialMediaImage } from "@/components/social/social-media-image";
 import { SocialIcon } from "@/components/social/social-icon";
@@ -49,6 +50,7 @@ import { toggleSocialStoryLike } from "@/app/(app)/social/light-actions";
 import {
   nextStoryHeart,
   storyHeartCountVisible,
+  STORY_SEND_TOAST_MS,
   type SocialStoryLikeState,
 } from "@/lib/social-story-actions";
 import { SOCIAL, SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
@@ -377,6 +379,7 @@ export function SocialStoryViewer({
   const [hearts, setHearts] = useState<Record<string, SocialStoryLikeState>>({ ...likes });
   const [heartPending, setHeartPending] = useState(false);
   const [sendItemId, setSendItemId] = useState<string | null>(null);
+  const [sentToast, setSentToast] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const holdRef = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -451,6 +454,11 @@ export function SocialStoryViewer({
     observer.observe(screen, { attributes: true, attributeFilter: ["hidden"] });
     return () => observer.disconnect();
   }, [storyId]);
+  useEffect(() => {
+    if (!sentToast) return undefined;
+    const timer = window.setTimeout(() => setSentToast(false), STORY_SEND_TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [sentToast]);
   useEffect(() => {
     if (!item || item.id === storyId) return;
     const href = socialStoryHref(item.id);
@@ -818,8 +826,14 @@ export function SocialStoryViewer({
         ) : null}
       </div>
       {sendItemId ? (
-        <SocialStorySendSheet storyId={sendItemId} open onClose={() => setSendItemId(null)} />
+        <SocialStorySendSheet
+          storyId={sendItemId}
+          open
+          onClose={() => setSendItemId(null)}
+          onSent={() => setSentToast(true)}
+        />
       ) : null}
+      {sentToast ? <SocialStorySentToast /> : null}
     </div>
   );
 }

@@ -1,12 +1,15 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { SOCIAL, socialStoryHref, storyDmInsertRow, storyLikeInsertRow } from "@/lib/social";
+import { SOCIAL, storyLikeInsertRow } from "@/lib/social";
+import { storyDmInsertRow } from "@/lib/social-dm-story";
 import {
   nextStoryHeart,
+  STORY_SEND_TOAST_MS,
   storyHeartCountVisible,
   storySendPeopleOrder,
   storySendPeopleQuery,
+  storySendToast,
   storySendUiAfter,
 } from "@/lib/social-story-actions";
 
@@ -67,7 +70,7 @@ describe("send story", () => {
     expect(storySendPeopleQuery(people, "ADA")).toEqual([people[0]]);
   });
 
-  it("sends this story item as a DM link plus its media", () => {
+  it("stores a calm body and keeps the story media", () => {
     const media = [
       {
         kind: "image" as const,
@@ -75,20 +78,39 @@ describe("send story", () => {
         contentType: "image/jpeg" as const,
       },
     ];
-    expect(
-      storyDmInsertRow({
-        senderId: "u1",
-        conversationId: "conv-1",
-        storyId: "s1",
-        media,
-      }),
-    ).toEqual({
+    const row = storyDmInsertRow({
+      senderId: "u1",
+      conversationId: "conv-1",
+      storyId: "s1",
+      authorId: "11111111-1111-4111-8111-111111111111",
+      expiresAt: "2099-01-01T00:00:00.000Z",
+      media,
+    });
+    expect(row).toEqual({
       sender_id: "u1",
       conversation_id: "conv-1",
-      body: socialStoryHref("s1"),
-      media,
+      body: "Sent a story",
+      media: [
+        ...media,
+        {
+          kind: "story-share",
+          storyId: "s1",
+          authorId: "11111111-1111-4111-8111-111111111111",
+          expiresAt: "2099-01-01T00:00:00.000Z",
+        },
+      ],
       status: "active",
     });
+    expect(row.body).toBe(SOCIAL.dms.sentStory);
+    expect(JSON.stringify(row)).not.toMatch(/\/social\/stories|https?:/);
+  });
+
+  it("toasts for 2000ms only after the sheet will close", () => {
+    expect(STORY_SEND_TOAST_MS).toBe(2000);
+    expect(storySendToast({})).toEqual({ show: true, ms: 2000 });
+    expect(storySendToast({ error: "Could not send this story." })).toEqual({ show: false, ms: 0 });
+    expect(storySendToast(undefined)).toEqual({ show: false, ms: 0 });
+    expect(storySendToast(null)).toEqual({ show: false, ms: 0 });
   });
 });
 

@@ -10,6 +10,7 @@ vi.mock("next/image", () => ({
 import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { SOCIAL } from "@/lib/social";
 import { SocialStorySendSheet } from "./social-story-send-sheet";
+import { SocialStorySentToast } from "./social-story-sent-toast";
 
 const person = {
   id: "u2",
@@ -63,6 +64,34 @@ describe("SocialStorySendSheet", () => {
     expect(html).toContain(SOCIAL.stories.sendEmpty);
     expect(html).toContain("t-body-sm");
     expect(SOCIAL.stories.sendEmpty).toBe("No people yet.");
+  });
+
+  it("toasts with InlineNotice grammar only after the sheet closes", () => {
+    const src = readFileSync("src/components/social/social-story-send-sheet.tsx", "utf8");
+    const viewer = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
+    const toastSrc = readFileSync("src/components/social/social-story-sent-toast.tsx", "utf8");
+    const closeAt = src.indexOf("if (outcome.close)");
+    const sentAt = src.indexOf("onSent?.()");
+    const errAt = src.indexOf("setError(outcome.error)");
+    expect(closeAt).toBeGreaterThan(-1);
+    expect(sentAt).toBeGreaterThan(closeAt);
+    expect(errAt).toBeGreaterThan(sentAt);
+    expect(src.slice(errAt)).not.toContain("onSent");
+    expect(viewer).toContain("STORY_SEND_TOAST_MS");
+    expect(viewer).toContain("setSentToast(true)");
+    expect(toastSrc).toContain("bottom-[var(--space-6)]");
+    expect(toastSrc).toContain("max-w-[280px]");
+    expect(toastSrc).toContain("shadow-none");
+    expect(toastSrc).toContain('aria-live="polite"');
+    expect(toastSrc).not.toMatch(/confetti|text-green|bg-green|shadow-lg|shadow-md/);
+    const html = renderToStaticMarkup(createElement(SocialStorySentToast));
+    expect(html).toContain("data-social-story-sent-toast");
+    expect(html).toContain('role="status"');
+    expect(html).toContain('aria-live="polite"');
+    expect(html).toContain("max-w-[280px]");
+    expect(html).toContain("bottom-[var(--space-6)]");
+    expect(html).toContain(SOCIAL.stories.sent);
+    expect(html).not.toMatch(/confetti|text-green|bg-green/);
   });
 
   it("renders nothing when closed", () => {

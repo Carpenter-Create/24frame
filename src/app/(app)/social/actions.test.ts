@@ -8,7 +8,6 @@ import {
   postInsertRow,
   profileInsertRow,
   SOCIAL,
-  socialStoryHref,
   storyLikeInsertRow,
 } from "@/lib/social";
 import { SocialMuxUploadNotBoundError } from "@/lib/social-mux";
@@ -623,8 +622,16 @@ describe("social actions", () => {
         row: {
           sender_id: "u1",
           conversation_id: "conv-1",
-          body: socialStoryHref("s1"),
-          media,
+          body: "Sent a story",
+          media: [
+            ...media,
+            {
+              kind: "story-share",
+              storyId: "s1",
+              authorId: author,
+              expiresAt: "2099-01-01T00:00:00.000Z",
+            },
+          ],
           status: "active",
         },
       },

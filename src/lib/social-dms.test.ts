@@ -67,6 +67,7 @@ describe("loadDmThreadMessages", () => {
     const newestFirst = [message(2), message(1)];
     const chain = feedChain(newestFirst);
     const page = await loadDmThreadMessages({ from: vi.fn(() => chain) } as never, "c1");
+    expect(chain.select).toHaveBeenCalledWith("id, body, sender_id, created_at, status, media");
     expect(chain.eq).toHaveBeenCalledWith("conversation_id", "c1");
     expect(chain.eq).toHaveBeenCalledWith("status", "active");
     expect(chain.or).not.toHaveBeenCalled();

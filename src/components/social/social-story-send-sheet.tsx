@@ -17,6 +17,7 @@ import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { SOCIAL } from "@/lib/social";
 import {
   storySendPeopleQuery,
+  storySendToast,
   storySendUiAfter,
   type StorySendPerson,
 } from "@/lib/social-story-actions";
@@ -25,11 +26,13 @@ export function SocialStorySendSheet({
   storyId,
   open,
   onClose,
+  onSent,
   directory,
 }: {
   storyId: string;
   open: boolean;
   onClose: () => void;
+  onSent?: () => void;
   directory?: readonly StorySendPerson[];
 }) {
   const titleId = useId();
@@ -84,6 +87,7 @@ export function SocialStorySendSheet({
     const result = await sendSocialStoryItem(form);
     const outcome = storySendUiAfter(result);
     if (outcome.close) {
+      if (storySendToast(result).show) onSent?.();
       onClose();
       return;
     }
