@@ -12,10 +12,11 @@ import {
   SOCIAL_COMPOSER_ROW_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CREATE_CAMERA_ACCEPT } from "@/lib/social-create-media";
-import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
+import { SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
 import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
-// FB-row lock v1. One row on phone and desktop.
+// FB-row lock v1.1. One row on phone and desktop. Field is white
+// with a hairline. Photo and Camera are glyph 16, hit 32, flush.
 // Prompt and avatar open the Create sheet default face.
 // Photo reuses the Create media library pick. Camera reuses that pick
 // with capture=environment. Icon only — no Photo/Camera labels.
@@ -46,7 +47,7 @@ function ComposerAffordance({
         className={SOCIAL_COMPOSER_AFFORDANCE_CLASS}
         onClick={openPicker}
       >
-        <SocialIcon name={icon} size={SOCIAL_ICON_SIZE_HEADER} className="text-ink-2" />
+        <SocialIcon name={icon} size={SOCIAL_ICON_SIZE_SEARCH} className="text-ink-2" />
       </button>
       {input}
     </>

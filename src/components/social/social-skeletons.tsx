@@ -89,8 +89,8 @@ export function SocialHomeCenterSkeleton({
           <Skeleton className={SOCIAL_COMPOSER_FIELD_CLASS} />
         </div>
         <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
-          <Skeleton className="size-10 shrink-0 rounded-full" />
-          <Skeleton className="size-10 shrink-0 rounded-full" />
+          <Skeleton className="size-8 shrink-0 rounded-full" />
+          <Skeleton className="size-8 shrink-0 rounded-full" />
         </div>
       </div>
       <SocialStoriesRailSkeleton tall />

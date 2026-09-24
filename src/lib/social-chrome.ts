@@ -297,26 +297,26 @@ export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
 export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
 
 // Home composer share stage. Phone SoT; desktop uses this same row.
-// FB-row lock v1. Surface #FFFFFF (bg-surface), hairline #ECEDF0
-// (border-hairline), radius 16, pad 16. One row, stage ~72 (16+40+16).
-// Avatar 40, gap 12, Share something pill, gap 8, icon-only Photo then
-// Camera (glyph 20, hit 40, gap 8, ink-2, no labels). Supersedes the
-// density v1.1 two-row stage. No Live/Feeling strip.
+// FB-row lock v1.1 tokens. Host stays white, hairline, radius 16, pad 16.
+// One row. Avatar 40, gap 12. Share something field is white with a
+// hairline (not muted fill), radius 20, height 40, pad H 16.
+// Photo then Camera: glyph 16, hit 32, gap 0, 8px after the field, ink-2.
+// No labels. No Live/Feeling strip.
 export const SOCIAL_COMPOSER_CLASS =
   `flex w-full items-center ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
 
 export const SOCIAL_COMPOSER_ROW_CLASS =
   "flex min-w-0 flex-1 items-center gap-[var(--space-3)]";
 
-// 8px after the pill, then 8px between the two icon hits.
+// 8px after the field. Hits sit flush.
 export const SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS =
-  "ml-[var(--space-2)] flex shrink-0 items-center gap-[var(--space-2)]";
+  "ml-[var(--space-2)] flex shrink-0 items-center gap-0";
 
 export const SOCIAL_COMPOSER_AFFORDANCE_CLASS =
-  "inline-flex size-10 shrink-0 items-center justify-center text-ink-2";
+  "inline-flex size-8 shrink-0 items-center justify-center bg-transparent text-ink-2";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
-  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] bg-surface-muted px-[var(--space-4)] t-body text-ink-2";
+  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] border border-hairline bg-surface px-[var(--space-4)] t-body text-ink-2";
 
 export const SOCIAL_COMPOSER_MEDIA_CLASS =
   "relative flex size-9 shrink-0 cursor-pointer items-center justify-center text-ink-2";
