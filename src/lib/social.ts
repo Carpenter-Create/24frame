@@ -499,6 +499,8 @@ export const SOCIAL = {
     findPeople: "Find people",
     composerPrompt: "Share something",
     composerPromptNamed: "Share something",
+    composerPhoto: "Photo",
+    composerCamera: "Camera",
     followingTab: "Following",
     forYouTab: "For you",
     compose: "Write a post",

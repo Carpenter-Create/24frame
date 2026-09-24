@@ -7,6 +7,7 @@ import { SocialStoryRailFace } from "@/components/social/social-story-rail-face"
 import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
+  SOCIAL_HOME_STORIES_TRACK_CLASS,
   SOCIAL_HOME_STORY_CREATE_FACE_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
   SOCIAL_HOME_STORY_FACE_RING_CLASS,
@@ -68,7 +69,7 @@ function HomeTallStoriesRail({
       data-social-stories-tall=""
       className="overflow-x-auto"
     >
-      <div className="flex w-max gap-2 pb-2">
+      <div className={SOCIAL_HOME_STORIES_TRACK_CLASS}>
         {canCreate ? (
           <Link
             href={SOCIAL_ROUTES.storiesNew}

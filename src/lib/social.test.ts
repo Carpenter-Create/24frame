@@ -96,6 +96,8 @@ describe("social copy lock", () => {
     );
     expect(SOCIAL.home.composerPrompt).toBe("Share something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Share something");
+    expect(SOCIAL.home.composerPhoto).toBe("Photo");
+    expect(SOCIAL.home.composerCamera).toBe("Camera");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.firstName).toBe("First name");

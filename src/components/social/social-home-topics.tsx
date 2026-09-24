@@ -22,7 +22,7 @@ export function SocialHomeTopics({
 }) {
   const topic = useSocialHomeLive("following", active).topic;
   return (
-    <div data-social-home-topics="" className="min-w-0">
+    <div data-social-home-topics="" className="min-w-0 py-0">
       <HouseChipRail
         data-social-home-topics-rail=""
         rows={SOCIAL_TOPIC_RAIL_ROWS}

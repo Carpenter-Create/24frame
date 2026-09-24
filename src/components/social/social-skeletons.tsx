@@ -6,8 +6,10 @@ import { cn } from "@/lib/cn";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_AVATAR_SM_CLASS,
+  SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS,
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_COMPOSER_ROW_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
   SOCIAL_FEED_CHROME_CLASS,
@@ -73,7 +75,7 @@ export function SocialHomeCenterSkeleton({
               {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
                 <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-24 shrink-0 rounded-full" />
+                    <Skeleton key={i} className="h-8 w-24 shrink-0 rounded-full" />
                   ))}
                 </div>
               ))}
@@ -82,8 +84,14 @@ export function SocialHomeCenterSkeleton({
         </div>
       ) : null}
       <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
-        <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
-        <Skeleton className={SOCIAL_COMPOSER_FIELD_CLASS} />
+        <div className={SOCIAL_COMPOSER_ROW_CLASS}>
+          <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
+          <Skeleton className={SOCIAL_COMPOSER_FIELD_CLASS} />
+        </div>
+        <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
       </div>
       <SocialStoriesRailSkeleton tall />
       {middle}

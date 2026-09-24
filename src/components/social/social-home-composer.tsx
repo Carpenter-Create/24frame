@@ -2,12 +2,57 @@
 
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialCreateSheet } from "@/components/social/social-create-sheet";
-import { SOCIAL_COMPOSER_CLASS, SOCIAL_COMPOSER_FIELD_CLASS } from "@/lib/social-chrome";
+import { useSocialCreateMediaPick } from "@/components/social/social-create-media";
+import { SocialIcon } from "@/components/social/social-icon";
+import {
+  SOCIAL_COMPOSER_AFFORDANCE_CLASS,
+  SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS,
+  SOCIAL_COMPOSER_CLASS,
+  SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_COMPOSER_ROW_CLASS,
+} from "@/lib/social-chrome";
+import { SOCIAL_CREATE_CAMERA_ACCEPT } from "@/lib/social-create-media";
+import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
 import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
-// Share stage on phone and desktop. Avatar 40 + Share something pill
-// on a surface card. The whole stage opens the Create sheet SoT
-// (Photo · Video · Write · Go live). Create dock stays.
+// Density lock v1.1. Two-row share stage on phone and desktop.
+// Row 1 opens the Create sheet. Photo reuses the Create media library
+// pick. Camera reuses that pick with capture=environment (device
+// camera) and the same Create review. No second uploader, no second
+// viewfinder, no Live / Feeling strip.
+
+function ComposerAffordance({
+  affordance,
+  icon,
+  label,
+  capture,
+}: {
+  affordance: "photo" | "camera";
+  icon: "image" | "camera";
+  label: string;
+  capture?: "environment";
+}) {
+  const { openPicker, input } = useSocialCreateMediaPick(
+    capture
+      ? { capture, accept: SOCIAL_CREATE_CAMERA_ACCEPT, multiple: false, label }
+      : { label },
+  );
+  return (
+    <>
+      <button
+        type="button"
+        data-social-composer-affordance={affordance}
+        className={SOCIAL_COMPOSER_AFFORDANCE_CLASS}
+        onClick={openPicker}
+      >
+        <SocialIcon name={icon} size={SOCIAL_ICON_SIZE_HEADER} />
+        <span className="t-label text-ink-2">{label}</span>
+      </button>
+      {input}
+    </>
+  );
+}
+
 export function SocialHomeComposer({
   authorName,
   authorPhotoUrl,
@@ -16,21 +61,32 @@ export function SocialHomeComposer({
   authorPhotoUrl?: string | null;
 }) {
   return (
-    <SocialCreateSheet
-      trigger={
-        <button
-          type="button"
-          data-social-home-composer=""
-          data-social-create-sheet="composer"
-          aria-label={SOCIAL.create.title}
-          className={SOCIAL_COMPOSER_CLASS}
-        >
-          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-10" />
-          <span data-social-composer-prompt="" className={`${SOCIAL_COMPOSER_FIELD_CLASS} text-ink-2`}>
-            {socialComposerPrompt(authorName)}
-          </span>
-        </button>
-      }
-    />
+    <div data-social-home-composer="" className={SOCIAL_COMPOSER_CLASS}>
+      <SocialCreateSheet
+        trigger={
+          <button
+            type="button"
+            data-social-composer-prompt-row=""
+            data-social-create-sheet="composer"
+            aria-label={SOCIAL.create.title}
+            className={SOCIAL_COMPOSER_ROW_CLASS}
+          >
+            <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-10" />
+            <span data-social-composer-prompt="" className={`${SOCIAL_COMPOSER_FIELD_CLASS} text-ink-2`}>
+              {socialComposerPrompt(authorName)}
+            </span>
+          </button>
+        }
+      />
+      <div data-social-composer-affordances="" className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
+        <ComposerAffordance affordance="photo" icon="image" label={SOCIAL.home.composerPhoto} />
+        <ComposerAffordance
+          affordance="camera"
+          icon="camera"
+          label={SOCIAL.home.composerCamera}
+          capture="environment"
+        />
+      </div>
+    </div>
   );
 }

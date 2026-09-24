@@ -14,7 +14,6 @@
 // house-shell. Feed / stories / create measured IA stays here.
 
 import {
-  HOUSE_CHIP_RAIL_CHIP_CLASS,
   HOUSE_CHIP_RAIL_CLASS,
   HOUSE_CHIP_RAIL_ROW_CLASS,
   HOUSE_CHIP_RAIL_STACK_CLASS,
@@ -27,7 +26,6 @@ import {
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
   HOUSE_SCROLL_ROW_CLASS,
-  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
 } from "@/lib/house-shell";
 import { HOUSE_VOICE_FOCUS_HOST_CLASS } from "@/lib/form-control";
 import { HOUSE_PHONE_STACK_CLASS, HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
@@ -117,9 +115,10 @@ const socialShellCenterClass =
 
 export const SOCIAL_HOME_CENTER_CLASS = socialShellCenterClass;
 
-// Home spine only. Phone SoT. 16 between Topics, composer, Stories, and
-// the feed. Profile, Explore, and Messages keep the shared gap-2 center.
-export const SOCIAL_HOME_SPINE_CLASS = "gap-[var(--space-4)]";
+// Home spine only. Phone SoT. Density lock v1.1: 8 between Topics,
+// composer, Stories, and the feed (supersedes v1's 16). Profile,
+// Explore, and Messages keep the shared gap-2 center.
+export const SOCIAL_HOME_SPINE_CLASS = "gap-[var(--space-2)]";
 
 // Profile desktop row matches Home: this column plus SocialForYouRail
 // at lg+. Explore and Messages use that same row. The center stays
@@ -190,22 +189,26 @@ export const SOCIAL_STORY_FACE_CLASS =
 export const SOCIAL_STORY_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[9px] bg-surface-muted";
 
-// Home tall FB-style cards. Phone SoT 120×208; desktop follows at 128×224.
-// Circular rings superseded. Spine density lock — do not shrink back to 108×192.
+// Home tall FB-style cards. Phone SoT 136×240; desktop follows at 144×256.
+// Density lock v1.1 — do not shrink back to v1 120×208, and do not
+// shrink sparse rails (≤2 cards) or invent empty placeholders.
 export const SOCIAL_HOME_STORY_CARD_CLASS =
-  `relative h-[208px] w-[120px] shrink-0 overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface md:h-[224px] md:w-[128px]`;
+  `relative h-[240px] w-[136px] shrink-0 overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface md:h-[256px] md:w-[144px]`;
+
+// Rail pad H 0, top 0, bottom 8. Gap 8. Same on phone and desktop.
+export const SOCIAL_HOME_STORIES_TRACK_CLASS = "flex w-max gap-2 px-0 pt-0 pb-2";
 
 // Create plate stays 72 phone / 80 md. The larger card grows the upper
-// media face. Seam = card height − plate (136 phone / 144 md).
+// media face. Seam = card height − plate (168 phone / 176 md).
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
-  "absolute inset-x-0 top-0 h-[136px] overflow-hidden bg-surface-muted md:h-[144px]";
+  "absolute inset-x-0 top-0 h-[168px] overflow-hidden bg-surface-muted md:h-[176px]";
 
 // Accent circle + white plus glyph. Not a white-fill well (Plus fill
 // knockout reads as white disc / blue +). border-surface is the seam
 // ring only — not the well fill. Phone + desktop share this class.
-// Centered on the photo/plate seam (136 phone / 144 md). 36 phone / 40 md.
+// Centered on the photo/plate seam (168 phone / 176 md). 36 phone / 40 md.
 export const SOCIAL_HOME_STORY_PLUS_CLASS =
-  "absolute left-1/2 top-[118px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[124px] md:size-10";
+  "absolute left-1/2 top-[150px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[156px] md:size-10";
 
 // Adam 2026-09-20 — Create Story is Social chrome, not an eyebrow.
 // t-label uppercase + 0.12em track stacked CREATE / STORY as a
@@ -298,12 +301,24 @@ export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
 export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
 
 // Home composer share stage. Phone SoT; desktop uses this same class.
-// Surface #FFFFFF (bg-surface), hairline #ECEDF0 (border-hairline),
-// radius 16, pad 16. Row is avatar 40 + muted pill (#F4F4F6, h 40, r 20).
-// Height is the 40 field plus 16/16 pad (~72). One press opens Create.
-// No transparent row, no Live/Photo/Feeling strip.
+// Density lock v1.1. Surface #FFFFFF (bg-surface), hairline #ECEDF0
+// (border-hairline), radius 16, pad 16. Two rows, gap 8.
+// Row 1: avatar 40 + muted pill (#F4F4F6, h 40, r 20), gap 12.
+// Row 2: Photo · Camera only, hit 40, gap 24, indent 52 under the pill.
+// Stage height is 16+40+8+40+16 (~120). Prompt opens Create.
+// No single-pill face, no Live/Feeling strip.
 export const SOCIAL_COMPOSER_CLASS =
-  `flex w-full items-center gap-[var(--space-4)] ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
+  `flex w-full flex-col gap-[var(--space-2)] ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
+
+export const SOCIAL_COMPOSER_ROW_CLASS =
+  "flex w-full min-w-0 items-center gap-[var(--space-3)]";
+
+// Avatar 40 + row gap 12 = 52, so Photo · Camera start under the pill.
+export const SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS =
+  "flex min-w-0 items-center gap-[var(--space-6)] pl-[calc(2.5rem+var(--space-3))]";
+
+export const SOCIAL_COMPOSER_AFFORDANCE_CLASS =
+  "inline-flex h-10 shrink-0 items-center gap-[var(--space-2)] text-ink-2";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
   "flex h-10 min-w-0 flex-1 items-center rounded-[20px] bg-surface-muted px-[var(--space-4)] t-body text-ink-2";
@@ -536,19 +551,22 @@ export const SOCIAL_PROFILE_ROLES_ROW_CLASS = HOUSE_CHIP_RAIL_CLASS;
 export const SOCIAL_PROFILE_ROLE_PILL_CLASS =
   `w-fit ${HOUSE_PILL_ITEM_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
 
-// Home Topics aliases the house chip rail. Not SegmentedTrack: lenses
+// Home Topics uses the house chip rail host. Not SegmentedTrack: lenses
 // stay discrete chips (All first). Selected uses HOUSE_PILL_SELECTED_CLASS
-// (accent fill + white). Idle stays HOUSE_CHIP_RAIL_CHIP_CLASS.
-// Adam 2026-09-20: one horizontal chip row. Phone: same one-row scroll
-// (never truncate — scroll). HOUSE_CHIP_RAIL_ROWS stays 2 for every
-// other chip-rail consumer.
+// (accent fill + white). Density lock v1.1: chip hit is 32 (h-8), not the
+// fat HOUSE_CHIP_RAIL_CHIP_CLASS. Type stays t-body-sm. One horizontal
+// row. Phone scrolls — never truncate. HOUSE_CHIP_RAIL_ROWS stays 2 for
+// every other chip-rail consumer.
 export const SOCIAL_TOPIC_RAIL_ROWS = 1;
 export const SOCIAL_TOPIC_RAIL_CLASS = HOUSE_CHIP_RAIL_CLASS;
 export const SOCIAL_TOPIC_RAIL_STACK_CLASS = HOUSE_CHIP_RAIL_STACK_CLASS;
 export const SOCIAL_TOPIC_CHIP_ROW_CLASS = HOUSE_CHIP_RAIL_ROW_CLASS;
-export const SOCIAL_TOPIC_RAIL_CHIP_CLASS = HOUSE_CHIP_RAIL_CHIP_CLASS;
+export const SOCIAL_TOPIC_RAIL_CHIP_MEASURE_CLASS =
+  "relative z-10 inline-flex h-8 shrink-0 cursor-pointer select-none items-center whitespace-nowrap rounded-full px-[var(--space-4)] t-body-sm";
+export const SOCIAL_TOPIC_RAIL_CHIP_CLASS =
+  `${SOCIAL_TOPIC_RAIL_CHIP_MEASURE_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
 export const SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS =
-  `${HOUSE_SEGMENTED_ITEM_BASE_CLASS} ${HOUSE_PILL_SELECTED_CLASS}`;
+  `${SOCIAL_TOPIC_RAIL_CHIP_MEASURE_CLASS} ${HOUSE_PILL_SELECTED_CLASS}`;
 
 export function socialTopicRailChipClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS : SOCIAL_TOPIC_RAIL_CHIP_CLASS;
