@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
-import { SocialMediaImage } from "@/components/social/social-media-image";
+import { SocialStoryRailFace } from "@/components/social/social-story-rail-face";
 import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
@@ -19,8 +19,7 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
-import { SOCIAL_STORY_CARD_IMAGE_SIZES } from "@/lib/social-media-display";
-import { SOCIAL, SOCIAL_ROUTES, socialInitials, socialPersonLabel, socialStoryHref } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel, socialStoryHref } from "@/lib/social";
 
 function storyLabel(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -101,13 +100,7 @@ function HomeTallStoriesRail({
               className={SOCIAL_HOME_STORY_CARD_CLASS}
             >
               <span data-social-story-media="" className="absolute inset-0 bg-surface-muted">
-                {photo ? (
-                  <SocialMediaImage src={photo} sizes={SOCIAL_STORY_CARD_IMAGE_SIZES} />
-                ) : (
-                  <span className="flex size-full items-center justify-center t-body font-semibold text-ink-2">
-                    {socialInitials(name)}
-                  </span>
-                )}
+                <SocialStoryRailFace name={name} photoUrl={photo ?? null} />
               </span>
               <span
                 className={cn(
@@ -205,7 +198,7 @@ export function SocialStoriesRail({
             >
               <div className={cn(cardClass, card.unseen ? "bg-accent" : "bg-hairline")}>
                 <div data-social-story-media="" className={mediaClass}>
-                  {photo ? <SocialMediaImage src={photo} sizes={SOCIAL_STORY_CARD_IMAGE_SIZES} /> : null}
+                  <SocialStoryRailFace name={name} photoUrl={photo ?? null} />
                 </div>
               </div>
               <p className="w-full truncate text-center t-label font-medium text-ink">{storyLabel(name)}</p>
