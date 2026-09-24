@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { isSocialMuxId, SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
+import {
+  isSocialMuxId,
+  SOCIAL_MUX_PLAYBACK_POLICIES,
+  SOCIAL_MUX_PROVIDER,
+  type SocialMuxPlaybackPolicy,
+} from "@/lib/social-mux";
 
 // Member post media rules. Keys live in posts.media (Pack 2 jsonb).
 // Stills go to 24frame-media-source-prod. Social Video + Go live store
@@ -60,6 +65,7 @@ export type SocialMediaItem = {
   playbackId?: string;
   uploadId?: string;
   assetId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
 export const SOCIAL_MEDIA_ACCEPT = SOCIAL_MEDIA_CONTENT_TYPES.join(",");
@@ -93,6 +99,7 @@ const itemSchema = z.object({
   playbackId: muxIdSchema.optional(),
   uploadId: muxIdSchema.optional(),
   assetId: muxIdSchema.optional(),
+  playbackPolicy: z.enum(SOCIAL_MUX_PLAYBACK_POLICIES).optional(),
 });
 
 export function isSocialMuxMediaItem(item: SocialMediaItem): item is SocialMediaItem & {

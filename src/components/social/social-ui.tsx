@@ -5,6 +5,7 @@ import { HouseChipRail } from "@/components/chrome/house-chip-rail";
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
+import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
@@ -144,6 +145,7 @@ export type SocialPostMediaItem = {
   kind: "image" | "video";
   url: string;
   playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
   orientation?: SocialMediaOrientation;
   width?: number;
   height?: number;

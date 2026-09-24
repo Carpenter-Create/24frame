@@ -16,6 +16,7 @@ import {
   type SocialMediaLane,
 } from "@/lib/social-media";
 import { socialMediaProxies, socialMediaProxiesByPostId } from "@/lib/social-edge";
+import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   isMediaCloudfrontConfigured,
   signSocialMediaCloudfrontUrl,
@@ -187,6 +188,7 @@ export type SignedSocialMedia = {
   url: string;
   contentType: SocialMediaContentType;
   playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
 /**

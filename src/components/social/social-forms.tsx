@@ -88,6 +88,7 @@ function persistKeys(media: SocialMediaItem[]) {
           playbackId: item.playbackId,
           ...(item.uploadId ? { uploadId: item.uploadId } : {}),
           ...(item.assetId ? { assetId: item.assetId } : {}),
+          ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
         }
       : {}),
   }));
@@ -133,6 +134,7 @@ function publishOptimisticPost({
           kind: item.kind,
           url,
           ...(item.playbackId ? { playbackId: item.playbackId } : {}),
+          ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
         },
       ];
     }),

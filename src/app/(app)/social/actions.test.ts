@@ -875,6 +875,7 @@ describe("social actions", () => {
         playbackId: "uNbxnGLKJ00yfbijDO8COxT",
         uploadId: "zd01Pe2bNpYhxbrwYABgFE",
         assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+        playbackPolicy: "signed",
       },
     });
     expect(finalizeSocialMuxDirectUpload).toHaveBeenCalledWith("zd01Pe2bNpYhxbrwYABgFE", author);

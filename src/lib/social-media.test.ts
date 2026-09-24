@@ -281,6 +281,22 @@ describe("posts.media persist shape", () => {
       assetId: "SqQnqz6s5MBuXGvJaUWdXu",
     };
     expect(mediaItemsForInsert([video], USER)).toEqual({ ok: true, items: [video] });
+    expect(mediaItemsForInsert([{ ...video, playbackPolicy: "signed" }], USER)).toEqual({
+      ok: true,
+      items: [{ ...video, playbackPolicy: "signed" }],
+    });
+    expect(mediaItemsForInsert([{ ...video, playbackPolicy: "public" }], USER)).toEqual({
+      ok: true,
+      items: [{ ...video, playbackPolicy: "public" }],
+    });
+    expect(parsePostMedia([{ ...video, playbackPolicy: "public" }])).toEqual([
+      { ...video, playbackPolicy: "public" },
+    ]);
+    expect(mediaItemsForInsert([{ ...video, playbackPolicy: "open" }], USER)).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+    expect(parsePostMedia([{ ...video, playbackPolicy: "open" }])).toEqual([]);
     expect(parsePostMedia([video, { ...video, playbackId: "short" }])).toEqual([video]);
     expect(
       mediaItemsForInsert(

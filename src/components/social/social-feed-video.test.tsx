@@ -5,8 +5,11 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/dynamic", () => ({
   default: () =>
-    function MuxPlayerStub() {
-      return null;
+    function MuxPlayerStub(props: { playbackId?: string; tokens?: { playback?: string } }) {
+      return createElement("div", {
+        "data-mux-player-stub": props.playbackId ?? "",
+        "data-mux-has-tokens": props.tokens ? "yes" : "no",
+      });
     },
 }));
 
@@ -23,6 +26,41 @@ describe("SocialFeedVideo", () => {
     expect(html).toContain('data-social-mux-player="abc12345xx"');
     expect(html).toContain("data-social-post-video");
     expect(html).not.toContain("<video");
+  });
+
+  it("plays public and missing policy with the playback id and no tokens", () => {
+    for (const playbackPolicy of [undefined, "public" as const]) {
+      const html = renderToStaticMarkup(
+        createElement(SocialFeedVideo, {
+          item: {
+            url: "https://image.mux.com/abc12345/thumbnail.webp",
+            playbackId: "abc12345xx",
+            ...(playbackPolicy ? { playbackPolicy } : {}),
+          },
+        }),
+      );
+      expect(html).toContain('data-social-mux-playback="public"');
+      expect(html).toContain('data-mux-player-stub="abc12345xx"');
+      expect(html).toContain('data-mux-has-tokens="no"');
+      expect(html).not.toContain('data-mux-has-tokens="yes"');
+      expect(html).not.toContain("playback-token");
+    }
+  });
+
+  it("holds signed playback until tokens exist and does not mount a tokenless player", () => {
+    const html = renderToStaticMarkup(
+      createElement(SocialFeedVideo, {
+        item: {
+          url: "https://image.mux.com/abc12345/thumbnail.webp",
+          playbackId: "abc12345xx",
+          playbackPolicy: "signed",
+        },
+      }),
+    );
+    expect(html).toContain('data-social-mux-player="abc12345xx"');
+    expect(html).toContain('data-social-mux-playback="pending"');
+    expect(html).not.toContain("data-mux-player-stub");
+    expect(html).not.toContain('data-mux-has-tokens="yes"');
   });
 
   it("keeps the naive player for leftover S3 videos", () => {
@@ -44,6 +82,8 @@ describe("SocialFeedVideo", () => {
     expect(player).toContain("aspectRatio: \"auto\"");
     expect(player).toContain('tokens={{');
     expect(player).toContain("SOCIAL_MUX_PLAYBACK_ROUTE");
+    expect(player).toContain("socialMuxPlaybackRequiresTokens");
+    expect(player).toContain("if (!signed) return");
     expect(player).toContain("playback: tokens.playback");
     expect(player).not.toContain("@/lib/social-mux-server");
     expect(player).not.toContain("maxResolution");

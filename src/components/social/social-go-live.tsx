@@ -395,6 +395,7 @@ export function SocialGoLive() {
           kind: "video",
           url: clip.url,
           ...(uploaded.item.playbackId ? { playbackId: uploaded.item.playbackId } : {}),
+          ...(uploaded.item.playbackPolicy ? { playbackPolicy: uploaded.item.playbackPolicy } : {}),
         },
       ],
       authorName: SOCIAL.home.you,

@@ -198,6 +198,31 @@ describe("Social optimistic mutation SoT", () => {
       expect(muxed.form.get("media")).toContain("uNbxnGLKJ00yfbijDO8COxT");
       expect(muxed.form.get("media")).toContain('"provider":"mux"');
       expect(muxed.post.media).toEqual([{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT" }]);
+      expect(muxed.form.get("media")).not.toContain("playbackPolicy");
+    }
+    const signed = beginSocialPostPublish({
+      body: "",
+      mediaItems: [
+        {
+          kind: "video",
+          key: "posts/u1/a.mp4",
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+          assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+          playbackPolicy: "signed",
+        },
+      ],
+      mediaPreview: [{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT", playbackPolicy: "signed" }],
+      authorName: "Ada Lovelace",
+    });
+    expect(signed.ok).toBe(true);
+    if (signed.ok) {
+      expect(signed.form.get("media")).toContain('"playbackPolicy":"signed"');
+      expect(signed.post.media).toEqual([
+        { kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT", playbackPolicy: "signed" },
+      ]);
     }
     expect(started.post.body).toBe("hello");
     expect(started.post.authorHandle).toBe("ada");

@@ -4,6 +4,7 @@
 // apply/await/refresh loops or a second persist helper.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
+import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   runOptimisticMutation,
   type OptimisticRun,
@@ -27,6 +28,7 @@ export type SocialOptimisticPostMedia = {
   kind: "image" | "video";
   url: string;
   playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
 export type SocialOptimisticPost = {
@@ -56,6 +58,7 @@ export type SocialPostPublishDraft = {
     playbackId?: string;
     uploadId?: string;
     assetId?: string;
+    playbackPolicy?: SocialMuxPlaybackPolicy;
   }[];
   mediaPreview?: readonly SocialOptimisticPostMedia[];
   authorId?: string;
@@ -436,6 +439,7 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
             playbackId: item.playbackId,
             ...(item.uploadId ? { uploadId: item.uploadId } : {}),
             ...(item.assetId ? { assetId: item.assetId } : {}),
+            ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
           }
         : {}),
     }))),
@@ -461,6 +465,7 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
         kind: item.kind,
         url: item.url,
         ...(item.playbackId ? { playbackId: item.playbackId } : {}),
+        ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
       })),
   };
   return { ok: true, form, post };
