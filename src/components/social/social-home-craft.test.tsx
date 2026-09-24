@@ -226,7 +226,10 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-social-story-media");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("data-social-avatar");
-    expect(html).toContain("Maya C.");
+    expect(html).toContain('aria-label="Maya Chen"');
+    expect(html).not.toContain("Maya C.");
+    expect(html).not.toContain("from-band/72");
+    expect(html).not.toContain("bg-gradient-to-t");
     expect(html).toContain("w-[136px]");
     expect(html).toContain("h-[240px]");
     expect(html).toContain("md:w-[144px]");
@@ -243,8 +246,6 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("h-[192px]");
     expect(html).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("bg-accent");
-    expect(html).toContain("bg-gradient-to-t");
-    expect(html).toContain("from-band/72");
     expect(html).not.toContain("bg-band/55");
     expect(html).toContain("h-[168px]");
     expect(html).toContain("md:h-[176px]");
@@ -260,7 +261,10 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("font-medium");
     expect(html).toContain(SOCIAL_HOME_STORY_CREATE_LABEL_CLASS);
     expect(html).toContain(SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS);
-    expect(html.indexOf("Maya C.")).toBeGreaterThan(html.indexOf("data-social-story-media"));
+    const userCard = html.slice(html.indexOf("data-social-story-card"));
+    expect(userCard.indexOf("data-social-avatar")).toBeGreaterThan(userCard.indexOf("data-social-story-media"));
+    expect(userCard).not.toContain(SOCIAL.stories.create);
+    expect(html.indexOf(SOCIAL.stories.create)).toBeLessThan(html.indexOf("data-social-story-card"));
   });
 
   it("sets Create Story in house t-body-sm, not t-label stacked caps", () => {
@@ -445,7 +449,9 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(media).toContain("/api/social/media?key=");
     expect(media).toContain(encodeURIComponent(imageKey));
     expect(media).not.toContain("signed-avatar");
-    expect(image).toContain("Maya C.");
+    expect(image).toContain('aria-label="Maya Chen"');
+    expect(image).not.toContain("Maya C.");
+    expect(image).not.toContain("from-band/72");
     const video = renderToStaticMarkup(
       <SocialStoriesRail
         authors={new Map([[authorId, { display_name: "Maya Chen", handle: "maya" }]])}

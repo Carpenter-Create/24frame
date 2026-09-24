@@ -226,10 +226,6 @@ export const SOCIAL_HOME_STORY_FACE_RING_CLASS =
 export const SOCIAL_HOME_STORY_FACE_CLASS =
   "flex size-full items-center justify-center overflow-hidden rounded-full bg-surface t-label font-semibold text-ink";
 
-// Transparent → band @ 72%. Not a flat band bar. White label. CSS truncate.
-export const SOCIAL_HOME_STORY_NAME_CLASS =
-  "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 truncate bg-gradient-to-t from-band/72 to-transparent px-2 t-label font-medium leading-[48px] text-band-ink";
-
 export const SOCIAL_STORIES_CARD_CLASS =
   `flex h-[168px] w-[112px] shrink-0 items-center justify-center ${SOCIAL_SURFACE_RADIUS_CLASS} p-[3px]`;
 

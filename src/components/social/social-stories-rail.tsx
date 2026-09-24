@@ -11,7 +11,6 @@ import {
   SOCIAL_HOME_STORY_CREATE_FACE_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
   SOCIAL_HOME_STORY_FACE_RING_CLASS,
-  SOCIAL_HOME_STORY_NAME_CLASS,
   SOCIAL_HOME_STORY_PLUS_CLASS,
   SOCIAL_STORIES_CARD_CLASS,
   SOCIAL_STORIES_FACE_CLASS,
@@ -103,6 +102,7 @@ function HomeTallStoriesRail({
               href={storyCardHref(card)}
               data-social-story-card={card.authorId}
               data-social-story-unseen={card.unseen ? "" : undefined}
+              aria-label={name}
               className={SOCIAL_HOME_STORY_CARD_CLASS}
             >
               <span data-social-story-media="" className="absolute inset-0 bg-surface-muted">
@@ -121,7 +121,6 @@ function HomeTallStoriesRail({
                   className="size-full"
                 />
               </span>
-              <span className={SOCIAL_HOME_STORY_NAME_CLASS}>{storyLabel(name)}</span>
             </Link>
           );
         })}
