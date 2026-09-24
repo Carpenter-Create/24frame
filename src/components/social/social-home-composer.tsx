@@ -15,11 +15,11 @@ import { SOCIAL_CREATE_CAMERA_ACCEPT } from "@/lib/social-create-media";
 import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
 import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
-// Density lock v1.1. Two-row share stage on phone and desktop.
-// Row 1 opens the Create sheet. Photo reuses the Create media library
-// pick. Camera reuses that pick with capture=environment (device
-// camera) and the same Create review. No second uploader, no second
-// viewfinder, no Live / Feeling strip.
+// FB-row lock v1. One row on phone and desktop.
+// Prompt and avatar open the Create sheet default face.
+// Photo reuses the Create media library pick. Camera reuses that pick
+// with capture=environment. Icon only — no Photo/Camera labels.
+// No second row, no Live / Feeling strip, no new sheet.
 
 function ComposerAffordance({
   affordance,
@@ -42,11 +42,11 @@ function ComposerAffordance({
       <button
         type="button"
         data-social-composer-affordance={affordance}
+        aria-label={label}
         className={SOCIAL_COMPOSER_AFFORDANCE_CLASS}
         onClick={openPicker}
       >
-        <SocialIcon name={icon} size={SOCIAL_ICON_SIZE_HEADER} />
-        <span className="t-label text-ink-2">{label}</span>
+        <SocialIcon name={icon} size={SOCIAL_ICON_SIZE_HEADER} className="text-ink-2" />
       </button>
       {input}
     </>
@@ -72,7 +72,7 @@ export function SocialHomeComposer({
             className={SOCIAL_COMPOSER_ROW_CLASS}
           >
             <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-10" />
-            <span data-social-composer-prompt="" className={`${SOCIAL_COMPOSER_FIELD_CLASS} text-ink-2`}>
+            <span data-social-composer-prompt="" className={SOCIAL_COMPOSER_FIELD_CLASS}>
               {socialComposerPrompt(authorName)}
             </span>
           </button>

@@ -8,9 +8,10 @@ import { SOCIAL, SOCIAL_ROUTES, socialCreateHref } from "@/lib/social";
 // Supersedes 2026-09-20 lock_airy_topics_under_cut_phone_composer
 // (Stories above Topics, phone composer cut). That phone cut is revoked.
 // One Home column on both devices: Topics → composer → Stories → wall.
-// The share-stage composer (avatar + "Share something" + Photo · Camera)
-// is on phone and desktop. Create dock and Create sheet stay. Same JSX,
-// no second layout, no gray liner, no Live / Feeling strip on Home.
+// The share-stage composer (avatar + "Share something" + icon-only
+// Photo · Camera) is one row on phone and desktop. Create dock and
+// Create sheet stay. Same JSX, no second layout, no gray liner, no
+// Live / Feeling strip on Home.
 export const SOCIAL_HOME_STACK_LOCK = "lock_topics_composer_stories_wall" as const;
 export const SOCIAL_HOME_STACK_ORDER = ["topics", "composer", "stories", "wall"] as const;
 

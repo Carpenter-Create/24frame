@@ -296,25 +296,24 @@ export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
 
 export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
 
-// Home composer share stage. Phone SoT; desktop uses this same class.
-// Density lock v1.1. Surface #FFFFFF (bg-surface), hairline #ECEDF0
-// (border-hairline), radius 16, pad 16. Two rows, gap 8.
-// Row 1: avatar 40 + muted pill (#F4F4F6, h 40, r 20), gap 12.
-// Row 2: Photo · Camera only, hit 40, gap 24, indent 52 under the pill.
-// Stage height is 16+40+8+40+16 (~120). Prompt opens Create.
-// No single-pill face, no Live/Feeling strip.
+// Home composer share stage. Phone SoT; desktop uses this same row.
+// FB-row lock v1. Surface #FFFFFF (bg-surface), hairline #ECEDF0
+// (border-hairline), radius 16, pad 16. One row, stage ~72 (16+40+16).
+// Avatar 40, gap 12, Share something pill, gap 8, icon-only Photo then
+// Camera (glyph 20, hit 40, gap 8, ink-2, no labels). Supersedes the
+// density v1.1 two-row stage. No Live/Feeling strip.
 export const SOCIAL_COMPOSER_CLASS =
-  `flex w-full flex-col gap-[var(--space-2)] ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
+  `flex w-full items-center ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
 
 export const SOCIAL_COMPOSER_ROW_CLASS =
-  "flex w-full min-w-0 items-center gap-[var(--space-3)]";
+  "flex min-w-0 flex-1 items-center gap-[var(--space-3)]";
 
-// Avatar 40 + row gap 12 = 52, so Photo · Camera start under the pill.
+// 8px after the pill, then 8px between the two icon hits.
 export const SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS =
-  "flex min-w-0 items-center gap-[var(--space-6)] pl-[calc(2.5rem+var(--space-3))]";
+  "ml-[var(--space-2)] flex shrink-0 items-center gap-[var(--space-2)]";
 
 export const SOCIAL_COMPOSER_AFFORDANCE_CLASS =
-  "inline-flex h-10 shrink-0 items-center gap-[var(--space-2)] text-ink-2";
+  "inline-flex size-10 shrink-0 items-center justify-center text-ink-2";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
   "flex h-10 min-w-0 flex-1 items-center rounded-[20px] bg-surface-muted px-[var(--space-4)] t-body text-ink-2";

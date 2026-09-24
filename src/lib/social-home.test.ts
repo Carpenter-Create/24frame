@@ -26,8 +26,9 @@ describe("Social Home stack lock", () => {
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
     expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("flex-col");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("items-center");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("flex-col");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("gap-[var(--space-2)]");
     expect(SOCIAL_COMPOSER_CLASS).toContain("p-[var(--space-4)]");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");

@@ -56,7 +56,7 @@ const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]])
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
 describe("Social Home craft (Figma 160:482 / 160:964)", () => {
-  it("renders the two-row share stage: prompt opens Create, Photo and Camera reuse the media pick", () => {
+  it("renders the one-row share stage: prompt opens Create, icon-only Photo and Camera reuse the media pick", () => {
     const html = renderToStaticMarkup(
       <SocialHomeComposer authorName="Adam Carpenter" />,
     );
@@ -93,9 +93,11 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain('data-social-icon="image"');
     expect(html).toContain('data-social-icon="camera"');
     expect(html).toContain(`width="20"`);
-    expect(html).toContain("t-label");
-    expect(html).toContain(SOCIAL.home.composerPhoto);
-    expect(html).toContain(SOCIAL.home.composerCamera);
+    expect(html).not.toContain("t-label");
+    expect(html).toContain(`aria-label="${SOCIAL.home.composerPhoto}"`);
+    expect(html).toContain(`aria-label="${SOCIAL.home.composerCamera}"`);
+    expect(html).not.toContain(`>${SOCIAL.home.composerPhoto}<`);
+    expect(html).not.toContain(`>${SOCIAL.home.composerCamera}<`);
     expect(html).toContain(`accept="${SOCIAL_CREATE_MEDIA_ACCEPT}"`);
     expect(html).toContain(`accept="${SOCIAL_CREATE_CAMERA_ACCEPT}"`);
     expect(html).toContain('capture="environment"');
@@ -105,22 +107,24 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(photoAt).toBeGreaterThan(html.indexOf("data-social-composer-prompt"));
     expect(cameraAt).toBeGreaterThan(photoAt);
     expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
-    expect(SOCIAL_COMPOSER_CLASS).toContain("flex-col");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("items-center");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("flex-col");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-none");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("items-center");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("gap-[var(--space-2)]");
     expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
     expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
     expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_COMPOSER_CLASS).toContain("p-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("flex-1");
     expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("items-center");
     expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("gap-[var(--space-3)]");
-    expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).toContain("gap-[var(--space-6)]");
-    expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).toContain("pl-[calc(2.5rem+var(--space-3))]");
-    expect(SOCIAL_COMPOSER_AFFORDANCE_CLASS).toContain("h-10");
+    expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).toContain("ml-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).not.toContain("pl-[calc(2.5rem+var(--space-3))]");
+    expect(SOCIAL_COMPOSER_AFFORDANCE_CLASS).toContain("size-10");
     expect(SOCIAL_COMPOSER_AFFORDANCE_CLASS).toContain("text-ink-2");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("bg-surface-muted");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-10");
