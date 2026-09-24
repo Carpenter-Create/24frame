@@ -24,6 +24,7 @@ import { commentInsertRow } from "@/lib/social-comments";
 
 vi.mock("@/lib/s3-social-media", () => ({
   presignSocialMediaPut: vi.fn(),
+  headSocialMediaObject: vi.fn(async () => ({ bytes: 1200, contentType: null })),
 }));
 
 vi.mock("@/lib/social-mux-server", () => ({
@@ -35,7 +36,7 @@ vi.mock("@/lib/social-mux-server", () => ({
   })),
 }));
 
-import { presignSocialMediaPut } from "@/lib/s3-social-media";
+import { headSocialMediaObject, presignSocialMediaPut } from "@/lib/s3-social-media";
 import {
   createSocialMuxDirectUpload,
   finalizeSocialMuxDirectUpload,
@@ -744,7 +745,7 @@ describe("social actions", () => {
       kind: "image",
       contentType: "image/jpeg",
     });
-    expect(presignSocialMediaPut).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`, "image/jpeg");
+    expect(presignSocialMediaPut).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`, "image/jpeg", 1200);
   });
 
   it("accepts a still on story create and stories-lane presign", async () => {
@@ -780,7 +781,7 @@ describe("social actions", () => {
       kind: "image",
       contentType: "image/jpeg",
     });
-    expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.jpg`, "image/jpeg");
+    expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.jpg`, "image/jpeg", 1200);
 
     vi.mocked(presignSocialMediaPut).mockResolvedValue("https://s3.example/put");
     const videoSign = new FormData();
@@ -793,7 +794,30 @@ describe("social actions", () => {
       kind: "video",
       contentType: "video/mp4",
     });
-    expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.mp4`, "video/mp4");
+    expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.mp4`, "video/mp4", 1200);
+  });
+
+  it("rejects a story when the stored object is missing, oversized, or a different type", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const form = new FormData();
+    form.set(
+      "media",
+      JSON.stringify([{ kind: "image", key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" }]),
+    );
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
+    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.mediaMissing });
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce({
+      bytes: 11 * 1024 * 1024,
+      contentType: "image/jpeg",
+    });
+    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.home.mediaTooLarge });
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce({ bytes: 1200, contentType: "video/mp4" });
+    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.mediaType });
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`stories/${author}/${object}.jpg`);
+    expect(inserts).toEqual([]);
   });
 
   it("creates a Mux direct upload for Social Video and finalizes the playback id", async () => {

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import {
@@ -10,6 +10,7 @@ import {
   SOCIAL_MEDIA_PUT_TTL_SECONDS,
   SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
   socialMediaKindFor,
+  socialMediaMaxBytes,
   type SocialMediaContentType,
   type SocialMediaKind,
   type SocialMediaLane,
@@ -85,23 +86,44 @@ function mediaClient(): { bucket: string; s3: S3Client } {
 export async function presignSocialMediaPut(
   key: string,
   contentType: SocialMediaContentType,
+  contentLength: number,
 ): Promise<string> {
   if (isForbiddenMediaKey(key)) {
     throw new Error("Media key is not allowed");
   }
+  const kind = socialMediaKindFor(contentType);
+  if (!kind || !Number.isInteger(contentLength) || contentLength <= 0 || contentLength > socialMediaMaxBytes(kind)) {
+    throw new Error("Media content length is not allowed");
+  }
   const { bucket, s3 } = mediaClient();
-  // Browser PUT only sends Content-Type. Do not sign Cache-Control —
-  // a signed extra header 403s the PUT (stills, Stories, welcome).
-  // GET ResponseCacheControl / CloudFront signing stay on the read path.
+  // Browser PUT sends Content-Type plus the Content-Length fetch adds for
+  // the body. Sign that length so a declared size cannot PUT a larger
+  // object. Do not sign Cache-Control — a signed extra header 403s the PUT.
   return getSignedUrl(
     s3,
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       ContentType: contentType,
+      ContentLength: contentLength,
     }),
     { expiresIn: SOCIAL_MEDIA_PUT_TTL_SECONDS },
   );
+}
+
+export async function headSocialMediaObject(
+  key: string,
+): Promise<{ bytes: number; contentType: string | null } | null> {
+  if (isForbiddenMediaKey(key)) return null;
+  try {
+    const { bucket, s3 } = mediaClient();
+    const out = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+    if (out.ContentLength == null || !Number.isFinite(out.ContentLength)) return null;
+    const contentType = out.ContentType?.split(";")[0]?.trim().toLowerCase() || null;
+    return { bytes: out.ContentLength, contentType };
+  } catch {
+    return null;
+  }
 }
 
 export async function presignSocialMediaGet(key: string): Promise<string> {

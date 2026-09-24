@@ -12,12 +12,13 @@ import {
   parseSocialMediaLane,
   socialMediaKindFor,
   socialMediaObjectKey,
+  storedSocialMediaRejection,
   validateMediaUpload,
   profileCoverKeyFromMedia,
   welcomeVideoKeyFromMedia,
   type SocialMediaItem,
 } from "@/lib/social-media";
-import { presignSocialMediaPut } from "@/lib/s3-social-media";
+import { headSocialMediaObject, presignSocialMediaPut } from "@/lib/s3-social-media";
 import { isSocialMuxId, SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
 import {
   createSocialMuxDirectUpload,
@@ -247,15 +248,16 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const lane = parseSocialMediaLane(String(formData.get("lane") ?? ""));
+  const byteLength = Number(formData.get("byte_length") ?? 0);
   const checked = validateMediaUpload({
     contentType: String(formData.get("content_type") ?? ""),
-    byteLength: Number(formData.get("byte_length") ?? 0),
+    byteLength,
     lane,
   });
   if (!checked.ok) return { error: socialMediaRuleMessage(checked.error, lane) };
   const key = socialMediaObjectKey(user.id, crypto.randomUUID(), checked.contentType, lane);
   try {
-    const url = await presignSocialMediaPut(key, checked.contentType);
+    const url = await presignSocialMediaPut(key, checked.contentType, byteLength);
     return { key, url, kind: checked.kind, contentType: checked.contentType };
   } catch {
     return { error: SOCIAL.home.uploadFailed };
@@ -384,6 +386,11 @@ export async function createSocialStory(formData: FormData): Promise<ActionResul
   const media = mediaItemsForInsert(formData.get("media"), user.id, "stories");
   if (!media.ok) return { error: socialMediaRuleMessage(media.error, "stories") };
   if (media.items.length === 0) return { error: SOCIAL.stories.empty };
+
+  for (const item of media.items) {
+    const rejection = storedSocialMediaRejection(item, await headSocialMediaObject(item.key));
+    if (rejection) return { error: socialMediaRuleMessage(rejection, "stories") };
+  }
 
   const { error } = await supabase.from("stories").insert(
     storyInsertRow({ authorId: user.id, body, media: media.items }),

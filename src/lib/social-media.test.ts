@@ -10,6 +10,7 @@ import {
   welcomeVideoKeyFromMedia,
   parsePostMedia,
   socialMediaObjectKey,
+  storedSocialMediaRejection,
   validateMediaUpload,
 } from "./social-media";
 
@@ -163,6 +164,31 @@ describe("posts.media persist shape", () => {
       ok: false,
       error: "tooLarge",
     });
+    expect(validateMediaUpload({ contentType: "image/jpeg", byteLength: 0 })).toEqual({
+      ok: false,
+      error: "missing",
+    });
+    expect(validateMediaUpload({ contentType: "image/jpeg", byteLength: 1.5 })).toEqual({
+      ok: false,
+      error: "missing",
+    });
+  });
+
+  it("rejects a stored object that is missing, oversized, or a different type", () => {
+    const image = { kind: "image" as const, contentType: "image/jpeg" };
+    const video = { kind: "video" as const, contentType: "video/mp4" };
+    expect(storedSocialMediaRejection(image, null)).toBe("missing");
+    expect(storedSocialMediaRejection(image, { bytes: 0, contentType: "image/jpeg" })).toBe("missing");
+    expect(storedSocialMediaRejection(image, { bytes: 11 * 1024 * 1024, contentType: "image/jpeg" })).toBe(
+      "tooLarge",
+    );
+    expect(storedSocialMediaRejection(image, { bytes: 1200, contentType: "video/mp4" })).toBe("type");
+    expect(storedSocialMediaRejection(image, { bytes: 1200, contentType: "image/jpeg" })).toBeNull();
+    expect(storedSocialMediaRejection(image, { bytes: 1200, contentType: null })).toBeNull();
+    expect(storedSocialMediaRejection(video, { bytes: 250 * 1024 * 1024, contentType: "video/mp4" })).toBeNull();
+    expect(storedSocialMediaRejection(video, { bytes: 250 * 1024 * 1024 + 1, contentType: "video/mp4" })).toBe(
+      "tooLarge",
+    );
   });
 
   it("accepts one still or one video on the stories lane and keeps posts open to stills", () => {
