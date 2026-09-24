@@ -34,6 +34,8 @@ describe("social isolation lock", () => {
     expect(env).not.toContain("NEXT_PUBLIC_KV");
     expect(env).toContain("MUX_TOKEN_ID=");
     expect(env).toContain("MUX_TOKEN_SECRET=");
+    expect(env).toContain("MUX_SIGNING_KEY=");
+    expect(env).toContain("MUX_PRIVATE_KEY=");
     expect(env).not.toContain("NEXT_PUBLIC_MUX");
   });
 

@@ -1,13 +1,26 @@
 import "server-only";
 
+import Mux from "@mux/mux-node";
+
 import {
   isSocialMuxId,
   socialMuxAssetSettings,
+  socialMuxPassthroughBoundToUser,
+  SocialMuxUploadNotBoundError,
   type SocialMuxAssetSettings,
   type SocialMuxIntent,
+  type SocialMuxPlaybackTokens,
 } from "@/lib/social-mux";
 
-export const SOCIAL_MUX_ENV = ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"] as const;
+export const SOCIAL_MUX_ENV = [
+  "MUX_TOKEN_ID",
+  "MUX_TOKEN_SECRET",
+  "MUX_SIGNING_KEY",
+  "MUX_PRIVATE_KEY",
+] as const;
+
+// Official Mux JWT helper (`mux.jwt.signPlaybackId`). Key id is MUX_SIGNING_KEY.
+// Base64 PEM is MUX_PRIVATE_KEY. Do not mint with the API token secret.
 
 // Server-only Mux Video client for Social. Token secret never leaves this
 // module. Do not import from client components, Edge Social reads, or
@@ -15,6 +28,7 @@ export const SOCIAL_MUX_ENV = ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"] as const;
 
 const MUX_API = "https://api.mux.com";
 const FINALIZE_DELAYS_MS = [250, 500, 750, 1000, 1500, 2000, 2000, 2000] as const;
+const SOCIAL_MUX_PLAYBACK_TOKEN_EXPIRATION = "12h";
 
 export type SocialMuxDirectUpload = {
   uploadId: string;
@@ -32,6 +46,9 @@ type MuxUploadData = {
   url?: string;
   status?: string;
   asset_id?: string | null;
+  new_asset_settings?: {
+    passthrough?: string | null;
+  } | null;
 };
 
 type MuxAssetData = {
@@ -86,7 +103,7 @@ export async function createSocialMuxDirectUpload(input: {
     body: JSON.stringify({
       cors_origin: muxCorsOrigin(),
       new_asset_settings: {
-        playback_policies: ["public"],
+        playback_policies: ["signed"],
         video_quality: input.settings.videoQuality,
         max_resolution_tier: input.settings.maxResolutionTier,
         ...(input.passthrough ? { passthrough: input.passthrough } : {}),
@@ -109,19 +126,51 @@ export async function retrieveSocialMuxAsset(assetId: string): Promise<MuxAssetD
   return muxRequest<MuxAssetData>(`/video/v1/assets/${assetId}`);
 }
 
-export function publicPlaybackIdFromAsset(asset: MuxAssetData): string | null {
+export async function mintSocialMuxPlaybackTokens(
+  playbackId: string,
+): Promise<SocialMuxPlaybackTokens> {
+  if (!isSocialMuxId(playbackId)) throw new Error("Mux playback id is invalid");
+  const mux = new Mux({
+    jwtSigningKey: requireMuxEnv("MUX_SIGNING_KEY"),
+    jwtPrivateKey: requireMuxEnv("MUX_PRIVATE_KEY"),
+  });
+  const signed = await mux.jwt.signPlaybackId(playbackId, {
+    expiration: SOCIAL_MUX_PLAYBACK_TOKEN_EXPIRATION,
+    type: ["video", "thumbnail", "storyboard"],
+  });
+  const playback = signed["playback-token"];
+  const thumbnail = signed["thumbnail-token"];
+  const storyboard = signed["storyboard-token"];
+  if (!playback || !thumbnail || !storyboard) {
+    throw new Error("Mux playback token was not minted");
+  }
+  return { playback, thumbnail, storyboard };
+}
+
+export function signedPlaybackIdFromAsset(asset: MuxAssetData): string | null {
   const match = asset.playback_ids?.find(
-    (item) => item.policy === "public" && item.id && isSocialMuxId(item.id),
+    (item) => item.policy === "signed" && item.id && isSocialMuxId(item.id),
   );
   return match?.id ?? null;
 }
 
+function muxUploadPassthrough(upload: MuxUploadData): string | null {
+  const value = upload.new_asset_settings?.passthrough;
+  return typeof value === "string" ? value : null;
+}
+
 export async function finalizeSocialMuxDirectUpload(
   uploadId: string,
+  callerUserId: string,
 ): Promise<SocialMuxReadyAsset> {
+  if (!callerUserId.trim()) throw new SocialMuxUploadNotBoundError();
+
   let assetId = "";
   for (const delay of FINALIZE_DELAYS_MS) {
     const upload = await retrieveSocialMuxUpload(uploadId);
+    if (!socialMuxPassthroughBoundToUser(muxUploadPassthrough(upload), callerUserId)) {
+      throw new SocialMuxUploadNotBoundError();
+    }
     if (upload.status === "errored" || upload.status === "cancelled" || upload.status === "timed_out") {
       throw new Error("Mux upload failed");
     }
@@ -136,7 +185,7 @@ export async function finalizeSocialMuxDirectUpload(
   let playbackId: string | null = null;
   for (const delay of FINALIZE_DELAYS_MS) {
     const asset = await retrieveSocialMuxAsset(assetId);
-    playbackId = publicPlaybackIdFromAsset(asset);
+    playbackId = signedPlaybackIdFromAsset(asset);
     if (playbackId) {
       return { uploadId, assetId, playbackId };
     }

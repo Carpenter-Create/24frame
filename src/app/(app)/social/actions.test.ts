@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { followInsertRow, likeInsertRow, postInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
+import { SocialMuxUploadNotBoundError } from "@/lib/social-mux";
 import { revalidatePath } from "next/cache";
 import {
   addSocialDmPeople,
@@ -851,6 +852,10 @@ describe("social actions", () => {
       height: 2160,
     });
     expect(presignSocialMediaPut).not.toHaveBeenCalled();
+    expect(createSocialMuxDirectUpload).toHaveBeenCalledWith({
+      settings: { videoQuality: "basic", maxResolutionTier: "1080p" },
+      passthrough: `${author}:${object}`,
+    });
 
     vi.mocked(finalizeSocialMuxDirectUpload).mockResolvedValue({
       uploadId: "zd01Pe2bNpYhxbrwYABgFE",
@@ -872,6 +877,13 @@ describe("social actions", () => {
         assetId: "SqQnqz6s5MBuXGvJaUWdXu",
       },
     });
+    expect(finalizeSocialMuxDirectUpload).toHaveBeenCalledWith("zd01Pe2bNpYhxbrwYABgFE", author);
+
+    vi.mocked(finalizeSocialMuxDirectUpload).mockRejectedValue(new SocialMuxUploadNotBoundError());
+    expect(await finalizeSocialMuxUpload(finish)).toEqual({ error: SOCIAL.home.mediaForbidden });
+
+    vi.mocked(finalizeSocialMuxDirectUpload).mockRejectedValue(new Error("Mux playback id is still preparing"));
+    expect(await finalizeSocialMuxUpload(finish)).toEqual({ error: SOCIAL.home.videoPreparing });
   });
 
   it("does not open a Mux upload on the stories lane", async () => {

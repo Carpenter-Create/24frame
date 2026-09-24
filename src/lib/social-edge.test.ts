@@ -119,12 +119,15 @@ describe("Social Edge vs Node runtime lock", () => {
     const profileApi = readFileSync("src/app/api/social/profile/route.ts", "utf8");
     const avatarApi = readFileSync("src/app/api/social/avatar/[userId]/route.ts", "utf8");
     const mediaApi = readFileSync("src/app/api/social/media/route.ts", "utf8");
+    const muxPlaybackApi = readFileSync("src/app/api/social/mux-playback/route.ts", "utf8");
     const photoApi = readFileSync("src/app/api/account/photo/route.ts", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
     const light = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
-    for (const src of [own, edit, create, live, storyNew, profileApi, avatarApi, mediaApi, photoApi]) {
+    for (const src of [own, edit, create, live, storyNew, profileApi, avatarApi, mediaApi, muxPlaybackApi, photoApi]) {
       expect(src).toContain('export const runtime = "nodejs"');
     }
+    expect(muxPlaybackApi).toContain("mintSocialMuxPlaybackTokens");
+    expect(muxPlaybackApi).not.toContain("NEXT_PUBLIC_");
     expect(actions).toContain("presignSocialMediaPut");
     expect(actions).toContain("@/lib/s3-social-media");
     expect(light).not.toContain("@/lib/s3-");
