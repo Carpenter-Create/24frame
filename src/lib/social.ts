@@ -63,6 +63,12 @@ export function isSocialStoryCreatePath(pathname: string): boolean {
   return path === SOCIAL_ROUTES.storiesNew;
 }
 
+/** Write compose. Not Go live. */
+export function isSocialWriteComposePath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  return path === SOCIAL_ROUTES.create;
+}
+
 /** Open DM thread. Not the inbox, not New message. */
 export function isSocialDmThreadPath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;

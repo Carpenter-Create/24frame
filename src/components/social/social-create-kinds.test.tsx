@@ -33,8 +33,23 @@ describe("Social create kinds", () => {
     expect(write).not.toContain("data-social-create-well");
     expect(write).not.toContain(SOCIAL.create.media);
     expect(write).not.toContain(SOCIAL.create.goLive);
-    expect(write).toContain(SOCIAL.home.attach);
-    expect(write).toContain("data-social-create-attach");
+    expect(write).toContain("data-social-create-dismiss");
+    expect(write).toContain(`aria-label="${SOCIAL.create.close}"`);
+    expect(write).toContain('data-social-create-attach="photo"');
+    expect(write).toContain('data-social-create-attach="video"');
+    expect(write).toContain(`aria-label="${SOCIAL.create.photo}"`);
+    expect(write).toContain(`aria-label="${SOCIAL.create.video}"`);
+    expect(write).toContain('aria-label="Add photo or video"');
+    expect(write).not.toContain(`>${SOCIAL.home.attach}<`);
+    expect(write).toContain("size-10");
+    expect(write).toContain("gap-2");
+    expect(write).toContain('width="24"');
+    expect(write).toContain("min-h-dvh");
+    expect(write).toContain("max-md:border-0");
+    expect(write).toContain("max-md:rounded-none");
+    expect(write).toContain(SOCIAL.create.caption);
+    expect(write).toContain(SOCIAL.home.audienceFollowing);
+    expect(write).toContain(SOCIAL.home.submit);
     expect(write).toContain("autofocus");
 
     const pick = renderToStaticMarkup(

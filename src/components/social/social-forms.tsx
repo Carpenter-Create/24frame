@@ -28,7 +28,10 @@ import {
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_REPLY_PILL_CLASS,
+  SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS,
+  SOCIAL_WRITE_COMPOSE_HOST_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
@@ -65,6 +68,7 @@ import {
   runSocialOptimisticMutation,
 } from "@/lib/social-optimistic";
 import { cn } from "@/lib/cn";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import { SocialAvatar } from "./social-avatar";
 import { SocialHandleField } from "./social-handle-field";
 import { SocialIcon } from "./social-icon";
@@ -541,7 +545,7 @@ export function SocialCreateCompose({
       data-social-create-form=""
       data-social-create-kind={kind}
       data-social-create-media-step={kind === "media" ? "caption" : undefined}
-      className={SOCIAL_CREATE_CARD_CLASS}
+      className={kind === "text" ? SOCIAL_WRITE_COMPOSE_HOST_CLASS : SOCIAL_CREATE_CARD_CLASS}
       onSubmit={(event) => {
         event.preventDefault();
         ingestSpeechLearning({
@@ -563,6 +567,19 @@ export function SocialCreateCompose({
         });
       }}
     >
+      {kind === "text" ? (
+        <div className="flex items-center">
+          <button
+            type="button"
+            data-social-create-dismiss=""
+            aria-label={SOCIAL.create.close}
+            className={SOCIAL_POST_ACTION_HIT_CLASS}
+            onClick={() => router.back()}
+          >
+            <SocialIcon name="x" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
+          </button>
+        </div>
+      ) : null}
       <div className="flex items-center gap-3" data-social-create-author="">
         <SocialAvatar
           name={authorName}
@@ -643,15 +660,26 @@ export function SocialCreateCompose({
         </select>
       </div>
       {kind === "text" ? (
-        <div className="flex items-center">
+        <div className={SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS} data-social-create-attach-row="">
           <button
             type="button"
-            data-social-create-attach=""
-            className={TEXT_ACTION_CLASS}
+            data-social-create-attach="photo"
+            aria-label={SOCIAL.create.photo}
+            className={SOCIAL_POST_ACTION_HIT_CLASS}
             disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
             onClick={() => fileRef.current?.click()}
           >
-            {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
+            <SocialIcon name="image" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
+          </button>
+          <button
+            type="button"
+            data-social-create-attach="video"
+            aria-label={SOCIAL.create.video}
+            className={SOCIAL_POST_ACTION_HIT_CLASS}
+            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
           </button>
           <input
             ref={fileRef}

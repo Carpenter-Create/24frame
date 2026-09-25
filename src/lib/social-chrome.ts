@@ -786,6 +786,16 @@ export const SOCIAL_SHARE_SHEET_ACTION_CLASS =
 export const SOCIAL_CREATE_CARD_CLASS =
   "flex flex-col gap-3 rounded-[8px] border border-hairline bg-surface p-4 md:gap-4 md:p-6";
 
+// Write compose phone host. Edge-to-edge viewport. No floating card.
+// Desktop keeps the card. Cite write-compose-immersive-icons-lock-v1.
+export const SOCIAL_WRITE_COMPOSE_FRAME_CLASS =
+  "w-full max-md:px-0 max-md:py-0 md:py-4 md:pl-[var(--chrome-gutter)] md:pr-[var(--shell-gutter-inline-end)]";
+
+export const SOCIAL_WRITE_COMPOSE_HOST_CLASS =
+  "flex w-full min-h-dvh flex-col gap-3 bg-surface px-[var(--space-4)] max-md:rounded-none max-md:border-0 max-md:pt-[max(var(--space-4),env(safe-area-inset-top))] max-md:pb-[max(var(--space-4),env(safe-area-inset-bottom))] md:min-h-0 md:gap-4 md:rounded-[8px] md:border md:border-hairline md:p-6";
+
+export const SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS = "flex items-center gap-2";
+
 export const SOCIAL_CREATE_WELL_CLASS =
   "flex h-[220px] w-full flex-col items-center justify-center gap-2 rounded-[8px] border border-dashed border-hairline bg-surface-muted px-4 py-7 text-center md:h-[320px] md:gap-2.5 md:px-6 md:py-10";
 
