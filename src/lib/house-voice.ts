@@ -2,6 +2,8 @@ export const HOUSE_VOICE = {
   search: "Search by voice",
   dictate: "Dictate",
   listening: "Listening",
+  voice: "Voice",
+  stop: "Stop",
 } as const;
 
 export type HouseVoiceSurface = "search" | "dictate";

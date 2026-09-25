@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,10 @@ import {
   SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_REPLY_PILL_CLASS,
   SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS,
+  SOCIAL_WRITE_COMPOSE_BAR_CLASS,
   SOCIAL_WRITE_COMPOSE_HOST_CLASS,
+  SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
+  SOCIAL_WRITE_COMPOSE_X_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
@@ -540,12 +544,167 @@ export function SocialCreateCompose({
     );
   }
 
+  if (kind === "text") {
+    const writing = body.trim().length > 0;
+    return (
+      <form
+        data-social-create-form=""
+        data-social-create-kind="text"
+        data-social-write-voice=""
+        className={SOCIAL_WRITE_COMPOSE_HOST_CLASS}
+        onSubmit={(event) => {
+          event.preventDefault();
+          ingestSpeechLearning({
+            text: body,
+            source: "typed",
+            workspace: "social",
+          });
+          publishOptimisticPost({
+            body,
+            media,
+            previews,
+            authorName,
+            authorHandle,
+            authorPhotoUrl,
+            onNavigate: () => {
+              router.push(SOCIAL_ROUTES.home);
+            },
+            setError,
+          });
+        }}
+      >
+        <div className="flex items-center justify-between gap-[var(--space-4)]">
+          <button
+            type="button"
+            data-social-create-dismiss=""
+            aria-label={SOCIAL.create.close}
+            className={SOCIAL_WRITE_COMPOSE_X_CLASS}
+            onClick={() => router.back()}
+          >
+            <SocialIcon name="x" size={22} className="text-ink-2" />
+          </button>
+          <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
+            {SOCIAL.home.submit}
+          </button>
+        </div>
+        <div className="mt-[var(--space-4)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
+          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
+          <span className="min-w-0">
+            <span className={SOCIAL_PERSON_PRIMARY_CLASS}>{authorName}</span>
+            {authorHandle ? (
+              <span className={SOCIAL_PERSON_SECONDARY_CLASS}>{displayHandle(authorHandle)}</span>
+            ) : null}
+          </span>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col">
+          {media.length > 0 ? (
+            <ul
+              data-social-create-preview=""
+              className="mt-[var(--space-4)] flex min-h-0 flex-1 flex-col gap-[var(--space-2)]"
+            >
+              {media.map((item) => (
+                <li key={item.key} className="relative min-h-0 flex-1 overflow-hidden bg-surface-muted">
+                  {previews[item.key] && item.kind === "video" ? (
+                    <video src={previews[item.key]} className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS} controls />
+                  ) : previews[item.key] ? (
+                    <Image
+                      src={previews[item.key]}
+                      alt={SOCIAL.home.photoKind}
+                      fill
+                      unoptimized
+                      sizes="100vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS} />
+                  )}
+                  <button
+                    type="button"
+                    className={`${TEXT_ACTION_CLASS} absolute right-[var(--space-2)] top-[var(--space-2)] bg-surface px-[var(--space-2)]`}
+                    onClick={() => setMedia((current) => current.filter((row) => row.key !== item.key))}
+                  >
+                    {SOCIAL.home.removeAttach}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex flex-1 items-center justify-center py-[var(--space-8)]">
+              <HouseVoiceMic
+                surface="dictate"
+                workspace="social"
+                presentation="hero"
+                getValue={() => body}
+                onValue={setBody}
+              />
+            </div>
+          )}
+        </div>
+        <div className="mt-auto flex flex-col gap-[var(--space-2)] pt-[var(--space-4)]">
+          <div className={SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS} data-social-create-attach-row="">
+            <button
+              type="button"
+              data-social-create-attach="photo"
+              aria-label={SOCIAL.create.photo}
+              className={SOCIAL_POST_ACTION_HIT_CLASS}
+              disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+              onClick={() => fileRef.current?.click()}
+            >
+              <SocialIcon name="image" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
+            </button>
+            <button
+              type="button"
+              data-social-create-attach="video"
+              aria-label={SOCIAL.create.video}
+              className={SOCIAL_POST_ACTION_HIT_CLASS}
+              disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+              onClick={() => fileRef.current?.click()}
+            >
+              <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept={SOCIAL_MEDIA_ACCEPT}
+              multiple
+              className="sr-only"
+              data-social-create-attach-input=""
+              aria-label={SOCIAL.home.attach}
+              onChange={(event) => void onPick(event.target.files)}
+            />
+          </div>
+          <p className="flex items-center gap-2 t-body-sm text-ink-2">
+            <span className="hidden md:inline">{SOCIAL.home.audience}</span>
+            <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS, "inline-flex items-center gap-1.5")}>
+              <SocialIcon name="users" size={14} className="text-ink-2" />
+              {SOCIAL.home.audienceFollowing}
+            </span>
+          </p>
+          <label className="sr-only" htmlFor="social-create-body">
+            {SOCIAL.home.composerPrompt}
+          </label>
+          <Textarea
+            variant="bare"
+            id="social-create-body"
+            name="body"
+            rows={writing ? 4 : 1}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder={SOCIAL.home.composerPrompt}
+            className={cn(SOCIAL_WRITE_COMPOSE_BAR_CLASS, writing ? "max-h-[40vh] min-h-12" : "h-12 overflow-hidden")}
+          />
+        </div>
+        <FormError error={error} />
+      </form>
+    );
+  }
+
   return (
     <form
       data-social-create-form=""
       data-social-create-kind={kind}
-      data-social-create-media-step={kind === "media" ? "caption" : undefined}
-      className={kind === "text" ? SOCIAL_WRITE_COMPOSE_HOST_CLASS : SOCIAL_CREATE_CARD_CLASS}
+      data-social-create-media-step="caption"
+      className={SOCIAL_CREATE_CARD_CLASS}
       onSubmit={(event) => {
         event.preventDefault();
         ingestSpeechLearning({
@@ -567,19 +726,6 @@ export function SocialCreateCompose({
         });
       }}
     >
-      {kind === "text" ? (
-        <div className="flex items-center">
-          <button
-            type="button"
-            data-social-create-dismiss=""
-            aria-label={SOCIAL.create.close}
-            className={SOCIAL_POST_ACTION_HIT_CLASS}
-            onClick={() => router.back()}
-          >
-            <SocialIcon name="x" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
-          </button>
-        </div>
-      ) : null}
       <div className="flex items-center gap-3" data-social-create-author="">
         <SocialAvatar
           name={authorName}
@@ -635,7 +781,6 @@ export function SocialCreateCompose({
             name="body"
             rows={3}
             value={body}
-            autoFocus={kind === "text"}
             onChange={(e) => setBody(e.target.value)}
             placeholder={SOCIAL.home.captionPlaceholder}
             className="h-20 min-w-0 flex-1 px-0 py-1 placeholder:text-ink-2 md:h-24"
@@ -659,40 +804,6 @@ export function SocialCreateCompose({
           ))}
         </select>
       </div>
-      {kind === "text" ? (
-        <div className={SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS} data-social-create-attach-row="">
-          <button
-            type="button"
-            data-social-create-attach="photo"
-            aria-label={SOCIAL.create.photo}
-            className={SOCIAL_POST_ACTION_HIT_CLASS}
-            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
-            onClick={() => fileRef.current?.click()}
-          >
-            <SocialIcon name="image" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
-          </button>
-          <button
-            type="button"
-            data-social-create-attach="video"
-            aria-label={SOCIAL.create.video}
-            className={SOCIAL_POST_ACTION_HIT_CLASS}
-            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
-            onClick={() => fileRef.current?.click()}
-          >
-            <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept={SOCIAL_MEDIA_ACCEPT}
-            multiple
-            className="sr-only"
-            data-social-create-attach-input=""
-            aria-label={SOCIAL.home.attach}
-            onChange={(event) => void onPick(event.target.files)}
-          />
-        </div>
-      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 t-body-sm text-ink-2">
           <span className="hidden md:inline">{SOCIAL.home.audience}</span>

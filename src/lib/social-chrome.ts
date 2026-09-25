@@ -786,13 +786,28 @@ export const SOCIAL_SHARE_SHEET_ACTION_CLASS =
 export const SOCIAL_CREATE_CARD_CLASS =
   "flex flex-col gap-3 rounded-[8px] border border-hairline bg-surface p-4 md:gap-4 md:p-6";
 
-// Write compose phone host. Edge-to-edge viewport. No floating card.
-// Desktop keeps the card. Cite write-compose-immersive-icons-lock-v1.
-export const SOCIAL_WRITE_COMPOSE_FRAME_CLASS =
-  "w-full max-md:px-0 max-md:py-0 md:py-4 md:pl-[var(--chrome-gutter)] md:pr-[var(--shell-gutter-inline-end)]";
+// Voice-first write compose. Edge-to-edge house light. No card cousin.
+// docs/design-locks/write-compose-voice-first-immersive-lock-v1.md
+export const SOCIAL_WRITE_COMPOSE_FRAME_CLASS = "min-h-dvh w-full";
 
 export const SOCIAL_WRITE_COMPOSE_HOST_CLASS =
-  "flex w-full min-h-dvh flex-col gap-3 bg-surface px-[var(--space-4)] max-md:rounded-none max-md:border-0 max-md:pt-[max(var(--space-4),env(safe-area-inset-top))] max-md:pb-[max(var(--space-4),env(safe-area-inset-bottom))] md:min-h-0 md:gap-4 md:rounded-[8px] md:border md:border-hairline md:p-6";
+  "mx-auto flex min-h-dvh w-full max-w-[680px] flex-col bg-surface px-[var(--space-4)] pt-[max(var(--space-4),env(safe-area-inset-top))] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
+
+export const SOCIAL_WRITE_COMPOSE_X_CLASS =
+  "inline-flex size-11 shrink-0 items-center justify-center text-ink-2 active:opacity-70";
+
+export const SOCIAL_WRITE_VOICE_HERO_CLASS =
+  "flex size-48 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink-2";
+
+export const SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS = "ring-2 ring-accent";
+
+export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent ring-2 ring-accent";
+
+export const SOCIAL_WRITE_COMPOSE_BAR_CLASS =
+  "w-full resize-none rounded-[24px] bg-surface-muted px-[var(--space-4)] t-body text-ink outline-none placeholder:text-ink-2";
+
+export const SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS =
+  "h-full min-h-0 w-full bg-surface-muted object-cover";
 
 export const SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS = "flex items-center gap-2";
 

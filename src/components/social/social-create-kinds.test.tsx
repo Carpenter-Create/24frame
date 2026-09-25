@@ -44,13 +44,27 @@ describe("Social create kinds", () => {
     expect(write).toContain("size-10");
     expect(write).toContain("gap-2");
     expect(write).toContain('width="24"');
+    expect(write).toContain('width="22"');
+    expect(write).toContain("size-11");
+    expect(write).toContain("size-48");
+    expect(write).toContain("size-12");
     expect(write).toContain("min-h-dvh");
-    expect(write).toContain("max-md:border-0");
-    expect(write).toContain("max-md:rounded-none");
-    expect(write).toContain(SOCIAL.create.caption);
+    expect(write).toContain("max-w-[680px]");
+    expect(write).toContain("h-12");
+    expect(write).toContain("rounded-[24px]");
+    expect(write).toContain(`placeholder="${SOCIAL.home.composerPrompt}"`);
+    expect(write).not.toContain(SOCIAL.create.caption);
+    expect(write).not.toContain("data-house-voice-mic=\"search\"");
+    expect(write).toContain('data-house-voice-mic="dictate"');
+    expect(write).toContain('aria-label="Voice"');
+    expect(write).toContain("data-social-write-voice");
+    expect(write).not.toContain(`>${SOCIAL.home.photoKind}<`);
     expect(write).toContain(SOCIAL.home.audienceFollowing);
     expect(write).toContain(SOCIAL.home.submit);
-    expect(write).toContain("autofocus");
+    expect(write).not.toContain("autofocus");
+    expect(src.indexOf("data-social-create-preview")).toBeLessThan(src.indexOf('presentation="hero"'));
+    expect(src.indexOf('presentation="hero"')).toBeLessThan(src.indexOf('id="social-create-body"'));
+    expect(src).toContain("unoptimized");
 
     const pick = renderToStaticMarkup(
       createElement(SocialCreateCompose, {

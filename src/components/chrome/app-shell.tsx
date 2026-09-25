@@ -195,7 +195,7 @@ export function AppShell({
   const dmImmersiveStage = isSocialDmImmersivePath(pathname);
   const dmThreadStage = isSocialDmThreadPath(pathname);
   const dmComposeStage = isSocialDmComposePath(pathname);
-  // Write compose owns the phone face. Header and dock return on dismiss.
+  // Write compose owns the face on phone and desktop. Chrome returns on dismiss.
   const writeComposeStage = isSocialWriteComposePath(pathname);
   const hideDestRail = hideProductRail || storyCreateStage || storyOpenStage;
   const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
@@ -308,8 +308,7 @@ export function AppShell({
           leftover `/messages` path (retired — 404), and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Do not invent Move chrome or a
           second phone switcher. Studio secondary rail stays HOLD. */}
-      {storyOpenStage || dmImmersiveStage ? null : (
-      <div className={writeComposeStage ? "max-md:hidden md:contents" : "contents"}>
+      {storyOpenStage || dmImmersiveStage || writeComposeStage ? null : (
       <HouseLeadChromeSlot
         chrome={chrome}
         isGcStaff={isGcStaff}
@@ -348,7 +347,6 @@ export function AppShell({
           />
         }
       />
-      </div>
       )}
 
       <main
@@ -363,14 +361,14 @@ export function AppShell({
       >
         <div
           className={
-            storyOpenStage || dmImmersiveStage
-              ? "min-h-full w-full"
+            storyOpenStage || dmImmersiveStage || writeComposeStage
+              ? writeComposeStage
+                ? SOCIAL_WRITE_COMPOSE_FRAME_CLASS
+                : "min-h-full w-full"
               : storyCreateStage
               ? "flex min-h-full w-full flex-col"
               : socialChrome
-              ? writeComposeStage
-                ? SOCIAL_WRITE_COMPOSE_FRAME_CLASS
-                : SOCIAL_DESKTOP_FRAME_PAD_CLASS
+              ? SOCIAL_DESKTOP_FRAME_PAD_CLASS
               : titlesBleed
                 ? "w-full pb-24 max-md:pb-0"
                 : homePage
