@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("social post media upload SoT", () => {
-  it("routes post videos to Mux and leaves stills + stories on S3", () => {
+  it("routes post and story videos to Mux and leaves stills on S3", () => {
     const src = readFileSync("src/lib/social-media-upload.ts", "utf8");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
     const live = readFileSync("src/components/social/social-go-live.tsx", "utf8");
@@ -13,14 +13,15 @@ describe("social post media upload SoT", () => {
     expect(src).toContain('body.set("intent", options.intent ?? "video")');
     expect(src).toContain("original_quality");
     expect(src).toContain("probeSocialVideoPixels");
+    expect(src).toContain('lane === "posts" || lane === "stories"');
     expect(src).not.toContain("NEXT_PUBLIC_MUX");
     expect(forms).toContain("uploadSocialPostMedia");
     expect(forms).toContain("originalQuality");
     expect(live).toContain("uploadSocialPostMedia");
     expect(live).toContain('intent: "live"');
     expect(studio).toContain("presignSocialMediaUpload");
-    expect(studio).not.toContain("createSocialMuxUpload");
-    expect(studio).not.toContain("uploadSocialPostMedia");
+    expect(studio).toContain("uploadSocialMuxVideoFile");
+    expect(studio).toContain('lane: "stories"');
   });
 
   it("PUTs stills, Stories, and welcome with Content-Type only — no Cache-Control", () => {

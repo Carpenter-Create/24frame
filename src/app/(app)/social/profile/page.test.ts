@@ -497,7 +497,9 @@ describe("Social profile public face", () => {
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-welcome-video");
-    expect(html).toContain('src="https://s3.example/welcome.mp4#t=0.1"');
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain('src="https://s3.example/welcome.mp4#t=0.1"');
+    expect(html).not.toContain("<video");
     expect(html.indexOf("data-social-welcome-video")).toBeLessThan(html.indexOf("data-social-profile-tabs") || html.length);
   });
 

@@ -18,7 +18,7 @@ describe("signedStoryPlaybackItems", () => {
     signedSocialMediaUrl.mockImplementation(async (key: string) => `https://media.example/${key}`);
   });
 
-  it("signs native story video with the existing media GET and leaves stills on the proxy", async () => {
+  it("fails closed on native story video and does not sign the object", async () => {
     const imageKey = `stories/${USER}/${OBJECT}.jpg`;
     const videoKey = `stories/${USER}/${OBJECT}.mp4`;
     const items = await signedStoryPlaybackItems(
@@ -32,10 +32,10 @@ describe("signedStoryPlaybackItems", () => {
       kind: "image",
       url: `${SOCIAL_MEDIA_ROUTE}?key=${encodeURIComponent(imageKey)}`,
     });
-    expect(items[1]?.url).toBe(`https://media.example/${videoKey}`);
+    expect(items[1]?.url).toBe("");
     expect(items[1]?.url).not.toContain(SOCIAL_MEDIA_ROUTE);
-    expect(signedSocialMediaUrl).toHaveBeenCalledTimes(1);
-    expect(signedSocialMediaUrl).toHaveBeenCalledWith(videoKey);
+    expect(items[1]?.playbackId).toBeUndefined();
+    expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
   it("keeps Mux playback id and policy for the existing player and does not sign the object", async () => {

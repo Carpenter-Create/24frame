@@ -1,5 +1,6 @@
 // Social Mux encode + playback SoT. Client-safe — no token secret.
-// Video + Go live posts only. Stories / welcome / Education stay off this module.
+// Stories, posts, and everywhere Social video play here.
+// Education and title film stay off this module.
 // Playback is Auto (adaptive). Do not add a quality Settings maze.
 
 export const SOCIAL_MUX_PROVIDER = "mux" as const;

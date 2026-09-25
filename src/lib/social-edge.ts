@@ -47,19 +47,19 @@ export type SocialEdgeMediaItem = {
   playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
-/** Rail / neighbor cover. Same proxy as playback. Video stays a still (no second CDN). */
+/** Rail / neighbor cover. Stills stay on the image proxy. Video is not a <video> src. */
 export function socialStoryRailCover(
   media: unknown,
   authorId: string,
 ): { kind: "image" | "video"; url: string } | null {
   const first = socialMediaProxies(media, authorId, "stories")[0];
-  if (!first?.url) return null;
-  // Public / legacy Mux stills are the unsigned thumbnail (#676).
-  // Signed playback 403s that URL. Do not paint it as an image.
+  if (!first) return null;
   if (first.playbackId) {
-    if (socialMuxPlaybackRequiresTokens(first.playbackPolicy)) return null;
-    return { kind: "image", url: first.url };
+    if (socialMuxPlaybackRequiresTokens(first.playbackPolicy)) return { kind: "video", url: "" };
+    return first.url ? { kind: "image", url: first.url } : { kind: "video", url: "" };
   }
+  if (first.kind === "video") return { kind: "video", url: "" };
+  if (!first.url) return null;
   return { kind: first.kind, url: first.url };
 }
 
@@ -72,7 +72,9 @@ export function socialMediaProxies(
     isSocialMuxMediaItem(item)
       ? {
           kind: item.kind,
-          url: socialMuxThumbnailUrl(item.playbackId),
+          url: socialMuxPlaybackRequiresTokens(item.playbackPolicy)
+            ? ""
+            : socialMuxThumbnailUrl(item.playbackId),
           contentType: item.contentType,
           playbackId: item.playbackId,
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),

@@ -53,7 +53,7 @@ describe("Social Edge media proxies", () => {
     ).toEqual({ kind: "image", url: socialMediaHref(imageKey) });
     expect(
       socialStoryRailCover([{ kind: "video", key: videoKey, contentType: "video/mp4" }], AUTHOR),
-    ).toEqual({ kind: "video", url: socialMediaHref(videoKey) });
+    ).toEqual({ kind: "video", url: "" });
     expect(socialStoryRailCover([], AUTHOR)).toBeNull();
     expect(
       socialStoryRailCover([{ kind: "image", key: "avatars/x", contentType: "image/jpeg" }], AUTHOR),
@@ -64,7 +64,7 @@ describe("Social Edge media proxies", () => {
         [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "signed" }],
         AUTHOR,
       ),
-    ).toBeNull();
+    ).toEqual({ kind: "video", url: "" });
     expect(
       socialStoryRailCover(
         [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "public" }],
@@ -114,6 +114,7 @@ describe("Social Edge media proxies", () => {
       AUTHOR,
     );
     expect(signed[0]?.playbackPolicy).toBe("signed");
+    expect(signed[0]?.url).toBe("");
     const legacy = socialMediaProxies(
       [
         {

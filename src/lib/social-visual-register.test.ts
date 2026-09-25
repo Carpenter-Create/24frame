@@ -40,7 +40,8 @@ describe("rich calm visual register v1.4", () => {
     expect(SOCIAL_STORY_STAGE_CLASS).not.toMatch(/shadow/);
     expect(viewer).toContain("paintStoryEnter");
     expect(viewer).toContain("SOCIAL_STORY_STILL_PROGRESS_MS");
-    expect(viewer).toContain("currentTime / node.duration");
+    expect(viewer).toContain("SocialMuxPlayer");
+    expect(viewer).not.toContain("currentTime / node.duration");
     expect(viewer).not.toMatch(/shadow-/);
     expect(rail).not.toMatch(/shadow-/);
     expect(cover).not.toMatch(/autoPlay|autoplay/);

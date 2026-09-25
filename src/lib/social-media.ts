@@ -315,13 +315,20 @@ export function mediaItemsForInsert(
       if (item.data.kind !== "video" || !isSocialMuxMediaItem(item.data)) {
         return { ok: false, error: "invalid" };
       }
-      if (lane === "stories") {
-        return { ok: false, error: "type" };
-      }
     }
     items.push(item.data);
   }
   return { ok: true, items };
+}
+
+/** Post and story video complete only with a Mux playback id. */
+export function socialPublishedVideoRejection(
+  items: readonly SocialMediaItem[],
+): SocialMediaRuleError | null {
+  for (const item of items) {
+    if (item.kind === "video" && !isSocialMuxMediaItem(item)) return "type";
+  }
+  return null;
 }
 
 export function validateMediaUpload(input: {

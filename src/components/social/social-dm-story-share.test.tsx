@@ -23,7 +23,7 @@ const author = {
 };
 
 describe("SocialDmStoryShare", () => {
-  it("plays Mux and native video through SocialFeedVideo, not a poster or a lightbox", () => {
+  it("plays Mux video through SocialFeedVideo and fails closed without a playback id", () => {
     const src = readFileSync("src/components/social/social-dm-story-share.tsx", "utf8");
     const host = readFileSync("src/lib/social-dm-story-fullscreen.ts", "utf8");
     expect(src).toContain("SocialFeedVideo");
@@ -78,11 +78,10 @@ describe("SocialDmStoryShare", () => {
         href: null,
       }),
     );
-    expect(file).toContain("<video");
-    expect(file).toContain("controls");
-    expect(file).toContain("playsInline");
+    expect(file).toContain("data-social-video-closed");
+    expect(file).not.toContain("<video");
     expect(file).toContain("data-social-post-video");
-    expect(readFileSync("src/components/social/social-feed-video.tsx", "utf8")).toContain("playsInline");
+    expect(file).not.toContain("#t=0.1");
     expect(file).not.toContain("<img");
     expect(file).not.toContain("/social/stories");
   });

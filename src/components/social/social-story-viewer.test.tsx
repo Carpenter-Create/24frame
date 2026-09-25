@@ -73,8 +73,10 @@ describe("SocialStoryViewer", () => {
     expect(html).not.toContain("max-w-[420px]");
     expect(html).not.toContain("bg-surface p-");
     expect(html).toContain('data-social-story-viewer="s1"');
-    expect(html).toContain("data-social-story-video");
-    expect(html).toContain("/api/social/media?key=stories%2Forg%2Fclip.mp4#t=0.1");
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("/api/social/media?key=stories%2Forg%2Fclip.mp4");
+    expect(html).not.toContain("#t=0.1");
     expect(html).toContain('data-social-story-frame=""');
     expect(html).toContain("data-social-story-pause");
     expect(html).toContain("data-social-story-mute");
@@ -134,24 +136,15 @@ describe("SocialStoryViewer", () => {
 
   it("pauses a hidden story and commits the enter class before paint", () => {
     const src = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
-    expect(src).toContain("node.pause()");
-    expect(src).toContain("onForcedMute");
+    expect(src).not.toContain("<video");
+    expect(src).not.toContain("socialVideoDisplaySrc");
     expect(src).not.toContain("audioTracks");
     expect(src).toContain("setAudible(true)");
     expect(src).toContain("consumeStoryEnter");
     expect(src).toContain("storyTrayStep");
     expect(src).toContain("w-2/3");
     expect(src).toContain("SOCIAL_STORY_PROGRESS_ROW_CLASS");
-    expect(src).toContain("onEnded={() => onComplete()}");
     expect(src).not.toContain("requestAnimationFrame(() => setEnter");
-    const catchAt = src.indexOf("void node.play().catch");
-    const retryAt = src.indexOf("void node.play()", catchAt + 1);
-    expect(catchAt).toBeGreaterThan(-1);
-    expect(retryAt).toBeGreaterThan(catchAt);
-    const beforeRetry = src.slice(catchAt, retryAt);
-    expect(beforeRetry).toContain("storyPlaybackHeld(screen, paused)");
-    expect(beforeRetry).toContain("node.pause()");
-    expect(src).toContain('screen?.hasAttribute("hidden")');
     const warm = src.slice(src.lastIndexOf("new MutationObserver"));
     expect(warm).toContain("paintStoryEnter");
     expect(src.indexOf("flushSync(() => apply(null))")).toBeLessThan(

@@ -57,6 +57,7 @@ import {
   handleFieldValue,
   splitSocialDisplayName,
 } from "@/lib/social";
+import { isLocalMediaPreviewSrc } from "@/lib/social-media-display";
 import { socialProfileImdbRowSummary } from "@/lib/social-imdb";
 import {
   composeSocialWebsiteUrlField,
@@ -563,7 +564,7 @@ export function SocialProfileEditForm({
           <div data-social-profile-edit-welcome="" className={SOCIAL_PROFILE_EDIT_CARD_CLASS}>
             <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2`}>
               <p className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.welcomeVideo}</p>
-              {welcomePreview ? (
+              {welcomePreview && isLocalMediaPreviewSrc(welcomePreview) ? (
                 <video
                   src={welcomePreview}
                   controls
@@ -571,6 +572,8 @@ export function SocialProfileEditForm({
                   preload="metadata"
                   className="aspect-video w-full bg-surface-muted object-contain"
                 />
+              ) : welcomePreview ? (
+                <div data-social-video-closed="" className="aspect-video w-full bg-surface-muted" />
               ) : null}
               <div className="flex flex-col gap-2">
                 <button

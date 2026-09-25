@@ -517,7 +517,14 @@ describe("social actions", () => {
     const { inserts } = stub({ profile: null });
     const object = "22222222-2222-4222-8222-222222222222";
     const media = [
-      { kind: "video" as const, key: `stories/${author}/${object}.mp4`, contentType: "video/mp4" as const },
+      {
+        kind: "video" as const,
+        key: `stories/${author}/${object}.mp4`,
+        contentType: "video/mp4" as const,
+        provider: "mux" as const,
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        playbackPolicy: "signed" as const,
+      },
     ];
     const form = new FormData();
     form.set("media", JSON.stringify(media));
@@ -786,9 +793,26 @@ describe("social actions", () => {
     const object = "22222222-2222-4222-8222-222222222222";
     vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
     const { inserts } = stub({ profile: { id: author } });
+    const native = new FormData();
+    native.set("body", "with media");
+    native.set(
+      "media",
+      JSON.stringify([
+        { kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" },
+        { kind: "video", key: `posts/${author}/${object}.mp4`, contentType: "video/mp4" },
+      ]),
+    );
+    expect(await createSocialPost(native)).toEqual({ error: SOCIAL.home.mediaType });
     const media = [
       { kind: "image" as const, key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" as const },
-      { kind: "video" as const, key: `posts/${author}/${object}.mp4`, contentType: "video/mp4" as const },
+      {
+        kind: "video" as const,
+        key: `posts/${author}/${object}.mp4`,
+        contentType: "video/mp4" as const,
+        provider: "mux" as const,
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        playbackPolicy: "signed" as const,
+      },
     ];
     const form = new FormData();
     form.set("body", "with media");
@@ -938,8 +962,7 @@ describe("social actions", () => {
       "media",
       JSON.stringify([{ kind: "video", key: `stories/${author}/${object}.mp4`, contentType: "video/mp4" }]),
     );
-    vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
-    expect(await createSocialStory(video)).toEqual({ error: SOCIAL.stories.mediaMissing });
+    expect(await createSocialStory(video)).toEqual({ error: SOCIAL.stories.mediaType });
     expect(inserts).toEqual([]);
   });
 
@@ -1009,16 +1032,40 @@ describe("social actions", () => {
     expect(await finalizeSocialMuxUpload(finish)).toEqual({ error: SOCIAL.home.videoPreparing });
   });
 
-  it("does not open a Mux upload on the stories lane", async () => {
+  it("opens a Mux upload on the stories lane and finalizes that key", async () => {
     const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
     vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
     stub({ profile: { id: author } });
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(object);
+    vi.mocked(createSocialMuxDirectUpload).mockResolvedValue({
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      url: "https://storage.googleapis.com/mux-upload",
+    });
     const form = new FormData();
     form.set("content_type", "video/mp4");
     form.set("byte_length", "1200");
     form.set("lane", "stories");
-    expect(await createSocialMuxUpload(form)).toEqual({ error: SOCIAL.home.mediaType });
-    expect(createSocialMuxDirectUpload).not.toHaveBeenCalled();
+    expect(await createSocialMuxUpload(form)).toEqual({
+      key: `stories/${author}/${object}.mp4`,
+      url: "https://storage.googleapis.com/mux-upload",
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      kind: "video",
+      contentType: "video/mp4",
+    });
+    expect(createSocialMuxDirectUpload).toHaveBeenCalled();
+    vi.mocked(finalizeSocialMuxDirectUpload).mockResolvedValue({
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+      playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+    });
+    const finish = new FormData();
+    finish.set("upload_id", "zd01Pe2bNpYhxbrwYABgFE");
+    finish.set("key", `stories/${author}/${object}.mp4`);
+    finish.set("content_type", "video/mp4");
+    expect(await finalizeSocialMuxUpload(finish)).toMatchObject({
+      item: { playbackId: "uNbxnGLKJ00yfbijDO8COxT", key: `stories/${author}/${object}.mp4` },
+    });
   });
 
   it("stores bio newlines and counts them toward 150", async () => {

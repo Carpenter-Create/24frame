@@ -1,7 +1,10 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
   isAnimatedRasterSrc,
+  isLocalMediaPreviewSrc,
+  isRejectedSocialVideoSrc,
   isSessionGatedSocialSrc,
   socialAvatarImageSizes,
   socialMediaFrameClass,
@@ -17,14 +20,18 @@ describe("social media display", () => {
     expect(isAnimatedRasterSrc("/local.gif")).toBe(true);
   });
 
-  it("adds a first-frame fragment without rewriting an existing hash or empty src", () => {
-    expect(socialVideoDisplaySrc("https://cf.example/welcome.mp4?sig=1")).toBe(
-      "https://cf.example/welcome.mp4?sig=1#t=0.1",
-    );
-    expect(socialVideoDisplaySrc("https://cf.example/welcome.mp4#t=2")).toBe(
-      "https://cf.example/welcome.mp4#t=2",
-    );
+  it("refuses proxy, fragment, and raw object URLs as a Social video src", () => {
+    expect(isRejectedSocialVideoSrc("/api/social/media?key=stories%2Forg%2Fclip.mp4")).toBe(true);
+    expect(isRejectedSocialVideoSrc("/api/social/media?key=stories%2Forg%2Fclip.mp4#t=0.1")).toBe(true);
+    expect(isRejectedSocialVideoSrc("https://cf.example/welcome.mp4?sig=1")).toBe(true);
+    expect(isRejectedSocialVideoSrc("https://cf.example/welcome.mp4#t=2")).toBe(true);
+    expect(isRejectedSocialVideoSrc("")).toBe(true);
+    expect(socialVideoDisplaySrc("https://cf.example/welcome.mp4?sig=1")).toBe("");
+    expect(socialVideoDisplaySrc("/api/social/media?key=clip.mp4#t=0.1")).toBe("");
     expect(socialVideoDisplaySrc("")).toBe("");
+    expect(isRejectedSocialVideoSrc("https://stream.mux.com/uNbxnGLKJ00yfbijDO8COxT.m3u8")).toBe(false);
+    expect(isLocalMediaPreviewSrc("blob:https://local/1")).toBe(true);
+    expect(isLocalMediaPreviewSrc("https://s3.example/welcome.mp4")).toBe(false);
   });
 
   it("sizes profile faces for the 80px disk", () => {
@@ -59,5 +66,24 @@ describe("social media display", () => {
     expect(socialStoryMediaFrameClass()).toBe("aspect-[9/16] w-full object-cover");
     expect(socialStoryMediaFrameClass()).not.toContain("aspect-video");
     expect(socialStoryMediaFrameClass()).not.toContain("aspect-[4/5]");
+  });
+
+  it("keeps published Social video off the media proxy and native video element", () => {
+    const files = [
+      "src/components/social/social-feed-video.tsx",
+      "src/components/social/social-story-viewer.tsx",
+      "src/components/social/social-story-rail-cover.tsx",
+      "src/components/social/social-welcome-video.tsx",
+      "src/app/(app)/social/explore/page.tsx",
+    ];
+    for (const file of files) {
+      const src = readFileSync(file, "utf8");
+      expect(src).not.toContain("socialVideoDisplaySrc");
+      expect(src).not.toContain("<video");
+      expect(src).not.toContain("#t=0.1");
+    }
+    const player = readFileSync("src/components/social/social-mux-player.tsx", "utf8");
+    expect(player).toContain("onLoadedData={paint}");
+    expect(player).not.toContain("if (ready) onPaint?.()");
   });
 });

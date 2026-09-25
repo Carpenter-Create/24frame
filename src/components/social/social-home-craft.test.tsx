@@ -398,8 +398,9 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
         ]}
       />,
     );
-    expect(video).toContain("data-social-story-cover");
-    expect(video).toContain("#t=0.1");
+    expect(video).toContain("data-social-video-closed");
+    expect(video).not.toContain("#t=0.1");
+    expect(video).not.toContain("<video");
     expect(video).not.toContain("autoplay");
     expect(video).toContain("border-hairline");
     expect(video).not.toContain("border-accent");

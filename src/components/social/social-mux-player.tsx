@@ -59,11 +59,9 @@ export function SocialMuxPlayer({
   const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
   const [mint, setMint] = useState<{ playbackId: string; tokens: SocialMuxPlaybackTokens } | null>(null);
   const tokens = signed && mint?.playbackId === playbackId ? mint.tokens : null;
-  const ready = !signed || tokens != null;
-
-  useEffect(() => {
-    if (ready) onPaint?.();
-  }, [onPaint, ready]);
+  const paint = () => {
+    onPaint?.();
+  };
 
   useEffect(() => {
     if (!signed) return;
@@ -104,6 +102,7 @@ export function SocialMuxPlayer({
             autoPlay={autoPlay}
             muted={muted}
             preload="metadata"
+            onLoadedData={paint}
             poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
             className="size-full object-cover"
             style={playerStyle(chromeless)}
@@ -117,6 +116,7 @@ export function SocialMuxPlayer({
           autoPlay={autoPlay}
           muted={muted}
           preload="metadata"
+          onLoadedData={paint}
           poster={socialMuxThumbnailUrl(playbackId)}
           className="size-full object-cover"
           style={playerStyle(chromeless)}

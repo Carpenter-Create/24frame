@@ -174,7 +174,9 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("data-social-profile-edit-welcome");
     expect(html).toContain(SOCIAL.profile.welcomeReplace);
     expect(html).toContain(SOCIAL.profile.welcomeRemove);
-    expect(html).toContain('src="https://s3.example/welcome.mp4"');
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain('src="https://s3.example/welcome.mp4"');
+    expect(html).not.toContain("<video");
     expect(html).not.toContain("data-social-welcome-video");
   });
 

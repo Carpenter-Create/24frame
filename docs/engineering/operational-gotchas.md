@@ -270,6 +270,9 @@ aws s3api put-bucket-cors --bucket 24frame-media-source-prod --region us-west-2 
 `MUX_SIGNING_KEY` + `MUX_PRIVATE_KEY` (official Mux JWT names). Server-only
 — never `NEXT_PUBLIC_`. One SoT: `src/lib/social-mux.ts` (locks) +
 `src/lib/social-mux-server.ts` (API + `mux.jwt.signPlaybackId`). The player
-fetches `/api/social/mux-playback`. Stories, welcome video, Education, and
-title film stay off Mux. Detail: [`docs/infra/social-mux.md`](../infra/social-mux.md).
+fetches `/api/social/mux-playback`. Social video (Stories, posts, feed,
+Explore, rail) is Mux-only. Education and title film stay off Mux.
+Welcome playback fails closed until a playback id is stored.
+Detail: [`docs/infra/social-mux.md`](../infra/social-mux.md).
+Lock: [`docs/design-locks/social-video-mux-only-lock-v1.md`](../design-locks/social-video-mux-only-lock-v1.md).
 

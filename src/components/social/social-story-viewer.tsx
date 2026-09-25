@@ -9,7 +9,6 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
-  type SyntheticEvent,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -47,7 +46,8 @@ import {
   SOCIAL_STORY_STAGE_IN_CLASS,
   SOCIAL_STORY_STILL_PROGRESS_MS,
 } from "@/lib/social-chrome";
-import { SOCIAL_POST_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
+import { SOCIAL_POST_IMAGE_SIZES } from "@/lib/social-media-display";
+import { isSocialMuxId } from "@/lib/social-mux";
 import { noteStoryMediaPainted } from "@/lib/social-story-open-hold";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { toggleSocialStoryLike } from "@/app/(app)/social/light-actions";
@@ -129,19 +129,7 @@ function StoryCover({
   url: string | null;
   kind: "image" | "video" | null;
 }) {
-  if (!url || !kind) return null;
-  if (kind === "video") {
-    return (
-      <video
-        data-social-story-cover=""
-        muted
-        playsInline
-        preload="metadata"
-        src={socialVideoDisplaySrc(url)}
-        className="pointer-events-none absolute inset-0 size-full object-cover"
-      />
-    );
-  }
+  if (!url || kind !== "image") return null;
   return (
     <SocialMediaImage src={url} sizes={SOCIAL_POST_IMAGE_SIZES} alt="" />
   );
@@ -184,85 +172,6 @@ function NeighborCard({
         <span className="t-label text-band-ink/65">{socialRelativeTime(neighbor.createdAt)}</span>
       </span>
     </button>
-  );
-}
-
-function StoryVideo({
-  src,
-  paused,
-  muted,
-  onForcedMute,
-  onProgress,
-  onComplete,
-}: {
-  src: string;
-  paused: boolean;
-  muted: boolean;
-  onForcedMute: () => void;
-  onProgress: (progress: number) => void;
-  onComplete: () => void;
-}) {
-  const ref = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    let live = true;
-    const screen = storyScreen(node);
-    const sync = () => {
-      if (!live) return;
-      const concealed = screen?.hasAttribute("hidden") === true;
-      if (paused || concealed) {
-        node.pause();
-        return;
-      }
-      node.muted = muted;
-      void node.play().catch(() => {
-        if (!live) return;
-        // A hide can abort this play(). Do not resume it under the next story.
-        if (storyPlaybackHeld(screen, paused)) {
-          node.pause();
-          return;
-        }
-        onForcedMute();
-        node.muted = true;
-        if (!live || storyPlaybackHeld(screen, paused)) {
-          node.pause();
-          return;
-        }
-        void node.play().catch(() => {
-          if (storyPlaybackHeld(screen, paused)) node.pause();
-        });
-      });
-    };
-    sync();
-    const observer = screen ? new MutationObserver(sync) : null;
-    observer?.observe(screen as HTMLElement, { attributes: true, attributeFilter: ["hidden"] });
-    return () => {
-      live = false;
-      observer?.disconnect();
-      node.pause();
-    };
-  }, [muted, onForcedMute, paused, src]);
-
-  return (
-    <video
-      ref={ref}
-      data-social-story-video=""
-      autoPlay
-      playsInline
-      preload="metadata"
-      src={socialVideoDisplaySrc(src)}
-      className="absolute inset-0 size-full object-cover"
-      onTimeUpdate={(event: SyntheticEvent<HTMLVideoElement>) => {
-        const node = event.currentTarget;
-        if (!node.duration || !Number.isFinite(node.duration)) return;
-        onProgress(Math.min(1, node.currentTime / node.duration));
-      }}
-      onLoadedData={() => noteStoryMediaPainted()}
-      onError={() => noteStoryMediaPainted()}
-      onEnded={() => onComplete()}
-    />
   );
 }
 
@@ -373,7 +282,6 @@ export function SocialStoryViewer({
   const [muted, setMuted] = useState(false);
   const [audible, setAudible] = useState(true);
   const [audibleFor, setAudibleFor] = useState<string | null>(null);
-  const [videoProgress, setVideoProgress] = useState(0);
   const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
   const [hop, setHop] = useState<"next" | "prev" | null>(null);
   const [hearts, setHearts] = useState<Record<string, SocialStoryLikeState>>({ ...likes });
@@ -386,13 +294,11 @@ export function SocialStoryViewer({
   const mediaRef = useRef<HTMLDivElement>(null);
   const holdRef = useRef<{ x: number; y: number; at: number } | null>(null);
   const suppressClick = useRef(false);
-  const forceMute = useCallback(() => setMuted(true), []);
   const author = authors[cursor.author];
   const item = author?.items[cursor.item];
   const clip = item?.media[0] ?? null;
   const playable = clip?.kind === "video" ? clip : null;
-  const mux = playable?.playbackId ? playable : null;
-  const video = playable && !mux ? playable : null;
+  const mux = playable?.playbackId && isSocialMuxId(playable.playbackId) ? playable : null;
   const sendSheetOpen = sendItemId !== null;
   const activityOpen = activityStoryId !== null;
   const playbackPaused = paused || held || sendSheetOpen || activityOpen || sayExpanded;
@@ -422,7 +328,6 @@ export function SocialStoryViewer({
       }
       if (!result) return;
       paintStoryEnter(mediaRef.current, direction, setHop);
-      setVideoProgress(0);
       setHeld(false);
       setCursor(result);
     },
@@ -439,7 +344,6 @@ export function SocialStoryViewer({
       if (!row || row.items.length === 0) return;
       const direction = authorIndex >= cursor.author ? "next" : "prev";
       paintStoryEnter(mediaRef.current, direction, setHop);
-      setVideoProgress(0);
       setHeld(false);
       setCursor({
         author: authorIndex,
@@ -665,19 +569,11 @@ export function SocialStoryViewer({
                 autoPlay={!playbackPaused}
                 chromeless
                 onPaint={noteStoryMediaPainted}
-                className="absolute inset-0 size-full"
+                className="absolute inset-0 size-full object-cover"
               />
             ) : null}
-            {video ? (
-              <StoryVideo
-                key={item.id}
-                src={video.url}
-                paused={playbackPaused}
-                muted={muted}
-                onForcedMute={forceMute}
-                onProgress={setVideoProgress}
-                onComplete={() => go("next", "auto")}
-              />
+            {playable && !mux ? (
+              <div data-social-video-closed="" className="absolute inset-0 size-full object-cover" />
             ) : null}
             {!clip && item.body ? (
               <div className="flex h-full items-center justify-center px-6 text-center">
@@ -736,22 +632,20 @@ export function SocialStoryViewer({
                     data-social-story-progress-fill=""
                     className={cn(
                       "block h-full origin-left bg-band-ink",
-                      i === cursor.item && !video ? SOCIAL_STORY_PROGRESS_FILL_CLASS : null,
+                      i === cursor.item ? SOCIAL_STORY_PROGRESS_FILL_CLASS : null,
                     )}
                     style={
                       i < cursor.item
                         ? { transform: "scaleX(1)" }
                         : i > cursor.item
                           ? { transform: "scaleX(0)" }
-                          : video
-                            ? { transform: `scaleX(${videoProgress})` }
-                            : {
-                                animationDuration: `${SOCIAL_STORY_STILL_PROGRESS_MS}ms`,
-                                animationPlayState: playbackPaused ? "paused" : "running",
-                              }
+                          : {
+                              animationDuration: `${SOCIAL_STORY_STILL_PROGRESS_MS}ms`,
+                              animationPlayState: playbackPaused ? "paused" : "running",
+                            }
                     }
                     onAnimationEnd={() => {
-                      if (i !== cursor.item || video) return;
+                      if (i !== cursor.item) return;
                       go("next", "auto");
                     }}
                   />
