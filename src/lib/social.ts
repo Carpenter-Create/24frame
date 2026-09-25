@@ -63,6 +63,18 @@ export function isSocialStoryCreatePath(pathname: string): boolean {
   return path === SOCIAL_ROUTES.storiesNew;
 }
 
+/** Write compose. Not Go live. */
+export function isSocialWriteComposePath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  return path === SOCIAL_ROUTES.create;
+}
+
+/** First tap leaves write compose for Social home. A warm house hop wins; otherwise push. */
+export function leaveSocialWriteCompose(ownHome: () => boolean, pushHome: () => void): void {
+  if (ownHome()) return;
+  pushHome();
+}
+
 /** Open DM thread. Not the inbox, not New message. */
 export function isSocialDmThreadPath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
@@ -497,8 +509,10 @@ export const SOCIAL = {
     recentChats: "Recent chats",
     chatsEmpty: "No messages yet",
     findPeople: "Find people",
-    composerPrompt: "Write something",
-    composerPromptNamed: "Write something",
+    composerPrompt: "Share something",
+    composerPromptNamed: "Share something",
+    composerPhoto: "Photo",
+    composerCamera: "Camera",
     followingTab: "Following",
     forYouTab: "For you",
     compose: "Write a post",

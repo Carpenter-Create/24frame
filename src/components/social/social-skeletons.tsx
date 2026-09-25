@@ -2,14 +2,22 @@ import type { ReactNode } from "react";
 
 import { Skeleton } from "@/components/layout/skeleton";
 import { HOUSE_DRAWER_HOST_CLASS, HOUSE_DRAWER_PANEL_CLASS } from "@/lib/house-overlay";
+import { cn } from "@/lib/cn";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_AVATAR_SM_CLASS,
+  SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS,
   SOCIAL_COMPOSER_CLASS,
+  SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_COMPOSER_ROW_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
+  SOCIAL_DM_INBOX_ROW_CLASS,
+  SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_MOBILE_BLEED_CLASS,
+  SOCIAL_STORIES_FEED_RULE_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_ROW_CLASS,
@@ -18,6 +26,8 @@ import {
   SOCIAL_TOPIC_RAIL_STACK_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
+  SOCIAL_HOME_SPINE_CLASS,
+  SOCIAL_HOME_TOPICS_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
@@ -60,40 +70,50 @@ export function SocialHomeCenterSkeleton({
   topics?: boolean;
   middle?: ReactNode;
 } = {}) {
-  const body = (
-    <>
-      {topics ? (
-        <div data-social-home-topics-skeleton="" className="min-w-0">
-          <div className={SOCIAL_TOPIC_RAIL_CLASS}>
-            <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
-              {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
-                <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-24 shrink-0 rounded-full" />
-                  ))}
-                </div>
+  const topicsSkeleton = topics ? (
+    <div data-social-home-topics-skeleton="" className={SOCIAL_HOME_TOPICS_CLASS}>
+      <div className={SOCIAL_TOPIC_RAIL_CLASS}>
+        <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
+          {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
+            <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-24 shrink-0 rounded-full" />
               ))}
             </div>
-          </div>
+          ))}
         </div>
-      ) : null}
-      <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
-        <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-        <Skeleton className="h-9 min-w-0 flex-1" />
       </div>
+    </div>
+  ) : null;
+  const composerSkeleton = (
+    <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
+      <div className={SOCIAL_COMPOSER_ROW_CLASS}>
+        <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
+        <Skeleton className={cn(SOCIAL_COMPOSER_FIELD_CLASS, "bg-surface-muted")} />
+      </div>
+      <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+      </div>
+    </div>
+  );
+  const body = (
+    <>
+      {topicsSkeleton}
+      {composerSkeleton}
       <SocialStoriesRailSkeleton tall />
       {middle}
       <div data-social-feed-skeleton="" className={SOCIAL_FEED_GUTTER_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
-            <div className="flex gap-2">
+            <div className={`flex gap-2 ${SOCIAL_FEED_CHROME_CLASS}`}>
               <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <Skeleton className="h-3.5 w-1/3" />
                 <Skeleton className="h-3 w-2/3" />
               </div>
             </div>
-            <Skeleton className="h-40 w-full rounded-[8px]" />
+            <Skeleton className={cn("h-40 w-full", SOCIAL_MOBILE_BLEED_CLASS)} />
           </div>
         ))}
       </div>
@@ -101,7 +121,7 @@ export function SocialHomeCenterSkeleton({
   );
   if (!topics) return body;
   return (
-    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={cn(SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_SPINE_CLASS)}>
       {body}
     </div>
   );
@@ -115,7 +135,10 @@ function SocialStoriesRailSkeleton({
   tall?: boolean;
 }) {
   return (
-    <div data-social-stories-skeleton="" className="flex gap-2 overflow-hidden">
+    <div
+      data-social-stories-skeleton=""
+      className={cn("flex gap-2 overflow-hidden", SOCIAL_MOBILE_BLEED_CLASS, tall && SOCIAL_STORIES_FEED_RULE_CLASS)}
+    >
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className={tall ? SOCIAL_HOME_STORY_CARD_CLASS : SOCIAL_STORY_CARD_CLASS} />
       ))}
@@ -171,14 +194,14 @@ export function SocialProfileCenterSkeleton() {
       <div className={SOCIAL_FEED_GUTTER_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
-            <div className="flex gap-2">
+            <div className={`flex gap-2 ${SOCIAL_FEED_CHROME_CLASS}`}>
               <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <Skeleton className="h-3.5 w-1/3" />
                 <Skeleton className="h-3 w-2/3" />
               </div>
             </div>
-            <Skeleton className="h-40 w-full rounded-[8px]" />
+            <Skeleton className={cn("h-40 w-full", SOCIAL_MOBILE_BLEED_CLASS)} />
           </div>
         ))}
       </div>
@@ -339,7 +362,7 @@ export function SocialDmsRowsSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-[var(--space-3)] border-b border-hairline py-[var(--space-4)]"
+          className={cn("flex items-center gap-[var(--space-3)]", SOCIAL_DM_INBOX_ROW_CLASS)}
         >
           <Skeleton className="size-12 rounded-full" />
           <div className="flex min-w-0 flex-1 flex-col gap-2">

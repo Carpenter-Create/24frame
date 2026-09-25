@@ -37,7 +37,7 @@ import {
   createSocialTabBarScrollTracker,
   stepSocialTabBarScroll,
 } from "@/lib/social-tab-bar-scroll";
-import { isSocialDmImmersivePath, isSocialStoryCreatePath, isSocialStoryOpenPath } from "@/lib/social";
+import { isSocialDmImmersivePath, isSocialStoryCreatePath, isSocialStoryOpenPath, isSocialWriteComposePath } from "@/lib/social";
 import { clampWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 
 // Prior Social float: hide on scroll-down, show on scroll-up.
@@ -99,6 +99,7 @@ export function HousePhoneBottomNav({
     !isSocialStoryCreatePath(pathname) &&
     !isSocialStoryOpenPath(pathname) &&
     !isSocialDmImmersivePath(pathname) &&
+    !isSocialWriteComposePath(pathname) &&
     housePhoneShowsBottomDests({
       workspace,
       homeOwned,

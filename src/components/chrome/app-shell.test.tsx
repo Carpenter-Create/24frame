@@ -1193,6 +1193,27 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-app-rail");
   });
 
+  it("hides phone Social chrome on write compose and restores it on Home", () => {
+    navigation.pathname = "/social/create";
+    const compose = renderShell();
+    expect(compose).toContain('data-social-write-compose=""');
+    expect(compose).toContain("min-h-dvh w-full");
+    expect(compose).not.toContain("data-house-phone-bottom-nav");
+    expect(compose).not.toContain("data-house-lead-chrome");
+    expect(compose).toContain("data-app-rail");
+
+    navigation.pathname = "/social";
+    const home = renderShell();
+    expect(home).not.toContain("data-social-write-compose");
+    expect(home).toContain("data-house-lead-chrome");
+    expect(home).toContain("data-house-phone-bottom-nav");
+
+    navigation.pathname = "/social/create/live";
+    const live = renderShell();
+    expect(live).not.toContain("data-social-write-compose");
+    expect(live).toContain("data-house-phone-bottom-nav");
+  });
+
   it("keeps Social chrome on the DM inbox", () => {
     navigation.pathname = "/social/dms";
     const inbox = renderShell();

@@ -52,7 +52,8 @@ describe("Social Home activity feed lock v1", () => {
     const html = renderToStaticMarkup(<SocialHomeActivityEmpty findPeople />);
     expect(html).toContain("No activity yet");
     expect(html).toContain("Posts, stories, and updates from people you follow show up here.");
-    expect(html).toContain("Write something");
+    expect(html).toContain("Share something");
+    expect(html).not.toContain("Write something");
     expect(html).toContain("Create a story");
     expect(html).toContain('href="/social/stories/new"');
     expect(html).toContain("Find people");

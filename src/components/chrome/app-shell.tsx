@@ -39,6 +39,7 @@ import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
   SOCIAL_DESKTOP_FRAME_PAD_CLASS,
   SOCIAL_RAIL_PANEL_CLASS,
+  SOCIAL_WRITE_COMPOSE_FRAME_CLASS,
 } from "@/lib/social-chrome";
 import { isCoProductionsPath } from "@/lib/co-productions";
 import {
@@ -47,6 +48,7 @@ import {
   isSocialDmThreadPath,
   isSocialStoryCreatePath,
   isSocialStoryOpenPath,
+  isSocialWriteComposePath,
 } from "@/lib/social";
 import { isHomeOwnedPath, OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { QUEUE_HREF } from "@/lib/queue";
@@ -193,6 +195,8 @@ export function AppShell({
   const dmImmersiveStage = isSocialDmImmersivePath(pathname);
   const dmThreadStage = isSocialDmThreadPath(pathname);
   const dmComposeStage = isSocialDmComposePath(pathname);
+  // Write compose owns the face on phone and desktop. Chrome returns on dismiss.
+  const writeComposeStage = isSocialWriteComposePath(pathname);
   const hideDestRail = hideProductRail || storyCreateStage || storyOpenStage;
   const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
   const homeOwned = isHomeOwnedPath(pathname);
@@ -202,6 +206,7 @@ export function AppShell({
     !storyCreateStage &&
     !storyOpenStage &&
     !dmImmersiveStage &&
+    !writeComposeStage &&
     housePhoneShowsBottomDests({
       workspace,
       homeOwned,
@@ -303,7 +308,7 @@ export function AppShell({
           leftover `/messages` path (retired — 404), and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Do not invent Move chrome or a
           second phone switcher. Studio secondary rail stays HOLD. */}
-      {storyOpenStage || dmImmersiveStage ? null : (
+      {storyOpenStage || dmImmersiveStage || writeComposeStage ? null : (
       <HouseLeadChromeSlot
         chrome={chrome}
         isGcStaff={isGcStaff}
@@ -350,13 +355,16 @@ export function AppShell({
         data-social-story-open={storyOpenStage ? "" : undefined}
         data-social-dm-thread={dmThreadStage ? "" : undefined}
         data-social-dm-compose={dmComposeStage ? "" : undefined}
+        data-social-write-compose={writeComposeStage ? "" : undefined}
         data-house-lead-scroll=""
         style={{ marginLeft: "var(--sidebar-width)" }}
       >
         <div
           className={
-            storyOpenStage || dmImmersiveStage
-              ? "min-h-full w-full"
+            storyOpenStage || dmImmersiveStage || writeComposeStage
+              ? writeComposeStage
+                ? SOCIAL_WRITE_COMPOSE_FRAME_CLASS
+                : "min-h-full w-full"
               : storyCreateStage
               ? "flex min-h-full w-full flex-col"
               : socialChrome

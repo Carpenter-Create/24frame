@@ -17,9 +17,17 @@ import { stashSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { SOCIAL_ICON_SIZE_CREATE_TILE } from "@/lib/social-icons";
 import { SOCIAL } from "@/lib/social";
 
-function useSocialCreateMediaPick() {
+export function useSocialCreateMediaPick(options?: {
+  accept?: string;
+  capture?: "environment" | "user";
+  multiple?: boolean;
+  label?: string;
+}) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const accept = options?.accept ?? SOCIAL_CREATE_MEDIA_ACCEPT;
+  const multiple = options?.multiple ?? true;
+  const label = options?.label ?? SOCIAL.create.media;
 
   function openPicker() {
     inputRef.current?.click();
@@ -35,11 +43,13 @@ function useSocialCreateMediaPick() {
     <input
       ref={inputRef}
       type="file"
-      accept={SOCIAL_CREATE_MEDIA_ACCEPT}
-      multiple
+      accept={accept}
+      multiple={multiple}
+      capture={options?.capture}
       className="sr-only"
       data-social-create-media-input=""
-      aria-label={SOCIAL.create.media}
+      data-social-create-media-capture={options?.capture}
+      aria-label={label}
       onChange={(event) => onChange(event.target.files)}
     />
   );

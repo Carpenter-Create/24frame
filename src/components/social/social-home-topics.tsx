@@ -3,7 +3,11 @@
 import { HouseLink } from "@/components/chrome/house-link";
 
 import { HouseChipRail } from "@/components/chrome/house-chip-rail";
-import { socialTopicRailChipClass, SOCIAL_TOPIC_RAIL_ROWS } from "@/lib/social-chrome";
+import {
+  SOCIAL_HOME_TOPICS_CLASS,
+  socialTopicRailChipClass,
+  SOCIAL_TOPIC_RAIL_ROWS,
+} from "@/lib/social-chrome";
 import {
   SOCIAL_CATEGORY_ALL,
   SOCIAL_CATEGORY_LABELS,
@@ -22,7 +26,7 @@ export function SocialHomeTopics({
 }) {
   const topic = useSocialHomeLive("following", active).topic;
   return (
-    <div data-social-home-topics="" className="min-w-0">
+    <div data-social-home-topics="" className={SOCIAL_HOME_TOPICS_CLASS}>
       <HouseChipRail
         data-social-home-topics-rail=""
         rows={SOCIAL_TOPIC_RAIL_ROWS}

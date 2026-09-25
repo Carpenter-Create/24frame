@@ -29,6 +29,8 @@ import {
   isSocialDmComposePath,
   isSocialDmImmersivePath,
   isSocialDmThreadPath,
+  isSocialWriteComposePath,
+  leaveSocialWriteCompose,
   isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
@@ -94,8 +96,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.emptyHint).toBe(
       "Posts, stories, and updates from people you follow show up here.",
     );
-    expect(SOCIAL.home.composerPrompt).toBe("Write something");
-    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.home.composerPrompt).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Share something");
+    expect(SOCIAL.home.composerPhoto).toBe("Photo");
+    expect(SOCIAL.home.composerCamera).toBe("Camera");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.firstName).toBe("First name");
@@ -186,6 +190,25 @@ describe("social copy lock", () => {
     expect(isSocialDmImmersivePath(`${SOCIAL_ROUTES.dms}/new`)).toBe(true);
     expect(isSocialDmImmersivePath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(true);
     expect(isSocialDmImmersivePath(SOCIAL_ROUTES.dms)).toBe(false);
+    expect(isSocialWriteComposePath(SOCIAL_ROUTES.create)).toBe(true);
+    expect(isSocialWriteComposePath(`${SOCIAL_ROUTES.create}/`)).toBe(true);
+    expect(isSocialWriteComposePath(SOCIAL_ROUTES.createLive)).toBe(false);
+    expect(isSocialWriteComposePath(SOCIAL_ROUTES.home)).toBe(false);
+    let pushes = 0;
+    leaveSocialWriteCompose(
+      () => true,
+      () => {
+        pushes += 1;
+      },
+    );
+    expect(pushes).toBe(0);
+    leaveSocialWriteCompose(
+      () => false,
+      () => {
+        pushes += 1;
+      },
+    );
+    expect(pushes).toBe(1);
     expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
@@ -533,11 +556,13 @@ describe("profile opt-in", () => {
     expect(socialFollowsTabLabel("followers")).toBe(SOCIAL.profile.followersTab);
     expect(SOCIAL.profile.followsSearch).toBe("Search username or display name");
     expect(SOCIAL.follow.followBack).toBe("Follow back");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
-    expect(socialComposerPrompt(null)).toBe("Write something");
-    expect(socialComposerPrompt("")).toBe("Write something");
-    expect(SOCIAL.home.composerPrompt).toBe("Write something");
-    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe("Share something");
+    expect(socialComposerPrompt("Ada Lovelace")).not.toContain("Ada");
+    expect(socialComposerPrompt(null)).toBe("Share something");
+    expect(socialComposerPrompt("")).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe(SOCIAL.home.composerPrompt);
+    expect(SOCIAL.home.composerPrompt).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Share something");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.activityTab).toBe("Activity");

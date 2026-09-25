@@ -324,9 +324,11 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
     expect(socialChrome).toContain("HOUSE_PILL_SELECTED_CLASS");
     expect(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
-    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toBe(
-      `${HOUSE_SEGMENTED_ITEM_BASE_CLASS} ${HOUSE_PILL_SELECTED_CLASS}`,
-    );
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain("h-8");
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain("t-body-sm");
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_CLASS).toContain("h-8");
+    expect(SOCIAL_TOPIC_RAIL_CHIP_CLASS).not.toContain("py-[var(--space-2)]");
     expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
     expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).not.toContain("bg-ink");
     expect(socialTopicRailChipClass(true)).toBe(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS);
