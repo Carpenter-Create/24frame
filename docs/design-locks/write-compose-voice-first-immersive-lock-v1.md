@@ -1,7 +1,7 @@
 # [GC][24Frame] LOCK — Write compose voice-first immersive v1
 
 **Date:** 2026-09-25 (CT)  
-**Status:** **LOCKED** · **§0.4 Adam LOCKED iMessage path (2026-09-25):** caption-as-stage · mic trailing **inside** compose row · **no** gray paper card · supersedes tip `9c4cf970` / §0.3 gray-field+orphan-mic · Design Own→READY · no PR · #681 DRAFT until CoS CLEAR Dev  
+**Status:** **LOCKED** · **§0.4.2 Adam PASS amend 2026-09-25:** attach path REQUIRED · camera **far-right** on feed write · mic stays OUT · font ≥16 · grow-up · Design Own→READY tip-first · no PR · #681 DRAFT  
 **Repo:** `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`  
 **Box:** `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md`  
 **FAIL tip `9c4cf970` (supersede):** gray paper card + orphan mic under left + dead white — Adam 2026-09-25 phone. **Prior FAIL:** `/workspace/24frame-agg-ux/write-compose-thin-card-adam-fail-2026-09-25.png` (thin CAPTION) · `/workspace/24frame-agg-ux/write-compose-photo-attach-no-preview-adam-fail-2026-09-25.png` (text-only Photo·Remove · **no** image face) · `/workspace/24frame-agg-ux/write-compose-tip-840ef405-adam-almost-2026-09-25.png` (tip `840ef405` almost-100% · Share something **not** optical V-center)  
@@ -15,7 +15,7 @@
 
 ## One lock
 
-**House-light immersive write compose — Coinbase rich-calm · Immersive Social · Media Immersion. §0.4: kind=text empty = iMessage path — caption-as-stage (type owns the face) · mic trailing inside compose row · no gray paper card. Media attached = preview above caption. Photo/video kinds = media-first. Kill 220 voice disc · gray `#EEEEF0` plate · orphan mic · Voice|Text tabs · Following chip. X dismisses. Material tokens below are SoT.**
+**House-light immersive write compose — Coinbase rich-calm · Immersive Social · Media Immersion. §0.4–§0.4.2: kind=text = iMessage caption-as-stage on white · **no** gray paper card · **no** mic · **camera far-right** opens library attach (REQUIRED) · font ≥16px · grow/scroll up. Media attached = preview above caption. Photo/video kinds = media-first. Kill 220 · Voice|Text · Following. X dismisses. DM voice notes elsewhere. Material tokens below are SoT.**
 
 ---
 
@@ -151,7 +151,7 @@
 **Adam LOCKED craft direction:** Path = **iMessage** (not immersive mic-hero return). Caption-as-stage · mic trailing **inside** the compose row · **no** gray paper card / rounded fill box.  
 **FAIL tip:** `9c4cf970` — gray card + mic under left edge + empty white = paper.  
 **Doctrine cite:** Immersive Social · **Media Immersion Doctrine** (media-rich when media; soft/flat/pasted paper = FAIL) · rich-calm v1.4 chrome · quiet redundant-chrome.  
-**Keeps:** house light · no drop shadows · spacing **8 / 16 / 24 / 48** · immersive chrome (X+Post · hide shell+dock) · dictate on mic · media glyphs **OUT** until attach · photo/video create kinds media-first · **no** Voice|Text tabs · permanent 220 **OUT**.
+**Keeps (amended §0.4.1):** house light · no drop shadows · spacing **8 / 16 / 24 / 48** · immersive chrome (X+Post · hide shell+dock) · media glyphs **OUT** until attach · photo/video create kinds media-first · **no** Voice|Text tabs · permanent 220 **OUT** · **mic OUT** on Social write (see §0.4.1).
 
 ### Geometry (phone — one SoT)
 
@@ -161,16 +161,16 @@
 | Stage | Edge-to-edge `#FFFFFF` · **0** page ring · **0** floating gray card |
 | Chrome | Row **48** · `#ECEDF0` 1px hairline · pad H **16** · X hit **44** · Post h **40** / radius **8** Sporty |
 | Author | Avatar **32** + name only · gap **8** · pad top **8** · pad H **16** · handle OUT |
-| Caption-as-stage | Type **owns the face** under author → down to compose-row top · pad H **16** · pad top **8** · ink `#14171A` · font-size **≥16px** (iOS Safari zoom floor; Adam amend) · placeholder **Share something** `#3D4450` |
+| Caption-as-stage | Type **owns the face** under author → down to compose-row top · pad H **16** · pad top **8** · ink `#14171A` · `t-body` **0.9375rem** · placeholder **Share something** `#3D4450` |
 | Caption fill | **Transparent on `#FFFFFF`** — **OUT** `#EEEEF0` / `#F4F4F6` / muted rounded plate · **OUT** radius-**16** gray paper card · **OUT** bordered CAPTION well |
 | Compose row | **One** bottom row · min-height **48** · pad H **16** · pad bottom **16** + safe-area · flex · `align-items: flex-end` · gap **8** · **0** gray rounded fill behind row · top hairline `#ECEDF0` **1px** **IN** |
-| Type in row | Flex **1** · multiline · grows **up** · max ~**40vh** · then scroll so the caret and latest line stay fully visible · **0** mid-glyph clip · **0** ellipsis · transparent bg · **0** border · **0** radius fill · caret ink `#14171A` |
-| Mic | **OUT** on feed write compose (Adam LOCK 2026-09-25) — no trailing mic · no dictate control · no orphan · no 220 disc |
-| Empty state | Placeholder visible in stage/row · mic trailing in-row · stage white reads as write face — **not** dead white half under a gray card |
-| Typing state | Placeholder clears · multiline grows up · caret + latest line stay fully visible above the row bottom / safe area · no mic · Post enabled when content |
-| Listening state | Mic → Sporty `#1769FF` · ring **2px** outside hit · calm pulse ≤ house · transcript appends into caption · tap mic stop |
-| Media empty | Cite **§0.4.1** — one camera far-right opens the library · not a text-only row · not a photo+video pair |
-| Media attached | Cite §5 — preview above caption · Remove on/near · camera stays far-right so more can be added |
+| Type in row | Flex **1** · multiline · grows **up** · max ~**40vh** then scroll · font **≥16px** (`1rem`) · transparent bg · **0** border · **0** radius fill · caret ink `#14171A` · never truncate mid-glyph |
+| Mic | **OUT** on Social write — cite **§0.4.1** (moved to DM voice notes) |
+| Empty state | Placeholder on white stage/row · **no** mic · **not** dead white half under a gray card |
+| Typing state | Placeholder clears · multiline grows/scrolls up (§0.4.1) · font ≥16px · Post enabled when content |
+| Listening state | **OUT** on Social write (§0.4.1) |
+| Media empty | Glyphs **OUT** until attach intent |
+| Media attached | Cite §5 — preview above caption · Remove on/near · then compose row may show media icons · icons→text gap **8** |
 | Photo/video kinds | Media-first unchanged · same immersive chrome |
 | Desktop | Same grammar · column max **680** · compose row same · no phone-card cousin |
 | Tabs | **OUT** Voice\|Text |
@@ -179,18 +179,55 @@
 
 | State | Must read |
 |-------|-----------|
-| Empty | White stage · Share something · camera far-right · **no** mic · **no** gray plate |
-| Typing | Caption grows on white · mic stays in-row · Mercury chrome |
-| Listening | Mic Sporty · words land in caption · still no paper card |
+| Empty | White stage · Share something · **no** mic · **no** gray plate |
+| Typing | Caption grows/scrolls on white · ≥16px · Mercury chrome |
+| Listening | **OUT** on Social write |
 
-**PASS:** Phone glance = iMessage-like write · type owns face · camera far-right opens the library · mic **OUT** · Immersive Social / not paper.  
-**FAIL class:** tip `9c4cf970` gray card · mic under left · dead white · flat paper UI · 220 disc · Voice\|Text tabs · text-only row with no library path.
+**PASS:** Phone glance = iMessage-like caption-as-stage · type owns face · **no** mic on write · Immersive Social / not paper · cite §0.4.1.  
+**FAIL class:** tip `9c4cf970` gray card · mic under left · dead white · flat paper UI · 220 disc · Voice\|Text tabs.
 
-### 0.4.1 — camera far-right (Adam LOCK 2026-09-25)
+**OUT invent:** soft keep `#EEEEF0` plate · revive write-compose mic / speech→caption · revive 220 · dark stage · shadows · media icons on empty · truncate while typing.
 
-Mic stays **OUT** on feed write. One Phosphor **camera** occupies the trailing slot the mic used. Hit **40** · glyph **24** · ink `#14171A` · opens the library (`SOCIAL_MEDIA_ACCEPT`, same `onPick`). Present on empty. Stays reachable when media is attached. No photo+video pair on the empty row. No DM voice notes.
+### §0.4.1 — Mic OUT on Social write (Adam LOCK 2026-09-25) + type never-truncate
 
-**OUT invent:** soft keep `#EEEEF0` plate “for presence” · mic below row · mic left-orphaned · revive 220 · dark stage · shadows · media icons on empty.
+**Adam LOCK (mic scope):** **REMOVE** in-row mic from Social create / feed write compose. Speech→caption mic is **dead** on this surface. Mic for **audio voice notes** lives on **DM compose only** (separate lock `dm-voice-note-lock-v1.md`).  
+**Keeps from §0.4:** caption-as-stage · white row · no gray card · no Voice|Text tabs · immersive chrome · house light · spacing 8/16/24/48 · no shadows · attach via §0.4.2 camera (not text-only).  
+**Supersedes:** §0.4 mic trailing in-row · prior KEEP in-row mic for write compose · listening/dictate states on this surface.
+
+| Token | Lock (one SoT) |
+|-------|----------------|
+| Mic on write compose | **OUT** — no Phosphor mic · no dictate · no speech→caption on Social create / feed write |
+| Compose row | Type flex **1** + **camera far-right** (§0.4.2) · min-height **48** · pad H **16** · pad bottom **16** + safe-area · hairline `#ECEDF0` 1px top · **0** gray fill · **0** mic |
+| Caption font | **`≥16px`** computed (`t-body` **1rem / 16px** on phone) — kill iOS Safari input zoom from &lt;16px |
+| Caption grow | Multiline grows **up** · max ~**40vh** then **scroll inside field** — **never** truncate mid-glyph / ellipsis while typing (phone never-truncate gospel) |
+| Empty state | Share something on white · camera far-right · no mic · no gray plate |
+| Typing state | Placeholder clears · grow/scroll up · Post when content |
+| Listening state | **OUT** on this surface (no mic) |
+| DM voice | Cite `dm-voice-note-lock-v1.md` — not this file |
+
+**PASS:** White caption-as-stage · ≥16px · grows without clip · no mic on Social write.  
+**FAIL:** in-row mic on write · Safari zoom · mid-glyph truncate · gray paper card · text-only with **no** attach path.
+
+### §0.4.2 — Attach path + camera far-right (Adam PASS amend 2026-09-25)
+
+**Adam PASS** tip `35e64ae8` + two amends LOCKED:
+1. Text/feed write compose **MUST** keep a way to open camera roll / attach media (library picker). **Do not** ship text-only with no attach path.
+2. **Camera** control sits **far right** on feed write compose (same placement feed had before mic-out). Mic stays **OUT** on feed write.
+
+| Token | Lock (one SoT) |
+|-------|----------------|
+| Attach path | **REQUIRED** on kind=text / feed write — opens system/library picker (camera roll) · photo + video attach into this post |
+| Camera control | Phosphor **camera** (or house Image) glyph **24** · hit **40×40** · ink `#14171A` · **far-right** trailing in compose row |
+| Row order (L→R) | Caption/type flex **1** · gap **8** · **camera** (far-right) · pad H **16** |
+| Mic | **OUT** (cite §0.4.1) — do not put mic left of camera on feed write |
+| On tap camera | Library picker · on select → §5 media preview above caption · Remove on/near preview |
+| Empty + typing | Camera **always visible** far-right (attach available before and while typing) |
+| Extra media icon row | **OUT** as a second orphan row — camera far-right **is** the attach affordance (quiet chrome) |
+| Photo/video create kinds | Media-first unchanged · not this row invent |
+| DM camera | Far-right on DM compose — cite `dm-voice-note-lock-v1.md` §B chrome note · not voice-note UX invent here |
+
+**PASS:** White caption stage · camera far-right · library attach works · no mic · ≥16 · grow-up.  
+**FAIL:** text-only no attach · camera missing/misplaced · mic returns on feed write.
 
 ---
 ## 1 — Host (immersive)
@@ -213,13 +250,13 @@ Mic stays **OUT** on feed write. One Phosphor **camera** occupies the trailing s
 
 | Token | Lock |
 |-------|------|
-| kind=text empty | Cite **§0.4** — mic trailing **inside** compose row hit **40** · dictate · Sporty listening — **OUT** permanent 220 · **OUT** orphan footer mic |
+| kind=text empty | Cite **§0.4 / §0.4.1** — caption-as-stage · mic **OUT** on Social write · **OUT** permanent 220 |
 | Placement (legacy / OUT on text empty) | Was centered above bottom bar — **OUT** for kind=text empty |
 | Size (legacy / OUT on text empty) | Diameter **220** — cite §0.2 material history only · **OUT** empty text path |
-| Glyph in-row | Phosphor mic · glyph **24** · hit **40** · ink `#14171A` — trailing accessory · optical pro weight |
-| Listening | Compact Sporty Blue `#1769FF` ring **2px** on in-row mic · calm pulse ≤ house · transcript → caption |
-| Recording | Compact Sporty wash on mic — house-calm · **not** revive empty disc |
-| Hit | In-row mic **40** start/stop dictate · `aria-label` Dictate / Stop |
+| Glyph in-row | **OUT** on Social write (§0.4.1) — DM voice notes own mic |
+| Listening | **OUT** on Social write |
+| Recording | **OUT** on Social write |
+| Hit | N/A on Social write |
 
 ---
 
@@ -231,8 +268,8 @@ Mic stays **OUT** on feed write. One Phosphor **camera** occupies the trailing s
 | Idle / empty | Cite **§0.4** — Share something on `#FFFFFF` · max grow ~**40vh** · **no** muted fill plate |
 | Field | Transparent · pad H **16** · **0** `#EEEEF0` radius card · **0** border · optical calm on white |
 | Placeholder | `t-body` · `#3D4450` · **Share something** · not “Ask ChatGPT” |
-| Expand | Grows multi-line up · max ~**40vh** · mic stays trailing in compose row |
-| Mic | Trailing **inside** compose row (§0.4) — iMessage accessory · not orphaned under/outside |
+| Expand | Grows/scrolls multi-line up · max ~**40vh** · font ≥16px · never truncate · **no** mic |
+| Mic | **OUT** (§0.4.1) — Social write has no mic |
 | Mic mid-text | **OUT** — no mic glyph inserted as characters mid-caption |
 
 ---
@@ -298,35 +335,40 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 | Voice\|Text tabs / mode switcher | Adam §0.3 — OUT |
 | Soft keep empty voice-primary + caption-primary | One SoT — §0.3 wins on kind=text empty |
 | Gray `#EEEEF0` / muted rounded caption plate on kind=text | Adam §0.4 — tip `9c4cf970` paper FAIL |
-| Mic orphaned under/outside compose row (left edge) | Adam §0.4 — mic trailing **inside** row |
+| Mic orphaned under/outside compose row (left edge) | Historical §0.4 · **§0.4.1 mic entirely OUT** on Social write |
+| In-row / speech→caption mic on Social write/create | Adam §0.4.1 LOCK 2026-09-25 — DM voice notes only |
+| Text-only write with no attach / library path | Adam §0.4.2 — camera far-right REQUIRED |
+| Camera not far-right on feed write | Adam §0.4.2 — far-right trailing |
+| Caption font &lt;16px (iOS Safari zoom) | Adam §0.4.1 — font ≥16px / 1rem |
+| Caption truncates mid-glyph while typing | Adam §0.4.1 + phone never-truncate — grow/scroll up |
 | Dead white half under gray card | Adam §0.4 — caption-as-stage on white |
 | Flat paper UI / soft pasted compose | Media Immersion Doctrine · Immersive Social |
 
 
 ---
 
-## Must-fix (vs tip `9c4cf970` + §0.4)
+## Must-fix (vs tip `9c4cf970` + §0.4 / §0.4.1)
 
 1. Kill CAPTION label + bordered field · kill gray `#EEEEF0` radius caption plate.  
-2. **§0.4** kind=text: caption-as-stage on `#FFFFFF` · mic trailing **inside** compose row hit **40** · Sporty listening · **no** 220 disc · **no** orphan mic.  
-3. Compose row min **48** · pad H **16** · gap **8** · type flex-1 grow ~**40vh** · **0** gray row fill.  
+2. **§0.4** caption-as-stage on `#FFFFFF` · **§0.4.1 mic OUT** · **§0.4.2 camera far-right** attach REQUIRED · **no** 220 disc.  
+3. Compose row min **48** · pad H **16** · type flex-1 · camera hit **40** far-right · font **≥16px** · grow/scroll up · never truncate · **0** gray row fill.  
 4. Edge-to-edge `#FFFFFF` · shell+dock hidden · Post/X in chrome.
-5. Media icons **OUT** on empty kind=text · reveal on attach · preview **above** caption when attached.
-6. **No** Following chip · **no** Voice|Text tabs.
+5. Camera far-right always · on attach preview **above** caption (§5) · no orphan multi-icon media row.
+6. **No** Following chip · **no** Voice|Text tabs · **no** speech→caption mic on write.
 7. **X** dismisses write compose.
 8. Materials: chrome 48+hairline · Post 40/8 · spacing 8/16/24/48 · no drop shadows · Geist · Immersive Social / Media Immersion (not paper).
 9. Kill debug FAB · icons→row gap **8** when media icons present.
-10. Photo/video create kinds: media-first unchanged.
+10. Photo/video create kinds: media-first unchanged · DM voice notes = `dm-voice-note-lock-v1.md`.
 
 ---
 
 ## Done-when
 
-1. Phone glance kind=text empty = **iMessage path** — type owns face · mic in-row · **not** gray paper card · **not** orphan mic · **not** 220 disc.  
-2. Tokens: compose row 48 · mic 40/24 · grow ~40vh · transparent caption · X 44 · Post 40/8.  
-3. Empty / typing / listening states match §0.4 table.  
+1. Phone glance kind=text = caption-as-stage · camera far-right · **no** mic · **not** gray paper · **not** 220 · **not** Safari zoom · **not** mid-glyph clip · **not** text-only.  
+2. Tokens: compose row 48 · camera 40/24 far-right · font ≥16px · grow/scroll ~40vh · transparent caption · X 44 · Post 40/8.  
+3. Empty / typing states match §0.4.1 · listening OUT.  
 4. Media attached = §5 preview · no text-only Photo·Remove.  
 5. No Following · no Voice|Text · X dismiss.  
-6. Tip cites §0.4 · stay DRAFT · no Design PR.
+6. Tip cites §0.4.1 · stay DRAFT · no Design PR.
 
-**Ship:** Design Own→READY **§0.4** Adam iMessage path · CoS CLEAR Dev tip-first against §0.4 (supersedes `9c4cf970`). Box: `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md` → `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`.
+**Ship:** Design Own→READY **§0.4.2** camera far-right + attach REQUIRED · CoS CLEAR Dev tip-first. Box: `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md` → `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`.
