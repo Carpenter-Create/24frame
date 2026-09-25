@@ -1,7 +1,7 @@
 # [GC][24Frame] LOCK — Stories open smooth (no grey hitch) v1
 
 **Date:** 2026-09-24 (CT)  
-**Status:** **LOCKED** (Adam 2026-09-24 · open hiccup / grey blank before load · CoS tip-first CLEAR Dev #682 · Design lock parallel/after · house speed — no invent bounce) · Design does **not** open a PR · CoS seeds `docs/design-locks/` · Design HOLD invent else  
+**Status:** **LOCKED** (Adam 2026-09-24 · open hiccup / grey blank before load · CoS tip-first CLEAR Dev #682 · Design lock parallel/after · house speed — no invent bounce) · Poster-hold stays. Motion and close are superseded by [`stories-open-smooth-lock-v1.1.md`](stories-open-smooth-lock-v1.1.md). Design does **not** open a PR · CoS seeds `docs/design-locks/`  
 **Repo citation:** `docs/design-locks/stories-open-smooth-lock-v1.md`  
 **Box draft:** `/workspace/24frame-agg-ux/stories-open-smooth-lock-v1.md`  
 **Adam call:** Stories should open smoothly into the full picture after press; currently hiccups (grey blank) before load.  

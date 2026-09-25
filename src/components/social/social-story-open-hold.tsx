@@ -9,20 +9,26 @@ import {
   storyOpenHoldSrc,
 } from "@/lib/social-story-open-hold";
 
-// docs/design-locks/stories-open-smooth-lock-v1.md
+// docs/design-locks/stories-open-smooth-lock-v1.1.md
 // The story route's loading frame replaces the page. This hold lives on the
 // Social layout, which stays mounted, and keeps the rail still up until the
-// viewer reports real pixels.
+// viewer reports real pixels. The still then settles off over 220ms.
+
+const STORY_OPEN_SETTLE_MS = 220;
 
 export function SocialStoryOpenHold() {
   const pathname = usePathname();
   const [src, setSrc] = useState<string | null>(null);
+  const [release, setRelease] = useState(false);
   const [trackedPath, setTrackedPath] = useState(pathname);
   const onStory =
     pathname.startsWith("/social/stories/") && !pathname.startsWith("/social/stories/new");
   if (pathname !== trackedPath) {
     setTrackedPath(pathname);
-    if (!onStory) setSrc(null);
+    if (!onStory) {
+      setSrc(null);
+      setRelease(false);
+    }
   }
 
   useEffect(() => {
@@ -43,17 +49,30 @@ export function SocialStoryOpenHold() {
       if (!(card instanceof HTMLElement)) return;
       const next = storyOpenHoldSrc(card);
       if (!next) return;
-      flushSync(() => setSrc(next));
+      flushSync(() => {
+        setRelease(false);
+        setSrc(next);
+      });
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
   }, []);
 
   useEffect(() => {
-    const onPaint = () => setSrc(null);
+    const onPaint = () => setRelease(true);
     window.addEventListener(SOCIAL_STORY_MEDIA_PAINTED, onPaint);
     return () => window.removeEventListener(SOCIAL_STORY_MEDIA_PAINTED, onPaint);
   }, []);
+
+  useEffect(() => {
+    if (!release || !src) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => {
+      setSrc(null);
+      setRelease(false);
+    }, reduce ? 0 : STORY_OPEN_SETTLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [release, src]);
 
   if (!src) return null;
   return (
@@ -62,7 +81,12 @@ export function SocialStoryOpenHold() {
       src={src}
       alt=""
       data-social-story-open-hold=""
-      className="pointer-events-none fixed inset-0 z-[70] size-full object-cover"
+      data-social-story-open-settle={release ? "" : undefined}
+      className={
+        release
+          ? "pointer-events-none fixed inset-0 z-[70] size-full object-cover social-story-open-settle"
+          : "pointer-events-none fixed inset-0 z-[70] size-full object-cover"
+      }
     />
   );
 }

@@ -25,6 +25,9 @@ describe("rich calm visual register v1.4", () => {
     expect(SOCIAL_STORY_STILL_PROGRESS_MS).toBe(5000);
     expect(css).not.toContain("social-story-stage-in");
     expect(motion).toContain("animation: social-story-activate 220ms ease-out both");
+    expect(motion).toContain("animation: social-story-open-settle 220ms ease-out both");
+    const hop = css.slice(css.indexOf("@keyframes social-story-activate {"), css.indexOf("@keyframes social-story-open-settle"));
+    expect(hop).not.toContain("opacity");
     expect(motion).toContain("animation: social-story-activate-prev 220ms ease-out both");
     expect(motion).toContain("animation-timing-function: linear");
     expect(motion).not.toMatch(/bounce|spring|parallax/i);

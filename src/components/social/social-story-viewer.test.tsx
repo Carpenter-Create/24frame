@@ -85,6 +85,15 @@ describe("SocialStoryViewer", () => {
     expect(html).toContain("border-accent");
     expect(html).toContain('data-social-story-mark=""');
     expect(html).toContain('href="/social"');
+    const closeAt = html.indexOf('data-social-story-close=""');
+    const close = html.slice(closeAt, html.indexOf("</a>", closeAt));
+    expect(closeAt).toBeGreaterThan(html.indexOf('data-social-story-tap="next"'));
+    expect(close).toContain('href="/social"');
+    expect(close).toContain("size-11");
+    expect(close).toContain("z-30");
+    expect(close).toContain("touch-manipulation");
+    expect(close).toContain('width="22"');
+    expect(close).toContain('height="22"');
     expect(html).toContain("Send message");
     expect(html).not.toContain("Reply to Ada Lovelace…");
     expect(html).toContain('data-social-story-heart=""');
@@ -147,7 +156,19 @@ describe("SocialStoryViewer", () => {
     expect(src).not.toContain("requestAnimationFrame(() => setEnter");
     expect(src).not.toContain("SOCIAL_STORY_STAGE_IN_CLASS");
     const hold = readFileSync("src/components/social/social-story-open-hold.tsx", "utf8");
-    expect(hold).toContain("flushSync(() => setSrc(next))");
+    expect(hold).toContain("flushSync(() => {");
+    expect(hold).toContain("setSrc(next)");
+    expect(hold).toContain("STORY_OPEN_SETTLE_MS = 220");
+    expect(hold).toContain("social-story-open-settle");
+    expect(src).toContain('data-social-story-close=""');
+    expect(src).toContain("size-11");
+    expect(src).toContain("onPointerDown={(event) => event.stopPropagation()}");
+    const phoneClose = src.slice(
+      src.indexOf('data-social-story-close=""'),
+      src.indexOf("</Link>", src.indexOf('data-social-story-close=""')),
+    );
+    expect(phoneClose).toContain("size-11");
+    expect(phoneClose).toContain("size={22}");
     const warm = src.slice(src.lastIndexOf("new MutationObserver"));
     expect(warm).toContain("paintStoryEnter");
     expect(src.indexOf("flushSync(() => apply(null))")).toBeLessThan(

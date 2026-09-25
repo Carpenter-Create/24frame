@@ -695,10 +695,12 @@ export function SocialStoryViewer({
               ) : null}
               <Link
                 href={SOCIAL_ROUTES.home}
+                data-social-story-close=""
                 aria-label={SOCIAL.stories.close}
-                className="flex size-10 items-center justify-center text-band-ink md:hidden"
+                onPointerDown={(event) => event.stopPropagation()}
+                className="relative z-30 flex size-11 shrink-0 touch-manipulation items-center justify-center text-band-ink md:hidden"
               >
-                <SocialIcon name="x" size={20} />
+                <SocialIcon name="x" size={22} />
               </Link>
             </div>
           </div>
