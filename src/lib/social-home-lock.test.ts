@@ -345,7 +345,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_FEED_TAIL_RULE_CLASS.startsWith("max-md:")).toBe(true);
     expect(SOCIAL_FEED_TAIL_RULE_CLASS).not.toMatch(/(?:^|\s)border-b(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).toContain(SOCIAL_FEED_TAIL_RULE_CLASS);
-    expect(SOCIAL_POST_ACTIONS_CLASS).toBe("flex flex-row items-center gap-[var(--space-4)]");
+    expect(SOCIAL_POST_ACTIONS_CLASS).toBe("flex flex-row items-center gap-2");
     expect(SOCIAL_POST_ACTION_HIT_CLASS).toBe(
       "inline-flex size-10 shrink-0 items-center justify-center text-ink-2 active:opacity-70",
     );

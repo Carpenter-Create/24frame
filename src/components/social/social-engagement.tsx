@@ -286,7 +286,7 @@ export function SocialLikeButton({
   }
 
   return (
-    <span className={icon ? "inline-flex" : "inline"}>
+    <span className={icon ? cn(SOCIAL_POST_ACTION_HIT_CLASS, "flex-col") : "inline"}>
       <button
         type="button"
         disabled={disabled}
@@ -294,7 +294,10 @@ export function SocialLikeButton({
         aria-label={view.liked ? SOCIAL.post.unlike : SOCIAL.post.like}
         className={
           icon
-            ? cn(SOCIAL_POST_ACTION_HIT_CLASS, view.liked && "text-accent")
+            ? cn(
+                "inline-flex size-10 shrink-0 items-center justify-center",
+                view.liked && "text-accent",
+              )
             : "t-body-sm text-ink-2"
         }
         onClick={onToggle}
