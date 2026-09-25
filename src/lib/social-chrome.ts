@@ -120,6 +120,13 @@ export const SOCIAL_HOME_CENTER_CLASS = socialShellCenterClass;
 // Explore, and Messages keep the shared gap-2 center.
 export const SOCIAL_HOME_SPINE_CLASS = "gap-[var(--space-2)]";
 
+// Topics sit between the header hairline and the composer top rule.
+// The social frame pads 16 above the stack. The spine gap under the
+// pills is 8. Pull the row up by that extra 8 so the air above the
+// pills matches the air below them. Pill hit stays 32.
+export const SOCIAL_HOME_TOPICS_CLASS =
+  "min-w-0 py-0 -mt-[var(--space-2)]";
+
 // Profile desktop row matches Home: this column plus SocialForYouRail
 // at lg+. Explore and Messages use that same row. The center stays
 // the shared 720. The pair stays tight. Phone stays the full phone canvas.

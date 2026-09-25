@@ -24,6 +24,7 @@ import {
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_HOME_SPINE_CLASS,
+  SOCIAL_HOME_TOPICS_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
@@ -67,7 +68,7 @@ export function SocialHomeCenterSkeleton({
   middle?: ReactNode;
 } = {}) {
   const topicsSkeleton = topics ? (
-    <div data-social-home-topics-skeleton="" className="min-w-0">
+    <div data-social-home-topics-skeleton="" className={SOCIAL_HOME_TOPICS_CLASS}>
       <div className={SOCIAL_TOPIC_RAIL_CLASS}>
         <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
           {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (

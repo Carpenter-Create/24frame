@@ -190,6 +190,8 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
     expect(html).toContain("h-8");
     expect(html).toContain("py-0");
+    expect(html).toContain("-mt-[var(--space-2)]");
+    expect(SOCIAL_TOPIC_RAIL_CHIP_CLASS).toContain("h-8");
     expect(html).not.toContain("text-[11px]");
     expect(html).not.toContain("py-[5px]");
     expect(SOCIAL_TOPIC_RAIL_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
