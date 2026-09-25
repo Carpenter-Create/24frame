@@ -34,6 +34,7 @@ import {
   dmThreadShowsAvatar,
   dmThreadSideClass,
   dmThreadStackClass,
+  dmThreadPostSystemLine,
   dmThreadStorySystemLine,
   dmThreadSystemLineAlignClass,
   dmThreadTimeLabel,
@@ -205,6 +206,15 @@ describe("DM thread message format", () => {
       SOCIAL.dms.sentYouStory,
     );
     expect(dmThreadStorySystemLine({ mine: true, authorHandle: null, senderName: "Ada" })).toBeNull();
+    expect(
+      dmThreadPostSystemLine({ mine: true, authorHandle: "ada", senderName: "Ada Lovelace" }),
+    ).toBe(SOCIAL.dms.youSentPost("ada"));
+    expect(
+      dmThreadPostSystemLine({ mine: false, authorHandle: "ada", senderName: "Bob One" }),
+    ).toBe(SOCIAL.dms.theySentAuthorPost("Bob One", "ada"));
+    expect(dmThreadPostSystemLine({ mine: false, authorHandle: null, senderName: "Bob One" })).toBe(
+      SOCIAL.dms.sentYouPost,
+    );
   });
 
   it("pins the composer to the bottom of the thread chrome", () => {

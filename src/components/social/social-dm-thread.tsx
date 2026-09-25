@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 
 import { SocialAvatar } from "@/components/social/social-avatar";
+import { SocialDmPostShare } from "@/components/social/social-dm-post-share";
 import { SocialDmStoryShare } from "@/components/social/social-dm-story-share";
 import { cn } from "@/lib/cn";
 import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
+import { POST_SHARE_CARD_WIDTH_CLASS } from "@/lib/social-post-share";
 import {
   clusterDmThreadMessages,
   DM_THREAD_AVATAR_CLASS,
@@ -34,11 +36,25 @@ export type DmThreadStoryShareView = {
   href: string | null;
 };
 
+export type DmThreadPostShareView = {
+  comment: string | null;
+  line: string | null;
+  authorName: string;
+  authorPhotoUrl: string | null;
+  caption: string | null;
+  kind: "image" | "video" | null;
+  url: string | null;
+  playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
+  href: string;
+};
+
 export type DmThreadViewMessage = DmThreadClusterMessage & {
   senderName: string;
   senderPhotoUrl: string | null;
   text: string | null;
   story: DmThreadStoryShareView | null;
+  post: DmThreadPostShareView | null;
 };
 
 function Bubble({ mine, text, marker }: { mine: boolean; text: string; marker: "bubble" | "comment" }) {
@@ -79,6 +95,39 @@ function ThreadMessage({ message }: { message: DmThreadViewMessage }) {
           playbackId={story.playbackId}
           playbackPolicy={story.playbackPolicy}
           href={story.href}
+        />
+      </div>
+    );
+  }
+  if (message.post) {
+    const { post } = message;
+    return (
+      <div
+        data-social-dm-post-group=""
+        className={cn("flex flex-col gap-2", message.mine ? "items-end" : "items-start")}
+      >
+        {post.comment ? <Bubble mine={message.mine} text={post.comment} marker="bubble" /> : null}
+        {post.line ? (
+          <p
+            data-social-dm-post-line=""
+            className={cn(
+              "t-body-sm text-ink-2 break-words",
+              POST_SHARE_CARD_WIDTH_CLASS,
+              message.mine ? "text-right" : "text-left",
+            )}
+          >
+            {post.line}
+          </p>
+        ) : null}
+        <SocialDmPostShare
+          authorName={post.authorName}
+          authorPhotoUrl={post.authorPhotoUrl}
+          caption={post.caption}
+          kind={post.kind}
+          url={post.url}
+          playbackId={post.playbackId}
+          playbackPolicy={post.playbackPolicy}
+          href={post.href}
         />
       </div>
     );

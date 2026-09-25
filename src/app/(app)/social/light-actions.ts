@@ -17,9 +17,19 @@ import {
   socialPersonLabel,
   socialPostHref,
   socialStoryHref,
+  normalizeMessageBody,
   storyLikeInsertRow,
 } from "@/lib/social";
 import { storyDmInsertRow } from "@/lib/social-dm-story";
+import {
+  postDmInsertRow,
+  postShareAttemptContains,
+  postShareAttemptId,
+  postShareFailureCopy,
+  postSharePeerAllowed,
+  postSharePeerIds,
+  recipientMayViewPost,
+} from "@/lib/social-post-share";
 import { socialAvatarHref } from "@/lib/social-edge";
 import { loadDmInbox } from "@/lib/social-dms";
 import { loadFolloweeIds, loadProfilesByIds, loadStoryById } from "@/lib/social-feed";
@@ -43,6 +53,8 @@ import {
 // Public Edge reads import these — not actions.ts (presign lives there).
 
 type ActionResult = { error?: string };
+
+type PostShareActionResult = ActionResult & { failedPeerIds?: string[] };
 
 async function requireUser() {
   const user = await getAuthUser();
@@ -197,12 +209,12 @@ export async function sendSocialStoryItem(formData: FormData): Promise<ActionRes
   return {};
 }
 
-export async function listStorySendPeople(): Promise<{ people: StorySendPerson[]; error?: string }> {
-  const { user, supabase, profileId } = await ownProfile();
-  if (!profileId) return { people: [], error: SOCIAL.cta.needProfile };
-
+async function loadStorySendDirectory(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<StorySendPerson[]> {
   const [followees, inbox] = await Promise.all([
-    loadFolloweeIds(supabase, user.id),
+    loadFolloweeIds(supabase, userId),
     loadDmInbox(supabase),
   ]);
   const recentPeerIds = inbox.rows.flatMap((row) =>
@@ -211,10 +223,10 @@ export async function listStorySendPeople(): Promise<{ people: StorySendPerson[]
   const ids = storySendPeopleOrder({
     recentPeerIds,
     followeeIds: followees.ids,
-    selfId: user.id,
+    selfId: userId,
   });
   const profiles = await loadProfilesByIds(supabase, ids);
-  const people = ids.flatMap((id) => {
+  return ids.flatMap((id) => {
     const person = profiles.get(id);
     if (!person || person.status !== "active") return [];
     return [
@@ -229,7 +241,122 @@ export async function listStorySendPeople(): Promise<{ people: StorySendPerson[]
       },
     ];
   });
-  return { people };
+}
+
+export async function sendSocialPostShare(formData: FormData): Promise<PostShareActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const postId = String(formData.get("post_id") ?? "").trim();
+  const peers = postSharePeerIds(formData.getAll("peer_id"));
+  const attemptId = postShareAttemptId(String(formData.get("attempt_id") ?? ""));
+  if (!postId || !peers.ok || !attemptId) return { error: SOCIAL.post.shareFailed };
+
+  const noteRaw = String(formData.get("note") ?? "");
+  const note = noteRaw.trim();
+  if (note && !normalizeMessageBody(note)) return { error: SOCIAL.post.shareFailed };
+
+  const { data: post, error: postError } = await supabase
+    .from("posts")
+    .select("id, author_id, body, media, status, group_id")
+    .eq("id", postId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (postError || !post) return { error: SOCIAL.post.missing };
+
+  const { data: authorProfile } = await supabase
+    .from("profiles")
+    .select("handle")
+    .eq("id", post.author_id)
+    .maybeSingle();
+
+  // Same allowlist the sheet lists. A stranger never reaches open_or_get.
+  // docs/design-locks/social-post-share-sheet-ig-lock-v1.md
+  const directory = await loadStorySendDirectory(supabase, user.id);
+  const allowlist = new Set(directory.map((person) => person.id));
+  const failedPeerIds: string[] = [];
+
+  for (const peerId of peers.ids) {
+    if (!postSharePeerAllowed(peerId, allowlist)) {
+      failedPeerIds.push(peerId);
+      continue;
+    }
+
+    let access: boolean | null = true;
+    if (post.group_id) {
+      const { data, error } = await supabase.rpc("can_access_group_content", {
+        p_group: post.group_id,
+        p_user: peerId,
+      });
+      access = error || data !== true ? null : true;
+    }
+    // Group post, Adam 2026-09-25: refuse a peer who cannot view it.
+    // No conversation, no media keys, no playback id.
+    // docs/design-locks/social-post-share-sheet-ig-lock-v1.md
+    if (!recipientMayViewPost({ groupId: post.group_id, access })) {
+      failedPeerIds.push(peerId);
+      continue;
+    }
+
+    const { data, error: openError } = await supabase.rpc("open_or_get_direct_conversation", {
+      p_peer: peerId,
+    });
+    const conversationId = typeof data === "string" ? data : "";
+    if (openError || !conversationId) {
+      failedPeerIds.push(peerId);
+      continue;
+    }
+
+    const { data: prior, error: priorError } = await supabase
+      .from("messages")
+      .select("id")
+      .eq("conversation_id", conversationId)
+      .eq("sender_id", user.id)
+      .contains("media", postShareAttemptContains(post.id, attemptId))
+      .limit(1);
+    if (priorError) {
+      failedPeerIds.push(peerId);
+      continue;
+    }
+    if ((prior ?? []).length > 0) continue;
+
+    const { error } = await supabase.from("messages").insert(
+      postDmInsertRow({
+        senderId: user.id,
+        conversationId,
+        postId: post.id,
+        authorId: post.author_id,
+        authorHandle: authorProfile?.handle ?? "",
+        caption: post.body,
+        note,
+        attemptId,
+        media: ownedMediaItems(post.media, post.author_id, "posts"),
+      }),
+    );
+    if (error) {
+      failedPeerIds.push(peerId);
+      continue;
+    }
+    revalidatePath(socialDmHref(conversationId));
+  }
+
+  if (failedPeerIds.length > 0) {
+    const names = failedPeerIds.flatMap((id) => {
+      const person = directory.find((item) => item.id === id);
+      return person ? [person.name] : [];
+    });
+    return { error: postShareFailureCopy(names), failedPeerIds };
+  }
+
+  revalidatePath(SOCIAL_ROUTES.dms);
+  revalidatePath(socialPostHref(postId));
+  return {};
+}
+
+export async function listStorySendPeople(): Promise<{ people: StorySendPerson[]; error?: string }> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { people: [], error: SOCIAL.cta.needProfile };
+  return { people: await loadStorySendDirectory(supabase, user.id) };
 }
 
 export async function listStoryViewers(storyId: string): Promise<{

@@ -7,6 +7,7 @@ import {
   socialPersonLabel,
 } from "@/lib/social";
 import { storySendSystemLine } from "@/lib/social-dm-story";
+import { postSendSystemLine } from "@/lib/social-post-share";
 
 // DM thread message format lock v1.
 // docs/design-locks/dm-thread-message-format-lock-v1.md
@@ -216,6 +217,19 @@ export function dmThreadStorySystemLine(input: {
   const name = input.senderName?.trim() ?? "";
   if (name && handle) return SOCIAL.dms.theySentAuthorStory(name, handle);
   return SOCIAL.dms.sentYouStory;
+}
+
+/** Side-aligned post-share line. Same chat grammar as the story line. */
+export function dmThreadPostSystemLine(input: {
+  mine: boolean;
+  authorHandle: string | null;
+  senderName: string | null;
+}): string {
+  const handle = bareHandle(input.authorHandle ?? "");
+  if (input.mine) return postSendSystemLine(handle);
+  const name = input.senderName?.trim() ?? "";
+  if (name && handle) return SOCIAL.dms.theySentAuthorPost(name, handle);
+  return SOCIAL.dms.sentYouPost;
 }
 
 function chicagoParts(date: Date, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatPart[] {
