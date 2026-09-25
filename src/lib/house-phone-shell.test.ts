@@ -522,10 +522,8 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     const socialCreate = renderToStaticMarkup(
       createElement(HousePhoneBottomNav, { workspace: "social" }),
     );
-    expect(socialCreate).not.toMatch(
-      /<a[^>]+href="\/social"[^>]*aria-current="page"/,
-    );
-    expect(socialCreate).toContain('data-house-phone-dest-create=""');
+    expect(socialCreate).not.toContain("data-house-phone-bottom-nav");
+    expect(socialCreate).not.toContain("data-house-phone-dest-create");
 
     navigation.pathname = SOCIAL_ROUTES.stories;
     const socialStories = renderToStaticMarkup(
