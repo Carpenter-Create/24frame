@@ -13,6 +13,9 @@ import {
   postSharePeerAllowed,
   postSharePeerIds,
   postSharePermalink,
+  postShareSelectBlocked,
+  postShareSelection,
+  postShareToggle,
   postShareSheetError,
   postShareUiAfter,
   presentDmPostShare,
@@ -116,6 +119,15 @@ describe("post DM share card", () => {
     expect(postSharePeerIds([" "])).toEqual({ ok: false, error: "empty" });
     const many = Array.from({ length: POST_SHARE_RECIPIENT_CAP + 1 }, (_, index) => `u${index}`);
     expect(postSharePeerIds(many)).toEqual({ ok: false, error: "cap" });
+    expect(postShareSelection(many)).toHaveLength(POST_SHARE_RECIPIENT_CAP);
+    const full = postShareSelection(many);
+    expect(postShareToggle(full, "extra")).toBe(full);
+    expect(postShareToggle(full, full[0]!)).toHaveLength(POST_SHARE_RECIPIENT_CAP - 1);
+    expect(postShareToggle(full.slice(0, POST_SHARE_RECIPIENT_CAP - 1), "extra")).toHaveLength(
+      POST_SHARE_RECIPIENT_CAP,
+    );
+    expect(postShareSelectBlocked(POST_SHARE_RECIPIENT_CAP, false)).toBe(true);
+    expect(postShareSelectBlocked(POST_SHARE_RECIPIENT_CAP, true)).toBe(false);
   });
 
   it("builds an in-app permalink and an inbox line that is not a URL", () => {

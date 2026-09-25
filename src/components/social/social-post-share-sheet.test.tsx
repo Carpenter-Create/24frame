@@ -8,6 +8,7 @@ vi.mock("next/image", () => ({
 }));
 
 import { SOCIAL } from "@/lib/social";
+import { POST_SHARE_RECIPIENT_CAP } from "@/lib/social-post-share";
 import { SocialPostShareButton, SocialPostShareSheet } from "./social-post-share-sheet";
 
 const person = {
@@ -95,6 +96,32 @@ describe("SocialPostShareSheet", () => {
     expect(html).not.toContain("data-social-post-share-secondary");
     expect(html).not.toContain(SOCIAL.post.shareCopyLink);
     expect(html).toContain("data-social-post-share-grid");
+  });
+
+  it("stops a further select once 16 people are chosen", () => {
+    const directory = Array.from({ length: POST_SHARE_RECIPIENT_CAP + 1 }, (_, index) => ({
+      id: `u${index}`,
+      name: `Person ${index}`,
+      handle: `p${index}`,
+      photoUrl: null,
+    }));
+    const html = renderToStaticMarkup(
+      createElement(SocialPostShareSheet, {
+        postId: "p1",
+        open: true,
+        onClose: () => undefined,
+        directory,
+        initialSelectedIds: directory.slice(0, POST_SHARE_RECIPIENT_CAP).map((item) => item.id),
+      }),
+    );
+    const cell = (id: string) => {
+      const marker = `data-social-post-share-cell="${id}"`;
+      const at = html.indexOf(marker);
+      return html.slice(at, html.indexOf(">", at));
+    };
+    expect(cell("u0")).not.toContain("disabled");
+    expect(cell(`u${POST_SHARE_RECIPIENT_CAP}`)).toContain("disabled");
+    expect(html.match(/data-social-post-share-check=/g)?.length).toBe(POST_SHARE_RECIPIENT_CAP);
   });
 });
 

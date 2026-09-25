@@ -61,6 +61,37 @@ export function postSharePeerIds(raw: readonly unknown[]): { ok: true; ids: stri
   return { ok: true, ids };
 }
 
+/** Keep the first 16 distinct ids. The sheet must not sit above the server cap. */
+export function postShareSelection(ids: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const next: string[] = [];
+  for (const value of ids) {
+    const id = value.trim();
+    if (!id || seen.has(id)) continue;
+    if (next.length >= POST_SHARE_RECIPIENT_CAP) break;
+    seen.add(id);
+    next.push(id);
+  }
+  return next;
+}
+
+/**
+ * Tap toggles. A selected person can leave at the cap.
+ * A new person cannot join once 16 are selected.
+ * docs/design-locks/social-post-share-sheet-ig-lock-v1.md
+ */
+export function postShareToggle(current: readonly string[], personId: string): readonly string[] {
+  const id = personId.trim();
+  if (!id) return current;
+  if (current.includes(id)) return current.filter((item) => item !== id);
+  if (current.length >= POST_SHARE_RECIPIENT_CAP) return current;
+  return [...current, id];
+}
+
+export function postShareSelectBlocked(selectedCount: number, alreadySelected: boolean): boolean {
+  return !alreadySelected && selectedCount >= POST_SHARE_RECIPIENT_CAP;
+}
+
 export function postShareAttemptId(raw: string): string | null {
   const id = raw.trim();
   if (!POST_SHARE_ATTEMPT_RE.test(id)) return null;

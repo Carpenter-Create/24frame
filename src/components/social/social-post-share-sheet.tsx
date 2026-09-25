@@ -12,7 +12,10 @@ import { Input } from "@/components/ui/input";
 import { displayHandle, SOCIAL } from "@/lib/social";
 import {
   postSharePermalink,
+  postShareSelectBlocked,
+  postShareSelection,
   postShareSheetError,
+  postShareToggle,
   postShareToast,
   postShareUiAfter,
   POST_SHARE_TOAST_MS,
@@ -119,7 +122,7 @@ export function SocialPostShareSheet({
   const provided = directory !== undefined;
   const [people, setPeople] = useState<StorySendPerson[]>(directory ? [...directory] : []);
   const [query, setQuery] = useState(initialQuery);
-  const [selectedIds, setSelectedIds] = useState<string[]>([...initialSelectedIds]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => postShareSelection(initialSelectedIds));
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
@@ -168,9 +171,10 @@ export function SocialPostShareSheet({
 
   function toggle(personId: string) {
     if (sending) return;
-    setSelectedIds((current) =>
-      current.includes(personId) ? current.filter((id) => id !== personId) : [...current, personId],
-    );
+    setSelectedIds((current) => {
+      const next = postShareToggle(current, personId);
+      return next === current ? current : [...next];
+    });
   }
 
   async function send() {
@@ -302,7 +306,7 @@ export function SocialPostShareSheet({
                   <button
                     type="button"
                     data-social-post-share-result={person.id}
-                    disabled={sending}
+                    disabled={sending || postShareSelectBlocked(selectedIds.length, selectedIds.includes(person.id))}
                     aria-pressed={selectedIds.includes(person.id)}
                     className="flex w-full min-w-0 items-center gap-3 py-2 text-left"
                     onClick={() => toggle(person.id)}
@@ -323,7 +327,7 @@ export function SocialPostShareSheet({
                   key={person.id}
                   type="button"
                   data-social-post-share-cell={person.id}
-                  disabled={sending}
+                  disabled={sending || postShareSelectBlocked(selectedIds.length, selectedIds.includes(person.id))}
                   aria-pressed={selectedIds.includes(person.id)}
                   className="flex min-w-0 flex-col items-center gap-2"
                   onClick={() => toggle(person.id)}

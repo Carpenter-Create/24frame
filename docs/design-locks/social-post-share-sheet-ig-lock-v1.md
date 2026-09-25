@@ -39,7 +39,7 @@ Tap **Share** on feed/post actions → one **IG-like bottom sheet**: search peop
 | Search | Pill height **40** · placeholder **Search** |
 | Create group | **OUT** v1 (no Groups invent) |
 | Suggested | **3-col** grid · avatar **56** · name under · gap **16** |
-| Select | **Multi-select** · Sporty Blue `#1769FF` check **20** on avatar · tap toggles |
+| Select | **Multi-select** · Sporty Blue `#1769FF` check **20** on avatar · tap toggles · no further select past **16** |
 | Message | Optional · pill **Write a message…** · height **40** · appears when ≥1 selected (same sheet morph · no second modal) |
 | Send | Full-width pill height **48** · Sporty Blue · **Send** · enabled when ≥1 recipient · empty message OK |
 | Success | Dismiss sheet · calm **Sent** confirmation (centered brief) · open/stay per existing DM routes — no invent |
