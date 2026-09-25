@@ -290,7 +290,9 @@ export async function sendSocialPostShare(formData: FormData): Promise<PostShare
       });
       access = error || data !== true ? null : true;
     }
-    // No row grant: no conversation, no media keys, no playback id.
+    // Group post, Adam 2026-09-25: refuse a peer who cannot view it.
+    // No conversation, no media keys, no playback id.
+    // docs/design-locks/social-post-share-sheet-ig-lock-v1.md
     if (!recipientMayViewPost({ groupId: post.group_id, access })) {
       failedPeerIds.push(peerId);
       continue;

@@ -76,6 +76,8 @@ export function postSharePeerAllowed(peerId: string, allowlist: ReadonlySet<stri
  * Wall posts (no group) are visible to any authenticated member.
  * A group post is visible only when can_access_group_content is true.
  * Missing group id or a failed access check refuses the peer.
+ * Adam 2026-09-25: do not send media or keys to a non-member.
+ * docs/design-locks/social-post-share-sheet-ig-lock-v1.md
  */
 export function recipientMayViewPost(input: {
   groupId: string | null | undefined;

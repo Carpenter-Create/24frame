@@ -54,6 +54,7 @@ Tap **Share** on feed/post actions → one **IG-like bottom sheet**: search peop
 | Video | Mux-only card / open (`social-video-mux-only-lock-v1.md`) |
 | Bubble / thread | Follow `dm-thread-message-format-lock-v1.md` · immersive real-estate locks — side alignment · not centered soft share |
 | Optional message | Above/with card as normal DM text if user wrote one |
+| Group post | Recipient without the group row grant: **refuse that peer**. No message, no media keys, no Mux playback id. `can_access_group_content` must be true. Adam confirmed 2026-09-25. |
 
 ---
 
@@ -70,7 +71,7 @@ Tap **Share** on feed/post actions → one **IG-like bottom sheet**: search peop
 
 ## Explicit OUT
 
-Dead Share · Comment opening Share · Add to story · branded WhatsApp row · Groups create · second modal after select · #681 gap reopen · Design PR
+Dead Share · Comment opening Share · Add to story · branded WhatsApp row · Groups create · group-post card to a non-member · second modal after select · #681 gap reopen · Design PR
 
 ## Done-when
 

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthUser } from "@/lib/supabase/auth";
@@ -844,6 +845,15 @@ describe("social actions", () => {
     expect(rpc).toHaveBeenCalledWith("can_access_group_content", { p_group: "g1", p_user: "u2" });
     expect(rpc).not.toHaveBeenCalledWith("open_or_get_direct_conversation", expect.anything());
     expect(JSON.stringify(inserts)).not.toContain("abc12345xx");
+    const send = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
+    const fn = send.slice(
+      send.indexOf("export async function sendSocialPostShare"),
+      send.indexOf("export async function listStorySendPeople"),
+    );
+    const view = fn.indexOf("recipientMayViewPost");
+    expect(view).toBeGreaterThan(-1);
+    expect(fn.indexOf("ownedMediaItems")).toBeGreaterThan(view);
+    expect(fn.indexOf("open_or_get_direct_conversation")).toBeGreaterThan(view);
   });
 
   it("fails closed when the group access check errors", async () => {
