@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { useHouseClient } from "@/components/chrome/house-client-shell";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,13 +29,14 @@ import {
   SOCIAL_PERSON_PRIMARY_CLASS,
   SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
-  SOCIAL_PILL_CLASS,
-  SOCIAL_PILL_IDLE_CLASS,
   SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_REPLY_PILL_CLASS,
   SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS,
+  SOCIAL_STORY_STAGE_IN_CLASS,
   SOCIAL_WRITE_COMPOSE_BAR_CLASS,
+  SOCIAL_WRITE_COMPOSE_CHROME_CLASS,
   SOCIAL_WRITE_COMPOSE_HOST_CLASS,
+  SOCIAL_WRITE_COMPOSE_POST_CLASS,
   SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
   SOCIAL_WRITE_COMPOSE_X_CLASS,
 } from "@/lib/social-chrome";
@@ -56,6 +59,7 @@ import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 import {
   displayHandle,
+  leaveSocialWriteCompose,
   SOCIAL,
   SOCIAL_ROUTES,
   socialHandleDisplayError,
@@ -395,6 +399,7 @@ export function SocialCreateCompose({
   initialStep?: SocialCreateMediaStep | null;
 }) {
   const router = useRouter();
+  const house = useHouseClient();
   const [pickedFiles, setPickedFiles] = useState(takeSocialHomeComposerMedia);
   const kind: SocialCreateKind = initialKind ?? "text";
   const ingestPicked = pickedFiles.length > 0 && kind === "media";
@@ -551,7 +556,7 @@ export function SocialCreateCompose({
         data-social-create-form=""
         data-social-create-kind="text"
         data-social-write-voice=""
-        className={SOCIAL_WRITE_COMPOSE_HOST_CLASS}
+        className={cn(SOCIAL_WRITE_COMPOSE_HOST_CLASS, SOCIAL_STORY_STAGE_IN_CLASS)}
         onSubmit={(event) => {
           event.preventDefault();
           ingestSpeechLearning({
@@ -573,28 +578,28 @@ export function SocialCreateCompose({
           });
         }}
       >
-        <div className="flex items-center justify-between gap-[var(--space-4)]">
+        <div className={SOCIAL_WRITE_COMPOSE_CHROME_CLASS}>
           <button
             type="button"
             data-social-create-dismiss=""
             aria-label={SOCIAL.create.close}
             className={SOCIAL_WRITE_COMPOSE_X_CLASS}
-            onClick={() => router.back()}
+            onClick={() =>
+              leaveSocialWriteCompose(
+                () => house?.navigateOwned(SOCIAL_ROUTES.home) ?? false,
+                () => router.push(SOCIAL_ROUTES.home),
+              )
+            }
           >
-            <SocialIcon name="x" size={22} className="text-ink-2" />
+            <SocialIcon name="x" size={22} className="text-ink" />
           </button>
-          <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
+          <button type="submit" disabled={uploading} className={SOCIAL_WRITE_COMPOSE_POST_CLASS}>
             {SOCIAL.home.submit}
           </button>
         </div>
         <div className="mt-[var(--space-4)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
           <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
-          <span className="min-w-0">
-            <span className={SOCIAL_PERSON_PRIMARY_CLASS}>{authorName}</span>
-            {authorHandle ? (
-              <span className={SOCIAL_PERSON_SECONDARY_CLASS}>{displayHandle(authorHandle)}</span>
-            ) : null}
-          </span>
+          <span className="min-w-0 t-body font-medium text-ink">{authorName}</span>
         </div>
         <div className="flex min-h-0 flex-1 flex-col">
           {media.length > 0 ? (
@@ -683,7 +688,7 @@ export function SocialCreateCompose({
               disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
               onClick={() => fileRef.current?.click()}
             >
-              <SocialIcon name="image" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
+              <SocialIcon name="image" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
             </button>
             <button
               type="button"
@@ -693,7 +698,7 @@ export function SocialCreateCompose({
               disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
               onClick={() => fileRef.current?.click()}
             >
-              <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink-2" />
+              <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
             </button>
             <input
               ref={fileRef}
@@ -706,13 +711,6 @@ export function SocialCreateCompose({
               onChange={(event) => void onPick(event.target.files)}
             />
           </div>
-          <p className="flex items-center gap-2 t-body-sm text-ink-2">
-            <span className="hidden md:inline">{SOCIAL.home.audience}</span>
-            <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS, "inline-flex items-center gap-1.5")}>
-              <SocialIcon name="users" size={14} className="text-ink-2" />
-              {SOCIAL.home.audienceFollowing}
-            </span>
-          </p>
           {media.length === 0 ? (
             <>
               <label className="sr-only" htmlFor="social-create-body">
@@ -841,14 +839,7 @@ export function SocialCreateCompose({
           ))}
         </select>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2 t-body-sm text-ink-2">
-          <span className="hidden md:inline">{SOCIAL.home.audience}</span>
-          <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS, "inline-flex items-center gap-1.5")}>
-            <SocialIcon name="users" size={14} className="text-ink-2" />
-            {SOCIAL.home.audienceFollowing}
-          </span>
-        </p>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
           {SOCIAL.home.submit}
         </button>

@@ -791,13 +791,20 @@ export const SOCIAL_CREATE_CARD_CLASS =
 export const SOCIAL_WRITE_COMPOSE_FRAME_CLASS = "min-h-dvh w-full";
 
 export const SOCIAL_WRITE_COMPOSE_HOST_CLASS =
-  "mx-auto flex min-h-dvh w-full max-w-[680px] flex-col bg-surface px-[var(--space-4)] pt-[max(var(--space-4),env(safe-area-inset-top))] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
+  "mx-auto flex min-h-dvh w-full max-w-[680px] flex-col bg-surface px-[var(--space-4)] pt-[max(0px,env(safe-area-inset-top))] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
+
+// §0. Row 48. Hairline on the bottom edge only. Pad H 16.
+export const SOCIAL_WRITE_COMPOSE_CHROME_CLASS =
+  "-mx-[var(--space-4)] flex h-12 items-center justify-between gap-[var(--space-4)] border-b border-hairline px-[var(--space-4)]";
+
+export const SOCIAL_WRITE_COMPOSE_POST_CLASS =
+  "inline-flex h-10 shrink-0 items-center justify-center rounded-[8px] bg-accent px-[var(--space-4)] t-body-sm font-medium text-accent-contrast disabled:opacity-70";
 
 export const SOCIAL_WRITE_COMPOSE_X_CLASS =
-  "inline-flex size-11 shrink-0 items-center justify-center text-ink-2 active:opacity-70";
+  "inline-flex size-11 shrink-0 items-center justify-center text-ink active:opacity-70";
 
 export const SOCIAL_WRITE_VOICE_HERO_CLASS =
-  "flex size-48 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink-2";
+  "flex size-48 shrink-0 items-center justify-center rounded-full border border-hairline bg-surface-muted text-ink";
 
 export const SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS = "ring-2 ring-accent";
 

@@ -30,6 +30,7 @@ import {
   isSocialDmImmersivePath,
   isSocialDmThreadPath,
   isSocialWriteComposePath,
+  leaveSocialWriteCompose,
   isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
@@ -193,6 +194,21 @@ describe("social copy lock", () => {
     expect(isSocialWriteComposePath(`${SOCIAL_ROUTES.create}/`)).toBe(true);
     expect(isSocialWriteComposePath(SOCIAL_ROUTES.createLive)).toBe(false);
     expect(isSocialWriteComposePath(SOCIAL_ROUTES.home)).toBe(false);
+    let pushes = 0;
+    leaveSocialWriteCompose(
+      () => true,
+      () => {
+        pushes += 1;
+      },
+    );
+    expect(pushes).toBe(0);
+    leaveSocialWriteCompose(
+      () => false,
+      () => {
+        pushes += 1;
+      },
+    );
+    expect(pushes).toBe(1);
     expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");

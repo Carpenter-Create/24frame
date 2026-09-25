@@ -25,7 +25,10 @@ const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 describe("Social create kinds", () => {
   it("enters the chosen mode directly — no second chooser on the compose form", () => {
     const write = renderToStaticMarkup(
-      createElement(SocialCreateCompose, { authorName: "Ada Lovelace" }),
+      createElement(SocialCreateCompose, {
+        authorName: "Ada Lovelace",
+        authorHandle: "acarpcreate",
+      }),
     );
     expect(write).toContain("data-social-create-form");
     expect(write).toContain('data-social-create-kind="text"');
@@ -60,7 +63,9 @@ describe("Social create kinds", () => {
     expect(write).toContain('aria-label="Voice"');
     expect(write).toContain("data-social-write-voice");
     expect(write).not.toContain(`>${SOCIAL.home.photoKind}<`);
-    expect(write).toContain(SOCIAL.home.audienceFollowing);
+    expect(write).not.toContain(SOCIAL.home.audienceFollowing);
+    expect(write).not.toContain("@acarpcreate");
+    expect(write).toContain("social-story-stage-in");
     expect(write).toContain(SOCIAL.home.submit);
     expect(write).not.toContain("autofocus");
     expect(src.indexOf("data-social-create-preview")).toBeLessThan(src.indexOf('id="social-create-body"'));
@@ -71,6 +76,23 @@ describe("Social create kinds", () => {
     expect(chrome).toContain(
       "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted",
     );
+    expect(chrome).toContain(
+      "-mx-[var(--space-4)] flex h-12 items-center justify-between gap-[var(--space-4)] border-b border-hairline px-[var(--space-4)]",
+    );
+    expect(chrome).toContain(
+      "inline-flex h-10 shrink-0 items-center justify-center rounded-[8px] bg-accent px-[var(--space-4)] t-body-sm font-medium text-accent-contrast",
+    );
+    expect(chrome).toContain(
+      "flex size-48 shrink-0 items-center justify-center rounded-full border border-hairline bg-surface-muted text-ink",
+    );
+    const dismiss = src.slice(
+      src.indexOf("data-social-create-dismiss"),
+      src.indexOf("data-social-create-author"),
+    );
+    expect(dismiss).toContain("leaveSocialWriteCompose");
+    expect(dismiss).toContain("navigateOwned(SOCIAL_ROUTES.home)");
+    expect(dismiss).toContain("router.push(SOCIAL_ROUTES.home)");
+    expect(dismiss).not.toContain("router.back()");
 
     const pick = renderToStaticMarkup(
       createElement(SocialCreateCompose, {
@@ -127,6 +149,7 @@ describe("Social create kinds", () => {
     expect(caption).not.toContain("data-social-create-media-next");
     expect(caption).not.toContain("data-social-create-attach");
     expect(caption).not.toContain("autofocus");
+    expect(caption).not.toContain(SOCIAL.home.audienceFollowing);
 
     expect(src).not.toContain("SegmentedTrack");
     expect(src).not.toContain("data-social-create-kinds");
