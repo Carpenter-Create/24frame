@@ -811,7 +811,7 @@ export const SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS = "ring-2 ring-accent";
 
 export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent ring-2 ring-accent";
 
-// §0.4. iMessage compose row. Type is transparent on white. Mic trails inside the row.
+// §0.4. iMessage compose row. Type is transparent on white. Feed write has no mic.
 // Hairline is the top edge only. No gray fill. Bottom pad is 16 above the safe area.
 export const SOCIAL_WRITE_COMPOSE_ROW_CLASS =
   "-mx-[var(--space-4)] -mb-[max(var(--space-4),env(safe-area-inset-bottom))] mt-auto flex min-h-12 items-end gap-[var(--space-2)] border-t border-hairline bg-transparent px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";

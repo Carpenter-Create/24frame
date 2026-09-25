@@ -718,13 +718,6 @@ export function SocialCreateCompose({
             placeholder={SOCIAL.home.composerPrompt}
             className={SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS}
           />
-          <HouseVoiceMic
-            surface="dictate"
-            workspace="social"
-            presentation="footer"
-            getValue={() => body}
-            onValue={setBody}
-          />
         </div>
         <FormError error={error} />
       </form>
