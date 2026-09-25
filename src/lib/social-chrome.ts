@@ -811,6 +811,21 @@ export const SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS = "ring-2 ring-accent";
 
 export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent ring-2 ring-accent";
 
+// §0.3. Empty kind=text. Caption owns the stage. Radius 16 presence well. Cap 40vh. No 220 disc.
+export const SOCIAL_WRITE_COMPOSE_CAPTION_CLASS =
+  "flex min-h-12 max-h-[40vh] w-full min-w-0 flex-1 flex-col overflow-y-auto rounded-[16px] bg-[#EEEEF0] px-[var(--space-4)] py-[var(--space-4)]";
+
+export const SOCIAL_WRITE_COMPOSE_CAPTION_FIELD_CLASS =
+  "min-h-12 w-full flex-1 resize-none bg-transparent py-0 text-[length:var(--text-sm)] leading-normal text-ink caret-ink outline-none placeholder:text-ink-2";
+
+// §0.3. Footer dictate mic. Hit 40. Glyph 24 is the icon size. Compact Sporty listening — not the 220 face.
+export const SOCIAL_WRITE_COMPOSE_MIC_CLASS =
+  "inline-flex size-10 shrink-0 items-center justify-center rounded-full text-ink";
+
+export const SOCIAL_WRITE_COMPOSE_MIC_LISTENING_CLASS = "ring-2 ring-accent";
+
+export const SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS = "bg-accent/10 text-accent ring-2 ring-accent";
+
 // Idle pill stays h 48 / radius 24 / muted fill / pad H 16. The field is one line, line-height 1, pad V 0, so the shell centers it.
 export const SOCIAL_WRITE_COMPOSE_PILL_CLASS =
   "flex h-12 w-full items-center rounded-[24px] bg-[#EEEEF0] px-[var(--space-4)]";

@@ -10,6 +10,9 @@ import {
   HOUSE_VOICE_MIC_LISTENING_CLASS,
 } from "@/lib/form-control";
 import {
+  SOCIAL_WRITE_COMPOSE_MIC_CLASS,
+  SOCIAL_WRITE_COMPOSE_MIC_LISTENING_CLASS,
+  SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS,
   SOCIAL_WRITE_VOICE_HERO_CLASS,
   SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS,
   SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS,
@@ -63,8 +66,8 @@ export function HouseVoiceMic({
   locale?: string;
   getValue: () => string;
   onValue: (next: string) => void;
-  /** Compose voice hero stays visible when speech is unavailable. */
-  presentation?: "icon" | "hero";
+  /** Compose voice faces stay visible when speech is unavailable. */
+  presentation?: "icon" | "hero" | "footer";
 }) {
   const probed = useSyncExternalStore(
     subscribeSpeechRecognition,
@@ -102,16 +105,21 @@ export function HouseVoiceMic({
   }, []);
 
   const hero = presentation === "hero";
-  if (!available && !hero) return null;
+  const footer = presentation === "footer";
+  if (!available && !hero && !footer) return null;
 
   const mode = houseVoiceTranscriptMode(surface);
   const label = hero
     ? listening
       ? HOUSE_VOICE.stop
       : HOUSE_VOICE.voice
-    : listening
-      ? HOUSE_VOICE.listening
-      : houseVoiceLabel(surface);
+    : footer
+      ? listening
+        ? HOUSE_VOICE.stop
+        : HOUSE_VOICE.dictate
+      : listening
+        ? HOUSE_VOICE.listening
+        : houseVoiceLabel(surface);
 
   function detach(rec: SpeechRecognitionLike | null) {
     if (!rec) return;
@@ -209,10 +217,16 @@ export function HouseVoiceMic({
       aria-pressed={listening}
       aria-label={label}
       className={cn(
-        hero ? SOCIAL_WRITE_VOICE_HERO_CLASS : cn(HOUSE_ICON_BUTTON_CLASS, HOUSE_VOICE_MIC_CLASS, FORM_CONTROL_FOCUS_CLASS),
+        hero
+          ? SOCIAL_WRITE_VOICE_HERO_CLASS
+          : footer
+            ? cn(SOCIAL_WRITE_COMPOSE_MIC_CLASS, FORM_CONTROL_FOCUS_CLASS)
+            : cn(HOUSE_ICON_BUTTON_CLASS, HOUSE_VOICE_MIC_CLASS, FORM_CONTROL_FOCUS_CLASS),
         hero && listening && SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS,
         hero && recording && SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS,
-        !hero && listening && HOUSE_VOICE_MIC_LISTENING_CLASS,
+        footer && listening && SOCIAL_WRITE_COMPOSE_MIC_LISTENING_CLASS,
+        footer && recording && SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS,
+        !hero && !footer && listening && HOUSE_VOICE_MIC_LISTENING_CLASS,
       )}
       onClick={() => {
         if (listeningRef.current) stop();
@@ -220,8 +234,9 @@ export function HouseVoiceMic({
       }}
     >
       <Microphone
-        className={hero ? "size-14" : "size-4"}
-        weight={hero ? "fill" : PHOSPHOR_CHROME_IDLE_WEIGHT}
+        size={footer ? 24 : undefined}
+        className={hero ? "size-14" : footer ? undefined : "size-4"}
+        weight={hero ? "fill" : footer ? "fill" : PHOSPHOR_CHROME_IDLE_WEIGHT}
         aria-hidden
       />
     </button>

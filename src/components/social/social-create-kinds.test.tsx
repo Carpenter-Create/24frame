@@ -39,30 +39,30 @@ describe("Social create kinds", () => {
     expect(write).not.toContain(SOCIAL.create.goLive);
     expect(write).toContain("data-social-create-dismiss");
     expect(write).toContain(`aria-label="${SOCIAL.create.close}"`);
-    expect(write).toContain('data-social-create-attach="photo"');
-    expect(write).toContain('data-social-create-attach="video"');
-    expect(write).toContain(`aria-label="${SOCIAL.create.photo}"`);
-    expect(write).toContain(`aria-label="${SOCIAL.create.video}"`);
-    expect(write).toContain('aria-label="Add photo or video"');
+    expect(write).not.toContain("data-social-create-attach");
+    expect(write).not.toContain(`aria-label="${SOCIAL.create.photo}"`);
+    expect(write).not.toContain(`aria-label="${SOCIAL.create.video}"`);
     expect(write).not.toContain(`>${SOCIAL.home.attach}<`);
     expect(write).toContain("size-10");
-    expect(write).toContain("gap-2");
     expect(write).toContain('width="24"');
     expect(write).toContain('width="22"');
     expect(write).toContain("size-11");
-    expect(write).toContain("size-[220px]");
-    expect(write).toContain("size-14");
-    expect(write).toContain("leading-none");
+    expect(write).not.toContain("size-[220px]");
+    expect(write).not.toContain("size-14");
+    expect(write).toContain("max-h-[40vh]");
+    expect(write).toContain("rounded-[16px]");
+    expect(write).toContain("data-social-write-caption");
     expect(write).toContain("items-center");
     expect(write).toContain("min-h-dvh");
     expect(write).toContain("max-w-[680px]");
     expect(write).toContain("h-12");
-    expect(write).toContain("rounded-[24px]");
+    expect(write).not.toContain("rounded-[24px]");
     expect(write).toContain(`placeholder="${SOCIAL.home.composerPrompt}"`);
     expect(write).not.toContain(SOCIAL.create.caption);
     expect(write).not.toContain("data-house-voice-mic=\"search\"");
     expect(write).toContain('data-house-voice-mic="dictate"');
-    expect(write).toContain('aria-label="Voice"');
+    expect(write).toContain('aria-label="Dictate"');
+    expect(write).not.toContain('aria-label="Voice"');
     expect(write).toContain("data-social-write-voice");
     expect(write).not.toContain(`>${SOCIAL.home.photoKind}<`);
     expect(write).not.toContain(SOCIAL.home.audienceFollowing);
@@ -71,8 +71,10 @@ describe("Social create kinds", () => {
     expect(write).toContain(SOCIAL.home.submit);
     expect(write).not.toContain("autofocus");
     expect(src.indexOf("data-social-create-preview")).toBeLessThan(src.indexOf('id="social-create-body"'));
-    expect(src.indexOf('id="social-create-body"')).toBeLessThan(src.indexOf('presentation="hero"'));
-    expect(src.indexOf('presentation="hero"')).toBeLessThan(src.indexOf("data-social-create-attach-row"));
+    expect(src).not.toContain('presentation="hero"');
+    expect(src).not.toContain("data-social-write-voice-stage");
+    expect(src.indexOf("data-social-write-caption")).toBeLessThan(src.indexOf('presentation="footer"'));
+    expect(src.indexOf('presentation="footer"')).toBeLessThan(src.indexOf("data-social-create-attach-row"));
     expect(src).toContain("size={20}");
     expect(src).toContain("unoptimized");
     expect(chrome).toContain(
@@ -92,18 +94,23 @@ describe("Social create kinds", () => {
     );
     expect(chrome).toContain("py-0 text-[length:var(--text-sm)] leading-none");
     expect(chrome).not.toContain("size-48 shrink-0");
-    expect(src).toContain("data-social-write-voice-stage");
+    expect(chrome).toContain(
+      "flex min-h-12 max-h-[40vh] w-full min-w-0 flex-1 flex-col overflow-y-auto rounded-[16px] bg-[#EEEEF0] px-[var(--space-4)] py-[var(--space-4)]",
+    );
+    expect(chrome).toContain(
+      "inline-flex size-10 shrink-0 items-center justify-center rounded-full text-ink",
+    );
     expect(chrome).toContain("mt-auto flex shrink-0 flex-col gap-[var(--space-2)]");
     expect(write).toContain("data-social-write-footer");
     expect(write).not.toContain("data-social-write-mode");
-    expect(write.indexOf("data-social-write-voice-stage")).toBeLessThan(
+    expect(write).not.toContain("data-social-write-voice-stage");
+    expect(write.indexOf("data-social-write-caption")).toBeLessThan(
       write.indexOf("data-social-write-footer"),
     );
     const footer = write.slice(write.indexOf("data-social-write-footer"));
-    expect(footer.indexOf("data-social-create-attach-row")).toBeLessThan(
-      footer.indexOf("data-social-write-pill"),
-    );
-    expect(footer.indexOf("data-social-write-voice-stage")).toBe(-1);
+    expect(footer).toContain('data-house-voice-mic="dictate"');
+    expect(footer).not.toContain("data-social-create-attach-row");
+    expect(footer).not.toContain("data-social-write-caption");
     const voice = readFileSync("src/components/chrome/house-voice-mic.tsx", "utf8");
     expect(voice).toContain('weight={hero ? "fill"');
     expect(voice).toContain('className={hero ? "size-14"');
