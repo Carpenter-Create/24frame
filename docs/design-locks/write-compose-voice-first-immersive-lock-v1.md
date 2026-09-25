@@ -1,11 +1,12 @@
 # [GC][24Frame] LOCK — Write compose voice-first immersive v1
 
 **Date:** 2026-09-25 (CT)  
-**Status:** **LOCKED** · Design Own→READY cite-only (Adam locked NOW — **no invent menu**) · Design no PR · CoS tip-first CLEAR Dev #681 · stay DRAFT  
+**Status:** **LOCKED** · Design Own→READY cite-only · **Amend:** media-attached preview (Adam 2026-09-25) · Design no PR · CoS tip-first CLEAR Dev #681 · stay DRAFT  
 **Repo:** `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`  
 **Box:** `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md`  
-**FAIL:** `/workspace/24frame-agg-ux/write-compose-thin-card-adam-fail-2026-09-25.png` (bordered CAPTION + form chrome + dead white · mic-in-field)  
+**FAIL:** `/workspace/24frame-agg-ux/write-compose-thin-card-adam-fail-2026-09-25.png` (thin CAPTION) · `/workspace/24frame-agg-ux/write-compose-photo-attach-no-preview-adam-fail-2026-09-25.png` (text-only Photo·Remove · **no** image face)  
 **Grammar ref only:** `/workspace/24frame-agg-ux/write-compose-voice-first-chatgpt-ref-2026-09-25.png` (big voice center · compact bottom Ask-bar — **not** ChatGPT brand / orb / dark)  
+**Media grammar ref only:** `/workspace/24frame-agg-ux/write-compose-photo-preview-instagram-ref-2026-09-25.png` (preview **above** caption — **not** IG dark / brand / New-post chrome invent)  
 **Keeps from** `write-compose-immersive-icons-lock-v1.md`: edge-to-edge · hide Social header+dock · media icons-only · X + Post  
 **Entry unchanged:** `share-something-text-write-direct-lock-v1.md`  
 **Standing:** Immersive Social · Media Immersion · launch-great · quiet redundant-chrome · phone never-truncate · spacing **8 / 16 / 24 / 48**
@@ -14,7 +15,7 @@
 
 ## One lock
 
-**House-light full-viewport write compose is voice-hero first. Text lives in a compact bottom bar. Kill the thin CAPTION card.**
+**House-light full-viewport write compose is voice-hero first (no media). When photo/video is attached, show a real preview above the caption — caption stays the write focus. Kill thin CAPTION card and text-only Photo·Remove.**
 
 ---
 
@@ -69,6 +70,25 @@
 
 ---
 
+
+## 5 — Media attached (Adam amend NOW)
+
+Instagram **New post** grammar only: **visible media preview above caption**. Caption stays the primary write focal point. Voice hero **yields**.
+
+| Token | Lock |
+|-------|------|
+| When | Any photo or video attached on this compose |
+| Preview | **Real image/video face** object-cover · full width minus inset **16** · radius **16** · max-height **50vh** · sits **above** the caption/write focus |
+| Order (top→bottom) | X/Post chrome → (quiet author) → **media preview** → **caption write** → media icons / Following as kept |
+| Caption | Primary write focal point under preview · house light · **no** CAPTION label · **no** bordered form well · expandable field / bottom bar grown for type |
+| Voice hero | **Yields** — hide or collapse the **192** voice face while media is attached · restore when all media removed |
+| Remove | Control **on/near** preview (corner hit **40** · glyph **20** X or trash · or quiet “Remove” beside preview) — never text-only **Photo · Remove** with **no** image |
+| Video | Same preview slot · show poster/frame · play chevron optional calm · not a second layout |
+| House | Light `#FFFFFF` stage · Sporty Blue only for Post / active — **OUT** IG dark theme |
+
+**FAIL:** `write-compose-photo-attach-no-preview-adam-fail-2026-09-25.png` — “Photo · Remove” text row · no preview face.  
+**PASS:** Attached media reads as a post preview above caption (IG order · house light).
+
 ## Explicit OUT
 
 | OUT | Why |
@@ -81,6 +101,8 @@
 | Groups · undraft | Not this |
 | #682 · #683 | Separate |
 | Changing Share something entry | Cite entry lock only |
+| Text-only “Photo · Remove” (no preview face) | Adam media FAIL |
+| IG dark / IG brand / New-post chrome invent (Poll/Prompt/audio) | Grammar = preview-above-caption only |
 
 ---
 
@@ -90,6 +112,7 @@
 2. Big centered voice face **192** · idle / listening / recording.  
 3. Compact bottom Share something bar · expand on type only.  
 4. Edge-to-edge `#FFFFFF` · shell+dock hidden · Post/X in chrome.
+5. Media attached → visible preview **above** caption · voice hero yields · Remove on/near preview.
 
 ---
 
@@ -97,6 +120,7 @@
 
 1. Phone glance = voice-hero immersive · not thin form card.  
 2. Tokens above match (192 · bar 48/24/16 · icons 24/40/8 · X 44).  
-3. Tip cites this lock · stay DRAFT · no Design PR.
+3. Media attached shows preview above caption · no text-only Photo·Remove.  
+4. Tip cites this lock · stay DRAFT · no Design PR.
 
 **Ship:** Design Own→READY · CoS CLEAR Dev tip-first #681.

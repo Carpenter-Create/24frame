@@ -806,8 +806,9 @@ export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent
 export const SOCIAL_WRITE_COMPOSE_BAR_CLASS =
   "w-full resize-none rounded-[24px] bg-surface-muted px-[var(--space-4)] t-body text-ink outline-none placeholder:text-ink-2";
 
+// §5. Full content width (host inset 16). Radius 16. Cap 50vh. object-cover face.
 export const SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS =
-  "h-full min-h-0 w-full bg-surface-muted object-cover";
+  "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted";
 
 export const SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS = "flex items-center gap-2";
 

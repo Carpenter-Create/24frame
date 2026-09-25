@@ -20,6 +20,7 @@ import { SOCIAL_CREATE_MEDIA_ACCEPT } from "@/lib/social-create-media";
 import { stashSocialHomeComposerMedia } from "@/lib/social-home-composer";
 
 const src = readFileSync("src/components/social/social-forms.tsx", "utf8");
+const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 
 describe("Social create kinds", () => {
   it("enters the chosen mode directly — no second chooser on the compose form", () => {
@@ -62,9 +63,14 @@ describe("Social create kinds", () => {
     expect(write).toContain(SOCIAL.home.audienceFollowing);
     expect(write).toContain(SOCIAL.home.submit);
     expect(write).not.toContain("autofocus");
-    expect(src.indexOf("data-social-create-preview")).toBeLessThan(src.indexOf('presentation="hero"'));
-    expect(src.indexOf('presentation="hero"')).toBeLessThan(src.indexOf('id="social-create-body"'));
+    expect(src.indexOf("data-social-create-preview")).toBeLessThan(src.indexOf('id="social-create-body"'));
+    expect(src.indexOf('id="social-create-body"')).toBeLessThan(src.indexOf('presentation="hero"'));
+    expect(src.indexOf('presentation="hero"')).toBeLessThan(src.indexOf("data-social-create-attach-row"));
+    expect(src).toContain("size={20}");
     expect(src).toContain("unoptimized");
+    expect(chrome).toContain(
+      "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted",
+    );
 
     const pick = renderToStaticMarkup(
       createElement(SocialCreateCompose, {

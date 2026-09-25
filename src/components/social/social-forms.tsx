@@ -598,36 +598,64 @@ export function SocialCreateCompose({
         </div>
         <div className="flex min-h-0 flex-1 flex-col">
           {media.length > 0 ? (
-            <ul
-              data-social-create-preview=""
-              className="mt-[var(--space-4)] flex min-h-0 flex-1 flex-col gap-[var(--space-2)]"
-            >
-              {media.map((item) => (
-                <li key={item.key} className="relative min-h-0 flex-1 overflow-hidden bg-surface-muted">
-                  {previews[item.key] && item.kind === "video" ? (
-                    <video src={previews[item.key]} className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS} controls />
-                  ) : previews[item.key] ? (
-                    <Image
-                      src={previews[item.key]}
-                      alt={SOCIAL.home.photoKind}
-                      fill
-                      unoptimized
-                      sizes="100vw"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS} />
-                  )}
-                  <button
-                    type="button"
-                    className={`${TEXT_ACTION_CLASS} absolute right-[var(--space-2)] top-[var(--space-2)] bg-surface px-[var(--space-2)]`}
-                    onClick={() => setMedia((current) => current.filter((row) => row.key !== item.key))}
-                  >
-                    {SOCIAL.home.removeAttach}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul
+                data-social-create-preview=""
+                className="mt-[var(--space-4)] flex flex-col gap-[var(--space-2)]"
+              >
+                {media.map((item) => (
+                  <li key={item.key}>
+                    <div className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS}>
+                      {previews[item.key] && item.kind === "video" ? (
+                        <video
+                          src={previews[item.key]}
+                          className="h-full w-full object-cover"
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : previews[item.key] ? (
+                        <Image
+                          src={previews[item.key]}
+                          alt={SOCIAL.home.photoKind}
+                          fill
+                          unoptimized
+                          sizes="100vw"
+                          className="object-cover"
+                        />
+                      ) : null}
+                      <button
+                        type="button"
+                        aria-label={SOCIAL.home.removeAttach}
+                        className={cn(
+                          SOCIAL_POST_ACTION_HIT_CLASS,
+                          "absolute right-[var(--space-2)] top-[var(--space-2)] bg-surface",
+                        )}
+                        onClick={() => setMedia((current) => current.filter((row) => row.key !== item.key))}
+                      >
+                        <SocialIcon name="x" size={20} className="text-ink-2" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <label className="sr-only" htmlFor="social-create-body">
+                {SOCIAL.home.composerPrompt}
+              </label>
+              <Textarea
+                variant="bare"
+                id="social-create-body"
+                name="body"
+                rows={writing ? 4 : 1}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder={SOCIAL.home.composerPrompt}
+                className={cn(
+                  SOCIAL_WRITE_COMPOSE_BAR_CLASS,
+                  "mt-[var(--space-4)]",
+                  writing ? "max-h-[40vh] min-h-12" : "h-12 overflow-hidden",
+                )}
+              />
+            </>
           ) : (
             <div className="flex flex-1 items-center justify-center py-[var(--space-8)]">
               <HouseVoiceMic
@@ -640,7 +668,12 @@ export function SocialCreateCompose({
             </div>
           )}
         </div>
-        <div className="mt-auto flex flex-col gap-[var(--space-2)] pt-[var(--space-4)]">
+        <div
+          className={cn(
+            "flex flex-col gap-[var(--space-2)] pt-[var(--space-4)]",
+            media.length === 0 && "mt-auto",
+          )}
+        >
           <div className={SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS} data-social-create-attach-row="">
             <button
               type="button"
@@ -680,19 +713,23 @@ export function SocialCreateCompose({
               {SOCIAL.home.audienceFollowing}
             </span>
           </p>
-          <label className="sr-only" htmlFor="social-create-body">
-            {SOCIAL.home.composerPrompt}
-          </label>
-          <Textarea
-            variant="bare"
-            id="social-create-body"
-            name="body"
-            rows={writing ? 4 : 1}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder={SOCIAL.home.composerPrompt}
-            className={cn(SOCIAL_WRITE_COMPOSE_BAR_CLASS, writing ? "max-h-[40vh] min-h-12" : "h-12 overflow-hidden")}
-          />
+          {media.length === 0 ? (
+            <>
+              <label className="sr-only" htmlFor="social-create-body">
+                {SOCIAL.home.composerPrompt}
+              </label>
+              <Textarea
+                variant="bare"
+                id="social-create-body"
+                name="body"
+                rows={writing ? 4 : 1}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder={SOCIAL.home.composerPrompt}
+                className={cn(SOCIAL_WRITE_COMPOSE_BAR_CLASS, writing ? "max-h-[40vh] min-h-12" : "h-12 overflow-hidden")}
+              />
+            </>
+          ) : null}
         </div>
         <FormError error={error} />
       </form>
