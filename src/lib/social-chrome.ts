@@ -811,14 +811,15 @@ export const SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS = "ring-2 ring-accent";
 
 export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent ring-2 ring-accent";
 
-// §0.3. Empty kind=text. Caption owns the stage. Radius 16 presence well. Cap 40vh. No 220 disc.
-export const SOCIAL_WRITE_COMPOSE_CAPTION_CLASS =
-  "flex min-h-12 max-h-[40vh] w-full min-w-0 flex-1 flex-col overflow-y-auto rounded-[16px] bg-[#EEEEF0] px-[var(--space-4)] py-[var(--space-4)]";
+// §0.4. iMessage compose row. Type is transparent on white. Mic trails inside the row.
+// Hairline is the top edge only. No gray fill. Bottom pad is 16 above the safe area.
+export const SOCIAL_WRITE_COMPOSE_ROW_CLASS =
+  "-mx-[var(--space-4)] -mb-[max(var(--space-4),env(safe-area-inset-bottom))] mt-auto flex min-h-12 items-end gap-[var(--space-2)] border-t border-hairline bg-transparent px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
 
-export const SOCIAL_WRITE_COMPOSE_CAPTION_FIELD_CLASS =
-  "min-h-12 w-full flex-1 resize-none bg-transparent py-0 text-[length:var(--text-sm)] leading-normal text-ink caret-ink outline-none placeholder:text-ink-2";
+export const SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS =
+  "max-h-[40vh] min-h-12 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent py-3 text-[length:var(--text-sm)] leading-normal text-ink caret-ink shadow-none outline-none placeholder:text-ink-2";
 
-// §0.3. Footer dictate mic. Hit 40. Glyph 24 is the icon size. Compact Sporty listening — not the 220 face.
+// §0.4. In-row dictate mic. Hit 40. Glyph 24 is the icon size. Compact Sporty listening — not the 220 face.
 export const SOCIAL_WRITE_COMPOSE_MIC_CLASS =
   "inline-flex size-10 shrink-0 items-center justify-center rounded-full text-ink";
 
@@ -826,26 +827,11 @@ export const SOCIAL_WRITE_COMPOSE_MIC_LISTENING_CLASS = "ring-2 ring-accent";
 
 export const SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS = "bg-accent/10 text-accent ring-2 ring-accent";
 
-// Idle pill stays h 48 / radius 24 / muted fill / pad H 16. The field is one line, line-height 1, pad V 0, so the shell centers it.
-export const SOCIAL_WRITE_COMPOSE_PILL_CLASS =
-  "flex h-12 w-full items-center rounded-[24px] bg-[#EEEEF0] px-[var(--space-4)]";
-
-export const SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS =
-  "h-auto max-h-[40vh] min-h-12 items-start overflow-y-auto py-[var(--space-4)]";
-
-export const SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS =
-  "h-[var(--text-sm)] w-full resize-none bg-transparent py-0 text-[length:var(--text-sm)] leading-none text-ink caret-ink outline-none placeholder:text-ink-2";
-
-export const SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS = "h-auto min-h-12 leading-normal";
-
 // §5. Full content width (host inset 16). Radius 16. Cap 50vh. object-cover face.
 export const SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS =
   "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted";
 
-// §0.1. Icons sit on the pill. Gap 8. Inset stays the host pad H 16.
-export const SOCIAL_WRITE_COMPOSE_FOOTER_CLASS =
-  "mt-auto flex shrink-0 flex-col gap-[var(--space-2)]";
-
+// §0.4. Media glyphs sit in the compose row, ahead of the field. Gap 8.
 export const SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS = "flex items-center gap-2";
 
 export const SOCIAL_CREATE_WELL_CLASS =

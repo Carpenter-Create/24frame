@@ -50,9 +50,12 @@ describe("Social create kinds", () => {
     expect(write).not.toContain("size-[220px]");
     expect(write).not.toContain("size-14");
     expect(write).toContain("max-h-[40vh]");
-    expect(write).toContain("rounded-[16px]");
-    expect(write).toContain("data-social-write-caption");
-    expect(write).toContain("items-center");
+    expect(write).not.toContain("rounded-[16px]");
+    expect(write).not.toContain("bg-[#EEEEF0]");
+    expect(write).toContain("bg-transparent");
+    expect(write).toContain("data-social-write-stage");
+    expect(write).toContain("items-end");
+    expect(write).toContain("border-t");
     expect(write).toContain("min-h-dvh");
     expect(write).toContain("max-w-[680px]");
     expect(write).toContain("h-12");
@@ -71,10 +74,11 @@ describe("Social create kinds", () => {
     expect(write).toContain(SOCIAL.home.submit);
     expect(write).not.toContain("autofocus");
     expect(src.indexOf("data-social-create-preview")).toBeLessThan(src.indexOf('id="social-create-body"'));
+    expect(src.indexOf("data-social-write-compose-row")).toBeLessThan(src.indexOf('id="social-create-body"'));
+    expect(src.indexOf('id="social-create-body"')).toBeLessThan(src.indexOf('presentation="footer"'));
     expect(src).not.toContain('presentation="hero"');
     expect(src).not.toContain("data-social-write-voice-stage");
-    expect(src.indexOf("data-social-write-caption")).toBeLessThan(src.indexOf('presentation="footer"'));
-    expect(src.indexOf('presentation="footer"')).toBeLessThan(src.indexOf("data-social-create-attach-row"));
+    expect(src).not.toContain("data-social-write-footer");
     expect(src).toContain("size={20}");
     expect(src).toContain("unoptimized");
     expect(chrome).toContain(
@@ -90,27 +94,25 @@ describe("Social create kinds", () => {
       "flex size-[220px] shrink-0 items-center justify-center rounded-full border border-hairline bg-[#EEEEF0] text-ink",
     );
     expect(chrome).toContain(
-      "flex h-12 w-full items-center rounded-[24px] bg-[#EEEEF0] px-[var(--space-4)]",
+      "-mx-[var(--space-4)] -mb-[max(var(--space-4),env(safe-area-inset-bottom))] mt-auto flex min-h-12 items-end gap-[var(--space-2)] border-t border-hairline bg-transparent px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]",
     );
-    expect(chrome).toContain("py-0 text-[length:var(--text-sm)] leading-none");
+    expect(chrome).toContain("max-h-[40vh] min-h-12 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent");
+    expect(chrome).not.toContain("rounded-[16px] bg-[#EEEEF0]");
     expect(chrome).not.toContain("size-48 shrink-0");
-    expect(chrome).toContain(
-      "flex min-h-12 max-h-[40vh] w-full min-w-0 flex-1 flex-col overflow-y-auto rounded-[16px] bg-[#EEEEF0] px-[var(--space-4)] py-[var(--space-4)]",
-    );
     expect(chrome).toContain(
       "inline-flex size-10 shrink-0 items-center justify-center rounded-full text-ink",
     );
-    expect(chrome).toContain("mt-auto flex shrink-0 flex-col gap-[var(--space-2)]");
-    expect(write).toContain("data-social-write-footer");
+    expect(write).toContain("data-social-write-compose-row");
     expect(write).not.toContain("data-social-write-mode");
     expect(write).not.toContain("data-social-write-voice-stage");
-    expect(write.indexOf("data-social-write-caption")).toBeLessThan(
-      write.indexOf("data-social-write-footer"),
+    expect(write).not.toContain("data-social-write-footer");
+    const row = write.slice(write.indexOf("data-social-write-compose-row"));
+    expect(row.indexOf('id="social-create-body"')).toBeLessThan(
+      row.indexOf('data-house-voice-mic="dictate"'),
     );
-    const footer = write.slice(write.indexOf("data-social-write-footer"));
-    expect(footer).toContain('data-house-voice-mic="dictate"');
-    expect(footer).not.toContain("data-social-create-attach-row");
-    expect(footer).not.toContain("data-social-write-caption");
+    expect(row).toContain('data-house-voice-mic="dictate"');
+    expect(row).not.toContain("data-social-create-attach");
+    expect(row).not.toContain("bg-[#EEEEF0]");
     const voice = readFileSync("src/components/chrome/house-voice-mic.tsx", "utf8");
     expect(voice).toContain('weight={hero ? "fill"');
     expect(voice).toContain('className={hero ? "size-14"');
