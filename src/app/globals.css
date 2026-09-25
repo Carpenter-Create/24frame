@@ -284,6 +284,11 @@ body {
 
 /* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation.
    Open-smooth v1.1: hops slide 220ms and stay opaque. A fade from zero is the jump. */
+
+/* §0.1. Preview comment FAB is not write-compose chrome. */
+body:has([data-social-write-compose]) :is(#vercel-toolbar, vercel-live-feedback, [data-vercel-toolbar]) {
+  display: none !important;
+}
 @keyframes social-story-activate {
   from { transform: translateX(24px); }
   to { transform: none; }

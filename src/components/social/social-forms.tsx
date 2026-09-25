@@ -33,8 +33,11 @@ import {
   SOCIAL_STORY_REPLY_PILL_CLASS,
   SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS,
   SOCIAL_STORY_STAGE_IN_CLASS,
-  SOCIAL_WRITE_COMPOSE_BAR_CLASS,
   SOCIAL_WRITE_COMPOSE_CHROME_CLASS,
+  SOCIAL_WRITE_COMPOSE_PILL_CLASS,
+  SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS,
+  SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS,
+  SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS,
   SOCIAL_WRITE_COMPOSE_HOST_CLASS,
   SOCIAL_WRITE_COMPOSE_POST_CLASS,
   SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
@@ -597,7 +600,7 @@ export function SocialCreateCompose({
             {SOCIAL.home.submit}
           </button>
         </div>
-        <div className="mt-[var(--space-4)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
+        <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
           <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
           <span className="min-w-0 t-body font-medium text-ink">{authorName}</span>
         </div>
@@ -646,23 +649,31 @@ export function SocialCreateCompose({
               <label className="sr-only" htmlFor="social-create-body">
                 {SOCIAL.home.composerPrompt}
               </label>
-              <Textarea
-                variant="bare"
-                id="social-create-body"
-                name="body"
-                rows={writing ? 4 : 1}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder={SOCIAL.home.composerPrompt}
+              <div
+                data-social-write-pill=""
                 className={cn(
-                  SOCIAL_WRITE_COMPOSE_BAR_CLASS,
+                  SOCIAL_WRITE_COMPOSE_PILL_CLASS,
                   "mt-[var(--space-4)]",
-                  writing ? "max-h-[40vh] min-h-12" : "h-12 overflow-hidden",
+                  writing && SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS,
                 )}
-              />
+              >
+                <Textarea
+                  variant="bare"
+                  id="social-create-body"
+                  name="body"
+                  rows={writing ? 4 : 1}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder={SOCIAL.home.composerPrompt}
+                  className={cn(
+                    SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS,
+                    writing && SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS,
+                  )}
+                />
+              </div>
             </>
           ) : (
-            <div className="flex flex-1 items-center justify-center py-[var(--space-8)]">
+            <div className="flex flex-1 items-center justify-center" data-social-write-voice-stage="">
               <HouseVoiceMic
                 surface="dictate"
                 workspace="social"
@@ -675,7 +686,7 @@ export function SocialCreateCompose({
         </div>
         <div
           className={cn(
-            "flex flex-col gap-[var(--space-2)] pt-[var(--space-4)]",
+            "flex flex-col gap-[var(--space-2)]",
             media.length === 0 && "mt-auto",
           )}
         >
@@ -716,16 +727,24 @@ export function SocialCreateCompose({
               <label className="sr-only" htmlFor="social-create-body">
                 {SOCIAL.home.composerPrompt}
               </label>
-              <Textarea
-                variant="bare"
-                id="social-create-body"
-                name="body"
-                rows={writing ? 4 : 1}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder={SOCIAL.home.composerPrompt}
-                className={cn(SOCIAL_WRITE_COMPOSE_BAR_CLASS, writing ? "max-h-[40vh] min-h-12" : "h-12 overflow-hidden")}
-              />
+              <div
+                data-social-write-pill=""
+                className={cn(SOCIAL_WRITE_COMPOSE_PILL_CLASS, writing && SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS)}
+              >
+                <Textarea
+                  variant="bare"
+                  id="social-create-body"
+                  name="body"
+                  rows={writing ? 4 : 1}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder={SOCIAL.home.composerPrompt}
+                  className={cn(
+                    SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS,
+                    writing && SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS,
+                  )}
+                />
+              </div>
             </>
           ) : null}
         </div>
