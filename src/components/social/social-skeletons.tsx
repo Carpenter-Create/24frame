@@ -17,6 +17,7 @@ import {
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_MOBILE_BLEED_CLASS,
+  SOCIAL_STORIES_FEED_RULE_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_ROW_CLASS,
@@ -134,7 +135,10 @@ function SocialStoriesRailSkeleton({
   tall?: boolean;
 }) {
   return (
-    <div data-social-stories-skeleton="" className={cn("flex gap-2 overflow-hidden", SOCIAL_MOBILE_BLEED_CLASS)}>
+    <div
+      data-social-stories-skeleton=""
+      className={cn("flex gap-2 overflow-hidden", SOCIAL_MOBILE_BLEED_CLASS, tall && SOCIAL_STORIES_FEED_RULE_CLASS)}
+    >
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className={tall ? SOCIAL_HOME_STORY_CARD_CLASS : SOCIAL_STORY_CARD_CLASS} />
       ))}

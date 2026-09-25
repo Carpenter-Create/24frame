@@ -16,6 +16,10 @@ import {
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_FEED_TAIL_RULE_CLASS,
   SOCIAL_HOME_TOPICS_CLASS,
+  SOCIAL_POST_ACTION_HEART_NUDGE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
+  SOCIAL_POST_ACTIONS_CLASS,
+  SOCIAL_STORIES_FEED_RULE_CLASS,
   SOCIAL_MOBILE_BLEED_CLASS,
   SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_FIGMA_PROFILE_BIO,
@@ -341,6 +345,29 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_FEED_TAIL_RULE_CLASS.startsWith("max-md:")).toBe(true);
     expect(SOCIAL_FEED_TAIL_RULE_CLASS).not.toMatch(/(?:^|\s)border-b(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).toContain(SOCIAL_FEED_TAIL_RULE_CLASS);
+    expect(SOCIAL_POST_ACTIONS_CLASS).toBe("flex flex-row items-center gap-[var(--space-4)]");
+    expect(SOCIAL_POST_ACTION_HIT_CLASS).toBe(
+      "inline-flex size-10 shrink-0 items-center justify-center text-ink-2 active:opacity-70",
+    );
+    expect(SOCIAL_POST_ACTION_HIT_CLASS).not.toContain("scale");
+    expect(SOCIAL_POST_ACTION_HEART_NUDGE_CLASS).toBe("translate-y-px");
+    expect(SOCIAL_STORIES_FEED_RULE_CLASS).toBe(
+      "max-md:border-b max-md:border-solid max-md:border-hairline",
+    );
+    expect(SOCIAL_STORIES_FEED_RULE_CLASS.startsWith("max-md:")).toBe(true);
+    expect(card).toContain("SOCIAL_POST_ACTIONS_CLASS");
+    expect(card.slice(card.indexOf("export function SocialPostCard"))).not.toContain("gap-3.5");
+    expect(icons).toContain("export const SOCIAL_ICON_SIZE_POST_ACTION = 24");
+    const like = readFileSync("src/components/social/social-engagement.tsx", "utf8");
+    const comments = readFileSync("src/components/social/social-comment-thread.tsx", "utf8");
+    expect(like).toContain("SOCIAL_POST_ACTION_HIT_CLASS");
+    expect(like).toContain("SOCIAL_POST_ACTION_HEART_NUDGE_CLASS");
+    expect(like).toContain("text-accent");
+    expect(comments).toContain("SOCIAL_POST_ACTION_HIT_CLASS");
+    expect(comments).not.toContain("HEART_NUDGE");
+    const homeStories = rail.slice(rail.indexOf("function HomeTallStoriesRail"), rail.indexOf("export function SocialStoriesRail"));
+    expect(homeStories).toContain("SOCIAL_STORIES_FEED_RULE_CLASS");
+    expect(rail.slice(rail.indexOf("export function SocialStoriesRail"))).not.toContain("SOCIAL_STORIES_FEED_RULE_CLASS");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-surface-muted");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("py-");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("gap-");

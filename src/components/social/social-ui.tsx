@@ -12,6 +12,9 @@ import {
   SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_POST_ACTION_HEART_NUDGE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
+  SOCIAL_POST_ACTIONS_CLASS,
   SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_POST_TIME_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
@@ -52,6 +55,7 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { socialProfileRendersCoverBand } from "@/lib/social-profile-cover";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import {
   SOCIAL_POST_IMAGE_SIZES,
   socialMediaFrameClass,
@@ -567,7 +571,7 @@ export function SocialPostCard({
       {captionAboveMedia ? caption : null}
       {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
       <div className={`flex flex-col gap-1 ${SOCIAL_FEED_CHROME_CLASS}`}>
-        <div data-social-post-actions="" className="flex items-center gap-3.5">
+        <div data-social-post-actions="" className={SOCIAL_POST_ACTIONS_CLASS}>
           {post.canLike ? (
             <SocialLikeButton
               postId={post.id}
@@ -577,7 +581,13 @@ export function SocialPostCard({
               icon
             />
           ) : (
-            <SocialIcon name="heart" size={22} />
+            <span className={SOCIAL_POST_ACTION_HIT_CLASS}>
+              <SocialIcon
+                name="heart"
+                size={SOCIAL_ICON_SIZE_POST_ACTION}
+                className={SOCIAL_POST_ACTION_HEART_NUDGE_CLASS}
+              />
+            </span>
           )}
           <SocialCommentTrigger post={thread} icon />
           <SocialPostShareButton postId={post.id} />

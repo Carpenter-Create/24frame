@@ -377,6 +377,25 @@ export const SOCIAL_DM_INBOX_ROW_CLASS =
 
 export const SOCIAL_FEED_CHROME_CLASS = "px-[var(--space-4)]";
 
+// Like · Comment · Share. One triplet on phone and desktop.
+// Hit 40, glyph 24, gap 16. The heart glyph drops 1px inside its
+// box so its mass shares the bubble and plane baseline.
+// docs/design-locks/social-home-post-actions-align-lock-v1.md
+export const SOCIAL_POST_ACTIONS_CLASS =
+  "flex flex-row items-center gap-[var(--space-4)]";
+
+export const SOCIAL_POST_ACTION_HIT_CLASS =
+  "inline-flex size-10 shrink-0 items-center justify-center text-ink-2 active:opacity-70";
+
+export const SOCIAL_POST_ACTION_HEART_NUDGE_CLASS = "translate-y-px";
+
+// Phone only. Under the Home Stories rail, same hairline as the feed.
+// The host is already bled, so the rule meets the viewport.
+// Desktop stays without it.
+// docs/design-locks/social-home-stories-feed-hairline-lock-v1.md
+export const SOCIAL_STORIES_FEED_RULE_CLASS =
+  "max-md:border-b max-md:border-solid max-md:border-hairline";
+
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).
 export const SOCIAL_POST_TIME_CLASS =
