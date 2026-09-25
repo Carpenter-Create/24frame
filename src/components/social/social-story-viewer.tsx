@@ -43,7 +43,6 @@ import {
   SOCIAL_STORY_PROGRESS_FILL_CLASS,
   SOCIAL_STORY_PROGRESS_ROW_CLASS,
   SOCIAL_STORY_STAGE_CLASS,
-  SOCIAL_STORY_STAGE_IN_CLASS,
   SOCIAL_STORY_STILL_PROGRESS_MS,
 } from "@/lib/social-chrome";
 import { SOCIAL_POST_IMAGE_SIZES } from "@/lib/social-media-display";
@@ -282,7 +281,6 @@ export function SocialStoryViewer({
   const [muted, setMuted] = useState(false);
   const [audible, setAudible] = useState(true);
   const [audibleFor, setAudibleFor] = useState<string | null>(null);
-  const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
   const [hop, setHop] = useState<"next" | "prev" | null>(null);
   const [hearts, setHearts] = useState<Record<string, SocialStoryLikeState>>({ ...likes });
   const [heartPending, setHeartPending] = useState(false);
@@ -355,11 +353,19 @@ export function SocialStoryViewer({
 
   useLayoutEffect(() => {
     const direction = consumeStoryEnter();
-    // The 180ms fade must be on the frame the browser paints. A later frame flashes.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- commit enter before paint
+    // Commit the segment hop before paint. Open itself stays opaque — a fade from
+    // zero is the jump the open-smooth lock forbids.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- commit hop before paint
     if (direction) setHop(direction);
-    else setEnter("open");
   }, [storyId]);
+  useLayoutEffect(() => {
+    if (!item) return;
+    const first = item.media[0];
+    const video = first?.kind === "video" ? first : null;
+    if (video?.playbackId && isSocialMuxId(video.playbackId)) return;
+    if (first?.kind === "image" && first.url) return;
+    noteStoryMediaPainted();
+  }, [item]);
   useEffect(() => {
     const stage = stageRef.current;
     const screen = stage ? storyScreen(stage) : null;
@@ -513,7 +519,7 @@ export function SocialStoryViewer({
       data-social-story-stage=""
       className={cn(SOCIAL_STORY_STAGE_CLASS, SOCIAL_STORY_HOLD_SURFACE_CLASS)}
     >
-      <div className={cn("relative h-full w-full", enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null)}>
+      <div className="relative h-full w-full">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-40 hidden items-center justify-between p-4 md:flex">
         {/* eslint-disable-next-line @next/next/no-img-element -- dark-stage wordmark; BrandLogo swaps with theme */}
         <img

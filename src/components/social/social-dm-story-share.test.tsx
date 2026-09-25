@@ -64,8 +64,8 @@ describe("SocialDmStoryShare", () => {
     expect(mux).toContain("data-social-post-video");
     expect(mux).toContain("data-social-dm-story-video");
     expect(mux).not.toContain("<video");
-    expect(mux).not.toContain("<img");
-    expect(mux).not.toContain("https://image.mux.com/abc12345xx/thumbnail.webp");
+    expect(mux).toContain('data-social-mux-poster=""');
+    expect(mux).toContain("https://image.mux.com/abc12345xx/thumbnail.webp");
     expect(mux).not.toContain("/social/stories");
     expect(mux).not.toContain("shadow");
 
@@ -81,7 +81,7 @@ describe("SocialDmStoryShare", () => {
     expect(file).toContain("data-social-video-closed");
     expect(file).not.toContain("<video");
     expect(file).toContain("data-social-post-video");
-    expect(file).not.toContain("#t=0.1");
+    expect(file).not.toContain("/api/social/media");
     expect(file).not.toContain("<img");
     expect(file).not.toContain("/social/stories");
   });

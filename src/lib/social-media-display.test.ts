@@ -4,13 +4,11 @@ import { describe, expect, it } from "vitest";
 import {
   isAnimatedRasterSrc,
   isLocalMediaPreviewSrc,
-  isRejectedSocialVideoSrc,
   isSessionGatedSocialSrc,
   socialAvatarImageSizes,
   socialMediaFrameClass,
   socialStoryMediaFrameClass,
   socialMediaOrientation,
-  socialVideoDisplaySrc,
 } from "./social-media-display";
 
 describe("social media display", () => {
@@ -20,18 +18,12 @@ describe("social media display", () => {
     expect(isAnimatedRasterSrc("/local.gif")).toBe(true);
   });
 
-  it("refuses proxy, fragment, and raw object URLs as a Social video src", () => {
-    expect(isRejectedSocialVideoSrc("/api/social/media?key=stories%2Forg%2Fclip.mp4")).toBe(true);
-    expect(isRejectedSocialVideoSrc("/api/social/media?key=stories%2Forg%2Fclip.mp4#t=0.1")).toBe(true);
-    expect(isRejectedSocialVideoSrc("https://cf.example/welcome.mp4?sig=1")).toBe(true);
-    expect(isRejectedSocialVideoSrc("https://cf.example/welcome.mp4#t=2")).toBe(true);
-    expect(isRejectedSocialVideoSrc("")).toBe(true);
-    expect(socialVideoDisplaySrc("https://cf.example/welcome.mp4?sig=1")).toBe("");
-    expect(socialVideoDisplaySrc("/api/social/media?key=clip.mp4#t=0.1")).toBe("");
-    expect(socialVideoDisplaySrc("")).toBe("");
-    expect(isRejectedSocialVideoSrc("https://stream.mux.com/uNbxnGLKJ00yfbijDO8COxT.m3u8")).toBe(false);
+  it("treats only blob and data URLs as a local capture preview", () => {
     expect(isLocalMediaPreviewSrc("blob:https://local/1")).toBe(true);
+    expect(isLocalMediaPreviewSrc("data:video/mp4;base64,AAA")).toBe(true);
     expect(isLocalMediaPreviewSrc("https://s3.example/welcome.mp4")).toBe(false);
+    expect(isLocalMediaPreviewSrc("/api/social/media?key=posts/u/x.jpg")).toBe(false);
+    expect(isLocalMediaPreviewSrc("")).toBe(false);
   });
 
   it("sizes profile faces for the 80px disk", () => {
@@ -42,7 +34,7 @@ describe("social media display", () => {
   it("treats same-origin Social signer routes as session-gated", () => {
     expect(isSessionGatedSocialSrc("/api/social/avatar/11111111-1111-4111-8111-111111111111")).toBe(true);
     expect(isSessionGatedSocialSrc("/api/social/media?key=posts/u/x.jpg")).toBe(true);
-    expect(isSessionGatedSocialSrc("/api/social/media?key=posts/u/x.mp4#t=0.1")).toBe(true);
+    expect(isSessionGatedSocialSrc("/api/social/media?key=posts/u/x.jpg#still")).toBe(true);
     expect(isSessionGatedSocialSrc("https://cf.example/posts/u/x.jpg")).toBe(false);
     expect(isSessionGatedSocialSrc("/api/account/photo")).toBe(false);
   });
@@ -75,15 +67,23 @@ describe("social media display", () => {
       "src/components/social/social-story-rail-cover.tsx",
       "src/components/social/social-welcome-video.tsx",
       "src/app/(app)/social/explore/page.tsx",
+      "src/app/(app)/social/stories/[id]/page.tsx",
+      "src/lib/social-edge.ts",
+      "src/lib/social-media-display.ts",
     ];
     for (const file of files) {
       const src = readFileSync(file, "utf8");
       expect(src).not.toContain("socialVideoDisplaySrc");
-      expect(src).not.toContain("<video");
-      expect(src).not.toContain("#t=0.1");
+      expect(src).not.toContain("signedStoryPlaybackItems");
+      expect(src).not.toContain("signedSocialMediaUrl");
+      expect(src).not.toContain("#t=");
+      if (file.endsWith(".tsx")) expect(src).not.toContain("<video");
     }
     const player = readFileSync("src/components/social/social-mux-player.tsx", "utf8");
     expect(player).toContain("onLoadedData={paint}");
+    expect(player).toContain('data-social-mux-poster=""');
     expect(player).not.toContain("if (ready) onPaint?.()");
+    expect(player).not.toContain("<video");
+    expect(player).not.toContain("#t=");
   });
 });

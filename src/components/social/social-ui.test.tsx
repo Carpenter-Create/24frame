@@ -985,7 +985,7 @@ describe("SocialPostCard media", () => {
     expect(html).toContain('src="https://cf.example/signed-image"');
     expect(html).toContain("data-social-post-video");
     expect(html).toContain("data-social-video-closed");
-    expect(html).not.toContain('src="https://cf.example/signed-video#t=0.1"');
+    expect(html).not.toContain("signed-video");
     expect(html).not.toContain("<video");
 
     const mux = renderToStaticMarkup(

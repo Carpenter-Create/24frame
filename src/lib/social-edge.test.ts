@@ -64,13 +64,34 @@ describe("Social Edge media proxies", () => {
         [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "signed" }],
         AUTHOR,
       ),
-    ).toEqual({ kind: "video", url: "" });
+    ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
     expect(
       socialStoryRailCover(
         [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "public" }],
         AUTHOR,
       ),
     ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
+  });
+
+  it("blanks a video url when there is no playback id and keeps stills on the image proxy", () => {
+    const imageKey = `stories/${AUTHOR}/${OBJECT}.jpg`;
+    const videoKey = `stories/${AUTHOR}/${OBJECT}.mp4`;
+    const items = socialMediaProxies(
+      [
+        { kind: "image", key: imageKey, contentType: "image/jpeg" },
+        { kind: "video", key: videoKey, contentType: "video/mp4" },
+      ],
+      AUTHOR,
+      "stories",
+    );
+    expect(items[0]).toMatchObject({
+      kind: "image",
+      url: `${SOCIAL_MEDIA_ROUTE}?key=${encodeURIComponent(imageKey)}`,
+    });
+    expect(items[1]?.kind).toBe("video");
+    expect(items[1]?.url).toBe("");
+    expect(items[1]?.url).not.toContain(SOCIAL_MEDIA_ROUTE);
+    expect(items[1]).not.toHaveProperty("playbackId");
   });
 
   it("exposes Mux playback ids on Edge profile without the S3 proxy", () => {

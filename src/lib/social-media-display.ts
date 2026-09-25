@@ -1,6 +1,5 @@
 import { SOCIAL_DESKTOP_MEASURE } from "@/lib/social-chrome";
 import { SOCIAL_AVATAR_ROUTE, SOCIAL_MEDIA_ROUTE } from "@/lib/social-edge";
-import { SOCIAL_MUX_PLAYBACK_HOST } from "@/lib/social-mux";
 
 // Display-only Social media helpers. Signing stays in s3-avatars /
 // s3-social-media. No upload or recorder changes.
@@ -40,35 +39,9 @@ export function isSessionGatedSocialSrc(src: string): boolean {
   return path === SOCIAL_MEDIA_ROUTE || path.startsWith(`${SOCIAL_AVATAR_ROUTE}/`);
 }
 
-/**
- * Published Social video is Mux Player only.
- * Proxy, redirect, media fragments, and raw object URLs are refused.
- * A Mux playback URL is the only string this helper does not reject.
- * Callers still must not assign it to a native <video>.
- */
-export function isRejectedSocialVideoSrc(src: string): boolean {
-  if (!src || src.includes("#")) return true;
-  try {
-    const url = new URL(src, "https://local.invalid");
-    if (url.hash) return true;
-    if (url.pathname === SOCIAL_MEDIA_ROUTE || url.pathname.startsWith(`${SOCIAL_AVATAR_ROUTE}/`)) {
-      return true;
-    }
-    return !(url.protocol === "https:" && url.hostname === SOCIAL_MUX_PLAYBACK_HOST);
-  } catch {
-    return true;
-  }
-}
-
-/** Local capture preview. Not a published Social playback URL. */
+/** Local capture preview. Not published Social playback. */
 export function isLocalMediaPreviewSrc(src: string): boolean {
   return src.startsWith("blob:") || src.startsWith("data:");
-}
-
-/** Fail closed. Rejected Social video srcs stay empty. */
-export function socialVideoDisplaySrc(src: string): string {
-  if (isRejectedSocialVideoSrc(src)) return "";
-  return src;
 }
 
 export type SocialMediaOrientation = "portrait" | "landscape";
@@ -113,7 +86,7 @@ export function socialMediaOrientation(
   return input.kind === "image" ? "portrait" : "landscape";
 }
 
-/** Feed media frame SoT. Stills, Mux poster, Mux player, native video. */
+/** Feed media frame SoT. Stills, Mux poster, and Mux player. */
 export function socialMediaFrameClass(
   orientation: SocialMediaOrientation | SocialMediaFrameInput,
 ): string {

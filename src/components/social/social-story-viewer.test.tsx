@@ -76,7 +76,6 @@ describe("SocialStoryViewer", () => {
     expect(html).toContain("data-social-video-closed");
     expect(html).not.toContain("<video");
     expect(html).not.toContain("/api/social/media?key=stories%2Forg%2Fclip.mp4");
-    expect(html).not.toContain("#t=0.1");
     expect(html).toContain('data-social-story-frame=""');
     expect(html).toContain("data-social-story-pause");
     expect(html).toContain("data-social-story-mute");
@@ -129,7 +128,8 @@ describe("SocialStoryViewer", () => {
     );
     expect(mux).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
     expect(mux).toContain('data-social-mux-playback="pending"');
-    expect(mux).not.toContain("image.mux.com");
+    expect(mux).toContain('data-social-mux-poster=""');
+    expect(mux).toContain("https://image.mux.com/uNbxnGLKJ00yfbijDO8COxT/thumbnail.webp");
     expect(mux).not.toContain("<video");
     expect(mux).toContain("data-social-story-mute");
   });
@@ -145,6 +145,9 @@ describe("SocialStoryViewer", () => {
     expect(src).toContain("w-2/3");
     expect(src).toContain("SOCIAL_STORY_PROGRESS_ROW_CLASS");
     expect(src).not.toContain("requestAnimationFrame(() => setEnter");
+    expect(src).not.toContain("SOCIAL_STORY_STAGE_IN_CLASS");
+    const hold = readFileSync("src/components/social/social-story-open-hold.tsx", "utf8");
+    expect(hold).toContain("flushSync(() => setSrc(next))");
     const warm = src.slice(src.lastIndexOf("new MutationObserver"));
     expect(warm).toContain("paintStoryEnter");
     expect(src.indexOf("flushSync(() => apply(null))")).toBeLessThan(
@@ -165,8 +168,10 @@ describe("SocialStoryViewer", () => {
     expect(src).not.toContain("currentTime = 0");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
-    expect(page).toContain("signedStoryPlaybackItems");
+    expect(page).toContain("socialMediaProxies");
+    expect(page).not.toContain("signedStoryPlaybackItems");
     expect(page).not.toContain("signedSocialMediaItems");
+    expect(page).not.toContain("signedSocialMediaUrl");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");
     expect(page).toContain("SOCIAL.stories.close");
   });

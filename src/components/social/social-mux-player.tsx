@@ -21,6 +21,20 @@ import {
 
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
+function MuxPoster({ src, onReady }: { src: string; onReady: () => void }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- thumb hold until decoded frames
+    <img
+      alt=""
+      src={src}
+      data-social-mux-poster=""
+      onLoad={onReady}
+      onError={onReady}
+      className="pointer-events-none absolute inset-0 size-full object-cover"
+    />
+  );
+}
+
 function playerStyle(chromeless: boolean) {
   if (!chromeless) {
     return {
@@ -58,9 +72,16 @@ export function SocialMuxPlayer({
 }) {
   const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
   const [mint, setMint] = useState<{ playbackId: string; tokens: SocialMuxPlaybackTokens } | null>(null);
+  const [paintedId, setPaintedId] = useState<string | null>(null);
   const tokens = signed && mint?.playbackId === playbackId ? mint.tokens : null;
-  const paint = () => {
+  const painted = paintedId === playbackId;
+  const poster = socialMuxThumbnailUrl(playbackId, tokens?.thumbnail);
+  const releaseHold = () => {
     onPaint?.();
+  };
+  const paint = () => {
+    setPaintedId(playbackId);
+    releaseHold();
   };
 
   useEffect(() => {
@@ -86,41 +107,47 @@ export function SocialMuxPlayer({
       data-social-mux-player={playbackId}
       data-social-mux-playback={signed ? (tokens ? "signed" : "pending") : "public"}
       data-social-post-video=""
-      className={cn(SOCIAL_MUX_PLAYER_CLASS, className)}
+      className={cn("relative", SOCIAL_MUX_PLAYER_CLASS, className)}
     >
       {signed ? (
-        tokens ? (
+        <>
+          {tokens ? (
+            <MuxPlayer
+              playbackId={playbackId}
+              tokens={{
+                playback: tokens.playback,
+                thumbnail: tokens.thumbnail,
+                storyboard: tokens.storyboard,
+              }}
+              streamType="on-demand"
+              playsInline
+              autoPlay={autoPlay}
+              muted={muted}
+              preload="metadata"
+              onLoadedData={paint}
+              poster={poster}
+              className="size-full object-cover"
+              style={playerStyle(chromeless)}
+            />
+          ) : null}
+          {painted ? null : <MuxPoster src={poster} onReady={releaseHold} />}
+        </>
+      ) : (
+        <>
           <MuxPlayer
             playbackId={playbackId}
-            tokens={{
-              playback: tokens.playback,
-              thumbnail: tokens.thumbnail,
-              storyboard: tokens.storyboard,
-            }}
             streamType="on-demand"
             playsInline
             autoPlay={autoPlay}
             muted={muted}
             preload="metadata"
             onLoadedData={paint}
-            poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
+            poster={poster}
             className="size-full object-cover"
             style={playerStyle(chromeless)}
           />
-        ) : null
-      ) : (
-        <MuxPlayer
-          playbackId={playbackId}
-          streamType="on-demand"
-          playsInline
-          autoPlay={autoPlay}
-          muted={muted}
-          preload="metadata"
-          onLoadedData={paint}
-          poster={socialMuxThumbnailUrl(playbackId)}
-          className="size-full object-cover"
-          style={playerStyle(chromeless)}
-        />
+          {painted ? null : <MuxPoster src={poster} onReady={releaseHold} />}
+        </>
       )}
     </div>
   );

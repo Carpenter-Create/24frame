@@ -161,8 +161,23 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("AC");
   });
 
-  it("shows replace and remove when a welcome video URL exists, and omits the public empty band", () => {
+  it("shows replace and remove when a welcome video is present, and does not play it", () => {
     const html = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="ada"
+        displayName="Ada Lovelace"
+        bio=""
+        photoUrl={null}
+        welcomeVideoUrl="present"
+      />,
+    );
+    expect(html).toContain("data-social-profile-edit-welcome");
+    expect(html).toContain(SOCIAL.profile.welcomeReplace);
+    expect(html).toContain(SOCIAL.profile.welcomeRemove);
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("data-social-welcome-video");
+    const stale = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
         displayName="Ada Lovelace"
@@ -171,13 +186,9 @@ describe("SocialProfileEditForm", () => {
         welcomeVideoUrl="https://s3.example/welcome.mp4"
       />,
     );
-    expect(html).toContain("data-social-profile-edit-welcome");
-    expect(html).toContain(SOCIAL.profile.welcomeReplace);
-    expect(html).toContain(SOCIAL.profile.welcomeRemove);
-    expect(html).toContain("data-social-video-closed");
-    expect(html).not.toContain('src="https://s3.example/welcome.mp4"');
-    expect(html).not.toContain("<video");
-    expect(html).not.toContain("data-social-welcome-video");
+    expect(stale).toContain("data-social-video-closed");
+    expect(stale).not.toContain("<video");
+    expect(stale).not.toContain("welcome.mp4");
   });
 
   it("shows one Professions drill-in row from persisted crafts and never a Category label", () => {

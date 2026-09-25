@@ -751,7 +751,7 @@ describe("social writes stay on the live spine", () => {
     ];
     for (const file of feed) {
       expect(readFileSync(file, "utf8")).toMatch(
-        /signedSocialMedia|socialMediaProxies|signedStoryPlaybackItems/,
+        /signedSocialMedia|socialMediaProxies/,
       );
     }
     const groupPost = readFileSync("src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx", "utf8");

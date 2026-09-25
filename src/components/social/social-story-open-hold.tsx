@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { flushSync } from "react-dom";
 
 import {
   SOCIAL_STORY_MEDIA_PAINTED,
@@ -40,7 +41,9 @@ export function SocialStoryOpenHold() {
       if (!(target instanceof Element)) return;
       const card = target.closest("a[data-social-story-card]");
       if (!(card instanceof HTMLElement)) return;
-      setSrc(storyOpenHoldSrc(card));
+      const next = storyOpenHoldSrc(card);
+      if (!next) return;
+      flushSync(() => setSrc(next));
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);

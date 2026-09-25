@@ -59,6 +59,8 @@ describe("SocialFeedVideo", () => {
     );
     expect(html).toContain('data-social-mux-player="abc12345xx"');
     expect(html).toContain('data-social-mux-playback="pending"');
+    expect(html).toContain('data-social-mux-poster=""');
+    expect(html).toContain("https://image.mux.com/abc12345xx/thumbnail.webp");
     expect(html).not.toContain("data-mux-player-stub");
     expect(html).not.toContain('data-mux-has-tokens="yes"');
   });
@@ -73,7 +75,6 @@ describe("SocialFeedVideo", () => {
     expect(html).toContain("data-social-post-video");
     expect(html).not.toContain("<video");
     expect(html).not.toContain("https://cf.example/signed-video");
-    expect(html).not.toContain("#t=0.1");
     expect(html).not.toContain("data-social-mux-player");
   });
 

@@ -55,8 +55,8 @@ export function socialStoryRailCover(
   const first = socialMediaProxies(media, authorId, "stories")[0];
   if (!first) return null;
   if (first.playbackId) {
-    if (socialMuxPlaybackRequiresTokens(first.playbackPolicy)) return { kind: "video", url: "" };
-    return first.url ? { kind: "image", url: first.url } : { kind: "video", url: "" };
+    const thumb = first.url || socialMuxThumbnailUrl(first.playbackId);
+    return thumb ? { kind: "image", url: thumb } : { kind: "video", url: "" };
   }
   if (first.kind === "video") return { kind: "video", url: "" };
   if (!first.url) return null;
@@ -81,7 +81,7 @@ export function socialMediaProxies(
         }
       : {
           kind: item.kind,
-          url: socialMediaHref(item.key),
+          url: item.kind === "video" ? "" : socialMediaHref(item.key),
           contentType: item.contentType,
         },
   );
