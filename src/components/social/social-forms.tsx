@@ -600,7 +600,7 @@ export function SocialCreateCompose({
             {SOCIAL.home.submit}
           </button>
         </div>
-        <div className="mt-[var(--space-4)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
+        <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
           <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
           <span className="min-w-0 t-body font-medium text-ink">{authorName}</span>
         </div>
@@ -673,7 +673,7 @@ export function SocialCreateCompose({
               </div>
             </>
           ) : (
-            <div className="flex flex-1 items-center justify-center py-[var(--space-8)]">
+            <div className="flex flex-1 items-center justify-center" data-social-write-voice-stage="">
               <HouseVoiceMic
                 surface="dictate"
                 workspace="social"
@@ -686,7 +686,7 @@ export function SocialCreateCompose({
         </div>
         <div
           className={cn(
-            "flex flex-col gap-[var(--space-2)] pt-[var(--space-4)]",
+            "flex flex-col gap-[var(--space-2)]",
             media.length === 0 && "mt-auto",
           )}
         >

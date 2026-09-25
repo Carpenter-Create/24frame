@@ -803,8 +803,9 @@ export const SOCIAL_WRITE_COMPOSE_POST_CLASS =
 export const SOCIAL_WRITE_COMPOSE_X_CLASS =
   "inline-flex size-11 shrink-0 items-center justify-center text-ink active:opacity-70";
 
+// §0.2. Diameter 220. #EEEEF0 is denser than --surface-muted. The 1px hairline sits inside the face.
 export const SOCIAL_WRITE_VOICE_HERO_CLASS =
-  "flex size-48 shrink-0 items-center justify-center rounded-full border border-hairline bg-surface-muted text-ink";
+  "flex size-[220px] shrink-0 items-center justify-center rounded-full border border-hairline bg-[#EEEEF0] text-ink";
 
 export const SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS = "ring-2 ring-accent";
 
@@ -812,13 +813,13 @@ export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent
 
 // Idle pill stays h 48 / radius 24 / muted fill / pad H 16. The field is one line, line-height 1, pad V 0, so the shell centers it.
 export const SOCIAL_WRITE_COMPOSE_PILL_CLASS =
-  "flex h-12 w-full items-center rounded-[24px] bg-surface-muted px-[var(--space-4)]";
+  "flex h-12 w-full items-center rounded-[24px] bg-[#EEEEF0] px-[var(--space-4)]";
 
 export const SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS =
   "h-auto max-h-[40vh] min-h-12 items-start overflow-y-auto py-[var(--space-4)]";
 
 export const SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS =
-  "h-4 w-full resize-none bg-transparent py-0 leading-none text-ink caret-ink outline-none placeholder:text-ink-2";
+  "h-[var(--text-sm)] w-full resize-none bg-transparent py-0 text-[length:var(--text-sm)] leading-none text-ink caret-ink outline-none placeholder:text-ink-2";
 
 export const SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS = "h-auto min-h-12 leading-normal";
 

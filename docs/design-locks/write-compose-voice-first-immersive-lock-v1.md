@@ -1,10 +1,10 @@
 # [GC][24Frame] LOCK — Write compose voice-first immersive v1
 
 **Date:** 2026-09-25 (CT)  
-**Status:** **LOCKED** · Design Own→READY cite-only · **Amend craft BAR** (Adam tip `708c9ce7` — cheap paper → Coinbase rich-calm immersive) · prior amends: media preview · no Following · X dismiss · Design no PR · CoS tip-first CLEAR Dev #681 · stay DRAFT  
+**Status:** **LOCKED** · Design Own→READY cite-only · **Amend tip `840ef405`:** Adam widget — overall still **cheap/sparse, not Coinbase** (+ Share something V-center) · §0.2 presence/rhythm/material · Design no PR · CoS CLEAR Dev #681 · stay DRAFT  
 **Repo:** `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`  
 **Box:** `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md`  
-**FAIL:** `/workspace/24frame-agg-ux/write-compose-thin-card-adam-fail-2026-09-25.png` (thin CAPTION) · `/workspace/24frame-agg-ux/write-compose-photo-attach-no-preview-adam-fail-2026-09-25.png` (text-only Photo·Remove · **no** image face)  
+**FAIL:** `/workspace/24frame-agg-ux/write-compose-thin-card-adam-fail-2026-09-25.png` (thin CAPTION) · `/workspace/24frame-agg-ux/write-compose-photo-attach-no-preview-adam-fail-2026-09-25.png` (text-only Photo·Remove · **no** image face) · `/workspace/24frame-agg-ux/write-compose-tip-840ef405-adam-almost-2026-09-25.png` (tip `840ef405` almost-100% · Share something **not** optical V-center)  
 **Grammar ref only:** `/workspace/24frame-agg-ux/write-compose-voice-first-chatgpt-ref-2026-09-25.png` (big voice center · compact bottom Ask-bar — **not** ChatGPT brand / orb / dark)  
 **Media grammar ref only:** `/workspace/24frame-agg-ux/write-compose-photo-preview-instagram-ref-2026-09-25.png` (preview **above** caption — **not** IG dark / brand / New-post chrome invent)  
 **Keeps from** `write-compose-immersive-icons-lock-v1.md`: edge-to-edge · hide Social header+dock · media icons-only · X + Post  
@@ -33,14 +33,14 @@
 | Top chrome | Row **48** · bottom hairline **`#ECEDF0` 1px** only · pad H **16** · X leading · Post trailing |
 | Post CTA | Height **40** · radius **8** · Sporty Blue `#1769FF` · label white `t-sm` medium · pad H **16** |
 | X dismiss | Hit **44×44** · glyph **22** ink `#14171A` · **must dismiss** compose → prior Social |
-| Author | Avatar **32** + **display name only** `t-body` medium `#14171A` · gap **8** · pad top **16** · handle **OUT** (quiet redundant-chrome — one identity signal) |
-| Voice face | Diameter **192** centered in remaining stage · fill `#F4F4F6` · **optional** hairline ring `#ECEDF0` **1px** for edge (presence without shadow) |
-| Voice glyph | House Phosphor **microphone** · optical **bold/fill** weight · glyph **48** · ink `#14171A` — **OUT** thin Lucide/wireframe doodle |
+| Author | Avatar **32** + **display name only** `t-body` medium `#14171A` · gap **8** · pad top **8** (cite §0.2) · handle **OUT** (quiet redundant-chrome — one identity signal) |
+| Voice face | Diameter **220** (raise from 192 — kill sparse) · optical center of stage · fill `#EEEEF0` (denser than page white) · hairline ring `#ECEDF0` **1px** **IN** · **0** shadow |
+| Voice glyph | House Phosphor **microphone** · optical **bold/fill** weight · glyph **56** · ink `#14171A` — **OUT** thin Lucide/wireframe doodle |
 | Voice listening | Sporty Blue ring **2px** outside face · calm pulse ≤ house · wash idle none |
 | Voice recording | Soft Sporty wash **8–12%** fill + ring · house-calm |
 | Voice OUT | ChatGPT orb / cloud texture / dark stage · parody glow · bounce |
-| Bottom bar idle | Height **48** · radius **24** pill · fill `#F4F4F6` · **0** border · pad H **16** · inset **16** · above safe-area |
-| Bottom bar type | Placeholder **Share something** · `t-body` **0.9375rem** · `text-ink-2` / `#3D4450` |
+| Bottom bar idle | Height **48** · radius **24** pill · fill `#EEEEF0` (cite §0.2) · **0** border · pad H **16** · inset **16** · above safe-area |
+| Bottom bar type | Placeholder **Share something** · `t-body` **0.9375rem** · `text-ink-2` / `#3D4450` · **optical vertical center** in h48 (see §0.1) |
 | Bottom bar expand | Grow multi-line on type · max ~**40vh** · still muted fill · **no** CAPTION bordered cousin |
 | Media icons | Phosphor glyph **24** · hit **40** · gap **8** · ink `#14171A` idle · Sporty when active · optical pro weight — **OUT** thin grey doodles |
 | Dividers | **Only** top-chrome bottom hairline · **no** mid-stage section hairlines inventing form regions |
@@ -49,7 +49,64 @@
 | Audience | **OUT** — everyone default · no Following chip / picker |
 | Light mode | House light only — **OUT** IG/ChatGPT dark invent |
 
-**PASS glance:** Immersive light stage · heavy quiet chrome · voice face has material weight · bottom bar is a calm pill · Post/X Mercury-sharp · reads Coinbase crafted Social — **not** a paper admin form.
+**PASS glance:** Immersive light stage · **220** voice mass · denser `#EEEEF0` materials · tight 8-rhythm · Mercury chrome · reads Coinbase crafted Social — **not** cheap · **not** sparse · **not** paper.
+
+
+## 0.1 — Tip `840ef405` almost-100% miss list (Adam 2026-09-25)
+
+**Adam:** “Somehow it feels almost correct but not 100%” · “Share something text isn’t vertically aligned either.”  
+**Shot FAIL:** `write-compose-tip-840ef405-adam-almost-2026-09-25.png`  
+**Grammar ref (structure only):** `write-compose-voice-first-chatgpt-ref-2026-09-25.png` — voice dominates · compact bottom pill · **not** ChatGPT dark/orb/brand.  
+**CoS:** tip-first CLEAR already on Share something optical V-center in h48 pill. This § is Design Own→READY for the remaining feel gap — one SoT per row · **no** product invent · **no** soft keep-both.
+
+| Miss | Lock (one SoT) |
+|------|----------------|
+| Share something V-align | **Optical vertical center** in height-**48** pill · flex `align-items: center` · `line-height: 1` · pad V **0** · kill input default asymmetric padding / baseline drift — placeholder sits true center (Adam call · CoS tip-first) |
+| Share something H | Leading pad **16** · text starts after pad · no extra leading indent |
+| Voice optical Y | Center of **remaining stage** between author-row bottom and media-icons top · not hugging author · not biased high |
+| Voice ring | `#ECEDF0` **1px** hairline **IN** on idle face (presence; §0 optional → required) |
+| Voice mic | Phosphor **fill/bold** optical · glyph **56** (cite §0.2) · ink `#14171A` — verify not outline wire on tip |
+| Icons → pill gap | **8** (same-job rhythm) |
+| Icons row | Hit **40** · glyph **24** · gap **8** · inset H **16** · ink `#14171A` · sit **above** pill |
+| Bottom cluster | Icons + pill as one calm footer stack · inset **16** · above safe-area · **no** dead FAB / debug chip on compose |
+| Floating debug FAB | **OUT** on write compose (shot shows stray dark list FAB — kill) |
+| Chrome | Keep §0 — row **48** · hairline under chrome · Post **40**/radius **8** · X **44** dismiss |
+| Feel PASS | Phone glance = ChatGPT **grammar** + §0.2 Coinbase presence — **not** almost · **not** cheap/sparse · **not** dark orb |
+
+**OUT invent:** moving Photo/Video into the pill (+ ChatGPT clone) · dark theme · new chrome rows · audience picker · soft “keep outline mic too.”
+
+---
+
+## 0.2 — Tip `840ef405` cheap/sparse → Coinbase (Adam widget)
+
+**Adam named miss:** “Overall still cheap or sparse, not Coinbase.”  
+**Shot:** `write-compose-tip-840ef405-adam-almost-2026-09-25.png`  
+**Cite:** rich-calm v1.4 · Immersive Social · launch-great · quiet redundant-chrome · Mercury sharpness + Circle air  
+**Keep:** §0 base · §0.1 V-center + FAB OUT · no product invent · no soft keep-both · house light (not ChatGPT dark/orb)
+
+**FAIL pattern:** thin wire icons · flat postage voice disc · vast empty white with no mass · footer drifting · reads sketch not Coinbase presence.
+
+| Token | Lock (one SoT) |
+|-------|----------------|
+| Voice mass | Diameter **220** (was 192) · owns stage — Circle air around a **heavy** face, not a small disc in a void |
+| Voice fill | `#EEEEF0` solid (one step denser than `#F4F4F6` page-muted cousins) · full opacity · **0** translucent wash idle |
+| Voice ring | `#ECEDF0` **1px** hairline **IN** · crisp Mercury edge |
+| Voice mic | Phosphor **fill/bold** · glyph **56** · ink `#14171A` — optical weight matches face mass |
+| Voice Y | Optical center between author bottom and icons top (§0.1) |
+| Author rhythm | Pad top **8** under chrome hairline (was 16 — tighten cheap float) · avatar **32** · name `t-body` **medium** `#14171A` · gap **8** · handle OUT |
+| Chrome weight | Row **48** · X glyph **22** stroke optical bold · Post h **40** · radius **8** · Sporty `#1769FF` full saturation · label white medium |
+| Chrome hairline | `#ECEDF0` **1px** under chrome — present (not missing; missing = sparse float) |
+| Icons material | Phosphor **bold/regular fill** · glyph **24** · hit **40** · gap **8** · ink `#14171A` at full — **OUT** thin grey hairline doodles |
+| Icons→pill | Gap **8** · inset H **16** · one footer stack |
+| Pill material | h **48** · radius **24** · fill `#EEEEF0` (match voice denser muted) · **0** border · **0** dual hairline · solid |
+| Pill type | Share something · `t-body` **0.9375rem** · `#3D4450` · **optical V-center** (§0.1) · pad H **16** |
+| Safe-area | Footer stack pad bottom **16** above home indicator / safe-area |
+| Stage | `#FFFFFF` edge-to-edge · white is Circle air **around** voice mass — if face reads light, whole stage = sparse FAIL |
+| Debug FAB | **OUT** (§0.1) |
+| Motion | Open **180ms** · listening Sporty ring **2px** · no bounce |
+| PASS | Phone glance = Coinbase crafted presence (heavy voice · dense muted fills · sharp chrome · tight 8-rhythm) — **not** cheap · **not** sparse sketch |
+
+**OUT:** enlarging chrome invent · second accent · shadows · dark stage · orb texture · icons-into-pill · audience chip · soft “keep 192 too.”
 
 ---
 ## 1 — Host (immersive)
@@ -71,12 +128,12 @@
 | Token | Lock |
 |-------|------|
 | Placement | **Centered** in the viewport above the bottom bar (optical center of remaining stage) |
-| Size | Soft face **192×192** circle (diameter **192**) |
-| Glyph | Cite §0 — Phosphor mic **bold/fill** optical · glyph **48** · ink `#14171A` — **NOT** thin doodle · **NOT** ChatGPT orb |
-| Fill idle | Cite §0 — `#F4F4F6` · optional `#ECEDF0` 1px ring · **0** drop shadow |
+| Size | Soft face **220×220** circle (diameter **220** — cite §0.2) |
+| Glyph | Cite §0.2 — Phosphor mic **bold/fill** · glyph **56** · ink `#14171A` — **NOT** thin doodle · **NOT** ChatGPT orb |
+| Fill idle | Cite §0.2 — `#EEEEF0` · `#ECEDF0` 1px ring **IN** · **0** drop shadow |
 | Listening | Soft Sporty Blue `#1769FF` ring **2px** outside face · calm pulse ≤ house motion (no parody glow orb) |
 | Recording | Same face · stronger Sporty Blue wash (~8–12% fill) + ring · still house-calm |
-| Hit | Full **192** face is the tap target (start/stop voice) · `aria-label` Voice / Stop |
+| Hit | Full **220** face is the tap target (start/stop voice) · `aria-label` Voice / Stop |
 
 ---
 
@@ -85,8 +142,8 @@
 | Token | Lock |
 |-------|------|
 | Role | Secondary to voice — ChatGPT **“Ask…”** grammar only (compact bar · expands on type) |
-| Idle bar | Cite §0 — height **48** · radius **24** · fill `#F4F4F6` · **0** border · pad H **16** · inset **16** · above safe-area / keyboard |
-| Placeholder | Cite §0 — `t-body` · `text-ink-2`/`#3D4450` · **Share something** (not “Ask ChatGPT”) |
+| Idle bar | Cite §0.2 — height **48** · radius **24** · fill `#EEEEF0` · **0** border · pad H **16** · inset **16** · above safe-area / keyboard |
+| Placeholder | Cite §0 / §0.1 — `t-body` · `text-ink-2`/`#3D4450` · **Share something** · **optical V-center** in h48 (not “Ask ChatGPT”) |
 | Expand | Tap bar → keyboard · bar grows to multi-line compose (min height **48** → content; max ~40vh) · voice hero may scale down or hold · **no** return to bordered CAPTION card |
 | Mic-in-field | **OUT** — no microphone inside a caption text box |
 
@@ -144,6 +201,10 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 | Handle under author name on compose | Quiet redundant-chrome — name only |
 | Mid-stage section hairlines / form kickers | Only top-chrome hairline |
 | Drop shadows / ChatGPT dark orb / cloud texture | House light · rich-calm OUT ornamental |
+| Share something top-heavy / baseline drift in h48 | Adam tip `840ef405` — optical V-center |
+| Floating debug FAB on write compose | Quiet chrome · OUT |
+| Outline/wire mic on voice face | Fill/bold Phosphor optical |
+| Cheap or sparse overall (Adam widget) | §0.2 — presence mass · denser muted · tight rhythm · Coinbase |
 
 ---
 
@@ -157,6 +218,8 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 6. **No** Following / audience chip · everyone default.
 7. **X** dismisses write compose (return to prior Social).
 8. **Craft bar §0** — Coinbase rich-calm material (not cheap paper): stage `#FFF` · chrome 48+hairline · Post 40/8 · voice 192 material · bar 48/24 **0** border · pro glyphs · name-only author.
+9. **§0.1** — Share something **optical V-center** in h48 · voice optical Y · ring IN · kill debug FAB · icons→pill gap **8** (tip `840ef405`).
+10. **§0.2** — kill cheap/sparse: voice **220** / fill `#EEEEF0` / mic **56** · pill `#EEEEF0` · author pad **8** · bold icons · chrome hairline present.
 
 ---
 
@@ -167,6 +230,8 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 3. Media attached shows preview above caption · no text-only Photo·Remove.  
 4. No Following chip · X dismiss smoke passes.
 5. Phone glance reads **Coinbase crafted** Immersive Social — not cheap paper drawing.
-6. Tip cites this lock · stay DRAFT · no Design PR.
+6. Tip `840ef405` PASS: Share something optically centered · feel gap closed vs §0.1 · no almost.
+7. Tip `840ef405` PASS: **not** cheap/sparse — Coinbase presence per §0.2.
+8. Tip cites this lock · stay DRAFT · no Design PR.
 
-**Ship:** Design Own→READY craft BAR amend · CoS CLEAR Dev tip-first #681 against §0 token table.
+**Ship:** Design Own→READY tip `840ef405` §0.2 cheap/sparse · CoS CLEAR Dev against §0 + §0.1 + §0.2 (V-center tip-first already).

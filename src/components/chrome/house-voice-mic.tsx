@@ -219,7 +219,11 @@ export function HouseVoiceMic({
         else start();
       }}
     >
-      <Microphone className={hero ? "size-12" : "size-4"} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} aria-hidden />
+      <Microphone
+        className={hero ? "size-14" : "size-4"}
+        weight={hero ? "fill" : PHOSPHOR_CHROME_IDLE_WEIGHT}
+        aria-hidden
+      />
     </button>
   );
 }

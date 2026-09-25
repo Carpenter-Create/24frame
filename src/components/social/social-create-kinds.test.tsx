@@ -50,8 +50,8 @@ describe("Social create kinds", () => {
     expect(write).toContain('width="24"');
     expect(write).toContain('width="22"');
     expect(write).toContain("size-11");
-    expect(write).toContain("size-48");
-    expect(write).toContain("size-12");
+    expect(write).toContain("size-[220px]");
+    expect(write).toContain("size-14");
     expect(write).toContain("leading-none");
     expect(write).toContain("items-center");
     expect(write).toContain("min-h-dvh");
@@ -85,14 +85,20 @@ describe("Social create kinds", () => {
       "inline-flex h-10 shrink-0 items-center justify-center rounded-[8px] bg-accent px-[var(--space-4)] t-body-sm font-medium text-accent-contrast",
     );
     expect(chrome).toContain(
-      "flex size-48 shrink-0 items-center justify-center rounded-full border border-hairline bg-surface-muted text-ink",
+      "flex size-[220px] shrink-0 items-center justify-center rounded-full border border-hairline bg-[#EEEEF0] text-ink",
     );
     expect(chrome).toContain(
-      "flex h-12 w-full items-center rounded-[24px] bg-surface-muted px-[var(--space-4)]",
+      "flex h-12 w-full items-center rounded-[24px] bg-[#EEEEF0] px-[var(--space-4)]",
     );
-    expect(chrome).toContain("py-0 leading-none");
-    expect(chrome).not.toContain("bg-[#EEEEF0]");
-    expect(chrome).not.toContain("size-[220px]");
+    expect(chrome).toContain("py-0 text-[length:var(--text-sm)] leading-none");
+    expect(chrome).not.toContain("size-48 shrink-0");
+    expect(src).toContain("data-social-write-voice-stage");
+    const voice = readFileSync("src/components/chrome/house-voice-mic.tsx", "utf8");
+    expect(voice).toContain('weight={hero ? "fill"');
+    expect(voice).toContain('className={hero ? "size-14"');
+    const css = readFileSync("src/app/globals.css", "utf8");
+    expect(css).toContain("body:has([data-social-write-compose])");
+    expect(css).toContain("#vercel-toolbar");
     const dismiss = src.slice(
       src.indexOf("data-social-create-dismiss"),
       src.indexOf("data-social-create-author"),
