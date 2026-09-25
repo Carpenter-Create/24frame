@@ -1,7 +1,7 @@
 # [GC][24Frame] LOCK — Write compose voice-first immersive v1
 
 **Date:** 2026-09-25 (CT)  
-**Status:** **LOCKED** · Design Own→READY cite-only · **Amend tip `840ef405`:** Adam widget — overall still **cheap/sparse, not Coinbase** (+ Share something V-center) · §0.2 presence/rhythm/material · Design no PR · CoS CLEAR Dev #681 · stay DRAFT  
+**Status:** **LOCKED** · **§0.3 Adam LOCKED hybrid (2026-09-25):** kind=text caption-primary · empty media OUT · mic=dictate footer · supersedes empty-state voice-primary on kind=text only · Design Own→READY · no PR · CoS CLEAR Dev #681 · stay DRAFT  
 **Repo:** `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`  
 **Box:** `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md`  
 **FAIL:** `/workspace/24frame-agg-ux/write-compose-thin-card-adam-fail-2026-09-25.png` (thin CAPTION) · `/workspace/24frame-agg-ux/write-compose-photo-attach-no-preview-adam-fail-2026-09-25.png` (text-only Photo·Remove · **no** image face) · `/workspace/24frame-agg-ux/write-compose-tip-840ef405-adam-almost-2026-09-25.png` (tip `840ef405` almost-100% · Share something **not** optical V-center)  
@@ -15,7 +15,7 @@
 
 ## One lock
 
-**House-light immersive write compose — Coinbase rich-calm craft bar (not cheap paper form). Voice-hero first when no media; media preview above caption when attached. Kill thin CAPTION card · text-only Photo·Remove · Following chip. X dismisses. Material tokens below are SoT.**
+**House-light immersive write compose — Coinbase rich-calm craft bar (not cheap paper form). §0.3: kind=text empty = caption-primary (no permanent 220 voice hero); mic footer = dictate; media icons OUT until attach. Media attached = preview above caption. Photo/video create kinds = media-first unchanged. Kill thin CAPTION card · text-only Photo·Remove · Following chip · Voice|Text tabs. X dismisses. Material tokens below are SoT.**
 
 ---
 
@@ -24,7 +24,7 @@
 
 **FAIL class:** “cheap paper drawing” / thin form sketch / wireframe Social — **not** Immersive Social · **not** Coinbase rich-calm.
 
-**IN register:** Coinbase precise calm trust + thoughtful hierarchy + presence (rich-calm v1.4 chrome on light compose). Richness on this surface = **voice stage presence** (no media) and **media preview fill** (when attached) — **not** ornamental invent · **not** ChatGPT dark/orb · **not** shadow stacks.
+**IN register:** Coinbase precise calm trust + thoughtful hierarchy + presence (rich-calm v1.4 chrome on light compose). Richness on this surface = **caption-primary presence** on kind=text empty (§0.3) and **media preview fill** (when attached) — historical voice-stage mass **superseded** empty on text — **not** ornamental invent · **not** ChatGPT dark/orb · **not** shadow stacks.
 
 | Token | Lock (one SoT) |
 |-------|----------------|
@@ -49,7 +49,7 @@
 | Audience | **OUT** — everyone default · no Following chip / picker |
 | Light mode | House light only — **OUT** IG/ChatGPT dark invent |
 
-**PASS glance:** Immersive light stage · **220** voice mass · denser `#EEEEF0` materials · tight 8-rhythm · Mercury chrome · reads Coinbase crafted Social — **not** cheap · **not** sparse · **not** paper.
+**PASS glance:** Immersive light stage · §0.3 caption-primary on kind=text · denser `#EEEEF0` materials · tight 8-rhythm · Mercury chrome · reads Coinbase crafted Social — **not** cheap · **not** sparse · **not** paper · **not** empty 220 monument.
 
 
 ## 0.1 — Tip `840ef405` almost-100% miss list (Adam 2026-09-25)
@@ -109,6 +109,40 @@
 **OUT:** enlarging chrome invent · second accent · shadows · dark stage · orb texture · icons-into-pill · audience chip · soft “keep 192 too.”
 
 ---
+
+## 0.3 — kind=text caption-primary / empty media OUT (Adam LOCKED hybrid 2026-09-25)
+
+**Adam LOCKED** Design hybrid: **B for empty kind=text + A media reveal**.  
+**Supersedes:** empty-state **voice-primary** / permanent **220** voice hero on **kind=text only**.  
+**Keeps:** immersive chrome (§0–§0.2 materials · X+Post · edge-to-edge · no Following chip · rich-calm) · media preview-above-caption when attached (§5) · photo/video create kinds media-first · **no** Voice|Text tabs.  
+**Cite:** CoS craft consult · Adam pick · Design Own consult hybrid.
+
+| Token | Lock (one SoT) |
+|-------|----------------|
+| Scope | **kind=text** empty compose only (Share something → write compose direct) |
+| Stage hierarchy | **Caption owns the stage** — multi-line write surface is the post · **not** a monument mic disc |
+| Caption empty | Placeholder **Share something** · `t-body` **0.9375rem** · `#3D4450` · house light · pad H **16** · inset H **16** under author |
+| Caption grow | Multi-line · max ~**40vh** · stage `#FFFFFF` · caption field fill `#EEEEF0` · radius **16** · **0** border · **0** CAPTION label · presence well (not thin form card) |
+| Voice hero empty | **OUT** — **no** permanent diameter-**220** voice face on empty kind=text |
+| Mic | Footer Phosphor mic · glyph **24** · hit **40** · ink `#14171A` · **dictate into caption** (talk or type on text path) |
+| Listening | Compact Sporty Blue `#1769FF` affordance on mic (ring **2px** / calm pulse ≤ house) — **not** empty-stage disc · transcript lands in caption |
+| Recording | Same compact mic Sporty wash — **not** revive 220 hero |
+| Media icons empty | **OUT** on empty kind=text — no Photo/Video glyphs until **attach intent** |
+| Media reveal | On attach intent (user chooses photo/video) → icons may show while picking · after attach: **preview above caption** (§5) · Remove on/near preview |
+| Footer idle (empty text) | One calm stack: **mic** (hit 40) + **Share something** pill/field · gap **8** · inset **16** · above safe-area · **no** media icon row |
+| Footer with media | Icons (when present) + pill · icons→pill gap **8** · hit **40** · glyph **24** |
+| Photo/video kinds | **Media-first unchanged** — preview primary · caption under · same immersive chrome (X+Post · hide shell+dock · house light) |
+| Tabs | **OUT** — no Voice\|Text tabs · no mode switcher invent |
+| Materials | Keep §0 / §0.2 — `#FFFFFF` stage · chrome **48** + `#ECEDF0` hairline · Post **40**/radius **8** · spacing **8 / 16 / 24 / 48** · **no** drop shadows · Geist only |
+| Desktop | Same kind=text caption-primary grammar in immersive column max **680** — **no** phone-card cousin · **no** permanent 220 disc |
+
+**PASS glance (kind=text empty):** Caption-first Social compose · mic ready to dictate · no awkward empty media row · Coinbase rich-calm — **not** ChatGPT empty voice monument · **not** sparse form · **not** Voice\|Text tabs.
+
+**OUT invent:** soft “keep 220 too on text” · Voice\|Text tabs · mic inside caption field · media icons on empty text · dark stage · shadows.
+
+**§2 / §3 note:** Historical voice-hero-primary rows below are **superseded for kind=text empty** by this §. Do not ship empty 220 disc on text path. Listening/dictate uses footer mic only.
+
+---
 ## 1 — Host (immersive)
 
 | Token | Lock |
@@ -119,33 +153,37 @@
 | Shell | Hide Social top chrome + bottom tab dock while open · restore on dismiss (same as v1) |
 | Author | Cite §0 — avatar **32** + **name only** · handle **OUT** · **no** form section plate |
 
-**Desktop:** one immersive full overlay / centered column (**max 680** ok) — same voice-hero + bottom bar grammar · **no** phone-card-with-gutters cousin.
+**Desktop:** one immersive full overlay / centered column (**max 680** ok) — same **§0.3 kind=text caption-primary** (or §5 media-first when attached) · **no** phone-card-with-gutters cousin · **no** permanent 220 disc on text empty.
 
 ---
 
-## 2 — Voice hero (primary)
+## 2 — Voice / dictate (superseded empty-primary by §0.3)
+
+**§0.3 supersedes** permanent voice-hero as empty kind=text primary. Rows below are **historical material refs only** if a future kind reopens a face — **do not ship** empty **220** disc on kind=text.
 
 | Token | Lock |
 |-------|------|
-| Placement | **Centered** in the viewport above the bottom bar (optical center of remaining stage) |
-| Size | Soft face **220×220** circle (diameter **220** — cite §0.2) |
-| Glyph | Cite §0.2 — Phosphor mic **bold/fill** · glyph **56** · ink `#14171A` — **NOT** thin doodle · **NOT** ChatGPT orb |
-| Fill idle | Cite §0.2 — `#EEEEF0` · `#ECEDF0` 1px ring **IN** · **0** drop shadow |
-| Listening | Soft Sporty Blue `#1769FF` ring **2px** outside face · calm pulse ≤ house motion (no parody glow orb) |
-| Recording | Same face · stronger Sporty Blue wash (~8–12% fill) + ring · still house-calm |
-| Hit | Full **220** face is the tap target (start/stop voice) · `aria-label` Voice / Stop |
+| kind=text empty | Cite **§0.3** — footer mic hit **40** · dictate into caption · compact Sporty listening — **OUT** permanent 220 face |
+| Placement (legacy / OUT on text empty) | Was centered above bottom bar — **OUT** for kind=text empty |
+| Size (legacy / OUT on text empty) | Diameter **220** — cite §0.2 material history only · **OUT** empty text path |
+| Glyph footer | Phosphor mic · glyph **24** · hit **40** · ink `#14171A` — optical pro weight |
+| Listening | Compact Sporty Blue `#1769FF` ring **2px** on footer mic · calm pulse ≤ house · transcript → caption |
+| Recording | Compact Sporty wash on mic — house-calm · **not** revive empty disc |
+| Hit | Footer mic **40** start/stop dictate · `aria-label` Dictate / Stop |
 
 ---
 
-## 3 — Text secondary (compact bottom bar)
+## 3 — Caption primary on kind=text (cite §0.3)
 
 | Token | Lock |
 |-------|------|
-| Role | Secondary to voice — ChatGPT **“Ask…”** grammar only (compact bar · expands on type) |
-| Idle bar | Cite §0.2 — height **48** · radius **24** · fill `#EEEEF0` · **0** border · pad H **16** · inset **16** · above safe-area / keyboard |
-| Placeholder | Cite §0 / §0.1 — `t-body` · `text-ink-2`/`#3D4450` · **Share something** · **optical V-center** in h48 (not “Ask ChatGPT”) |
-| Expand | Tap bar → keyboard · bar grows to multi-line compose (min height **48** → content; max ~40vh) · voice hero may scale down or hold · **no** return to bordered CAPTION card |
-| Mic-in-field | **OUT** — no microphone inside a caption text box |
+| Role | **Primary** on kind=text empty — caption *is* the post (Adam hybrid) · ChatGPT compact-bar grammar **superseded** for empty text hierarchy |
+| Idle / empty | Cite **§0.3** — multi-line Share something owns stage · max ~**40vh** · rich-calm materials |
+| Pill / field | Cite §0.2 — height min **48** · radius **24** when pill · fill `#EEEEF0` · **0** border · pad H **16** · inset **16** · above safe-area / keyboard · optical V-center when single-line |
+| Placeholder | Cite §0 / §0.1 — `t-body` · `#3D4450` · **Share something** · not “Ask ChatGPT” |
+| Expand | Grows multi-line on type · max ~**40vh** · **no** bordered CAPTION card · **no** permanent voice disc behind it |
+| Mic | Footer dictate (§0.3) — **not** inside caption field |
+| Mic-in-field | **OUT** — no microphone inside the caption text box |
 
 ---
 
@@ -156,7 +194,7 @@
 | Close | Cite §0 — hit **44×44** · glyph **22** · **must dismiss** compose (Adam tip `708c9ce7`) |
 | Post | Cite §0 — height **40** · radius **8** · Sporty · white `t-sm` medium · top-trailing |
 | Audience | **OUT** — no Following / audience chip on write compose V1 · posts go to **everyone** by default · no audience picker (Adam tip `708c9ce7`) |
-| Media icons | Cite §0 — Phosphor glyph **24** · hit **40** · gap **8** · ink `#14171A` · icons only · bottom cluster · aria ok |
+| Media icons | Cite §0 + **§0.3** — Phosphor glyph **24** · hit **40** · gap **8** · ink `#14171A` · icons only · **OUT on empty kind=text** · reveal on attach intent · aria ok |
 
 ---
 
@@ -171,7 +209,7 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 | Preview | **Real image/video face** object-cover · full width minus inset **16** · radius **16** · max-height **50vh** · sits **above** the caption/write focus |
 | Order (top→bottom) | X/Post chrome → (quiet author) → **media preview** → **caption write** → media icons only (**no** Following) |
 | Caption | Primary write focal point under preview · house light · **no** CAPTION label · **no** bordered form well · expandable field / bottom bar grown for type |
-| Voice hero | **Yields** — hide or collapse the **192** voice face while media is attached · restore when all media removed |
+| Voice hero | **Yields** — kind=text already has **no** empty 220 (§0.3) · when media attached keep preview-above-caption · do **not** restore empty disc on media remove (return to §0.3 caption-primary) |
 | Remove | Control **on/near** preview (corner hit **40** · glyph **20** X or trash · or quiet “Remove” beside preview) — never text-only **Photo · Remove** with **no** image |
 | Video | Same preview slot · show poster/frame · play chevron optional calm · not a second layout |
 | House | Light `#FFFFFF` stage · Sporty Blue only for Post / active — **OUT** IG dark theme |
@@ -186,7 +224,7 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 | ChatGPT brand / orb mark / “Ask ChatGPT” copy | Grammar only |
 | Dark theme invent | House light |
 | Bordered CAPTION + label form chrome | Adam thin FAIL |
-| Mic inside caption field | Voice hero owns mic |
+| Mic inside caption field | Footer mic owns dictate (§0.3) — still OUT of caption field |
 | Layout menu / soft card cousins | Adam already picked |
 | Groups · undraft | Not this |
 | #682 · #683 | Separate |
@@ -205,33 +243,36 @@ Instagram **New post** grammar only: **visible media preview above caption**. Ca
 | Floating debug FAB on write compose | Quiet chrome · OUT |
 | Outline/wire mic on voice face | Fill/bold Phosphor optical |
 | Cheap or sparse overall (Adam widget) | §0.2 — presence mass · denser muted · tight rhythm · Coinbase |
+| Permanent 220 voice hero on kind=text empty | Adam §0.3 hybrid — caption-primary |
+| Media icons on empty kind=text | Adam §0.3 — reveal on attach only |
+| Voice\|Text tabs / mode switcher | Adam §0.3 — OUT |
+| Soft keep empty voice-primary + caption-primary | One SoT — §0.3 wins on kind=text empty |
 
 ---
 
-## Must-fix (vs tip FAIL)
+## Must-fix (vs tip FAIL + §0.3)
 
 1. Kill CAPTION label + bordered field + mic-in-field.  
-2. Big centered voice face **192** · idle / listening / recording.  
-3. Compact bottom Share something bar · expand on type only.  
+2. **§0.3** kind=text empty: caption-primary · **no** permanent 220 voice disc · footer mic hit **40** = dictate · compact Sporty listening.  
+3. Share something multi-line owns stage · grow ~**40vh** · optical V-center when single-line pill.  
 4. Edge-to-edge `#FFFFFF` · shell+dock hidden · Post/X in chrome.
-5. Media attached → visible preview **above** caption · voice hero yields · Remove on/near preview.
-6. **No** Following / audience chip · everyone default.
+5. Media icons **OUT** on empty kind=text · reveal on attach · preview **above** caption when attached · Remove on/near preview.
+6. **No** Following / audience chip · everyone default · **no** Voice|Text tabs.
 7. **X** dismisses write compose (return to prior Social).
-8. **Craft bar §0** — Coinbase rich-calm material (not cheap paper): stage `#FFF` · chrome 48+hairline · Post 40/8 · voice 192 material · bar 48/24 **0** border · pro glyphs · name-only author.
-9. **§0.1** — Share something **optical V-center** in h48 · voice optical Y · ring IN · kill debug FAB · icons→pill gap **8** (tip `840ef405`).
-10. **§0.2** — kill cheap/sparse: voice **220** / fill `#EEEEF0` / mic **56** · pill `#EEEEF0` · author pad **8** · bold icons · chrome hairline present.
+8. **Craft bar §0 / §0.2** — Coinbase rich-calm: stage `#FFF` · chrome 48+hairline · Post 40/8 · pill `#EEEEF0` · pro glyphs · name-only author · spacing 8/16/24/48 · no drop shadows.
+9. **§0.1** — Share something **optical V-center** in h48 when pill · kill debug FAB · icons→pill gap **8** when icons present.
+10. Photo/video create kinds: media-first unchanged.
 
 ---
 
 ## Done-when
 
-1. Phone glance = voice-hero immersive · not thin form card.  
-2. Tokens above match (192 · bar 48/24/16 · icons 24/40/8 · X 44).  
+1. Phone glance kind=text empty = **caption-first** immersive · not thin form · not empty voice monument.  
+2. Tokens: caption ~40vh · mic hit **40** · icons OUT empty · icons→pill **8** when present · X **44** · Post **40**/8.  
 3. Media attached shows preview above caption · no text-only Photo·Remove.  
-4. No Following chip · X dismiss smoke passes.
+4. No Following chip · no Voice|Text tabs · X dismiss smoke passes.
 5. Phone glance reads **Coinbase crafted** Immersive Social — not cheap paper drawing.
-6. Tip `840ef405` PASS: Share something optically centered · feel gap closed vs §0.1 · no almost.
-7. Tip `840ef405` PASS: **not** cheap/sparse — Coinbase presence per §0.2.
-8. Tip cites this lock · stay DRAFT · no Design PR.
+6. Tip `840ef405` PASS rows still apply for material (V-center · not cheap/sparse) where they do not conflict with §0.3 hierarchy.
+7. Tip cites this lock · stay DRAFT · no Design PR.
 
-**Ship:** Design Own→READY tip `840ef405` §0.2 cheap/sparse · CoS CLEAR Dev against §0 + §0.1 + §0.2 (V-center tip-first already).
+**Ship:** Design Own→READY **§0.3** Adam hybrid · CoS CLEAR Dev tip-first against §0.3 (+ §0–§0.2 materials · §5 media). Box SoT: `/workspace/24frame-agg-ux/write-compose-voice-first-immersive-lock-v1.md` → repo `docs/design-locks/write-compose-voice-first-immersive-lock-v1.md`.
