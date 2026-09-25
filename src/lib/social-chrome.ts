@@ -264,6 +264,9 @@ export const SOCIAL_STORY_HOLD_SURFACE_CLASS = "select-none social-story-no-call
 // A still has no media duration; the fill uses this display interval.
 // Not a capture cap.
 export const SOCIAL_STORY_STILL_PROGRESS_MS = 5000;
+// Write compose still names this open class. The CSS fade stays out:
+// stories open-smooth forbids that keyframe in globals.css.
+export const SOCIAL_STORY_STAGE_IN_CLASS = "social-story-stage-in";
 export const SOCIAL_STORY_ACTIVATE_NEXT_CLASS = "social-story-activate";
 export const SOCIAL_STORY_ACTIVATE_PREV_CLASS = "social-story-activate-prev";
 export const SOCIAL_STORY_PROGRESS_FILL_CLASS = "social-story-progress";
