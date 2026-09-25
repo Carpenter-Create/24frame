@@ -169,8 +169,8 @@
 | Empty state | Placeholder visible in stage/row · mic trailing in-row · stage white reads as write face — **not** dead white half under a gray card |
 | Typing state | Placeholder clears · multiline grows up · caret + latest line stay fully visible above the row bottom / safe area · no mic · Post enabled when content |
 | Listening state | Mic → Sporty `#1769FF` · ring **2px** outside hit · calm pulse ≤ house · transcript appends into caption · tap mic stop |
-| Media empty | Glyphs **OUT** until attach intent |
-| Media attached | Cite §5 — preview above caption · Remove on/near · then compose row may show media icons · icons→text gap **8** |
+| Media empty | Cite **§0.4.1** — one camera far-right opens the library · not a text-only row · not a photo+video pair |
+| Media attached | Cite §5 — preview above caption · Remove on/near · camera stays far-right so more can be added |
 | Photo/video kinds | Media-first unchanged · same immersive chrome |
 | Desktop | Same grammar · column max **680** · compose row same · no phone-card cousin |
 | Tabs | **OUT** Voice\|Text |
@@ -179,12 +179,16 @@
 
 | State | Must read |
 |-------|-----------|
-| Empty | White stage · Share something · mic in-row trailing · **no** gray plate · **no** orphan mic |
+| Empty | White stage · Share something · camera far-right · **no** mic · **no** gray plate |
 | Typing | Caption grows on white · mic stays in-row · Mercury chrome |
 | Listening | Mic Sporty · words land in caption · still no paper card |
 
-**PASS:** Phone glance = iMessage-like write · type owns face · mic accessory in row · Immersive Social / not paper.  
-**FAIL class:** tip `9c4cf970` gray card · mic under left · dead white · flat paper UI · 220 disc · Voice\|Text tabs.
+**PASS:** Phone glance = iMessage-like write · type owns face · camera far-right opens the library · mic **OUT** · Immersive Social / not paper.  
+**FAIL class:** tip `9c4cf970` gray card · mic under left · dead white · flat paper UI · 220 disc · Voice\|Text tabs · text-only row with no library path.
+
+### 0.4.1 — camera far-right (Adam LOCK 2026-09-25)
+
+Mic stays **OUT** on feed write. One Phosphor **camera** occupies the trailing slot the mic used. Hit **40** · glyph **24** · ink `#14171A` · opens the library (`SOCIAL_MEDIA_ACCEPT`, same `onPick`). Present on empty. Stays reachable when media is attached. No photo+video pair on the empty row. No DM voice notes.
 
 **OUT invent:** soft keep `#EEEEF0` plate “for presence” · mic below row · mic left-orphaned · revive 220 · dark stage · shadows · media icons on empty.
 

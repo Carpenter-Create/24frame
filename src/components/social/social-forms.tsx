@@ -31,7 +31,6 @@ import {
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_REPLY_PILL_CLASS,
-  SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS,
   SOCIAL_STORY_STAGE_IN_CLASS,
   SOCIAL_WRITE_COMPOSE_CHROME_CLASS,
   SOCIAL_WRITE_COMPOSE_HOST_CLASS,
@@ -667,40 +666,6 @@ export function SocialCreateCompose({
           )}
         </div>
         <div className={SOCIAL_WRITE_COMPOSE_ROW_CLASS} data-social-write-compose-row="">
-          {media.length > 0 ? (
-            <div className={SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS} data-social-create-attach-row="">
-              <button
-                type="button"
-                data-social-create-attach="photo"
-                aria-label={SOCIAL.create.photo}
-                className={SOCIAL_POST_ACTION_HIT_CLASS}
-                disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
-                onClick={() => fileRef.current?.click()}
-              >
-                <SocialIcon name="image" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
-              </button>
-              <button
-                type="button"
-                data-social-create-attach="video"
-                aria-label={SOCIAL.create.video}
-                className={SOCIAL_POST_ACTION_HIT_CLASS}
-                disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
-                onClick={() => fileRef.current?.click()}
-              >
-                <SocialIcon name="video-camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
-              </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept={SOCIAL_MEDIA_ACCEPT}
-                multiple
-                className="sr-only"
-                data-social-create-attach-input=""
-                aria-label={SOCIAL.home.attach}
-                onChange={(event) => void onPick(event.target.files)}
-              />
-            </div>
-          ) : null}
           <label className="sr-only" htmlFor="social-create-body">
             {SOCIAL.home.composerPrompt}
           </label>
@@ -717,6 +682,26 @@ export function SocialCreateCompose({
             }}
             placeholder={SOCIAL.home.composerPrompt}
             className={SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS}
+          />
+          <button
+            type="button"
+            data-social-create-attach="library"
+            aria-label={SOCIAL.home.attach}
+            className={cn(SOCIAL_POST_ACTION_HIT_CLASS, "text-ink")}
+            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={SOCIAL_MEDIA_ACCEPT}
+            multiple
+            className="sr-only"
+            data-social-create-attach-input=""
+            aria-label={SOCIAL.home.attach}
+            onChange={(event) => void onPick(event.target.files)}
           />
         </div>
         <FormError error={error} />

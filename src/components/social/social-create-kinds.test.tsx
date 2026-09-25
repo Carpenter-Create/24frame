@@ -18,6 +18,7 @@ import { fitSocialWriteComposeField, SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS } from
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_CREATE_MEDIA_ACCEPT } from "@/lib/social-create-media";
+import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
 import { stashSocialHomeComposerMedia } from "@/lib/social-home-composer";
 
 const src = readFileSync("src/components/social/social-forms.tsx", "utf8");
@@ -40,12 +41,17 @@ describe("Social create kinds", () => {
     expect(write).not.toContain(SOCIAL.create.goLive);
     expect(write).toContain("data-social-create-dismiss");
     expect(write).toContain(`aria-label="${SOCIAL.create.close}"`);
-    expect(write).not.toContain("data-social-create-attach");
+    expect(write).toContain('data-social-create-attach="library"');
+    expect(write).toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
+    expect(write).toContain("data-social-create-attach-input");
+    expect(write).toContain(`aria-label="${SOCIAL.home.attach}"`);
+    expect(write).not.toContain('data-social-create-attach="photo"');
+    expect(write).not.toContain('data-social-create-attach="video"');
     expect(write).not.toContain(`aria-label="${SOCIAL.create.photo}"`);
     expect(write).not.toContain(`aria-label="${SOCIAL.create.video}"`);
     expect(write).not.toContain(`>${SOCIAL.home.attach}<`);
-    expect(write).not.toContain("size-10");
-    expect(write).not.toContain('width="24"');
+    expect(write).toContain("size-10");
+    expect(write).toContain('width="24"');
     expect(write).toContain('width="22"');
     expect(write).toContain("size-11");
     expect(write).not.toContain("size-[220px]");
@@ -116,10 +122,14 @@ describe("Social create kinds", () => {
     expect(write).not.toContain("data-social-write-voice-stage");
     expect(write).not.toContain("data-social-write-footer");
     const row = write.slice(write.indexOf("data-social-write-compose-row"));
-    expect(row).toContain('id="social-create-body"');
+    expect(row.indexOf('id="social-create-body"')).toBeLessThan(
+      row.indexOf('data-social-create-attach="library"'),
+    );
+    expect(row).toContain('data-social-icon="camera"');
+    expect(src).toContain("fileRef.current?.click()");
     expect(row).not.toContain("data-house-voice-mic");
     expect(row).not.toContain("Dictate");
-    expect(row).not.toContain("data-social-create-attach");
+    expect(row).not.toContain('data-social-create-attach="photo"');
     expect(row).not.toContain("bg-[#EEEEF0]");
     const voice = readFileSync("src/components/chrome/house-voice-mic.tsx", "utf8");
     expect(voice).toContain('weight={hero ? "fill"');
