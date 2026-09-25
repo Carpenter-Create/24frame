@@ -14,6 +14,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { SocialCreateCompose } from "./social-forms";
+import { fitSocialWriteComposeField, SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS } from "@/lib/social-chrome";
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_CREATE_MEDIA_ACCEPT } from "@/lib/social-create-media";
@@ -56,7 +57,16 @@ describe("Social create kinds", () => {
     expect(write).toContain("data-social-write-stage");
     expect(write).toContain("items-end");
     expect(write).toContain("border-t");
-    expect(write).toContain("min-h-dvh");
+    expect(write).toContain("h-dvh");
+    expect(write).toContain("max-h-dvh");
+    expect(write).toContain("overflow-hidden");
+    expect(write).toContain("text-[16px]");
+    expect(write).not.toContain("text-[length:var(--text-sm)]");
+    expect(SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS).toContain("text-[16px]");
+    expect(SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS).not.toContain("truncate");
+    expect(SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS).not.toContain("ellipsis");
+    expect(SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS).not.toContain("line-clamp");
+    expect(src).toContain("fitSocialWriteComposeField");
     expect(write).toContain("max-w-[680px]");
     expect(write).toContain("h-12");
     expect(write).not.toContain("rounded-[24px]");
@@ -190,5 +200,27 @@ describe("Social create kinds", () => {
     expect(src).not.toContain("SOCIAL_CREATE_KINDS.map");
     expect(src).not.toContain("setKind");
     expect("socialCreateKind" in SEGMENTED_TRACK_PERSIST).toBe(false);
+  });
+
+  it("grows the caption to its text and scrolls the caret once the field hits 40vh", () => {
+    const field = {
+      ownerDocument: { documentElement: { clientHeight: 800 } },
+      scrollHeight: 500,
+      style: { height: "" },
+      scrollTop: 0,
+    } as unknown as HTMLTextAreaElement;
+    fitSocialWriteComposeField(field);
+    expect(field.style.height).toBe("320px");
+    expect(field.scrollTop).toBe(500);
+
+    const short = {
+      ownerDocument: { documentElement: { clientHeight: 800 } },
+      scrollHeight: 72,
+      style: { height: "" },
+      scrollTop: 0,
+    } as unknown as HTMLTextAreaElement;
+    fitSocialWriteComposeField(short);
+    expect(short.style.height).toBe("72px");
+    expect(short.scrollTop).toBe(72);
   });
 });

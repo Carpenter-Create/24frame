@@ -161,13 +161,13 @@
 | Stage | Edge-to-edge `#FFFFFF` · **0** page ring · **0** floating gray card |
 | Chrome | Row **48** · `#ECEDF0` 1px hairline · pad H **16** · X hit **44** · Post h **40** / radius **8** Sporty |
 | Author | Avatar **32** + name only · gap **8** · pad top **8** · pad H **16** · handle OUT |
-| Caption-as-stage | Type **owns the face** under author → down to compose-row top · pad H **16** · pad top **8** · ink `#14171A` · `t-body` **0.9375rem** · placeholder **Share something** `#3D4450` |
+| Caption-as-stage | Type **owns the face** under author → down to compose-row top · pad H **16** · pad top **8** · ink `#14171A` · font-size **≥16px** (iOS Safari zoom floor; Adam amend) · placeholder **Share something** `#3D4450` |
 | Caption fill | **Transparent on `#FFFFFF`** — **OUT** `#EEEEF0` / `#F4F4F6` / muted rounded plate · **OUT** radius-**16** gray paper card · **OUT** bordered CAPTION well |
 | Compose row | **One** bottom row · min-height **48** · pad H **16** · pad bottom **16** + safe-area · flex · `align-items: flex-end` · gap **8** · **0** gray rounded fill behind row · top hairline `#ECEDF0` **1px** **IN** |
-| Type in row | Flex **1** · multiline · grows **up** · max ~**40vh** · transparent bg · **0** border · **0** radius fill · caret ink `#14171A` |
+| Type in row | Flex **1** · multiline · grows **up** · max ~**40vh** · then scroll so the caret and latest line stay fully visible · **0** mid-glyph clip · **0** ellipsis · transparent bg · **0** border · **0** radius fill · caret ink `#14171A` |
 | Mic | Trailing **inside** compose row (iMessage accessory) · Phosphor mic glyph **24** · hit **40×40** · ink `#14171A` · **not** under/outside/orphaned left of a card |
 | Empty state | Placeholder visible in stage/row · mic trailing in-row · stage white reads as write face — **not** dead white half under a gray card |
-| Typing state | Placeholder clears · multiline grows · mic stays trailing bottom-aligned in same row · Post enabled when content |
+| Typing state | Placeholder clears · multiline grows up · caret + latest line stay fully visible above the row bottom / safe area · mic stays trailing bottom-aligned in same row · Post enabled when content |
 | Listening state | Mic → Sporty `#1769FF` · ring **2px** outside hit · calm pulse ≤ house · transcript appends into caption · tap mic stop |
 | Media empty | Glyphs **OUT** until attach intent |
 | Media attached | Cite §5 — preview above caption · Remove on/near · then compose row may show media icons · icons→text gap **8** |

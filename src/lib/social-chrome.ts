@@ -791,7 +791,7 @@ export const SOCIAL_CREATE_CARD_CLASS =
 export const SOCIAL_WRITE_COMPOSE_FRAME_CLASS = "min-h-dvh w-full";
 
 export const SOCIAL_WRITE_COMPOSE_HOST_CLASS =
-  "mx-auto flex min-h-dvh w-full max-w-[680px] flex-col bg-surface px-[var(--space-4)] pt-[max(0px,env(safe-area-inset-top))] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
+  "mx-auto flex h-dvh max-h-dvh min-h-0 w-full max-w-[680px] flex-col overflow-hidden bg-surface px-[var(--space-4)] pt-[max(0px,env(safe-area-inset-top))] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
 
 // §0. Row 48. Hairline on the bottom edge only. Pad H 16.
 export const SOCIAL_WRITE_COMPOSE_CHROME_CLASS =
@@ -816,8 +816,38 @@ export const SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS = "bg-accent/10 text-accent
 export const SOCIAL_WRITE_COMPOSE_ROW_CLASS =
   "-mx-[var(--space-4)] -mb-[max(var(--space-4),env(safe-area-inset-bottom))] mt-auto flex min-h-12 items-end gap-[var(--space-2)] border-t border-hairline bg-transparent px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
 
+// 16px floor. text-sm (15px) makes iOS Safari zoom the page on focus.
 export const SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS =
-  "max-h-[40vh] min-h-12 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent py-3 text-[length:var(--text-sm)] leading-normal text-ink caret-ink shadow-none outline-none placeholder:text-ink-2";
+  "max-h-[40vh] min-h-12 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent py-3 text-[16px] leading-normal text-ink caret-ink shadow-none outline-none placeholder:text-ink-2";
+
+/** Grow the caption up to 40vh. Past that, scroll so the caret line stays inside the field. */
+export function fitSocialWriteComposeField(field: HTMLTextAreaElement): void {
+  const view = field.ownerDocument.documentElement.clientHeight || 0;
+  const max = Math.max(48, Math.round(view * 0.4));
+  field.style.height = "0px";
+  const needed = field.scrollHeight;
+  field.style.height = `${Math.min(needed, max)}px`;
+  field.scrollTop = field.scrollHeight;
+}
+
+/** Keep the compose inside the visual viewport so the keyboard does not cover the caret. */
+export function bindSocialWriteComposeViewport(form: HTMLElement, refit?: () => void): () => void {
+  if (typeof window === "undefined" || !window.visualViewport) return () => undefined;
+  const vv = window.visualViewport;
+  const apply = () => {
+    form.style.height = `${Math.round(vv.height)}px`;
+    form.style.maxHeight = `${Math.round(vv.height)}px`;
+    form.style.transform = vv.offsetTop > 0 ? `translateY(${Math.round(vv.offsetTop)}px)` : "";
+    refit?.();
+  };
+  apply();
+  vv.addEventListener("resize", apply);
+  vv.addEventListener("scroll", apply);
+  return () => {
+    vv.removeEventListener("resize", apply);
+    vv.removeEventListener("scroll", apply);
+  };
+}
 
 // §0.4. In-row dictate mic. Hit 40. Glyph 24 is the icon size. Compact Sporty listening — not the 220 face.
 export const SOCIAL_WRITE_COMPOSE_MIC_CLASS =

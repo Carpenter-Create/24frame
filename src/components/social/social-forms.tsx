@@ -37,6 +37,8 @@ import {
   SOCIAL_WRITE_COMPOSE_HOST_CLASS,
   SOCIAL_WRITE_COMPOSE_ROW_CLASS,
   SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS,
+  bindSocialWriteComposeViewport,
+  fitSocialWriteComposeField,
   SOCIAL_WRITE_COMPOSE_POST_CLASS,
   SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
   SOCIAL_WRITE_COMPOSE_X_CLASS,
@@ -414,9 +416,26 @@ export function SocialCreateCompose({
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [originalQuality, setOriginalQuality] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const writeFormRef = useRef<HTMLFormElement>(null);
+  const writeBodyRef = useRef<HTMLTextAreaElement>(null);
   const hasVideo =
     pickedFiles.some((file) => socialMediaKindFor(file.type) === "video") ||
     media.some((item) => item.kind === "video");
+
+  useEffect(() => {
+    const form = writeFormRef.current;
+    if (!form) return;
+    return bindSocialWriteComposeViewport(form, () => {
+      const field = writeBodyRef.current;
+      if (field) fitSocialWriteComposeField(field);
+    });
+  }, [kind]);
+
+  useEffect(() => {
+    const field = writeBodyRef.current;
+    if (!field) return;
+    fitSocialWriteComposeField(field);
+  }, [body, kind]);
 
   useEffect(() => {
     if (!ingestPicked) return;
@@ -551,9 +570,9 @@ export function SocialCreateCompose({
   }
 
   if (kind === "text") {
-    const writing = body.trim().length > 0;
     return (
       <form
+        ref={writeFormRef}
         data-social-create-form=""
         data-social-create-kind="text"
         data-social-write-voice=""
@@ -686,12 +705,16 @@ export function SocialCreateCompose({
             {SOCIAL.home.composerPrompt}
           </label>
           <Textarea
+            ref={writeBodyRef}
             variant="bare"
             id="social-create-body"
             name="body"
-            rows={writing ? 4 : 1}
+            rows={1}
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              setBody(e.target.value);
+              fitSocialWriteComposeField(e.currentTarget);
+            }}
             placeholder={SOCIAL.home.composerPrompt}
             className={SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS}
           />
