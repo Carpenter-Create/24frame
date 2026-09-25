@@ -477,12 +477,13 @@ export function SocialPostCard({
   permalink?: boolean;
 }) {
   // One card at every breakpoint.
-  // Text + media (Adam lock 2026-09-25, Facebook):
+  // Text + media: docs/design-locks/social-feed-text-media-caption-above-lock-v1.md
   //   author → caption → media → actions → likes → comments when N > 0.
+  // Media face stays social-feed-photo-scale-immersive-lock-v1.md
+  //   (full-bleed, min(70vh, 560), tap immersive). This card only reorders the caption.
   // Text-only stays the 2026-09-20 blend:
   //   author → actions → likes → caption → comments when N > 0.
   // Media-only: author → media → actions → likes.
-  // Caption is the text stack only. Media stays the media face (no paper card).
   // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
