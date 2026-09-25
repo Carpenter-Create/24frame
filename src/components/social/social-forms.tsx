@@ -445,7 +445,7 @@ export function SocialCreateCompose({
   }, [kind, router, step]);
 
   async function onPick(files: ArrayLike<File> | null) {
-    if (!files || files.length === 0 || kind !== "media") return;
+    if (!files || files.length === 0) return;
     const chosen = Array.from(files);
     setPickedFiles(chosen);
     setError("");
@@ -467,7 +467,9 @@ export function SocialCreateCompose({
         return next;
       });
       setMedia((current) => [...current, ...result.items!]);
-      setStep((current) => (current === "caption" ? current : "review"));
+      if (kind === "media") {
+        setStep((current) => (current === "caption" ? current : "review"));
+      }
     }
   }
 
@@ -616,6 +618,7 @@ export function SocialCreateCompose({
             name="body"
             rows={3}
             value={body}
+            autoFocus={kind === "text"}
             onChange={(e) => setBody(e.target.value)}
             placeholder={SOCIAL.home.captionPlaceholder}
             className="h-20 min-w-0 flex-1 px-0 py-1 placeholder:text-ink-2 md:h-24"
@@ -639,6 +642,29 @@ export function SocialCreateCompose({
           ))}
         </select>
       </div>
+      {kind === "text" ? (
+        <div className="flex items-center">
+          <button
+            type="button"
+            data-social-create-attach=""
+            className={TEXT_ACTION_CLASS}
+            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={SOCIAL_MEDIA_ACCEPT}
+            multiple
+            className="sr-only"
+            data-social-create-attach-input=""
+            aria-label={SOCIAL.home.attach}
+            onChange={(event) => void onPick(event.target.files)}
+          />
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 t-body-sm text-ink-2">
           <span className="hidden md:inline">{SOCIAL.home.audience}</span>

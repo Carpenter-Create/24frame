@@ -33,6 +33,9 @@ describe("Social create kinds", () => {
     expect(write).not.toContain("data-social-create-well");
     expect(write).not.toContain(SOCIAL.create.media);
     expect(write).not.toContain(SOCIAL.create.goLive);
+    expect(write).toContain(SOCIAL.home.attach);
+    expect(write).toContain("data-social-create-attach");
+    expect(write).toContain("autofocus");
 
     const pick = renderToStaticMarkup(
       createElement(SocialCreateCompose, {
@@ -87,6 +90,8 @@ describe("Social create kinds", () => {
     expect(caption).not.toContain(SOCIAL.create.dropEmpty);
     expect(caption).not.toContain("data-social-create-well");
     expect(caption).not.toContain("data-social-create-media-next");
+    expect(caption).not.toContain("data-social-create-attach");
+    expect(caption).not.toContain("autofocus");
 
     expect(src).not.toContain("SegmentedTrack");
     expect(src).not.toContain("data-social-create-kinds");

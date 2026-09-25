@@ -231,9 +231,16 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain('icon="users"');
     expect(home).toContain("SocialHomeTabs");
     expect(composer).toContain("data-social-home-composer");
-    expect(composer).toContain("data-social-create-sheet");
-    expect(composer).toContain("SocialCreateSheet");
-    expect(composer).not.toContain("socialCreateHref");
+    expect(composer).toContain('socialCreateHref("text")');
+    expect(composer).toContain("data-social-composer-write");
+    expect(composer).not.toContain("SocialCreateSheet");
+    expect(composer).not.toContain("data-social-create-sheet");
+    const writeDirect = readFileSync(
+      "docs/design-locks/share-something-text-write-direct-lock-v1.md",
+      "utf8",
+    );
+    expect(writeDirect).toContain("/social/create?kind=text");
+    expect(writeDirect).toContain("Add photo or video");
     expect(composer).toContain("socialComposerPrompt(authorName)");
     expect(composer).toContain("SocialAvatar");
     expect(composer).toContain("authorPhotoUrl");

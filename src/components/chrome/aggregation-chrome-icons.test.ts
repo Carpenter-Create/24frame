@@ -78,7 +78,8 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
   });
 
   it("leaves Social interiors on Social V1 SocialIcon; SOCIAL_NAV dests are house Phosphor", () => {
-    expect(socialComposer).toContain("SocialCreateSheet");
+    expect(socialComposer).toContain('socialCreateHref("text")');
+    expect(socialComposer).not.toContain("SocialCreateSheet");
     // Density lock v1.1: Photo and Camera on the composer use Social V1 glyphs.
     expect(socialComposer).toContain("SocialIcon");
     expect(socialComposer).toContain('icon="image"');

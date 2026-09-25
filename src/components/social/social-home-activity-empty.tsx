@@ -13,15 +13,14 @@ import { SOCIAL, SOCIAL_ROUTES, socialCreateHref, socialSearchHref } from "@/lib
 
 const SOCIAL_HOME_ACTIVITY_CTA_CLASS = `${HOUSE_PHONE_STACK_CLASS} gap-[var(--space-4)] md:flex-row md:flex-wrap md:items-center md:justify-center`;
 
-/** Opens the Home composer. Falls back to Create text when that control is not mounted. */
+/** Opens write compose from Share something. Falls back when the prompt is not mounted. */
 export function focusSocialHomeComposer(): void {
-  const composer = document.querySelector<HTMLElement>("[data-social-home-composer]");
-  if (!composer) {
-    window.location.assign(socialCreateHref("text"));
+  const prompt = document.querySelector<HTMLAnchorElement>("[data-social-composer-prompt-row]");
+  if (prompt) {
+    prompt.click();
     return;
   }
-  composer.focus();
-  composer.click();
+  window.location.assign(socialCreateHref("text"));
 }
 
 export function SocialHomeActivityEmpty({ findPeople }: { findPeople: boolean }) {

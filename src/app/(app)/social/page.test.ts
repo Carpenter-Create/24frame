@@ -185,8 +185,9 @@ describe("Social home", () => {
     expect(stackClass).toContain("gap-[var(--space-2)]");
     expect(stackClass).not.toContain("gap-[var(--space-4)]");
     expect(stackClass).toContain("lg:max-w-[720px]");
-    expect(html).toContain("data-social-create-sheet");
-    expect(html).not.toContain("/social/create?kind=text");
+    expect(html).toContain("/social/create?kind=text");
+    expect(html).toContain("data-social-composer-write");
+    expect(html).not.toContain('data-social-create-sheet="composer"');
     expect(html).toContain(SOCIAL.create.title);
     expect(html).not.toContain("data-social-composer-action");
     expect(html).not.toContain("data-social-home-topics-composer-divider");

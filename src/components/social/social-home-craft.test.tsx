@@ -56,26 +56,27 @@ const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]])
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
 describe("Social Home craft (Figma 160:482 / 160:964)", () => {
-  it("renders the one-row share stage: prompt opens Create, icon-only Photo and Camera reuse the media pick", () => {
+  it("renders the one-row share stage: prompt opens write compose, icon-only Photo and Camera reuse the media pick", () => {
     const html = renderToStaticMarkup(
       <SocialHomeComposer authorName="Adam Carpenter" />,
     );
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-composer-prompt");
     expect(html).toContain("data-social-composer-prompt-row");
-    expect(html).toContain('data-social-create-sheet="composer"');
+    expect(html).toContain('href="/social/create?kind=text"');
+    expect(html).toContain("data-social-composer-write");
+    expect(html).not.toContain("data-social-create-sheet");
     expect(html).toContain(SOCIAL_COMPOSER_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_ROW_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_AFFORDANCE_CLASS);
-    expect(html).not.toContain("/social/create?kind=text");
     expect(html).toContain("Share something");
     expect(html).not.toContain("Write something");
     expect(html).not.toContain("What&#x27;s on your mind");
     expect(html).not.toContain("Share something,");
     expect(html.split("Share something").length - 1).toBe(1);
-    expect(html).toContain(SOCIAL.create.title);
+    expect(html).not.toContain(SOCIAL.create.title);
     expect(html).not.toContain('data-social-icon="plus"');
     expect(html).not.toContain('data-social-icon="broadcast"');
     expect(html).toContain("text-ink-2");
