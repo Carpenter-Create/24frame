@@ -340,11 +340,33 @@ export const SOCIAL_FOLLOW_COMPACT_IDLE_CLASS =
 export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
+// Phone only. The social frame pads 16. These utilities cancel that
+// gutter so a row meets the viewport. They are max-md, so desktop
+// column inset stays. Do not put them on the composer or Topics.
+export const SOCIAL_MOBILE_BLEED_CLASS =
+  "max-md:-mx-[var(--chrome-gutter)] max-md:w-[calc(100%+2*var(--chrome-gutter))]";
+
+// Restores the 16 the bleed removed, for text and avatars on a row
+// whose hairline itself is full-bleed.
+export const SOCIAL_MOBILE_BLEED_PAD_CLASS = "max-md:px-[var(--chrome-gutter)]";
+
 // Post sits on the page canvas. The list draws the between-post
 // hairline (SOCIAL_FEED_GUTTER_CLASS). No card box. Chrome keeps a
-// 16 inset; media is full-bleed of the center column (no side pad).
+// 16 inset. On phone the row and its hairline meet the viewport;
+// desktop stays the column width.
 export const SOCIAL_FEED_ROW_CLASS =
-  "flex flex-col gap-2 bg-surface py-[var(--space-4)]";
+  `flex flex-col gap-2 bg-surface py-[var(--space-4)] ${SOCIAL_MOBILE_BLEED_CLASS} ${SOCIAL_MOBILE_BLEED_PAD_CLASS}`;
+
+// Feed media. px-0 inside the row. On phone it cancels the row pad
+// so the frame meets the viewport. Side radius stays 0. Desktop is
+// the column width.
+export const SOCIAL_POST_MEDIA_CLASS =
+  `flex w-full flex-col gap-2 px-0 ${SOCIAL_MOBILE_BLEED_CLASS}`;
+
+// Messages inbox hairline. Same phone bleed as the feed. The pad
+// keeps the face and the name inset.
+export const SOCIAL_DM_INBOX_ROW_CLASS =
+  `border-b border-hairline py-[var(--space-4)] ${SOCIAL_MOBILE_BLEED_CLASS} ${SOCIAL_MOBILE_BLEED_PAD_CLASS}`;
 
 export const SOCIAL_FEED_CHROME_CLASS = "px-[var(--space-4)]";
 

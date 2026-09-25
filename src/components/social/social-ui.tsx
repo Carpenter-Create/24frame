@@ -12,6 +12,7 @@ import {
   SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_POST_TIME_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
@@ -182,7 +183,7 @@ export function SocialPostMedia({
 }) {
   if (items.length === 0) return null;
   return (
-    <div data-social-post-media="" className="flex w-full flex-col gap-2 px-0">
+    <div data-social-post-media="" className={SOCIAL_POST_MEDIA_CLASS}>
       {items.map((item) => (
         <SocialPostMediaFrame
           key={item.playbackId ?? item.url}

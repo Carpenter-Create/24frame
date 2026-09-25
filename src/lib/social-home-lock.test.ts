@@ -14,6 +14,9 @@ import {
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_HOME_TOPICS_CLASS,
+  SOCIAL_MOBILE_BLEED_CLASS,
+  SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
@@ -341,6 +344,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_FEED_ROW_CLASS).not.toMatch(/(?:^|\s)(?:m[ytb]|my)-/);
     expect(SOCIAL_FEED_ROW_CLASS).toContain("py-[var(--space-4)]");
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("p-[var(--space-4)]");
+    expect(SOCIAL_MOBILE_BLEED_CLASS.startsWith("max-md:")).toBe(true);
+    expect(SOCIAL_MOBILE_BLEED_CLASS).toContain("-mx-[var(--chrome-gutter)]");
+    expect(SOCIAL_MOBILE_BLEED_CLASS).not.toMatch(/(?:^|\s)-mx-/);
+    expect(SOCIAL_FEED_ROW_CLASS).toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_POST_MEDIA_CLASS).toContain("px-0");
+    expect(SOCIAL_POST_MEDIA_CLASS).toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_HOME_TOPICS_CLASS).not.toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_DESKTOP_FRAME_PAD_CLASS).toContain("max-md:px-[var(--chrome-gutter)]");
     expect(chrome).toContain('export const SOCIAL_FEED_CHROME_CLASS = "px-[var(--space-4)]"');
     expect(chrome).toContain('export const SOCIAL_HOME_SPINE_CLASS = "gap-[var(--space-2)]"');
     expect(home).toContain("SOCIAL_HOME_SPINE_CLASS");
@@ -349,7 +361,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).not.toContain("pr-4 pb-2");
     expect(card).toContain("SOCIAL_FEED_CHROME_CLASS");
     expect(card).toContain("w-full");
-    expect(card).toContain("px-0");
+    expect(card).toContain("SOCIAL_POST_MEDIA_CLASS");
     expect(card).not.toContain("md:rounded-[8px]");
     expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");

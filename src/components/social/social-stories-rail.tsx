@@ -7,6 +7,7 @@ import { SocialStoryRailFace } from "@/components/social/social-story-rail-face"
 import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
+  SOCIAL_MOBILE_BLEED_CLASS,
   SOCIAL_HOME_STORIES_TRACK_CLASS,
   SOCIAL_HOME_STORY_CREATE_FACE_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
@@ -66,7 +67,7 @@ function HomeTallStoriesRail({
       data-social-stories=""
       data-social-stories-surface="home"
       data-social-stories-tall=""
-      className="overflow-x-auto"
+      className={cn("overflow-x-auto", SOCIAL_MOBILE_BLEED_CLASS)}
     >
       <div className={SOCIAL_HOME_STORIES_TRACK_CLASS}>
         {canCreate ? (
@@ -164,7 +165,7 @@ export function SocialStoriesRail({
   const mediaClass = SOCIAL_STORIES_MEDIA_CLASS;
 
   return (
-    <div data-social-stories="" data-social-stories-surface={surface} className="overflow-x-auto">
+    <div data-social-stories="" data-social-stories-surface={surface} className={cn("overflow-x-auto", SOCIAL_MOBILE_BLEED_CLASS)}>
       <div className="hidden w-max gap-3 pb-2 md:flex">
         {canCreate ? (
           <Link

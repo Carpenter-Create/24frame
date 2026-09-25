@@ -1052,6 +1052,7 @@ describe("SocialPostCard 24Frame blend", () => {
     );
     expect(mediaOpen).toContain("w-full");
     expect(mediaOpen).toContain("px-0");
+    expect(mediaOpen).toContain("max-md:-mx-[var(--chrome-gutter)]");
     expect(mediaOpen).not.toContain("px-[var(--space-4)]");
     const media = html.slice(html.indexOf("data-social-post-media"), html.indexOf("data-social-post-actions"));
     expect(media).not.toContain("md:rounded-[8px]");

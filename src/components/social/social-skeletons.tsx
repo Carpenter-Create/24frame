@@ -12,9 +12,11 @@ import {
   SOCIAL_COMPOSER_ROW_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
+  SOCIAL_DM_INBOX_ROW_CLASS,
   SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_MOBILE_BLEED_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_ROW_CLASS,
@@ -110,7 +112,7 @@ export function SocialHomeCenterSkeleton({
                 <Skeleton className="h-3 w-2/3" />
               </div>
             </div>
-            <Skeleton className="h-40 w-full" />
+            <Skeleton className={cn("h-40 w-full", SOCIAL_MOBILE_BLEED_CLASS)} />
           </div>
         ))}
       </div>
@@ -132,7 +134,7 @@ function SocialStoriesRailSkeleton({
   tall?: boolean;
 }) {
   return (
-    <div data-social-stories-skeleton="" className="flex gap-2 overflow-hidden">
+    <div data-social-stories-skeleton="" className={cn("flex gap-2 overflow-hidden", SOCIAL_MOBILE_BLEED_CLASS)}>
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className={tall ? SOCIAL_HOME_STORY_CARD_CLASS : SOCIAL_STORY_CARD_CLASS} />
       ))}
@@ -195,7 +197,7 @@ export function SocialProfileCenterSkeleton() {
                 <Skeleton className="h-3 w-2/3" />
               </div>
             </div>
-            <Skeleton className="h-40 w-full" />
+            <Skeleton className={cn("h-40 w-full", SOCIAL_MOBILE_BLEED_CLASS)} />
           </div>
         ))}
       </div>
@@ -356,7 +358,7 @@ export function SocialDmsRowsSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-[var(--space-3)] border-b border-hairline py-[var(--space-4)]"
+          className={cn("flex items-center gap-[var(--space-3)]", SOCIAL_DM_INBOX_ROW_CLASS)}
         >
           <Skeleton className="size-12 rounded-full" />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
