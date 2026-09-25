@@ -11,14 +11,21 @@ import {
   parseDmThreadCursorParam,
   socialDmThreadHref,
 } from "@/lib/social-dm-bounds";
-import { bareHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
+import { bareHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel, socialPostHref } from "@/lib/social";
 import {
   dmStoryComment,
   parseDmStoryShare,
   presentDmStoryShare,
   type DmStoryLive,
 } from "@/lib/social-dm-story";
-import { DM_THREAD_ROOT_CLASS, dmThreadHeaderModel, dmThreadHeaderPeers, dmThreadStorySystemLine } from "@/lib/social-dm-thread-format";
+import { dmPostComment, parseDmPostShare, presentDmPostShare } from "@/lib/social-post-share";
+import {
+  DM_THREAD_ROOT_CLASS,
+  dmThreadHeaderModel,
+  dmThreadHeaderPeers,
+  dmThreadPostSystemLine,
+  dmThreadStorySystemLine,
+} from "@/lib/social-dm-thread-format";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -96,7 +103,8 @@ export default async function SocialDmThreadPage({
         const parsed = parseDmStoryShare(message);
         const live = parsed?.storyId ? liveById.get(parsed.storyId) : undefined;
         const authorId = parsed?.authorId ?? live?.authorId;
-        return authorId ? [authorId] : [];
+        const postAuthorId = parseDmPostShare(message)?.authorId;
+        return [authorId, postAuthorId].filter((id): id is string => !!id);
       }),
     ]),
   ];
@@ -143,6 +151,8 @@ export default async function SocialDmThreadPage({
           live: parsed.legacy && parsed.storyId ? liveById.get(parsed.storyId) ?? null : null,
         })
       : null;
+    const postParsed = card ? null : parseDmPostShare(message);
+    const postCard = postParsed ? presentDmPostShare({ body: message.body, media: message.media }) : null;
     const base = {
       id: message.id,
       senderId: message.sender_id,
@@ -151,31 +161,57 @@ export default async function SocialDmThreadPage({
       senderName,
       senderPhotoUrl: message.sender_id ? faces.get(message.sender_id) ?? null : null,
     };
-    if (!card) {
-      return { ...base, text: message.body, story: null };
+    if (card) {
+      const author = card.authorId ? people.get(card.authorId) : null;
+      const authorHandle = author?.handle || parsed?.authorHandle || "";
+      return {
+        ...base,
+        text: null,
+        post: null,
+        story: {
+          comment: dmStoryComment(message),
+          line: dmThreadStorySystemLine({
+            mine,
+            authorHandle: authorHandle || null,
+            senderName,
+          }),
+          authorName: authorHandle ? bareHandle(authorHandle) : "",
+          authorPhotoUrl: card.authorId ? faces.get(card.authorId) ?? null : null,
+          unavailable: card.unavailable,
+          kind: card.kind,
+          url: card.url,
+          playbackId: card.playbackId,
+          playbackPolicy: card.playbackPolicy,
+          href: card.href,
+        },
+      };
     }
-    const author = card.authorId ? people.get(card.authorId) : null;
-    const authorHandle = author?.handle || parsed?.authorHandle || "";
-    return {
-      ...base,
-      text: null,
-      story: {
-        comment: dmStoryComment(message),
-        line: dmThreadStorySystemLine({
-          mine,
-          authorHandle: authorHandle || null,
-          senderName,
-        }),
-        authorName: authorHandle ? bareHandle(authorHandle) : "",
-        authorPhotoUrl: card.authorId ? faces.get(card.authorId) ?? null : null,
-        unavailable: card.unavailable,
-        kind: card.kind,
-        url: card.url,
-        playbackId: card.playbackId,
-        playbackPolicy: card.playbackPolicy,
-        href: card.href,
-      },
-    };
+    if (postCard && postParsed) {
+      const author = people.get(postCard.authorId);
+      const authorHandle = author?.handle || postParsed.authorHandle || "";
+      return {
+        ...base,
+        text: null,
+        story: null,
+        post: {
+          comment: dmPostComment(message),
+          line: dmThreadPostSystemLine({
+            mine,
+            authorHandle: authorHandle || null,
+            senderName,
+          }),
+          authorName: authorHandle ? bareHandle(authorHandle) : "",
+          authorPhotoUrl: faces.get(postCard.authorId) ?? null,
+          caption: postCard.caption,
+          kind: postCard.kind,
+          url: postCard.url,
+          playbackId: postCard.playbackId,
+          playbackPolicy: postCard.playbackPolicy,
+          href: socialPostHref(postCard.postId),
+        },
+      };
+    }
+    return { ...base, text: message.body, story: null, post: null };
   });
 
   return (

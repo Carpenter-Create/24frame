@@ -17,9 +17,11 @@ import {
   socialPersonLabel,
   socialPostHref,
   socialStoryHref,
+  normalizeMessageBody,
   storyLikeInsertRow,
 } from "@/lib/social";
 import { storyDmInsertRow } from "@/lib/social-dm-story";
+import { postDmInsertRow, postSharePeerIds } from "@/lib/social-post-share";
 import { socialAvatarHref } from "@/lib/social-edge";
 import { loadDmInbox } from "@/lib/social-dms";
 import { loadFolloweeIds, loadProfilesByIds, loadStoryById } from "@/lib/social-feed";
@@ -194,6 +196,68 @@ export async function sendSocialStoryItem(formData: FormData): Promise<ActionRes
   revalidatePath(socialDmHref(conversationId));
   revalidatePath(SOCIAL_ROUTES.dms);
   revalidatePath(socialStoryHref(story.id));
+  return {};
+}
+
+export async function sendSocialPostShare(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const postId = String(formData.get("post_id") ?? "").trim();
+  const peers = postSharePeerIds(formData.getAll("peer_id"));
+  if (!postId || !peers.ok) return { error: SOCIAL.post.shareFailed };
+
+  const noteRaw = String(formData.get("note") ?? "");
+  const note = noteRaw.trim();
+  if (note && !normalizeMessageBody(note)) return { error: SOCIAL.post.shareFailed };
+
+  const { data: post, error: postError } = await supabase
+    .from("posts")
+    .select("id, author_id, body, media, status")
+    .eq("id", postId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (postError || !post) return { error: SOCIAL.post.missing };
+
+  const { data: authorProfile } = await supabase
+    .from("profiles")
+    .select("handle")
+    .eq("id", post.author_id)
+    .maybeSingle();
+
+  const media = ownedMediaItems(post.media, post.author_id, "posts");
+  let failed = false;
+  for (const peerId of peers.ids) {
+    const { data, error: openError } = await supabase.rpc("open_or_get_direct_conversation", {
+      p_peer: peerId,
+    });
+    const conversationId = typeof data === "string" ? data : "";
+    if (openError || !conversationId) {
+      failed = true;
+      continue;
+    }
+    const { error } = await supabase.from("messages").insert(
+      postDmInsertRow({
+        senderId: user.id,
+        conversationId,
+        postId: post.id,
+        authorId: post.author_id,
+        authorHandle: authorProfile?.handle ?? "",
+        caption: post.body,
+        note,
+        media,
+      }),
+    );
+    if (error) {
+      failed = true;
+      continue;
+    }
+    revalidatePath(socialDmHref(conversationId));
+  }
+  if (failed) return { error: SOCIAL.post.shareFailed };
+
+  revalidatePath(SOCIAL_ROUTES.dms);
+  revalidatePath(socialPostHref(postId));
   return {};
 }
 

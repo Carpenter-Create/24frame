@@ -58,6 +58,7 @@ import {
 import { SocialAvatar } from "./social-avatar";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialCommentTrigger } from "./social-comment-thread";
+import { SocialPostShareButton } from "./social-post-share-sheet";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
@@ -552,9 +553,7 @@ export function SocialPostCard({
             <SocialIcon name="heart" size={22} />
           )}
           <SocialCommentTrigger post={thread} icon />
-          <span data-social-post-share="" className="text-ink">
-            <SocialIcon name="paper-plane-tilt" size={22} />
-          </span>
+          <SocialPostShareButton postId={post.id} />
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
         {caption ? (

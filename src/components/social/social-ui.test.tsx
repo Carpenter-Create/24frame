@@ -1056,6 +1056,9 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html).toContain('data-social-icon="chat-circle"');
     expect(html).toContain('data-social-post-share=""');
     expect(html).toContain('data-social-icon="paper-plane-tilt"');
+    expect(html).toContain('data-social-comment-open=""');
+    expect(html).not.toContain("data-social-post-share-sheet");
+    expect(html).not.toContain("data-social-comment-thread");
     expect(html).toContain(`4 ${SOCIAL.post.likes}`);
     expect(html).toContain('data-social-post-caption=""');
     expect(html).toContain("ada");
@@ -1126,7 +1129,8 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(postCard).toContain("SocialLikeButton");
     expect(postCard).toContain("SocialLikeCount");
     expect(postCard).toContain("SocialCommentTrigger");
-    expect(postCard).toContain("paper-plane-tilt");
+    expect(postCard).toContain("SocialPostShareButton");
+    expect(postCard).toContain('className="flex items-center gap-3.5"');
     expect(postCard.split("<SocialCommentTrigger").length - 1).toBe(2);
     expect(postCard).not.toContain("viewComments");
     expect(postCard).not.toContain("View comments");

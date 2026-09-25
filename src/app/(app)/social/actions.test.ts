@@ -32,6 +32,7 @@ import {
   createSocialComment,
   deleteSocialComment,
   sendSocialStoryItem,
+  sendSocialPostShare,
   toggleSocialFollow,
   toggleSocialLike,
   toggleSocialStoryLike,
@@ -654,6 +655,82 @@ describe("social actions", () => {
       table: "messages",
       row: { sender_id: "u1", conversation_id: "conv-1", body: "You sent @ada's story" },
     });
+  });
+
+  it("sends a post share card to each selected person", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    const media = [
+      {
+        kind: "video" as const,
+        key: `posts/${author}/${object}.mp4`,
+        contentType: "video/mp4" as const,
+        provider: "mux" as const,
+        playbackId: "abc12345xx",
+      },
+    ];
+    const inserts: { table: string; row: unknown }[] = [];
+    const from = vi.fn((table: string) => {
+      const chain: Record<string, unknown> = {};
+      chain.select = vi.fn(() => chain);
+      chain.eq = vi.fn(() => chain);
+      chain.maybeSingle = vi.fn(async () => {
+        if (table === "posts") {
+          return {
+            data: {
+              id: "p1",
+              author_id: author,
+              body: "DO YALL KNOW",
+              status: "active",
+              media,
+            },
+            error: null,
+          };
+        }
+        return {
+          data: { id: "u1", handle: "ada", display_name: "Ada", status: "active", bio: null },
+          error: null,
+        };
+      });
+      chain.insert = vi.fn((row: unknown) => {
+        inserts.push({ table, row });
+        const result = { data: null, error: null };
+        return {
+          then: (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve),
+        };
+      });
+      return chain;
+    });
+    const rpc = vi.fn(async () => ({ data: "conv-1", error: null }));
+    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+    const form = new FormData();
+    form.set("post_id", "p1");
+    form.append("peer_id", "u2");
+    form.append("peer_id", "u3");
+    form.set("note", "watch this");
+    expect(await sendSocialPostShare(form)).toEqual({});
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u3" });
+    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(inserts).toHaveLength(2);
+    expect(inserts[0]).toMatchObject({
+      table: "messages",
+      row: {
+        sender_id: "u1",
+        conversation_id: "conv-1",
+        body: "watch this",
+        status: "active",
+      },
+    });
+    const row = inserts[0]?.row as { media: Array<Record<string, unknown>> };
+    expect(row.media.at(-1)).toMatchObject({
+      kind: "post-share",
+      postId: "p1",
+      authorId: author,
+      authorHandle: "ada",
+      caption: "DO YALL KNOW",
+    });
+    expect(JSON.stringify(row)).not.toMatch(/\/social\/p\/|https?:/);
   });
 
   it("creates a comment when a profile exists", async () => {
