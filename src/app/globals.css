@@ -350,6 +350,14 @@ body {
   object-fit: cover;
 }
 
+/* Adam lock 2026-09-25. Feed carousel slide cap. Same Media Immersion
+   box for every slide so the stage does not jump while swiping.
+   Cover crop lives on the media. Width bleed is a chrome class. */
+.social-feed-carousel-slide {
+  height: min(70vh, 560px);
+  max-height: min(70vh, 560px);
+}
+
 /* Stories posted confirm. The studio host lives in the page scroller;
    the Social lead and phone dock are siblings. Hide them while the
    confirm is up — the same chrome-tax kill as the immersive studio

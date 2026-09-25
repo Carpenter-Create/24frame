@@ -55,7 +55,9 @@ import {
   socialMediaFrameClass,
   type SocialMediaOrientation,
 } from "@/lib/social-media-display";
+import { socialFeedUsesCarousel } from "@/lib/social-feed-carousel";
 import { SocialAvatar } from "./social-avatar";
+import { SocialFeedCarousel } from "./social-feed-carousel";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialCommentTrigger } from "./social-comment-thread";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
@@ -179,6 +181,9 @@ export function SocialPostMedia({
   frameClass?: string;
 }) {
   if (items.length === 0) return null;
+  if (socialFeedUsesCarousel(items.length)) {
+    return <SocialFeedCarousel items={items} />;
+  }
   return (
     <div data-social-post-media="" className="flex flex-col gap-2">
       {items.map((item) => (
@@ -478,7 +483,9 @@ export function SocialPostCard({
 }) {
   // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
   // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
-  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
+  // Adam lock 2026-09-25: text plus two or more media items puts the caption
+  // above the carousel. Single media and text-only keep the blend order.
+  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count, collage.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
   const href = socialPostHref(post.id);
@@ -493,12 +500,28 @@ export function SocialPostCard({
       {socialRelativeTime(post.createdAt)}
     </time>
   );
-  const caption = post.body ? (
+  const captionBody = post.body ? (
     <>
       <span className="font-semibold">{handle} </span>
       {post.body}
     </>
   ) : null;
+  const caption = captionBody ? (
+    permalink ? (
+      <Link
+        href={href}
+        data-social-post-caption=""
+        className="t-body-sm text-ink whitespace-pre-wrap break-words"
+      >
+        {captionBody}
+      </Link>
+    ) : (
+      <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
+        {captionBody}
+      </p>
+    )
+  ) : null;
+  const captionAboveMedia = socialFeedUsesCarousel(post.media.length) && caption != null;
   return (
     <article
       data-social-post={post.id}
@@ -537,6 +560,7 @@ export function SocialPostCard({
           ) : null}
         </div>
       </div>
+      {captionAboveMedia ? caption : null}
       {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
       <div className="flex flex-col gap-1">
         <div data-social-post-actions="" className="flex items-center gap-3.5">
@@ -557,21 +581,7 @@ export function SocialPostCard({
           </span>
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-        {caption ? (
-          permalink ? (
-            <Link
-              href={href}
-              data-social-post-caption=""
-              className="t-body-sm text-ink whitespace-pre-wrap break-words"
-            >
-              {caption}
-            </Link>
-          ) : (
-            <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
-              {caption}
-            </p>
-          )
-        ) : null}
+        {caption && !captionAboveMedia ? caption : null}
         <SocialCommentTrigger post={thread} />
       </div>
     </article>
