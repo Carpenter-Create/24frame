@@ -354,8 +354,15 @@ export const SOCIAL_MOBILE_BLEED_PAD_CLASS = "max-md:px-[var(--chrome-gutter)]";
 // hairline (SOCIAL_FEED_GUTTER_CLASS). No card box. Chrome keeps a
 // 16 inset. On phone the row and its hairline meet the viewport;
 // desktop stays the column width.
+// divide-y skips the last child, so the list tail had no matching
+// rule. This phone-only bottom border sits on the bled row, same
+// box as the mid-feed rules. Desktop does not gain it.
+// docs/design-locks/social-mobile-full-bleed-lock-v1.md
+export const SOCIAL_FEED_TAIL_RULE_CLASS =
+  "max-md:border-b max-md:border-solid max-md:border-hairline";
+
 export const SOCIAL_FEED_ROW_CLASS =
-  `flex flex-col gap-2 bg-surface py-[var(--space-4)] ${SOCIAL_MOBILE_BLEED_CLASS} ${SOCIAL_MOBILE_BLEED_PAD_CLASS}`;
+  `flex flex-col gap-2 bg-surface py-[var(--space-4)] ${SOCIAL_MOBILE_BLEED_CLASS} ${SOCIAL_MOBILE_BLEED_PAD_CLASS} ${SOCIAL_FEED_TAIL_RULE_CLASS}`;
 
 // Feed media. px-0 inside the row. On phone it cancels the row pad
 // so the frame meets the viewport. Side radius stays 0. Desktop is

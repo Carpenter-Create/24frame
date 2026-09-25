@@ -14,6 +14,7 @@ import {
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_FEED_TAIL_RULE_CLASS,
   SOCIAL_HOME_TOPICS_CLASS,
   SOCIAL_MOBILE_BLEED_CLASS,
   SOCIAL_POST_MEDIA_CLASS,
@@ -334,12 +335,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_FEED_GUTTER_CLASS");
     expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col divide-y divide-hairline");
     expect(SOCIAL_FEED_GUTTER_CLASS).toContain("divide-y divide-hairline");
+    expect(SOCIAL_FEED_TAIL_RULE_CLASS).toBe(
+      "max-md:border-b max-md:border-solid max-md:border-hairline",
+    );
+    expect(SOCIAL_FEED_TAIL_RULE_CLASS.startsWith("max-md:")).toBe(true);
+    expect(SOCIAL_FEED_TAIL_RULE_CLASS).not.toMatch(/(?:^|\s)border-b(?:\s|$)/);
+    expect(SOCIAL_FEED_ROW_CLASS).toContain(SOCIAL_FEED_TAIL_RULE_CLASS);
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-surface-muted");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("py-");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("gap-");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
-    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("border");
+    expect(SOCIAL_FEED_ROW_CLASS.replace(SOCIAL_FEED_TAIL_RULE_CLASS, "")).not.toContain("border");
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("rounded");
     expect(SOCIAL_FEED_ROW_CLASS).not.toMatch(/(?:^|\s)(?:m[ytb]|my)-/);
     expect(SOCIAL_FEED_ROW_CLASS).toContain("py-[var(--space-4)]");
