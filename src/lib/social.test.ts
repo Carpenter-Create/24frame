@@ -177,6 +177,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
     expect(SOCIAL.stories.reply).toBe("Reply quietly…");
+    expect(SOCIAL.stories.sendMessage).toBe("Send message");
+    expect(SOCIAL.stories.saySomething).toBe("Say something…");
+    expect(SOCIAL.stories.saySomethingExpanded).toBe("Add a comment or @mention friends…");
+    expect(SOCIAL.stories.activity).toBe("Activity");
     expect(SOCIAL.stories.subtitle).toBe("Add a video. It stays visible for 24 hours.");
     expect(SOCIAL.stories.empty).toBe("Add a video.");
     expect(SOCIAL.stories.attach).toBe("Add video");
@@ -746,7 +750,9 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/stories/[id]/page.tsx",
     ];
     for (const file of feed) {
-      expect(readFileSync(file, "utf8")).toMatch(/signedSocialMedia|socialMediaProxies/);
+      expect(readFileSync(file, "utf8")).toMatch(
+        /signedSocialMedia|socialMediaProxies/,
+      );
     }
     const groupPost = readFileSync("src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx", "utf8");
     expect(groupPost).toContain("redirect(socialPostHref(post.id))");

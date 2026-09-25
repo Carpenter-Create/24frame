@@ -5,13 +5,15 @@ import { SOCIAL_WELCOME_VIDEO_CLASS } from "@/lib/social-chrome";
 import { SocialWelcomeVideo } from "./social-welcome-video";
 
 describe("SocialWelcomeVideo", () => {
-  it("renders the player only when a signed URL exists", () => {
-    const html = renderToStaticMarkup(<SocialWelcomeVideo src="https://s3.example/welcome.mp4" />);
+  it("renders a closed face when a welcome video is present", () => {
+    const html = renderToStaticMarkup(<SocialWelcomeVideo present />);
     expect(html).toContain("data-social-welcome-video");
-    expect(html).toContain("data-social-welcome-video-player");
-    expect(html).toContain('src="https://s3.example/welcome.mp4#t=0.1"');
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("mux-player");
+    expect(html).not.toContain("src=");
     expect(html).toContain(SOCIAL_WELCOME_VIDEO_CLASS);
     expect(SOCIAL_WELCOME_VIDEO_CLASS).toContain("rounded-[var(--radius-lg)]");
-    expect(renderToStaticMarkup(<SocialWelcomeVideo src="" />)).toBe("");
+    expect(renderToStaticMarkup(<SocialWelcomeVideo present={false} />)).toBe("");
   });
 });

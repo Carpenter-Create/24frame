@@ -53,11 +53,45 @@ describe("Social Edge media proxies", () => {
     ).toEqual({ kind: "image", url: socialMediaHref(imageKey) });
     expect(
       socialStoryRailCover([{ kind: "video", key: videoKey, contentType: "video/mp4" }], AUTHOR),
-    ).toEqual({ kind: "video", url: socialMediaHref(videoKey) });
+    ).toEqual({ kind: "video", url: "" });
     expect(socialStoryRailCover([], AUTHOR)).toBeNull();
     expect(
       socialStoryRailCover([{ kind: "image", key: "avatars/x", contentType: "image/jpeg" }], AUTHOR),
     ).toBeNull();
+    const playbackId = "uNbxnGLKJ00yfbijDO8COxT";
+    expect(
+      socialStoryRailCover(
+        [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "signed" }],
+        AUTHOR,
+      ),
+    ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
+    expect(
+      socialStoryRailCover(
+        [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "public" }],
+        AUTHOR,
+      ),
+    ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
+  });
+
+  it("blanks a video url when there is no playback id and keeps stills on the image proxy", () => {
+    const imageKey = `stories/${AUTHOR}/${OBJECT}.jpg`;
+    const videoKey = `stories/${AUTHOR}/${OBJECT}.mp4`;
+    const items = socialMediaProxies(
+      [
+        { kind: "image", key: imageKey, contentType: "image/jpeg" },
+        { kind: "video", key: videoKey, contentType: "video/mp4" },
+      ],
+      AUTHOR,
+      "stories",
+    );
+    expect(items[0]).toMatchObject({
+      kind: "image",
+      url: `${SOCIAL_MEDIA_ROUTE}?key=${encodeURIComponent(imageKey)}`,
+    });
+    expect(items[1]?.kind).toBe("video");
+    expect(items[1]?.url).toBe("");
+    expect(items[1]?.url).not.toContain(SOCIAL_MEDIA_ROUTE);
+    expect(items[1]).not.toHaveProperty("playbackId");
   });
 
   it("exposes Mux playback ids on Edge profile without the S3 proxy", () => {
@@ -101,6 +135,7 @@ describe("Social Edge media proxies", () => {
       AUTHOR,
     );
     expect(signed[0]?.playbackPolicy).toBe("signed");
+    expect(signed[0]?.url).toBe("");
     const legacy = socialMediaProxies(
       [
         {

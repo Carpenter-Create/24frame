@@ -12,7 +12,6 @@ import {
   socialMuxPassthroughBoundToUser,
   socialMuxPlaybackRequiresTokens,
   socialMuxPlaybackTokensFromJson,
-  socialMuxPlaybackUrl,
   socialMuxThumbnailUrl,
   SOCIAL_MUX_PLAYBACK_ROUTE,
 } from "./social-mux";
@@ -70,14 +69,17 @@ describe("social Mux encode locks", () => {
     });
   });
 
-  it("builds public playback and thumbnail URLs from a playback id", () => {
+  it("builds a thumbnail URL from a playback id and does not mint a native HLS src", () => {
     expect(isSocialMuxId("uNbxnGLKJ00yfbijDO8COxTOyVKT01xpxW")).toBe(true);
     expect(isSocialMuxId("short")).toBe(false);
-    expect(socialMuxPlaybackUrl("abc12345")).toBe("https://stream.mux.com/abc12345.m3u8");
     expect(socialMuxThumbnailUrl("abc12345")).toBe(`https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp`);
     expect(socialMuxThumbnailUrl("abc12345", "thumb.jwt")).toBe(
       `https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp?token=thumb.jwt`,
     );
+    const sot = readFileSync("src/lib/social-mux.ts", "utf8");
+    expect(sot).not.toContain("socialMuxPlaybackUrl");
+    expect(sot).not.toContain(".m3u8");
+    expect(sot).not.toContain("stream.mux.com");
   });
 
   it("keeps token names server-only and out of the client SoT", () => {

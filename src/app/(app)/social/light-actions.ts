@@ -22,11 +22,13 @@ import {
 import { storyDmInsertRow } from "@/lib/social-dm-story";
 import { socialAvatarHref } from "@/lib/social-edge";
 import { loadDmInbox } from "@/lib/social-dms";
-import { loadFolloweeIds, loadProfilesByIds } from "@/lib/social-feed";
+import { loadFolloweeIds, loadProfilesByIds, loadStoryById } from "@/lib/social-feed";
 import { ownedMediaItems } from "@/lib/social-media";
 import { isStoryLive } from "@/lib/social-stories";
 import {
+  storyActivityViewers,
   storySendPeopleOrder,
+  type StoryActivityViewer,
   type StorySendPerson,
 } from "@/lib/social-story-actions";
 import { commentBodyError, commentInsertRow, normalizeCommentBody } from "@/lib/social-comments";
@@ -228,6 +230,50 @@ export async function listStorySendPeople(): Promise<{ people: StorySendPerson[]
     ];
   });
   return { people };
+}
+
+export async function listStoryViewers(storyId: string): Promise<{
+  people: StoryActivityViewer[];
+  error?: string;
+}> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { people: [], error: SOCIAL.cta.needProfile };
+
+  const id = storyId.trim();
+  if (!id) return { people: [], error: SOCIAL.stories.missing };
+  const story = await loadStoryById(supabase, id);
+  if (!story || story.author_id !== user.id) {
+    return { people: [], error: SOCIAL.stories.missing };
+  }
+
+  const { data, error } = await supabase
+    .from("story_views")
+    .select("viewer_id, viewed_at")
+    .eq("story_id", id);
+  if (error || !data) return { people: [], error: SOCIAL.stories.activityFailed };
+
+  const profiles = await loadProfilesByIds(
+    supabase,
+    data.map((row) => row.viewer_id),
+  );
+  const byId = new Map(
+    [...profiles.entries()].map(([profileId, profile]) => [
+      profileId,
+      {
+        handle: profile.handle,
+        displayName: profile.display_name,
+        status: profile.status,
+      },
+    ]),
+  );
+  return {
+    people: storyActivityViewers({
+      authorId: user.id,
+      views: data.map((row) => ({ viewerId: row.viewer_id, viewedAt: row.viewed_at })),
+      profiles: byId,
+      photoUrl: socialAvatarHref,
+    }),
+  };
 }
 
 type CommentActionResult = ActionResult & { id?: string; created_at?: string };

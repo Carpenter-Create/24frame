@@ -55,7 +55,7 @@ function SocialProfileOptimisticIdentity({
           websiteUrl={view.websiteUrl}
           imdbUrl={view.imdbUrl}
         />
-        {view.welcomeVideoUrl ? <SocialWelcomeVideo src={view.welcomeVideoUrl} /> : null}
+        {view.welcomeVideoUrl ? <SocialWelcomeVideo present /> : null}
     </div>
   );
 }
@@ -168,7 +168,7 @@ function SocialOwnProfileFaceView({
         stats={stats}
         actions={actions}
       />
-      {merged.welcomeVideoUrl ? <SocialWelcomeVideo src={merged.welcomeVideoUrl} /> : null}
+      {merged.welcomeVideoUrl ? <SocialWelcomeVideo present /> : null}
     </>
   );
 }

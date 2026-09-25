@@ -10,6 +10,7 @@ import {
   createSocialStory,
   presignSocialMediaUpload,
 } from "@/app/(app)/social/actions";
+import { uploadSocialMuxVideoFile } from "@/lib/social-media-upload";
 import {
   SOCIAL_STORY_CREATE_BACK_CLASS,
   SOCIAL_STORY_CREATE_CARDS_CLASS,
@@ -176,6 +177,13 @@ async function uploadStoryMedia(
   const prepared = prepareStoryUploadFile(file);
   if (prepared === "missing") return { error: storyUploadNotice("missing", kindHint) };
   if (prepared === "type") return { error: storyUploadNotice("type", kindHint) };
+  const kind = socialMediaKindFor(prepared.type);
+  if (kind === "video") {
+    const uploaded = await uploadSocialMuxVideoFile(prepared, { lane: "stories", signal });
+    if (signal?.aborted) return {};
+    if (!uploaded.item?.playbackId) return { error: uploaded.error ?? storyStoreNotice("presign") };
+    return { item: uploaded.item };
+  }
   const body = new FormData();
   body.set("content_type", prepared.type);
   body.set("byte_length", String(prepared.size));
@@ -203,8 +211,7 @@ async function uploadStoryMedia(
       console.error("story-put", put.status, put.statusText, await put.text());
       return { error: storyStoreNotice("reject") };
     }
-    const kind = socialMediaKindFor(prepared.type);
-    if (kind !== "image" && kind !== "video") return { error: storyUploadNotice("type", kindHint) };
+    if (kind !== "image") return { error: storyUploadNotice("type", kindHint) };
     return {
       item: {
         kind,

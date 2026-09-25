@@ -252,7 +252,6 @@ export const SOCIAL_STORY_HOLD_SURFACE_CLASS = "select-none social-story-no-call
 // A still has no media duration; the fill uses this display interval.
 // Not a capture cap.
 export const SOCIAL_STORY_STILL_PROGRESS_MS = 5000;
-export const SOCIAL_STORY_STAGE_IN_CLASS = "social-story-stage-in";
 export const SOCIAL_STORY_ACTIVATE_NEXT_CLASS = "social-story-activate";
 export const SOCIAL_STORY_ACTIVATE_PREV_CLASS = "social-story-activate-prev";
 export const SOCIAL_STORY_PROGRESS_FILL_CLASS = "social-story-progress";
@@ -270,8 +269,12 @@ export const SOCIAL_STORY_PROGRESS_ROW_CLASS = "flex gap-0.5";
 export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-30 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-band-ink/12 text-band-ink md:flex";
 
-export const SOCIAL_STORY_REPLY_PILL_CLASS =
-  "flex h-11 w-full items-center rounded-full border border-band-ink/45 bg-transparent px-4 text-left t-body-sm text-band-ink";
+// Glass amend: frosted wash on the dark stage. Not paper (bg-surface).
+// ~15% band-ink is inside the 12–20% white wash. Hairline is band-ink/20.
+export const SOCIAL_STORY_GLASS_FIELD_CLASS =
+  "flex h-10 w-full min-w-0 flex-1 items-center rounded-full border border-band-ink/20 bg-band-ink/15 px-4 text-left t-body-sm backdrop-blur";
+
+export const SOCIAL_STORY_REPLY_PILL_CLASS = `${SOCIAL_STORY_GLASS_FIELD_CLASS} text-band-ink/70`;
 
 // Stories viewer IG actions lock v1. One bottom row on phone and desktop.
 // Gap 8, pad x 16, pad y 8. Hit 40. Liked heart stays Sporty Blue on the

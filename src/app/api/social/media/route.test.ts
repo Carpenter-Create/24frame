@@ -16,7 +16,8 @@ const KEY = `posts/${UID}/${OBJECT}.jpg`;
 const OWN_STORY = `stories/${UID}/${OBJECT}.mp4`;
 const FOREIGN_POST = `posts/${OTHER}/${OBJECT}.jpg`;
 const FOREIGN_STORY = `stories/${OTHER}/${OBJECT}.mp4`;
-const LIVE = "2026-09-25T00:00:00.000Z";
+// Wall-clock dates expire this fixture and the live grant becomes a 403.
+const LIVE = "2099-01-01T00:00:00.000Z";
 const EXPIRED = "2020-01-01T00:00:00.000Z";
 
 function mediaRequest(key: string) {

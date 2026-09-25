@@ -10,7 +10,13 @@ import {
   socialChecklistItems,
 } from "./social-home";
 import { SOCIAL_COMPOSER_CLASS } from "./social-chrome";
-import { isStoryLive, storyExpiresAt, storyInsertRow, storyRailUnseen } from "./social-stories";
+import {
+  isStoryLive,
+  oldestLiveStoryId,
+  storyExpiresAt,
+  storyInsertRow,
+  storyRailUnseen,
+} from "./social-stories";
 
 describe("Social Home stack lock", () => {
   it("locks Topics → composer → Stories → wall on phone and desktop", () => {
@@ -79,5 +85,17 @@ describe("stories live window", () => {
     expect(storyInsertRow({ authorId: "u1", body: null, media: [], now }).expires_at).toBe(
       "2026-09-15T12:00:00.000Z",
     );
+    expect(
+      oldestLiveStoryId([
+        { id: "newer", created_at: "2026-09-14T18:00:00.000Z" },
+        { id: "older", created_at: "2026-09-14T12:00:00.000Z" },
+      ]),
+    ).toBe("older");
+    expect(
+      oldestLiveStoryId([
+        { id: "b", created_at: "2026-09-14T12:00:00.000Z" },
+        { id: "a", created_at: "2026-09-14T12:00:00.000Z" },
+      ]),
+    ).toBe("a");
   });
 });

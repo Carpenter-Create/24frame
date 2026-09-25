@@ -16,6 +16,7 @@ export function SocialMediaImage({
   className,
   sizes,
   priority = false,
+  onLoad,
   onError,
 }: {
   src: string;
@@ -23,6 +24,7 @@ export function SocialMediaImage({
   className?: string;
   sizes: string;
   priority?: boolean;
+  onLoad?: (event: SyntheticEvent<HTMLImageElement>) => void;
   onError?: (event: SyntheticEvent<HTMLImageElement>) => void;
 }) {
   return (
@@ -34,6 +36,7 @@ export function SocialMediaImage({
       className={cn("object-cover", className)}
       priority={priority}
       unoptimized={isAnimatedRasterSrc(src) || isSessionGatedSocialSrc(src)}
+      onLoad={onLoad}
       onError={onError}
     />
   );

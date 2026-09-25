@@ -23,7 +23,7 @@ const author = {
 };
 
 describe("SocialDmStoryShare", () => {
-  it("plays Mux and native video through SocialFeedVideo, not a poster or a lightbox", () => {
+  it("plays Mux video through SocialFeedVideo and fails closed without a playback id", () => {
     const src = readFileSync("src/components/social/social-dm-story-share.tsx", "utf8");
     const host = readFileSync("src/lib/social-dm-story-fullscreen.ts", "utf8");
     expect(src).toContain("SocialFeedVideo");
@@ -64,10 +64,27 @@ describe("SocialDmStoryShare", () => {
     expect(mux).toContain("data-social-post-video");
     expect(mux).toContain("data-social-dm-story-video");
     expect(mux).not.toContain("<video");
-    expect(mux).not.toContain("<img");
-    expect(mux).not.toContain("https://image.mux.com/abc12345xx/thumbnail.webp");
+    expect(mux).toContain('data-social-mux-poster=""');
+    expect(mux).toContain("https://image.mux.com/abc12345xx/thumbnail.webp");
     expect(mux).not.toContain("/social/stories");
     expect(mux).not.toContain("shadow");
+
+    const signed = renderToStaticMarkup(
+      createElement(SocialDmStoryShare, {
+        ...author,
+        unavailable: false,
+        kind: "video",
+        url: "",
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        playbackPolicy: "signed",
+        href: null,
+      }),
+    );
+    expect(signed).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
+    expect(signed).toContain('data-social-mux-playback="pending"');
+    expect(signed).not.toContain(SOCIAL.dms.storyUnavailable);
+    expect(signed).not.toContain("<video");
+    expect(signed).not.toContain("/api/social/media");
 
     const file = renderToStaticMarkup(
       createElement(SocialDmStoryShare, {
@@ -78,11 +95,10 @@ describe("SocialDmStoryShare", () => {
         href: null,
       }),
     );
-    expect(file).toContain("<video");
-    expect(file).toContain("controls");
-    expect(file).toContain("playsInline");
+    expect(file).toContain("data-social-video-closed");
+    expect(file).not.toContain("<video");
     expect(file).toContain("data-social-post-video");
-    expect(readFileSync("src/components/social/social-feed-video.tsx", "utf8")).toContain("playsInline");
+    expect(file).not.toContain("/api/social/media");
     expect(file).not.toContain("<img");
     expect(file).not.toContain("/social/stories");
   });

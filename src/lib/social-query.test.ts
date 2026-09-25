@@ -11,6 +11,7 @@ import {
   applyOptimisticSocialProfile,
   applyOptimisticSocialProfilePatch,
   invalidateSocialQueries,
+  SOCIAL_WELCOME_VIDEO_PRESENT,
   socialProfileFaceFromRow,
 } from "@/lib/social-query";
 
@@ -86,6 +87,22 @@ describe("social query cache helpers", () => {
     expect(face.bio).toBe("");
     expect(face.coverUrl).toBeNull();
     expect(face.welcomeVideoUrl).toBeNull();
+    const withWelcome = socialProfileFaceFromRow({
+      id: "u1",
+      handle: "ada",
+      display_name: "Ada",
+      status: "active",
+      bio: null,
+      cover_key: `posts/u1/${"22222222-2222-4222-8222-222222222222"}.jpg`,
+      welcome_video_key: "posts/u1/welcome.mp4",
+      crafts: [],
+      topics: [],
+      imdb_url: null,
+      website_url: null,
+    });
+    expect(withWelcome.welcomeVideoUrl).toBe(SOCIAL_WELCOME_VIDEO_PRESENT);
+    expect(withWelcome.welcomeVideoUrl).not.toContain("/api/social/media");
+    expect(withWelcome.coverUrl).toContain("/api/social/media");
     expect(face.imdbUrl).toBeNull();
     expect(face.websiteUrl).toBeNull();
     expect(face.photoUrl).toBe("/api/social/avatar/u1");

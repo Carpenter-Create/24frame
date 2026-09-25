@@ -4,7 +4,11 @@ import {
   type SocialMediaContentType,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { socialMuxThumbnailUrl, type SocialMuxPlaybackPolicy } from "@/lib/social-mux";
+import {
+  socialMuxPlaybackRequiresTokens,
+  socialMuxThumbnailUrl,
+  type SocialMuxPlaybackPolicy,
+} from "@/lib/social-mux";
 
 // Auth-light Social reads can run on Vercel Edge. AWS signing cannot.
 // Same-origin Node routes re-sign avatars/media so the Edge HTML does
@@ -43,14 +47,19 @@ export type SocialEdgeMediaItem = {
   playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
-/** Rail / neighbor cover. Same proxy as playback. Video stays a still (no second CDN). */
+/** Rail / neighbor cover. Stills stay on the image proxy. Video is not a <video> src. */
 export function socialStoryRailCover(
   media: unknown,
   authorId: string,
 ): { kind: "image" | "video"; url: string } | null {
   const first = socialMediaProxies(media, authorId, "stories")[0];
-  if (!first?.url) return null;
-  if (first.playbackId) return { kind: "image", url: first.url };
+  if (!first) return null;
+  if (first.playbackId) {
+    const thumb = first.url || socialMuxThumbnailUrl(first.playbackId);
+    return thumb ? { kind: "image", url: thumb } : { kind: "video", url: "" };
+  }
+  if (first.kind === "video") return { kind: "video", url: "" };
+  if (!first.url) return null;
   return { kind: first.kind, url: first.url };
 }
 
@@ -63,14 +72,16 @@ export function socialMediaProxies(
     isSocialMuxMediaItem(item)
       ? {
           kind: item.kind,
-          url: socialMuxThumbnailUrl(item.playbackId),
+          url: socialMuxPlaybackRequiresTokens(item.playbackPolicy)
+            ? ""
+            : socialMuxThumbnailUrl(item.playbackId),
           contentType: item.contentType,
           playbackId: item.playbackId,
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
         }
       : {
           kind: item.kind,
-          url: socialMediaHref(item.key),
+          url: item.kind === "video" ? "" : socialMediaHref(item.key),
           contentType: item.contentType,
         },
   );

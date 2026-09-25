@@ -342,6 +342,9 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(html).toContain("bg-hairline");
     expect(html).toContain("bg-accent");
     expect(html).toContain("p-[3px]");
+    const mobile = html.slice(html.indexOf('data-social-stories-mobile=""'));
+    expect(mobile).toContain("data-social-story-media");
+    expect(html.slice(0, html.indexOf('data-social-stories-mobile=""'))).toContain("data-social-story-media");
   });
 
   it("fills the home story card with story media, not the profile photo", () => {
@@ -398,8 +401,9 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
         ]}
       />,
     );
-    expect(video).toContain("data-social-story-cover");
-    expect(video).toContain("#t=0.1");
+    expect(video).toContain("data-social-video-closed");
+    expect(video).not.toContain("<video");
+    expect(video).not.toContain(encodeURIComponent(videoKey));
     expect(video).not.toContain("autoplay");
     expect(video).toContain("border-hairline");
     expect(video).not.toContain("border-accent");

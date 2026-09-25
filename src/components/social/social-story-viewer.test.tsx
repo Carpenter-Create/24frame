@@ -73,8 +73,9 @@ describe("SocialStoryViewer", () => {
     expect(html).not.toContain("max-w-[420px]");
     expect(html).not.toContain("bg-surface p-");
     expect(html).toContain('data-social-story-viewer="s1"');
-    expect(html).toContain("data-social-story-video");
-    expect(html).toContain("/api/social/media?key=stories%2Forg%2Fclip.mp4#t=0.1");
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("/api/social/media?key=stories%2Forg%2Fclip.mp4");
     expect(html).toContain('data-social-story-frame=""');
     expect(html).toContain("data-social-story-pause");
     expect(html).toContain("data-social-story-mute");
@@ -84,7 +85,17 @@ describe("SocialStoryViewer", () => {
     expect(html).toContain("border-accent");
     expect(html).toContain('data-social-story-mark=""');
     expect(html).toContain('href="/social"');
-    expect(html).toContain("Reply to Ada Lovelace…");
+    const closeAt = html.indexOf('data-social-story-close=""');
+    const close = html.slice(closeAt, html.indexOf("</a>", closeAt));
+    expect(closeAt).toBeGreaterThan(html.indexOf('data-social-story-tap="next"'));
+    expect(close).toContain('href="/social"');
+    expect(close).toContain("size-11");
+    expect(close).toContain("z-30");
+    expect(close).toContain("touch-manipulation");
+    expect(close).toContain('width="22"');
+    expect(close).toContain('height="22"');
+    expect(html).toContain("Send message");
+    expect(html).not.toContain("Reply to Ada Lovelace…");
     expect(html).toContain('data-social-story-heart=""');
     expect(html).toContain('data-social-story-heart-state="none"');
     expect(html).toContain('data-social-story-send=""');
@@ -110,26 +121,54 @@ describe("SocialStoryViewer", () => {
     expect(still).not.toContain("aspect-[4/5]");
     expect(still).toContain("social-story-progress");
     expect(still).toContain("animation-duration:5000ms");
+
+    const mux = renderToStaticMarkup(
+      createElement(SocialStoryViewer, {
+        ...viewerProps,
+        media: [
+          {
+            kind: "video",
+            url: "https://image.mux.com/uNbxnGLKJ00yfbijDO8COxT/thumbnail.webp",
+            playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+            playbackPolicy: "signed",
+          },
+        ],
+      }),
+    );
+    expect(mux).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
+    expect(mux).toContain('data-social-mux-playback="pending"');
+    expect(mux).toContain('data-social-mux-poster=""');
+    expect(mux).toContain("https://image.mux.com/uNbxnGLKJ00yfbijDO8COxT/thumbnail.webp");
+    expect(mux).not.toContain("<video");
+    expect(mux).toContain("data-social-story-mute");
   });
 
   it("pauses a hidden story and commits the enter class before paint", () => {
     const src = readFileSync("src/components/social/social-story-viewer.tsx", "utf8");
-    expect(src).toContain("node.pause()");
-    expect(src).toContain("onForcedMute");
+    expect(src).not.toContain("<video");
+    expect(src).not.toContain("socialVideoDisplaySrc");
+    expect(src).not.toContain("audioTracks");
+    expect(src).toContain("setAudible(true)");
     expect(src).toContain("consumeStoryEnter");
     expect(src).toContain("storyTrayStep");
     expect(src).toContain("w-2/3");
     expect(src).toContain("SOCIAL_STORY_PROGRESS_ROW_CLASS");
-    expect(src).toContain("onEnded={() => onComplete()}");
     expect(src).not.toContain("requestAnimationFrame(() => setEnter");
-    const catchAt = src.indexOf("void node.play().catch");
-    const retryAt = src.indexOf("void node.play()", catchAt + 1);
-    expect(catchAt).toBeGreaterThan(-1);
-    expect(retryAt).toBeGreaterThan(catchAt);
-    const beforeRetry = src.slice(catchAt, retryAt);
-    expect(beforeRetry).toContain("storyPlaybackHeld(screen, paused)");
-    expect(beforeRetry).toContain("node.pause()");
-    expect(src).toContain('screen?.hasAttribute("hidden")');
+    expect(src).not.toContain("SOCIAL_STORY_STAGE_IN_CLASS");
+    const hold = readFileSync("src/components/social/social-story-open-hold.tsx", "utf8");
+    expect(hold).toContain("flushSync(() => {");
+    expect(hold).toContain("setSrc(next)");
+    expect(hold).toContain("STORY_OPEN_SETTLE_MS = 220");
+    expect(hold).toContain("social-story-open-settle");
+    expect(src).toContain('data-social-story-close=""');
+    expect(src).toContain("size-11");
+    expect(src).toContain("onPointerDown={(event) => event.stopPropagation()}");
+    const phoneClose = src.slice(
+      src.indexOf('data-social-story-close=""'),
+      src.indexOf("</Link>", src.indexOf('data-social-story-close=""')),
+    );
+    expect(phoneClose).toContain("size-11");
+    expect(phoneClose).toContain("size={22}");
     const warm = src.slice(src.lastIndexOf("new MutationObserver"));
     expect(warm).toContain("paintStoryEnter");
     expect(src.indexOf("flushSync(() => apply(null))")).toBeLessThan(
@@ -141,11 +180,19 @@ describe("SocialStoryViewer", () => {
     expect(onKey.indexOf("storyPlaybackHeld(screen, false)")).toBeLessThan(onKey.indexOf('go("prev"'));
     expect(onKey).not.toContain("router.push");
     expect(src).toContain("sendSheetOpen");
-    expect(src).toContain("storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)");
-    expect(src).toContain("const playbackPaused = paused || held || sendSheetOpen");
+    expect(src).toContain(
+      "storyAdvanceWhileSending(sendSheetOpen || activityOpen, reason, paused || held)",
+    );
+    expect(src).toContain(
+      "const playbackPaused = paused || held || sendSheetOpen || activityOpen || sayExpanded",
+    );
     expect(src).not.toContain("currentTime = 0");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
+    expect(page).toContain("socialMediaProxies");
+    expect(page).not.toContain("signedStoryPlaybackItems");
+    expect(page).not.toContain("signedSocialMediaItems");
+    expect(page).not.toContain("signedSocialMediaUrl");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");
     expect(page).toContain("SOCIAL.stories.close");
   });

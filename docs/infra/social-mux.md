@@ -1,8 +1,10 @@
 # Social Mux Video — env already present
 
-Social **Video** and **Go live** recordings upload to Mux and play back
-through Mux Player (Auto / adaptive). Stills, Stories, welcome video,
-Education, and title film stay on their existing lanes.
+Social **video** — Stories, posts, and everywhere Social — uploads to Mux and
+plays through Mux Player (Auto / adaptive). Stills stay on the object
+store. Legacy native mp4 fails closed until a Mux playback id exists.
+Education and title film stay on their existing lanes. Lock:
+[`docs/design-locks/social-video-mux-only-lock-v1.md`](../design-locks/social-video-mux-only-lock-v1.md).
 
 ## Env (already on Vercel 24frame)
 
@@ -32,8 +34,9 @@ names the official Mux JWT helper reads. They stay in
 | Video + “Upload in original quality (up to 4K)” + 4K source | `basic` | `2160p` |
 
 No livestream backend. No Settings quality maze. New uploads use
-playback policy `signed`. Playback IDs are stored on `posts.media`
-next to the author-bound key.
+playback policy `signed`. Playback IDs are stored on `posts.media` and
+`stories.media` next to the author-bound key. Welcome video has no
+playback-id column, so that band stays an empty face.
 
 ## Playback tokens
 

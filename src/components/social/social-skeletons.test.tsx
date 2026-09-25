@@ -108,6 +108,8 @@ describe("Social loading skeletons", () => {
     expect(create).toContain("data-social-create-skeleton");
     expect(stories).toContain("data-social-stories-index-skeleton");
     expect(viewer).toContain("data-social-story-viewer-skeleton");
+    expect(viewer).not.toContain("animate-pulse");
+    expect(viewer).not.toContain("bg-surface-muted");
     expect(explore).toContain("data-social-explore-skeleton");
     expect(explore).toContain("data-social-explore-results-skeleton");
     expect(explore).toContain("data-social-for-you-skeleton");

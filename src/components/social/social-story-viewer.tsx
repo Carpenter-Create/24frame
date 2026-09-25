@@ -9,17 +9,19 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
-  type SyntheticEvent,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 
 import { SocialStoryReply } from "@/components/social/social-forms";
+import { SocialStoryActivitySheet } from "@/components/social/social-story-activity-sheet";
+import { SocialStorySaySomething } from "@/components/social/social-story-say";
 import { SocialStorySendSheet } from "@/components/social/social-story-send-sheet";
 import { SocialStorySentToast } from "@/components/social/social-story-sent-toast";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialMediaImage } from "@/components/social/social-media-image";
+import { SocialMuxPlayer } from "@/components/social/social-mux-player";
 import { SocialIcon } from "@/components/social/social-icon";
 import { BRAND_LOGO_DARK_SRC, BRAND_LOGO_HEIGHT_PX } from "@/lib/brand";
 import { HOUSE_CLIENT_SHELL } from "@/lib/house-client-shell";
@@ -41,10 +43,11 @@ import {
   SOCIAL_STORY_PROGRESS_FILL_CLASS,
   SOCIAL_STORY_PROGRESS_ROW_CLASS,
   SOCIAL_STORY_STAGE_CLASS,
-  SOCIAL_STORY_STAGE_IN_CLASS,
   SOCIAL_STORY_STILL_PROGRESS_MS,
 } from "@/lib/social-chrome";
-import { SOCIAL_POST_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
+import { SOCIAL_POST_IMAGE_SIZES } from "@/lib/social-media-display";
+import { isSocialMuxId } from "@/lib/social-mux";
+import { noteStoryMediaPainted } from "@/lib/social-story-open-hold";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { toggleSocialStoryLike } from "@/app/(app)/social/light-actions";
 import {
@@ -125,19 +128,7 @@ function StoryCover({
   url: string | null;
   kind: "image" | "video" | null;
 }) {
-  if (!url || !kind) return null;
-  if (kind === "video") {
-    return (
-      <video
-        data-social-story-cover=""
-        muted
-        playsInline
-        preload="metadata"
-        src={socialVideoDisplaySrc(url)}
-        className="pointer-events-none absolute inset-0 size-full object-cover"
-      />
-    );
-  }
+  if (!url || kind !== "image") return null;
   return (
     <SocialMediaImage src={url} sizes={SOCIAL_POST_IMAGE_SIZES} alt="" />
   );
@@ -180,91 +171,6 @@ function NeighborCard({
         <span className="t-label text-band-ink/65">{socialRelativeTime(neighbor.createdAt)}</span>
       </span>
     </button>
-  );
-}
-
-function StoryVideo({
-  src,
-  paused,
-  muted,
-  onAudible,
-  onForcedMute,
-  onProgress,
-  onComplete,
-}: {
-  src: string;
-  paused: boolean;
-  muted: boolean;
-  onAudible: (audible: boolean) => void;
-  onForcedMute: () => void;
-  onProgress: (progress: number) => void;
-  onComplete: () => void;
-}) {
-  const ref = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    let live = true;
-    const screen = storyScreen(node);
-    const sync = () => {
-      if (!live) return;
-      const concealed = screen?.hasAttribute("hidden") === true;
-      if (paused || concealed) {
-        node.pause();
-        return;
-      }
-      node.muted = muted;
-      void node.play().catch(() => {
-        if (!live) return;
-        // A hide can abort this play(). Do not resume it under the next story.
-        if (storyPlaybackHeld(screen, paused)) {
-          node.pause();
-          return;
-        }
-        onForcedMute();
-        node.muted = true;
-        if (!live || storyPlaybackHeld(screen, paused)) {
-          node.pause();
-          return;
-        }
-        void node.play().catch(() => {
-          if (storyPlaybackHeld(screen, paused)) node.pause();
-        });
-      });
-    };
-    sync();
-    const observer = screen ? new MutationObserver(sync) : null;
-    observer?.observe(screen as HTMLElement, { attributes: true, attributeFilter: ["hidden"] });
-    return () => {
-      live = false;
-      observer?.disconnect();
-      node.pause();
-    };
-  }, [muted, onForcedMute, paused, src]);
-
-  return (
-    <video
-      ref={ref}
-      data-social-story-video=""
-      autoPlay
-      playsInline
-      preload="metadata"
-      src={socialVideoDisplaySrc(src)}
-      className="absolute inset-0 size-full object-cover"
-      onTimeUpdate={(event: SyntheticEvent<HTMLVideoElement>) => {
-        const node = event.currentTarget;
-        if (!node.duration || !Number.isFinite(node.duration)) return;
-        onProgress(Math.min(1, node.currentTime / node.duration));
-      }}
-      onLoadedMetadata={(event: SyntheticEvent<HTMLVideoElement>) => {
-        const tracks = (
-          event.currentTarget as HTMLVideoElement & { audioTracks?: { length: number } }
-        ).audioTracks;
-        if (tracks && tracks.length === 0) onAudible(false);
-      }}
-      onEnded={() => onComplete()}
-    />
   );
 }
 
@@ -374,24 +280,33 @@ export function SocialStoryViewer({
   const [held, setHeld] = useState(false);
   const [muted, setMuted] = useState(false);
   const [audible, setAudible] = useState(true);
-  const [videoProgress, setVideoProgress] = useState(0);
-  const [enter, setEnter] = useState<"open" | "next" | "prev" | null>(null);
+  const [audibleFor, setAudibleFor] = useState<string | null>(null);
   const [hop, setHop] = useState<"next" | "prev" | null>(null);
   const [hearts, setHearts] = useState<Record<string, SocialStoryLikeState>>({ ...likes });
   const [heartPending, setHeartPending] = useState(false);
   const [sendItemId, setSendItemId] = useState<string | null>(null);
+  const [activityStoryId, setActivityStoryId] = useState<string | null>(null);
+  const [sayExpanded, setSayExpanded] = useState(false);
   const [sentToast, setSentToast] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const holdRef = useRef<{ x: number; y: number; at: number } | null>(null);
   const suppressClick = useRef(false);
-  const forceMute = useCallback(() => setMuted(true), []);
   const author = authors[cursor.author];
   const item = author?.items[cursor.item];
   const clip = item?.media[0] ?? null;
-  const video = clip?.kind === "video" ? clip : null;
+  const playable = clip?.kind === "video" ? clip : null;
+  const mux = playable?.playbackId && isSocialMuxId(playable.playbackId) ? playable : null;
   const sendSheetOpen = sendItemId !== null;
-  const playbackPaused = paused || held || sendSheetOpen;
+  const activityOpen = activityStoryId !== null;
+  const playbackPaused = paused || held || sendSheetOpen || activityOpen || sayExpanded;
+  const presenceId = item?.id ?? "";
+  if (presenceId !== audibleFor) {
+    setAudibleFor(presenceId);
+    setAudible(true);
+    setSayExpanded(false);
+    setActivityStoryId(null);
+  }
   const allowReply = !!author && canReply && (!selfId || author.authorId !== selfId);
   const prevNeighbor = neighborView(authors[cursor.author - 1], "last");
   const nextNeighbor = neighborView(authors[cursor.author + 1], "first");
@@ -403,7 +318,7 @@ export function SocialStoryViewer({
       const stage = stageRef.current;
       const screen = stage ? storyScreen(stage) : null;
       if (storyPlaybackHeld(screen, false)) return;
-      if (!storyAdvanceWhileSending(sendSheetOpen, reason, paused || held)) return;
+      if (!storyAdvanceWhileSending(sendSheetOpen || activityOpen, reason, paused || held)) return;
       const result = storyTrayStep(authors, cursor, direction);
       if (result === "close") {
         router.push(SOCIAL_ROUTES.home);
@@ -411,11 +326,10 @@ export function SocialStoryViewer({
       }
       if (!result) return;
       paintStoryEnter(mediaRef.current, direction, setHop);
-      setVideoProgress(0);
       setHeld(false);
       setCursor(result);
     },
-    [authors, cursor, held, paused, router, sendSheetOpen],
+    [activityOpen, authors, cursor, held, paused, router, sendSheetOpen],
   );
 
   const jumpTo = useCallback(
@@ -428,7 +342,6 @@ export function SocialStoryViewer({
       if (!row || row.items.length === 0) return;
       const direction = authorIndex >= cursor.author ? "next" : "prev";
       paintStoryEnter(mediaRef.current, direction, setHop);
-      setVideoProgress(0);
       setHeld(false);
       setCursor({
         author: authorIndex,
@@ -440,11 +353,19 @@ export function SocialStoryViewer({
 
   useLayoutEffect(() => {
     const direction = consumeStoryEnter();
-    // The 180ms fade must be on the frame the browser paints. A later frame flashes.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- commit enter before paint
+    // Commit the segment hop before paint. Open itself stays opaque — a fade from
+    // zero is the jump the open-smooth lock forbids.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- commit hop before paint
     if (direction) setHop(direction);
-    else setEnter("open");
   }, [storyId]);
+  useLayoutEffect(() => {
+    if (!item) return;
+    const first = item.media[0];
+    const video = first?.kind === "video" ? first : null;
+    if (video?.playbackId && isSocialMuxId(video.playbackId)) return;
+    if (first?.kind === "image" && first.url) return;
+    noteStoryMediaPainted();
+  }, [item]);
   useEffect(() => {
     const stage = stageRef.current;
     const screen = stage ? storyScreen(stage) : null;
@@ -590,17 +511,15 @@ export function SocialStoryViewer({
 
   const heart = hearts[item.id] ?? { liked: false, count: 0 };
   const heartLiked = heart.liked;
+  const ownStory = !!selfId && author.authorId === selfId;
 
   return (
     <div
       ref={stageRef}
       data-social-story-stage=""
-      className={cn(
-        SOCIAL_STORY_STAGE_CLASS,
-        SOCIAL_STORY_HOLD_SURFACE_CLASS,
-        enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null,
-      )}
+      className={cn(SOCIAL_STORY_STAGE_CLASS, SOCIAL_STORY_HOLD_SURFACE_CLASS)}
     >
+      <div className="relative h-full w-full">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-40 hidden items-center justify-between p-4 md:flex">
         {/* eslint-disable-next-line @next/next/no-img-element -- dark-stage wordmark; BrandLogo swaps with theme */}
         <img
@@ -638,19 +557,29 @@ export function SocialStoryViewer({
             )}
           >
             {clip?.kind === "image" ? (
-              <SocialMediaImage key={item.id} src={clip.url} sizes={SOCIAL_POST_IMAGE_SIZES} alt="" />
-            ) : null}
-            {video ? (
-              <StoryVideo
+              <SocialMediaImage
                 key={item.id}
-                src={video.url}
-                paused={playbackPaused}
-                muted={muted}
-                onAudible={setAudible}
-                onForcedMute={forceMute}
-                onProgress={setVideoProgress}
-                onComplete={() => go("next", "auto")}
+                src={clip.url}
+                sizes={SOCIAL_POST_IMAGE_SIZES}
+                alt=""
+                onLoad={() => noteStoryMediaPainted()}
+                onError={() => noteStoryMediaPainted()}
               />
+            ) : null}
+            {mux?.playbackId ? (
+              <SocialMuxPlayer
+                key={item.id}
+                playbackId={mux.playbackId}
+                playbackPolicy={mux.playbackPolicy}
+                muted={muted}
+                autoPlay={!playbackPaused}
+                chromeless
+                onPaint={noteStoryMediaPainted}
+                className="absolute inset-0 size-full object-cover"
+              />
+            ) : null}
+            {playable && !mux ? (
+              <div data-social-video-closed="" className="absolute inset-0 size-full object-cover" />
             ) : null}
             {!clip && item.body ? (
               <div className="flex h-full items-center justify-center px-6 text-center">
@@ -709,22 +638,20 @@ export function SocialStoryViewer({
                     data-social-story-progress-fill=""
                     className={cn(
                       "block h-full origin-left bg-band-ink",
-                      i === cursor.item && !video ? SOCIAL_STORY_PROGRESS_FILL_CLASS : null,
+                      i === cursor.item ? SOCIAL_STORY_PROGRESS_FILL_CLASS : null,
                     )}
                     style={
                       i < cursor.item
                         ? { transform: "scaleX(1)" }
                         : i > cursor.item
                           ? { transform: "scaleX(0)" }
-                          : video
-                            ? { transform: `scaleX(${videoProgress})` }
-                            : {
-                                animationDuration: `${SOCIAL_STORY_STILL_PROGRESS_MS}ms`,
-                                animationPlayState: playbackPaused ? "paused" : "running",
-                              }
+                          : {
+                              animationDuration: `${SOCIAL_STORY_STILL_PROGRESS_MS}ms`,
+                              animationPlayState: playbackPaused ? "paused" : "running",
+                            }
                     }
                     onAnimationEnd={() => {
-                      if (i !== cursor.item || video) return;
+                      if (i !== cursor.item) return;
                       go("next", "auto");
                     }}
                   />
@@ -741,10 +668,11 @@ export function SocialStoryViewer({
               <p className="min-w-0 truncate t-body-sm font-medium text-band-ink">{author.authorName}</p>
               <p className="shrink-0 t-label text-band-ink/65">{socialRelativeTime(item.createdAt)}</p>
               <span className="flex-1" />
-              {video && audible ? (
+              {playable ? (
                 <button
                   type="button"
                   data-social-story-mute=""
+                  data-social-story-audible={audible ? "true" : "false"}
                   aria-label={muted ? SOCIAL.stories.unmute : SOCIAL.stories.mute}
                   aria-pressed={muted}
                   className="flex size-10 items-center justify-center text-band-ink"
@@ -753,7 +681,7 @@ export function SocialStoryViewer({
                   <SocialIcon name={muted ? "speaker-slash" : "speaker-high"} size={20} />
                 </button>
               ) : null}
-              {video ? (
+              {playable ? (
                 <button
                   type="button"
                   data-social-story-pause=""
@@ -767,23 +695,41 @@ export function SocialStoryViewer({
               ) : null}
               <Link
                 href={SOCIAL_ROUTES.home}
+                data-social-story-close=""
                 aria-label={SOCIAL.stories.close}
-                className="flex size-10 items-center justify-center text-band-ink md:hidden"
+                onPointerDown={(event) => event.stopPropagation()}
+                className="relative z-30 flex size-11 shrink-0 touch-manipulation items-center justify-center text-band-ink md:hidden"
               >
-                <SocialIcon name="x" size={20} />
+                <SocialIcon name="x" size={22} />
               </Link>
             </div>
           </div>
-          <div data-social-story-actions="" className={SOCIAL_STORY_ACTIONS_ROW_CLASS}>
-            {allowReply ? (
+          <div
+            data-social-story-actions=""
+            className={cn(SOCIAL_STORY_ACTIONS_ROW_CLASS, sayExpanded && "items-end")}
+          >
+            {ownStory ? (
+              <SocialStorySaySomething key={item.id} onExpandedChange={setSayExpanded} />
+            ) : allowReply ? (
               <SocialStoryReply
                 peerId={author.authorId}
-                placeholder={SOCIAL.stories.replyTo(author.authorName)}
+                placeholder={SOCIAL.stories.sendMessage}
               />
             ) : (
               <div className="min-w-0 flex-1" />
             )}
             <div className={SOCIAL_STORY_ACTIONS_CLUSTER_CLASS}>
+              {ownStory ? (
+                <button
+                  type="button"
+                  data-social-story-activity=""
+                  aria-label={SOCIAL.stories.activity}
+                  className={cn(SOCIAL_STORY_ACTION_HIT_CLASS, SOCIAL_STORY_ACTION_IDLE_CLASS)}
+                  onClick={() => setActivityStoryId(item.id)}
+                >
+                  <SocialIcon name="users" size={20} />
+                </button>
+              ) : null}
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -836,7 +782,15 @@ export function SocialStoryViewer({
           onSent={() => setSentToast(true)}
         />
       ) : null}
+      {activityStoryId ? (
+        <SocialStoryActivitySheet
+          storyId={activityStoryId}
+          open
+          onClose={() => setActivityStoryId(null)}
+        />
+      ) : null}
       {sentToast ? <SocialStorySentToast /> : null}
+      </div>
     </div>
   );
 }

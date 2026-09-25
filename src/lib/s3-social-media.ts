@@ -195,7 +195,7 @@ export type SignedSocialMedia = {
  * Display SoT for feeds / Home / Explore / profile activity.
  * Same-origin edge proxy — no CloudFront/S3 RSA on the page path.
  * Privileged short-lived GETs stay on signedSocialMediaUrl / presignSocialMediaGet
- * (media API, welcome/cover hops that need a direct object URL).
+ * (the media API). Social video playback does not use them.
  */
 export async function signedSocialMediaItems(
   media: unknown,

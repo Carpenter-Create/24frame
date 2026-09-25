@@ -4,6 +4,7 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
+import { SocialFeedVideo } from "@/components/social/social-feed-video";
 import { SocialIcon } from "@/components/social/social-icon";
 import { SocialMediaImage } from "@/components/social/social-media-image";
 import { signSocialForYouCourseCovers } from "@/components/social/social-for-you-covers";
@@ -17,9 +18,9 @@ import {
   SOCIAL_PROFILE_PLAY_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
 } from "@/lib/social-chrome";
-import { socialMediaProxiesByPostId } from "@/lib/social-edge";
+import { socialMediaProxiesByPostId, type SocialEdgeMediaItem } from "@/lib/social-edge";
 import { SOCIAL_ICON_SIZE_PROFILE_PLAY } from "@/lib/social-icons";
-import { SOCIAL_PROFILE_TILE_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
+import { SOCIAL_PROFILE_TILE_IMAGE_SIZES } from "@/lib/social-media-display";
 import { loadExploreMedia, loadExploreSearch, type SocialExploreHit } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
@@ -146,18 +147,17 @@ function SocialExploreMediaTile({
   media,
 }: {
   hit: SocialExploreHit;
-  media: { kind: "image" | "video"; url: string }[];
+  media: SocialEdgeMediaItem[];
 }) {
   const first = media[0];
   return (
     <article data-social-explore-tile={hit.id} className={SOCIAL_PROFILE_TILE_CLASS}>
       {first.kind === "video" ? (
-        <video
-          data-social-explore-video=""
-          preload="metadata"
-          src={socialVideoDisplaySrc(first.url)}
-          className="absolute inset-0 size-full object-cover"
-        />
+        first.playbackId ? (
+          <SocialFeedVideo item={first} className="absolute inset-0 size-full object-cover" />
+        ) : (
+          <div data-social-video-closed="" data-social-explore-video="" className="absolute inset-0" />
+        )
       ) : (
         <div data-social-explore-image="" className="absolute inset-0">
           <SocialMediaImage src={first.url} sizes={SOCIAL_PROFILE_TILE_IMAGE_SIZES} />

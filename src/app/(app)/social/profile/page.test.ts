@@ -484,7 +484,7 @@ describe("Social profile public face", () => {
     expect(html).toContain('rel="noopener noreferrer"');
   });
 
-  it("renders the welcome video band only when a signed URL exists", async () => {
+  it("renders a closed welcome band when a welcome key is stored", async () => {
     stubClient({
       profile: { ...ensured, welcome_video_key: "posts/u1/welcome.mp4" },
     });
@@ -493,11 +493,13 @@ describe("Social profile public face", () => {
       error: null,
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    vi.mocked(socialMediaHref).mockReturnValue("https://s3.example/welcome.mp4");
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-welcome-video");
-    expect(html).toContain('src="https://s3.example/welcome.mp4#t=0.1"');
+    expect(html).toContain("data-social-video-closed");
+    expect(html).not.toContain("welcome.mp4");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("/api/social/media");
     expect(html.indexOf("data-social-welcome-video")).toBeLessThan(html.indexOf("data-social-profile-tabs") || html.length);
   });
 

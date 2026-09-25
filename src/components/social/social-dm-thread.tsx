@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialDmStoryShare } from "@/components/social/social-dm-story-share";
 import { cn } from "@/lib/cn";
+import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   clusterDmThreadMessages,
   DM_THREAD_AVATAR_CLASS,
@@ -29,6 +30,7 @@ export type DmThreadStoryShareView = {
   kind: "image" | "video" | null;
   url: string | null;
   playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
   href: string | null;
 };
 
@@ -75,6 +77,7 @@ function ThreadMessage({ message }: { message: DmThreadViewMessage }) {
           kind={story.kind}
           url={story.url}
           playbackId={story.playbackId}
+          playbackPolicy={story.playbackPolicy}
           href={story.href}
         />
       </div>
