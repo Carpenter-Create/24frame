@@ -875,6 +875,9 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
             className="w-full"
           />
         </div>
+        <button type="submit" aria-label={SOCIAL.dms.submit} className={DM_THREAD_COMPOSER_SEND_CLASS}>
+          <SocialIcon name="paper-plane-tilt" size={18} />
+        </button>
         <button
           type="button"
           data-social-dm-camera=""
@@ -897,9 +900,6 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
             event.currentTarget.value = "";
           }}
         />
-        <button type="submit" aria-label={SOCIAL.dms.submit} className={DM_THREAD_COMPOSER_SEND_CLASS}>
-          <SocialIcon name="paper-plane-tilt" size={18} />
-        </button>
       </div>
       <FormError error={error} />
     </form>

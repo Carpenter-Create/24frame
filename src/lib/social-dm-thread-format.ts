@@ -80,6 +80,7 @@ export const DM_THREAD_COMPOSER_SEND_CLASS =
   "flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast";
 
 // Far-right media accessory. Hit 40, ink via text-ink. Glyph size is separate.
+// docs/design-locks/dm-voice-note-lock-v1.md §B chrome only — Send stays left of the camera.
 export const DM_THREAD_COMPOSER_CAMERA_GLYPH = 24;
 
 export const DM_THREAD_COMPOSER_CAMERA_CLASS =

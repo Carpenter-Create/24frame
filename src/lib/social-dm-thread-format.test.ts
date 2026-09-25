@@ -243,8 +243,8 @@ describe("DM thread message format", () => {
     const cameraAt = compose.indexOf('data-social-dm-camera=""');
     const sendAt = compose.indexOf('aria-label={SOCIAL.dms.submit}');
     expect(fieldAt).toBeGreaterThan(-1);
-    expect(cameraAt).toBeGreaterThan(fieldAt);
-    expect(sendAt).toBeGreaterThan(cameraAt);
+    expect(sendAt).toBeGreaterThan(fieldAt);
+    expect(cameraAt).toBeGreaterThan(sendAt);
     expect(compose).toContain('name="camera"');
     expect(compose).toContain("size={DM_THREAD_COMPOSER_CAMERA_GLYPH}");
     expect(compose).toContain("accept={SOCIAL_MEDIA_ACCEPT}");

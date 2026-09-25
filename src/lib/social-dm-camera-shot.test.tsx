@@ -20,14 +20,14 @@ vi.mock("next/navigation", () => ({
 import { SocialDmCompose } from "@/components/social/social-forms";
 
 describe("DM thread composer camera", () => {
-  it("places a 24px camera after the field and before send", () => {
+  it("places a 24px camera far-right, after send", () => {
     const html = renderToStaticMarkup(<SocialDmCompose conversationId="thread-preview" />);
     const fieldAt = html.indexOf('id="social-dm-body"');
     const cameraAt = html.indexOf('data-social-dm-camera=""');
     const sendAt = html.indexOf('type="submit"');
     expect(fieldAt).toBeGreaterThan(-1);
-    expect(cameraAt).toBeGreaterThan(fieldAt);
-    expect(sendAt).toBeGreaterThan(cameraAt);
+    expect(sendAt).toBeGreaterThan(fieldAt);
+    expect(cameraAt).toBeGreaterThan(sendAt);
     expect(html).toContain('width="24"');
     expect(html).toContain('height="24"');
     expect(html).toContain('data-social-icon="camera"');
