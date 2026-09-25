@@ -24,6 +24,8 @@ import {
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_HOME_SPINE_CLASS,
+  SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS,
+  SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
@@ -66,33 +68,46 @@ export function SocialHomeCenterSkeleton({
   topics?: boolean;
   middle?: ReactNode;
 } = {}) {
-  const body = (
-    <>
-      {topics ? (
-        <div data-social-home-topics-skeleton="" className="min-w-0">
-          <div className={SOCIAL_TOPIC_RAIL_CLASS}>
-            <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
-              {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
-                <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} className="h-8 w-24 shrink-0 rounded-full" />
-                  ))}
-                </div>
+  const topicsSkeleton = topics ? (
+    <div data-social-home-topics-skeleton="" className="min-w-0">
+      <div className={SOCIAL_TOPIC_RAIL_CLASS}>
+        <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
+          {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
+            <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-24 shrink-0 rounded-full" />
               ))}
             </div>
-          </div>
-        </div>
-      ) : null}
-      <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
-        <div className={SOCIAL_COMPOSER_ROW_CLASS}>
-          <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
-          <Skeleton className={`${SOCIAL_COMPOSER_FIELD_CLASS} bg-surface-muted`} />
-        </div>
-        <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
-          <Skeleton className="size-8 shrink-0 rounded-full" />
-          <Skeleton className="size-8 shrink-0 rounded-full" />
+          ))}
         </div>
       </div>
+    </div>
+  ) : null;
+  const composerSkeleton = (
+    <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
+      <div className={SOCIAL_COMPOSER_ROW_CLASS}>
+        <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-8")} />
+        <Skeleton className={cn(SOCIAL_COMPOSER_FIELD_CLASS, "bg-surface-muted")} />
+      </div>
+      <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+      </div>
+    </div>
+  );
+  const body = (
+    <>
+      {topicsSkeleton}
+      {topics ? (
+        <div data-social-home-topics-composer-rule="" className={SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS}>
+          <div
+            data-social-home-topics-composer-divider=""
+            aria-hidden="true"
+            className={SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS}
+          />
+          {composerSkeleton}
+        </div>
+      ) : composerSkeleton}
       <SocialStoriesRailSkeleton tall />
       {middle}
       <div data-social-feed-skeleton="" className={SOCIAL_FEED_GUTTER_CLASS}>

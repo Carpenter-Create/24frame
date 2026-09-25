@@ -15,7 +15,7 @@ import {
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { cn } from "@/lib/cn";
-import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_HOME_SPINE_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_HOME_SPINE_CLASS, SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS, SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls, signedSocialMediaByPostId } from "@/lib/social-edge";
 import { socialFollowingWallView } from "@/lib/social-following-wall";
 import { SocialFollowingWallBound } from "@/components/social/social-following-wall-bound";
@@ -148,7 +148,14 @@ async function SocialHomeCenter({
       <SocialHomeTopics active={topic} />
       <SocialHomeColdSlot seedLane={lane} seedTopic={topic}>
         {profile ? (
-          <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+          <div data-social-home-topics-composer-rule="" className={SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS}>
+            <div
+              data-social-home-topics-composer-divider=""
+              aria-hidden="true"
+              className={SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS}
+            />
+            <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+          </div>
         ) : null}
         <SocialStoriesRail
           cards={rail}

@@ -7,6 +7,10 @@ import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
   SOCIAL_CENTER_WIDTH_CLASS,
   SOCIAL_COMPOSER_CLASS,
+  SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_COMPOSER_ROW_CLASS,
+  SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS,
+  SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS,
   SOCIAL_CONTENT_PAIR_WIDTH,
   SOCIAL_DESKTOP_FRAME_PAD_CLASS,
   SOCIAL_DESKTOP_MEASURE,
@@ -82,8 +86,19 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(homeSkeleton).toContain("data-social-home-stack={SOCIAL_HOME_STACK_LOCK}");
     expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_topics_composer_stories_wall");
     expect(SOCIAL_HOME_STACK_ORDER).toEqual(["topics", "composer", "stories", "wall"]);
-    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialHomeComposer"));
+    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("data-social-home-topics-composer-divider"));
+    expect(home.indexOf("data-social-home-topics-composer-divider")).toBeLessThan(home.indexOf("<SocialHomeComposer"));
     expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
+    expect(home).toContain("SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS");
+    expect(home).toContain("SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS).toBe("h-px w-full shrink-0 bg-hairline");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS).not.toContain("border");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS).toBe("flex w-full flex-col");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS).not.toContain("border");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS).not.toContain("gap-");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS).not.toContain("rounded");
+    expect(SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS).not.toContain("bg-");
+    expect(homeSkeleton).toContain("data-social-home-topics-composer-divider");
     expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
     expect(homeSkeleton.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
       homeSkeleton.indexOf("data-social-home-composer-skeleton"),
@@ -248,13 +263,31 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("flex-col");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-none");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("p-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-0");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-none");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("px-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("py-0");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-px");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("rounded-[var(--radius-lg)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("p-[var(--space-4)]");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("gap-[var(--space-2)]");
+    expect(composer).toContain('className="size-8"');
+    expect(composer).not.toContain("size-10");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).not.toContain("gap-[var(--space-3)]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-8");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("rounded-[16px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("border-0");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("outline-none");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("h-10");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("rounded-[20px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("shadow-");
     expect(chrome).toContain("SOCIAL_COMPOSER_ROW_CLASS");
     expect(chrome).toContain("gap-[var(--space-3)]");
     expect(chrome).toContain("SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS");

@@ -112,16 +112,20 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("flex-col");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-none");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-0");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-none");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("px-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("py-0");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("rounded-[var(--radius-lg)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("p-[var(--space-4)]");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("gap-[var(--space-2)]");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("p-[var(--space-4)]");
     expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("flex-1");
     expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("items-center");
-    expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("gap-[var(--space-3)]");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).not.toContain("gap-[var(--space-3)]");
     expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).toContain("ml-[var(--space-2)]");
     expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).toContain("gap-0");
     expect(SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS).not.toContain("gap-[var(--space-2)]");
@@ -138,12 +142,16 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-10");
-    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("rounded-[20px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-8");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("rounded-[16px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("h-10");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("rounded-[20px]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("px-[var(--space-4)]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("t-body");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("text-ink-2");
-    expect(html).toContain("size-10");
+    expect(html).toContain("size-8");
+    expect(html).not.toContain("size-10");
+    expect(html).not.toContain("size-11");
   });
 
   it("shows the composer author photo when a signed URL exists", () => {

@@ -297,17 +297,25 @@ export const SOCIAL_STORY_ACTION_IDLE_CLASS = "text-band-ink/70";
 export const SOCIAL_STORY_HEART_LIKED_CLASS = "text-[#1769FF]";
 
 // Home composer share stage. Phone SoT; desktop uses this same row.
-// FB-row lock v1.2 field. Host stays white, hairline, radius 16, pad 16.
-// One row. Avatar 40, gap 12. Share something is not a drawn pill:
-// transparent fill, no border, no shadow, no outline. Radius 20 is hit
-// geometry only. Height 40, pad H 16.
+// FB-row lock v1.3 height. Outer band is 32, the same as Topics.
+// Host pad Y 0, pad H 16, border none, radius 0, transparent.
+// Avatar 32, field 32, radius 16, gap avatar→field 8.
+// Field stays v1.2: transparent, no border, no shadow, no outline.
 // Photo then Camera stay v1.1: glyph 16, hit 32, gap 0, 8px after the
 // field, ink-2. No labels. No Live/Feeling strip.
 export const SOCIAL_COMPOSER_CLASS =
-  `flex w-full items-center ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-[var(--space-4)] text-left`;
+  "flex w-full items-center rounded-none border-0 bg-transparent px-[var(--space-4)] py-0 text-left";
 
 export const SOCIAL_COMPOSER_ROW_CLASS =
-  "flex min-w-0 flex-1 items-center gap-[var(--space-3)]";
+  "flex min-w-0 flex-1 items-center gap-[var(--space-2)]";
+
+// v1.4. Spine gap is 8 between Home flex children. Grouping this rule
+// with the composer keeps that 8 above the line and puts the 1px
+// immediately on the 32 band. The line is not a host border.
+export const SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS = "flex w-full flex-col";
+
+export const SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS =
+  "h-px w-full shrink-0 bg-hairline";
 
 // 8px after the field. Hits sit flush.
 export const SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS =
@@ -317,7 +325,7 @@ export const SOCIAL_COMPOSER_AFFORDANCE_CLASS =
   "inline-flex size-8 shrink-0 items-center justify-center bg-transparent text-ink-2";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
-  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] border-0 bg-transparent px-[var(--space-4)] t-body text-ink-2 outline-none";
+  "flex h-8 min-w-0 flex-1 items-center rounded-[16px] border-0 bg-transparent px-[var(--space-4)] t-body text-ink-2 outline-none";
 
 export const SOCIAL_COMPOSER_MEDIA_CLASS =
   "relative flex size-9 shrink-0 cursor-pointer items-center justify-center text-ink-2";
