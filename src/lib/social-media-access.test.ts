@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
@@ -416,5 +417,40 @@ describe("viewerMayMintSocialMuxPlayback", () => {
     } as never);
     await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(false);
     await expect(viewerMayMintSocialMuxPlayback(USER, "short", NOW)).resolves.toBe(false);
+  });
+
+  it("never queries messages while deciding a mux playback grant", async () => {
+    const tables: string[] = [];
+    const from = vi.fn((table: string) => {
+      tables.push(table);
+      if (table === "posts") return chain({ data: [] });
+      if (table === "stories") {
+        return chain({
+          data: [{ author_id: OTHER, status: "active", expires_at: LIVE, media: muxMedia(OTHER, "stories") }],
+        });
+      }
+      if (table === "follows") return chain({ data: [{ followee_id: OTHER }] });
+      return chain({ data: [{ id: "not-a-grant" }] });
+    });
+    vi.mocked(createClient).mockResolvedValue({ from } as never);
+    await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(true);
+    expect(tables).toEqual(["posts", "stories", "follows"]);
+    expect(tables).not.toContain("messages");
+
+    tables.length = 0;
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        tables.push(table);
+        return chain({ data: [] });
+      }),
+    } as never);
+    await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(false);
+    expect(tables).not.toContain("messages");
+
+    const grant = readFileSync("src/lib/social-media-access.ts", "utf8");
+    const mint = grant.slice(grant.indexOf("export async function viewerMayMintSocialMuxPlayback"));
+    const route = readFileSync("src/app/api/social/mux-playback/route.ts", "utf8");
+    expect(mint).not.toContain("messages");
+    expect(route).not.toContain("messages");
   });
 });
