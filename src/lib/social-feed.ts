@@ -581,6 +581,7 @@ export async function loadSuggestedPeople(
   supabase: ServerClient,
   excludeIds: readonly string[],
   viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
+  limit = SOCIAL_FOR_YOU_PEOPLE_LIMIT,
 ): Promise<SocialSuggestedPerson[]> {
   const { data } = await supabase
     .from("profiles")
@@ -590,7 +591,7 @@ export async function loadSuggestedPeople(
     .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
   const blocked = new Set(excludeIds.filter(Boolean));
   const available = (data ?? []).filter((row) => !blocked.has(row.id));
-  return rankSocialSuggestedPeople(available, viewer).slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
+  return rankSocialSuggestedPeople(available, viewer).slice(0, limit);
 }
 
 export async function loadProfilesByIds(

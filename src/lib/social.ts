@@ -72,6 +72,17 @@ export function isSocialDmThreadPath(pathname: string): boolean {
   return id.length > 0 && !id.includes("/") && id !== "new";
 }
 
+/** New message and New group chat. Not the inbox, not an open thread. */
+export function isSocialDmComposePath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  return path === `${SOCIAL_ROUTES.dms}/new` || path === `${SOCIAL_ROUTES.dms}/new/group`;
+}
+
+/** Thread or compose. The inbox keeps the Social shell and phone dock. */
+export function isSocialDmImmersivePath(pathname: string): boolean {
+  return isSocialDmThreadPath(pathname) || isSocialDmComposePath(pathname);
+}
+
 /** Open story viewer. Not the index, not the create stage. */
 export function isSocialStoryOpenPath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
@@ -883,6 +894,13 @@ export const SOCIAL = {
     empty: "No conversations yet.",
     startCta: "Start a conversation",
     newMessage: "New message",
+    to: "To:",
+    search: "Search",
+    groupChat: "Group chat",
+    groupChatHint: "Message up to 16 people",
+    newGroupChat: "New group chat",
+    groupName: "Group name (optional)",
+    suggested: "Suggested",
     chat: "Chat",
     searchPeople: "Search people",
     membershipSealed: "People are chosen when the conversation starts.",

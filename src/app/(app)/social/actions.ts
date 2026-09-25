@@ -575,10 +575,22 @@ export async function startSocialDm(formData: FormData): Promise<ActionResult> {
     redirect(socialDmHref(data));
   }
 
+  const parsed = normalizeConversationTitle(String(formData.get("title") ?? ""));
+  if (!parsed) return { error: SOCIAL.dms.titleInvalid };
+
   const { data, error } = await supabase.rpc("create_group_conversation", {
     p_peers: peers,
   });
   if (error || !data) return { error: quietDmAddError(error?.message ?? SOCIAL.dms.missing) };
+
+  if (parsed.title) {
+    const { error: titleError } = await supabase.rpc("set_group_conversation_title", {
+      p_conversation: data,
+      p_title: parsed.title,
+    });
+    if (titleError) return { error: quietDmAddError(titleError.message) };
+  }
+
   redirect(socialDmHref(data));
 }
 

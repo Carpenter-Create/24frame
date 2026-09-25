@@ -13,6 +13,8 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
+  DM_THREAD_COMPOSER_CAMERA_CLASS,
+  DM_THREAD_COMPOSER_CAMERA_GLYPH,
   DM_THREAD_COMPOSER_CLASS,
   DM_THREAD_COMPOSER_FIELD_CLASS,
   DM_THREAD_COMPOSER_ROW_CLASS,
@@ -844,6 +846,7 @@ export function SocialMessageButton({ peerId }: { peerId: string }) {
 
 export function SocialDmCompose({ conversationId }: { conversationId: string }) {
   const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   return (
     <form
       data-social-dm-form=""
@@ -875,6 +878,28 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
         <button type="submit" aria-label={SOCIAL.dms.submit} className={DM_THREAD_COMPOSER_SEND_CLASS}>
           <SocialIcon name="paper-plane-tilt" size={18} />
         </button>
+        <button
+          type="button"
+          data-social-dm-camera=""
+          aria-label={SOCIAL.home.attach}
+          className={DM_THREAD_COMPOSER_CAMERA_CLASS}
+          onClick={() => fileRef.current?.click()}
+        >
+          <SocialIcon name="camera" size={DM_THREAD_COMPOSER_CAMERA_GLYPH} className="text-ink" />
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept={SOCIAL_MEDIA_ACCEPT}
+          className="sr-only"
+          tabIndex={-1}
+          data-social-dm-attach-input=""
+          aria-label={SOCIAL.home.attach}
+          onChange={(event) => {
+            // Library open only. No DM media insert on this path.
+            event.currentTarget.value = "";
+          }}
+        />
       </div>
       <FormError error={error} />
     </form>

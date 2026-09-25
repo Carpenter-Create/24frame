@@ -79,6 +79,13 @@ export const DM_THREAD_COMPOSER_FIELD_CLASS =
 export const DM_THREAD_COMPOSER_SEND_CLASS =
   "flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast";
 
+// Far-right media accessory. Hit 40, ink via text-ink. Glyph size is separate.
+// docs/design-locks/dm-voice-note-lock-v1.md §B chrome only — Send stays left of the camera.
+export const DM_THREAD_COMPOSER_CAMERA_GLYPH = 24;
+
+export const DM_THREAD_COMPOSER_CAMERA_CLASS =
+  "inline-flex size-10 shrink-0 items-center justify-center text-ink active:opacity-70";
+
 // Header density geometry, hosted at the top of the thread viewport.
 // Safe-area sits above the 48 row. Surface #FFFFFF is bg-surface.
 export const DM_THREAD_HEADER_HOST_CLASS =
