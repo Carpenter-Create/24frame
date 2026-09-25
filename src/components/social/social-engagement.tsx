@@ -28,6 +28,9 @@ import {
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_FOLLOW_COMPACT_CLASS,
   SOCIAL_FOLLOW_COMPACT_IDLE_CLASS,
+  SOCIAL_POST_ACTION_GLYPH,
+  SOCIAL_POST_ACTION_HIT_CLASS,
+  SOCIAL_STORY_HEART_LIKED_CLASS,
 } from "@/lib/social-chrome";
 import {
   FOLLOW_CONFIRM_MS,
@@ -247,6 +250,7 @@ export function SocialLikeButton({
   groupSlug,
   disabled,
   icon = false,
+  tone = "canvas",
 }: {
   postId: string;
   liked: boolean;
@@ -254,6 +258,7 @@ export function SocialLikeButton({
   groupSlug?: string;
   disabled?: boolean;
   icon?: boolean;
+  tone?: "canvas" | "stage";
 }) {
   const view = useSocialLike(postId, { liked, likeCount });
   const [error, setError] = useState("");
@@ -289,11 +294,24 @@ export function SocialLikeButton({
         disabled={disabled}
         data-social-like=""
         aria-label={view.liked ? SOCIAL.post.unlike : SOCIAL.post.like}
-        className={icon ? "text-ink" : "t-body-sm text-ink-2"}
+        className={
+          icon
+            ? cn(
+                SOCIAL_POST_ACTION_HIT_CLASS,
+                tone === "stage"
+                  ? view.liked
+                    ? SOCIAL_STORY_HEART_LIKED_CLASS
+                    : "text-band-ink"
+                  : view.liked
+                    ? "text-ink"
+                    : "text-ink-2",
+              )
+            : "t-body-sm text-ink-2"
+        }
         onClick={onToggle}
       >
         {icon ? (
-          <SocialIcon name="heart" active={view.liked} size={22} />
+          <SocialIcon name="heart" active={view.liked} size={SOCIAL_POST_ACTION_GLYPH} />
         ) : (
           <>
             {view.likeCount} {SOCIAL.post.likes}

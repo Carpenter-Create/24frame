@@ -90,13 +90,19 @@ export function socialMediaOrientation(
   return input.kind === "image" ? "portrait" : "landscape";
 }
 
-/** Feed media frame SoT. Stills, Mux poster, Mux player, native video. */
+/**
+ * Feed media frame SoT. Stills, Mux poster, Mux player, native video.
+ * Height is min(70vh, 560px, aspect height). Width stays the container.
+ * Portrait crops inside the cap. Landscape follows aspect until the cap.
+ * docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md
+ * Complete class strings — Tailwind does not see interpolations.
+ */
 export function socialMediaFrameClass(
   orientation: SocialMediaOrientation | SocialMediaFrameInput,
 ): string {
   return socialMediaOrientation(orientation) === "portrait"
-    ? "aspect-[4/5] w-full object-cover"
-    : "aspect-video w-full object-cover";
+    ? "aspect-[4/5] h-[min(70vh,560px,calc(100cqw*5/4))] w-full max-h-[min(70vh,560px)] object-cover object-center"
+    : "aspect-video h-[min(70vh,560px,calc(100cqw*9/16))] w-full max-h-[min(70vh,560px)] object-cover object-center";
 }
 
 /** Story viewer lane only. A portrait story stays tall instead of the feed 16:9 crop. */

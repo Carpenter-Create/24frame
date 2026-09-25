@@ -50,8 +50,15 @@ describe("social media display", () => {
     expect(socialMediaOrientation({ aspect: 16 / 9 })).toBe("landscape");
     expect(socialMediaOrientation({ kind: "image" })).toBe("portrait");
     expect(socialMediaOrientation({ kind: "video" })).toBe("landscape");
-    expect(socialMediaFrameClass("portrait")).toBe("aspect-[4/5] w-full object-cover");
-    expect(socialMediaFrameClass("landscape")).toBe("aspect-video w-full object-cover");
+    expect(socialMediaFrameClass("portrait")).toBe(
+      "aspect-[4/5] h-[min(70vh,560px,calc(100cqw*5/4))] w-full max-h-[min(70vh,560px)] object-cover object-center",
+    );
+    expect(socialMediaFrameClass("landscape")).toBe(
+      "aspect-video h-[min(70vh,560px,calc(100cqw*9/16))] w-full max-h-[min(70vh,560px)] object-cover object-center",
+    );
+    expect(socialMediaFrameClass("portrait")).toContain("min(70vh,560px)");
+    expect(socialMediaFrameClass("landscape")).toContain("min(70vh,560px)");
+    expect(socialMediaFrameClass("portrait")).not.toContain("min(100vh");
     expect(socialMediaFrameClass({ kind: "image" })).toContain("aspect-[4/5]");
     expect(socialMediaFrameClass({ kind: "video" })).toContain("aspect-video");
     expect(socialMediaFrameClass({ kind: "video" })).not.toContain("aspect-square");

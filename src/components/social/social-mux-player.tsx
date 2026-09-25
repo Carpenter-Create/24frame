@@ -25,10 +25,12 @@ export function SocialMuxPlayer({
   playbackId,
   playbackPolicy,
   className,
+  fit = "cover",
 }: {
   playbackId: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
   className?: string;
+  fit?: "cover" | "contain";
 }) {
   const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
   const [mint, setMint] = useState<{ playbackId: string; tokens: SocialMuxPlaybackTokens } | null>(null);
@@ -57,7 +59,12 @@ export function SocialMuxPlayer({
       data-social-mux-player={playbackId}
       data-social-mux-playback={signed ? (tokens ? "signed" : "pending") : "public"}
       data-social-post-video=""
-      className={cn(SOCIAL_MUX_PLAYER_CLASS, className)}
+      className={cn(
+        fit === "contain"
+          ? "social-mux-player social-feed-immersive-media block size-full overflow-hidden object-contain"
+          : SOCIAL_MUX_PLAYER_CLASS,
+        className,
+      )}
     >
       {signed ? (
         tokens ? (
@@ -72,8 +79,12 @@ export function SocialMuxPlayer({
             playsInline
             preload="metadata"
             poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
-            className="size-full object-cover"
-            style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
+            className={fit === "contain" ? "size-full object-contain" : "size-full object-cover"}
+            style={
+              fit === "contain"
+                ? { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "contain" }
+                : { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }
+            }
           />
         ) : null
       ) : (
@@ -83,8 +94,12 @@ export function SocialMuxPlayer({
           playsInline
           preload="metadata"
           poster={socialMuxThumbnailUrl(playbackId)}
-          className="size-full object-cover"
-          style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
+          className={fit === "contain" ? "size-full object-contain" : "size-full object-cover"}
+          style={
+            fit === "contain"
+              ? { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "contain" }
+              : { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }
+          }
         />
       )}
     </div>

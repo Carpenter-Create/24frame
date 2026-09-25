@@ -16,6 +16,7 @@ export function SocialMediaImage({
   className,
   sizes,
   priority = false,
+  fit = "cover",
   onError,
 }: {
   src: string;
@@ -23,6 +24,7 @@ export function SocialMediaImage({
   className?: string;
   sizes: string;
   priority?: boolean;
+  fit?: "cover" | "contain";
   onError?: (event: SyntheticEvent<HTMLImageElement>) => void;
 }) {
   return (
@@ -31,7 +33,7 @@ export function SocialMediaImage({
       alt={alt}
       fill
       sizes={sizes}
-      className={cn("object-cover", className)}
+      className={cn(fit === "contain" ? "object-contain object-center" : "object-cover object-center", className)}
       priority={priority}
       unoptimized={isAnimatedRasterSrc(src) || isSessionGatedSocialSrc(src)}
       onError={onError}

@@ -12,16 +12,19 @@ export type SocialFeedVideoItem = {
 export function SocialFeedVideo({
   item,
   className,
+  fit = "cover",
 }: {
   item: SocialFeedVideoItem;
   className?: string;
+  fit?: "cover" | "contain";
 }) {
-  const fill = cn("size-full object-cover", className);
+  const fill = cn(fit === "contain" ? "size-full object-contain" : "size-full object-cover", className);
   if (item.playbackId) {
     return (
       <SocialMuxPlayer
         playbackId={item.playbackId}
         playbackPolicy={item.playbackPolicy}
+        fit={fit}
         className={fill}
       />
     );

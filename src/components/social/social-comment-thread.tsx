@@ -18,6 +18,8 @@ import {
   SOCIAL_COMMENT_SHEET_HOST_CLASS,
   SOCIAL_COMMENT_SHEET_SCRIM_CLASS,
   SOCIAL_COMMENT_SHEET_SURFACE_CLASS,
+  SOCIAL_POST_ACTION_GLYPH,
+  SOCIAL_POST_ACTION_HIT_CLASS,
 } from "@/lib/social-chrome";
 import { socialMemberHref, socialRelativeTime, SOCIAL } from "@/lib/social";
 import {
@@ -39,9 +41,11 @@ type ThreadPost = {
 export function SocialCommentTrigger({
   post,
   icon = false,
+  tone = "canvas",
 }: {
   post: ThreadPost;
   icon?: boolean;
+  tone?: "canvas" | "stage";
 }) {
   const [open, setOpen] = useState(false);
   const count = useSocialCommentCount(post.id, post.commentCount ?? 0);
@@ -57,10 +61,18 @@ export function SocialCommentTrigger({
           data-social-comment-open=""
           {...(showTrail ? { "data-social-comment-trail": "" } : {})}
           aria-label={SOCIAL.post.commentsTitle}
-          className={icon ? "text-ink" : "self-start text-left t-body-sm text-ink-2"}
+          className={
+            icon
+              ? cn(SOCIAL_POST_ACTION_HIT_CLASS, tone === "stage" ? "text-band-ink" : "text-ink-2")
+              : "self-start text-left t-body-sm text-ink-2"
+          }
           onClick={() => setOpen(true)}
         >
-          {icon ? <SocialIcon name="chat-circle" size={22} /> : `${count} ${SOCIAL.post.comments}`}
+          {icon ? (
+            <SocialIcon name="chat-circle" size={SOCIAL_POST_ACTION_GLYPH} />
+          ) : (
+            `${count} ${SOCIAL.post.comments}`
+          )}
         </button>
       ) : null}
       {open ? (

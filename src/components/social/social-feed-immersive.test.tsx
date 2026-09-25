@@ -1,0 +1,112 @@
+import { readFileSync } from "node:fs";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+
+import { SOCIAL } from "@/lib/social";
+import {
+  SOCIAL_FEED_IMMERSIVE_CLOSE_CLASS,
+  SOCIAL_FEED_IMMERSIVE_STAGE_CLASS,
+  SOCIAL_POST_ACTION_GLYPH,
+  SOCIAL_POST_ACTIONS_ROW_CLASS,
+  SOCIAL_STORY_HEART_LIKED_CLASS,
+} from "@/lib/social-chrome";
+
+import { SocialFeedImmersive } from "./social-feed-immersive";
+
+const immersiveSrc = readFileSync("src/components/social/social-feed-immersive.tsx", "utf8");
+const css = readFileSync("src/app/globals.css", "utf8");
+
+const post = {
+  id: "p1",
+  body: "hello from the dock",
+  likeCount: 2,
+  commentCount: 1,
+  liked: true,
+  createdAt: "2026-09-25T12:00:00.000Z",
+  authorId: "u1",
+  authorHandle: "ada",
+  authorName: "Ada Lovelace",
+  authorPhotoUrl: null,
+  groupSlug: null,
+  groupName: null,
+  canLike: true,
+  media: [{ kind: "image" as const, url: "https://cf.example/signed-image" }],
+};
+
+describe("SocialFeedImmersive", () => {
+  it("is one fullscreen stage with contain media and a bottom dock", () => {
+    const html = renderToStaticMarkup(
+      <SocialFeedImmersive post={post} index={0} onClose={() => undefined} />,
+    );
+    expect(html).toContain("data-social-feed-immersive");
+    expect(html).toContain(SOCIAL_FEED_IMMERSIVE_STAGE_CLASS);
+    expect(SOCIAL_FEED_IMMERSIVE_STAGE_CLASS).toContain("bg-[#0A0A0B]");
+    expect(SOCIAL_FEED_IMMERSIVE_STAGE_CLASS).toContain("fixed inset-0");
+    expect(html).toContain("object-contain");
+    expect(html).toContain("data-social-feed-immersive-close");
+    expect(html).toContain(SOCIAL_FEED_IMMERSIVE_CLOSE_CLASS);
+    expect(SOCIAL_FEED_IMMERSIVE_CLOSE_CLASS).toContain("size-[44px]");
+    expect(html).toContain('data-social-icon="x"');
+    expect(html).toContain("data-social-feed-immersive-caption");
+    expect(html).toContain("ada");
+    expect(html).toContain("hello from the dock");
+    expect(html).toContain("data-social-feed-immersive-dock");
+    expect(html).toContain(SOCIAL_POST_ACTIONS_ROW_CLASS);
+    expect(html).toContain("data-social-like");
+    expect(html).toContain("data-social-comment-open");
+    expect(html).toContain("data-social-post-share");
+    expect(html).toContain('data-social-post-share-url="/social/p/p1"');
+    expect(html.indexOf("data-social-feed-immersive-caption")).toBeLessThan(
+      html.indexOf("data-social-post-actions"),
+    );
+    expect(html.indexOf("data-social-comment-open")).toBeLessThan(html.indexOf("data-social-post-share"));
+    expect(html).not.toContain("data-social-comment-thread");
+    expect(html).toContain(SOCIAL_STORY_HEART_LIKED_CLASS);
+    expect(SOCIAL_POST_ACTION_GLYPH).toBe(24);
+    expect(immersiveSrc).not.toContain("md:grid-cols");
+    expect(immersiveSrc).not.toContain("data-social-feed-immersive-rail");
+    expect(css).toContain("animation: social-feed-immersive-in 180ms ease-out both");
+    expect(css).toContain("html:has([data-social-feed-immersive]) [data-house-lead-stack]");
+    expect(css).toContain("html:has([data-social-feed-immersive]) [data-house-phone-bottom-nav]");
+    expect(css).toContain("--media-object-fit: contain");
+    const motion = css.slice(css.indexOf("@keyframes social-feed-immersive-in"));
+    expect(motion.slice(0, 400)).not.toContain("transform");
+  });
+
+  it("shows more only when the caption exceeds three lines", () => {
+    const short = renderToStaticMarkup(
+      <SocialFeedImmersive post={post} index={0} onClose={() => undefined} />,
+    );
+    expect(short).not.toContain("data-social-feed-immersive-more");
+
+    const long = renderToStaticMarkup(
+      <SocialFeedImmersive
+        post={{ ...post, body: "word ".repeat(40) }}
+        index={0}
+        onClose={() => undefined}
+      />,
+    );
+    expect(long).toContain("data-social-feed-immersive-more");
+    expect(long).toContain(SOCIAL.post.captionMore);
+    expect(long).toContain("line-clamp-3");
+  });
+
+  it("plays Mux video with contain and does not use a raw file player when a playback id exists", () => {
+    const html = renderToStaticMarkup(
+      <SocialFeedImmersive
+        post={{
+          ...post,
+          body: null,
+          media: [{ kind: "video", url: "", playbackId: "abc12345xx" }],
+        }}
+        index={0}
+        onClose={() => undefined}
+      />,
+    );
+    expect(html).toContain('data-social-mux-player="abc12345xx"');
+    expect(html).toContain("object-contain");
+    expect(html).not.toContain("<video");
+    expect(html).toContain('aria-label="View video"');
+    expect(html).not.toContain("data-social-feed-immersive-caption");
+  });
+});

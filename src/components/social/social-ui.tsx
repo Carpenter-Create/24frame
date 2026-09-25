@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useCallback, useState, type ReactNode } from "react";
 import Link from "next/link";
 
 import { HouseChipRail } from "@/components/chrome/house-chip-rail";
@@ -10,7 +12,12 @@ import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
+  SOCIAL_FEED_MEDIA_BLEED_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_POST_ACTION_GLYPH,
+  SOCIAL_POST_ACTION_HIT_CLASS,
+  SOCIAL_POST_ACTIONS_ROW_CLASS,
+  SOCIAL_POST_CAPTION_CLASS,
   SOCIAL_POST_TIME_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
@@ -56,6 +63,7 @@ import {
   type SocialMediaOrientation,
 } from "@/lib/social-media-display";
 import { SocialAvatar } from "./social-avatar";
+import { SocialFeedImmersive, SocialPostShareControl } from "./social-feed-immersive";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialCommentTrigger } from "./social-comment-thread";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
@@ -171,22 +179,26 @@ export type SocialPostCardModel = {
 
 export function SocialPostMedia({
   items,
-  href,
+  onOpen,
   frameClass,
 }: {
   items: readonly SocialPostMediaItem[];
-  href?: string;
+  onOpen: (index: number) => void;
   frameClass?: string;
 }) {
   if (items.length === 0) return null;
   return (
-    <div data-social-post-media="" className="flex flex-col gap-2">
-      {items.map((item) => (
+    <div
+      data-social-post-media=""
+      className={cn("@container flex w-full flex-col gap-2", SOCIAL_FEED_MEDIA_BLEED_CLASS)}
+    >
+      {items.map((item, index) => (
         <SocialPostMediaFrame
           key={item.playbackId ?? item.url}
           item={item}
-          href={href}
+          label={item.kind === "video" ? SOCIAL.post.viewVideo : SOCIAL.post.viewPhoto}
           frameClass={frameClass}
+          onOpen={() => onOpen(index)}
         />
       ))}
     </div>
@@ -195,35 +207,41 @@ export function SocialPostMedia({
 
 function SocialPostMediaFrame({
   item,
-  href,
+  label,
   frameClass,
+  onOpen,
 }: {
   item: SocialPostMediaItem;
-  href?: string;
+  label: string;
   frameClass?: string;
+  onOpen: () => void;
 }) {
   const frame = cn(
     frameClass ?? socialMediaFrameClass(item),
-    "relative overflow-hidden bg-surface-muted md:rounded-[8px]",
+    "relative overflow-hidden bg-surface-muted",
+  );
+  const open = (
+    <button
+      type="button"
+      data-social-feed-media-open=""
+      aria-label={label}
+      className="absolute inset-0 z-10 cursor-pointer"
+      onClick={onOpen}
+    />
   );
   if (item.kind === "video") {
     return (
-      <div className={frame}>
+      <div data-social-feed-media-frame="" className={frame}>
         <SocialFeedVideo item={item} className="absolute inset-0 size-full object-cover" />
+        {open}
       </div>
     );
   }
-  const image = (
-    <div data-social-post-image="" className={frame}>
+  return (
+    <div data-social-post-image="" data-social-feed-media-frame="" className={frame}>
       <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />
+      {open}
     </div>
-  );
-  return href ? (
-    <Link href={href} className="block">
-      {image}
-    </Link>
-  ) : (
-    image
   );
 }
 
@@ -480,6 +498,8 @@ export function SocialPostCard({
   // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
   // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
   const media = post.media.length > 0;
+  const [immersiveIndex, setImmersiveIndex] = useState<number | null>(null);
+  const closeImmersive = useCallback(() => setImmersiveIndex(null), []);
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
   const href = socialPostHref(post.id);
   const thread = {
@@ -537,9 +557,12 @@ export function SocialPostCard({
           ) : null}
         </div>
       </div>
-      {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
+      {media ? <SocialPostMedia items={post.media} onOpen={setImmersiveIndex} /> : null}
+      {immersiveIndex != null ? (
+        <SocialFeedImmersive post={post} index={immersiveIndex} onClose={closeImmersive} />
+      ) : null}
       <div className="flex flex-col gap-1">
-        <div data-social-post-actions="" className="flex items-center gap-3.5">
+        <div data-social-post-actions="" className={SOCIAL_POST_ACTIONS_ROW_CLASS}>
           {post.canLike ? (
             <SocialLikeButton
               postId={post.id}
@@ -549,12 +572,12 @@ export function SocialPostCard({
               icon
             />
           ) : (
-            <SocialIcon name="heart" size={22} />
+            <span className={cn(SOCIAL_POST_ACTION_HIT_CLASS, "text-ink-2")}>
+              <SocialIcon name="heart" size={SOCIAL_POST_ACTION_GLYPH} />
+            </span>
           )}
           <SocialCommentTrigger post={thread} icon />
-          <span data-social-post-share="" className="text-ink">
-            <SocialIcon name="paper-plane-tilt" size={22} />
-          </span>
+          <SocialPostShareControl postId={post.id} />
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
         {caption ? (
@@ -562,12 +585,12 @@ export function SocialPostCard({
             <Link
               href={href}
               data-social-post-caption=""
-              className="t-body-sm text-ink whitespace-pre-wrap break-words"
+              className={SOCIAL_POST_CAPTION_CLASS}
             >
               {caption}
             </Link>
           ) : (
-            <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
+            <p data-social-post-caption="" className={SOCIAL_POST_CAPTION_CLASS}>
               {caption}
             </p>
           )

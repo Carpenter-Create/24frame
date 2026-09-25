@@ -929,7 +929,15 @@ describe("SocialPostCard media", () => {
     expect(postCard).not.toContain("aspect-square");
     expect(postMedia).not.toContain("aspect-square");
     expect(postMedia).toContain("socialMediaFrameClass");
-    expect(postCard).toContain("<SocialPostMedia items={post.media} href={permalink ? href : undefined} />");
+    expect(postMedia).toContain("data-social-feed-media-open");
+    expect(postMedia).toContain("SOCIAL.post.viewPhoto");
+    expect(postMedia).toContain("SOCIAL.post.viewVideo");
+    expect(postCard).toContain("<SocialPostMedia items={post.media} onOpen={setImmersiveIndex} />");
+    expect(still).toContain("min(70vh,560px)");
+    expect(still).toContain('aria-label="View photo"');
+    expect(still).toContain("max-md:-mx-");
+    expect(clip).toContain('aria-label="View video"');
+    expect(clip).toContain("min(70vh,560px)");
   });
 
   it("leads hairline rows with author, then media and copy", () => {
@@ -1124,8 +1132,10 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(postCard).toContain("SocialLikeButton");
     expect(postCard).toContain("SocialLikeCount");
     expect(postCard).toContain("SocialCommentTrigger");
-    expect(postCard).toContain("paper-plane-tilt");
+    expect(postCard).toContain("SocialPostShareControl");
     expect(postCard.split("<SocialCommentTrigger").length - 1).toBe(2);
+    expect(postCard).toContain("<SocialCommentTrigger post={thread} icon />");
+    expect(postCard).toContain("<SocialCommentTrigger post={thread} />");
     expect(postCard).not.toContain("viewComments");
     expect(postCard).not.toContain("View comments");
     expect(postCard).not.toContain("hidden md:flex");

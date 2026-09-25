@@ -317,6 +317,40 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
 export const SOCIAL_FEED_ROW_CLASS =
   "flex flex-col gap-2 bg-surface p-[var(--space-4)]";
 
+// Feed photo scale + tap immersive v1.
+// docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md
+// Width stays full-bleed. Phone cancels the row inset and the social
+// frame gutter so the face meets the viewport. Desktop cancels only
+// the row inset so the face meets the feed column. Height cap lives
+// on socialMediaFrameClass. Action geometry cites the align lock:
+// hit 40, glyph 24, gap 8. Do not reopen those sizes.
+export const SOCIAL_FEED_MEDIA_BLEED_CLASS =
+  "max-md:-mx-[calc(var(--space-4)+var(--chrome-gutter))] max-md:w-[calc(100%+(var(--space-4)+var(--chrome-gutter))*2)] md:-mx-[var(--space-4)] md:w-[calc(100%+var(--space-4)*2)]";
+
+export const SOCIAL_POST_ACTION_GLYPH = 24;
+
+export const SOCIAL_POST_ACTION_HIT_CLASS =
+  "inline-flex size-10 shrink-0 items-center justify-center";
+
+export const SOCIAL_POST_ACTIONS_ROW_CLASS = "flex items-center gap-[var(--space-2)]";
+
+export const SOCIAL_POST_CAPTION_CLASS =
+  "t-body text-ink whitespace-pre-wrap break-words";
+
+// #0A0A0B has no house token (--band is #1b1f23). One class, same
+// precedent as the story stage. Desktop uses this same fullscreen
+// stage — a trailing caption column is out.
+export const SOCIAL_FEED_IMMERSIVE_STAGE_CLASS =
+  "fixed inset-0 z-[70] bg-[#0A0A0B] text-band-ink social-feed-immersive-in";
+
+export const SOCIAL_FEED_IMMERSIVE_CLOSE_CLASS =
+  "absolute left-0 top-[env(safe-area-inset-top)] z-30 flex size-[44px] min-h-[44px] min-w-[44px] items-center justify-center text-band-ink";
+
+export const SOCIAL_FEED_IMMERSIVE_DOCK_CLASS =
+  "absolute inset-x-0 bottom-0 z-20 flex flex-col gap-[var(--space-2)] bg-[linear-gradient(to_top,rgb(0_0_0/0.4),rgb(0_0_0/0)_120px)] px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))] pt-[var(--space-4)]";
+
+export const SOCIAL_FEED_IMMERSIVE_CAPTION_CLASS = "t-body text-band-ink break-words";
+
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).
 export const SOCIAL_POST_TIME_CLASS =
