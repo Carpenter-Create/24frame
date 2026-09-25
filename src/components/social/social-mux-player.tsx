@@ -21,18 +21,49 @@ import {
 
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
+function playerStyle(chromeless: boolean) {
+  if (!chromeless) {
+    return {
+      aspectRatio: "auto",
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    } as const;
+  }
+  return {
+    aspectRatio: "auto",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    "--controls": "none",
+  } as const;
+}
+
 export function SocialMuxPlayer({
   playbackId,
   playbackPolicy,
   className,
+  muted = false,
+  autoPlay = false,
+  chromeless = false,
+  onPaint,
 }: {
   playbackId: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
   className?: string;
+  muted?: boolean;
+  autoPlay?: boolean;
+  chromeless?: boolean;
+  onPaint?: () => void;
 }) {
   const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
   const [mint, setMint] = useState<{ playbackId: string; tokens: SocialMuxPlaybackTokens } | null>(null);
   const tokens = signed && mint?.playbackId === playbackId ? mint.tokens : null;
+  const ready = !signed || tokens != null;
+
+  useEffect(() => {
+    if (ready) onPaint?.();
+  }, [onPaint, ready]);
 
   useEffect(() => {
     if (!signed) return;
@@ -70,10 +101,12 @@ export function SocialMuxPlayer({
             }}
             streamType="on-demand"
             playsInline
+            autoPlay={autoPlay}
+            muted={muted}
             preload="metadata"
             poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
             className="size-full object-cover"
-            style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
+            style={playerStyle(chromeless)}
           />
         ) : null
       ) : (
@@ -81,10 +114,12 @@ export function SocialMuxPlayer({
           playbackId={playbackId}
           streamType="on-demand"
           playsInline
+          autoPlay={autoPlay}
+          muted={muted}
           preload="metadata"
           poster={socialMuxThumbnailUrl(playbackId)}
           className="size-full object-cover"
-          style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
+          style={playerStyle(chromeless)}
         />
       )}
     </div>

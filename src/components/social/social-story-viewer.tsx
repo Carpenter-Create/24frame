@@ -22,6 +22,7 @@ import { SocialStorySendSheet } from "@/components/social/social-story-send-shee
 import { SocialStorySentToast } from "@/components/social/social-story-sent-toast";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialMediaImage } from "@/components/social/social-media-image";
+import { SocialMuxPlayer } from "@/components/social/social-mux-player";
 import { SocialIcon } from "@/components/social/social-icon";
 import { BRAND_LOGO_DARK_SRC, BRAND_LOGO_HEIGHT_PX } from "@/lib/brand";
 import { HOUSE_CLIENT_SHELL } from "@/lib/house-client-shell";
@@ -47,6 +48,7 @@ import {
   SOCIAL_STORY_STILL_PROGRESS_MS,
 } from "@/lib/social-chrome";
 import { SOCIAL_POST_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
+import { noteStoryMediaPainted } from "@/lib/social-story-open-hold";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { toggleSocialStoryLike } from "@/app/(app)/social/light-actions";
 import {
@@ -257,6 +259,8 @@ function StoryVideo({
         if (!node.duration || !Number.isFinite(node.duration)) return;
         onProgress(Math.min(1, node.currentTime / node.duration));
       }}
+      onLoadedData={() => noteStoryMediaPainted()}
+      onError={() => noteStoryMediaPainted()}
       onEnded={() => onComplete()}
     />
   );
@@ -386,7 +390,9 @@ export function SocialStoryViewer({
   const author = authors[cursor.author];
   const item = author?.items[cursor.item];
   const clip = item?.media[0] ?? null;
-  const video = clip?.kind === "video" ? clip : null;
+  const playable = clip?.kind === "video" ? clip : null;
+  const mux = playable?.playbackId ? playable : null;
+  const video = playable && !mux ? playable : null;
   const sendSheetOpen = sendItemId !== null;
   const activityOpen = activityStoryId !== null;
   const playbackPaused = paused || held || sendSheetOpen || activityOpen || sayExpanded;
@@ -601,12 +607,9 @@ export function SocialStoryViewer({
     <div
       ref={stageRef}
       data-social-story-stage=""
-      className={cn(
-        SOCIAL_STORY_STAGE_CLASS,
-        SOCIAL_STORY_HOLD_SURFACE_CLASS,
-        enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null,
-      )}
+      className={cn(SOCIAL_STORY_STAGE_CLASS, SOCIAL_STORY_HOLD_SURFACE_CLASS)}
     >
+      <div className={cn("relative h-full w-full", enter === "open" ? SOCIAL_STORY_STAGE_IN_CLASS : null)}>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-40 hidden items-center justify-between p-4 md:flex">
         {/* eslint-disable-next-line @next/next/no-img-element -- dark-stage wordmark; BrandLogo swaps with theme */}
         <img
@@ -644,7 +647,26 @@ export function SocialStoryViewer({
             )}
           >
             {clip?.kind === "image" ? (
-              <SocialMediaImage key={item.id} src={clip.url} sizes={SOCIAL_POST_IMAGE_SIZES} alt="" />
+              <SocialMediaImage
+                key={item.id}
+                src={clip.url}
+                sizes={SOCIAL_POST_IMAGE_SIZES}
+                alt=""
+                onLoad={() => noteStoryMediaPainted()}
+                onError={() => noteStoryMediaPainted()}
+              />
+            ) : null}
+            {mux?.playbackId ? (
+              <SocialMuxPlayer
+                key={item.id}
+                playbackId={mux.playbackId}
+                playbackPolicy={mux.playbackPolicy}
+                muted={muted}
+                autoPlay={!playbackPaused}
+                chromeless
+                onPaint={noteStoryMediaPainted}
+                className="absolute inset-0 size-full"
+              />
             ) : null}
             {video ? (
               <StoryVideo
@@ -746,7 +768,7 @@ export function SocialStoryViewer({
               <p className="min-w-0 truncate t-body-sm font-medium text-band-ink">{author.authorName}</p>
               <p className="shrink-0 t-label text-band-ink/65">{socialRelativeTime(item.createdAt)}</p>
               <span className="flex-1" />
-              {video ? (
+              {playable ? (
                 <button
                   type="button"
                   data-social-story-mute=""
@@ -759,7 +781,7 @@ export function SocialStoryViewer({
                   <SocialIcon name={muted ? "speaker-slash" : "speaker-high"} size={20} />
                 </button>
               ) : null}
-              {video ? (
+              {playable ? (
                 <button
                   type="button"
                   data-social-story-pause=""
@@ -866,6 +888,7 @@ export function SocialStoryViewer({
         />
       ) : null}
       {sentToast ? <SocialStorySentToast /> : null}
+      </div>
     </div>
   );
 }

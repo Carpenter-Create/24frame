@@ -111,6 +111,25 @@ describe("SocialStoryViewer", () => {
     expect(still).not.toContain("aspect-[4/5]");
     expect(still).toContain("social-story-progress");
     expect(still).toContain("animation-duration:5000ms");
+
+    const mux = renderToStaticMarkup(
+      createElement(SocialStoryViewer, {
+        ...viewerProps,
+        media: [
+          {
+            kind: "video",
+            url: "https://image.mux.com/uNbxnGLKJ00yfbijDO8COxT/thumbnail.webp",
+            playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+            playbackPolicy: "signed",
+          },
+        ],
+      }),
+    );
+    expect(mux).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
+    expect(mux).toContain('data-social-mux-playback="pending"');
+    expect(mux).not.toContain("image.mux.com");
+    expect(mux).not.toContain("<video");
+    expect(mux).toContain("data-social-story-mute");
   });
 
   it("pauses a hidden story and commits the enter class before paint", () => {
@@ -153,6 +172,8 @@ describe("SocialStoryViewer", () => {
     expect(src).not.toContain("currentTime = 0");
     const page = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(page).toContain("key={story.id}");
+    expect(page).toContain("signedStoryPlaybackItems");
+    expect(page).not.toContain("signedSocialMediaItems");
     expect(page).toContain("SOCIAL_STORY_STAGE_CLASS");
     expect(page).toContain("SOCIAL.stories.close");
   });

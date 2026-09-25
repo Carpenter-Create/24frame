@@ -58,6 +58,19 @@ describe("Social Edge media proxies", () => {
     expect(
       socialStoryRailCover([{ kind: "image", key: "avatars/x", contentType: "image/jpeg" }], AUTHOR),
     ).toBeNull();
+    const playbackId = "uNbxnGLKJ00yfbijDO8COxT";
+    expect(
+      socialStoryRailCover(
+        [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "signed" }],
+        AUTHOR,
+      ),
+    ).toBeNull();
+    expect(
+      socialStoryRailCover(
+        [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "public" }],
+        AUTHOR,
+      ),
+    ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
   });
 
   it("exposes Mux playback ids on Edge profile without the S3 proxy", () => {

@@ -4,7 +4,7 @@ import { SocialIcon } from "@/components/social/social-icon";
 import { SocialStoryViewer, type SocialStoryNeighbor } from "@/components/social/social-story-viewer";
 import { SOCIAL_STORY_STAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaItems } from "@/lib/s3-social-media";
+import { signedStoryPlaybackItems } from "@/lib/social-story-playback";
 import { socialStoryRailCover } from "@/lib/social-edge";
 import { followingAuthorIds } from "@/lib/social-home";
 import { isStoryLive } from "@/lib/social-stories";
@@ -106,7 +106,7 @@ export default async function SocialStoryPage({
       : Promise.resolve(new Set<string>()),
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrl(story.author_id),
-    signedSocialMediaItems(story.media, story.author_id, "stories"),
+    signedStoryPlaybackItems(story.media, story.author_id),
     signedAvatarUrls(peopleIds),
   ]);
   const rail = groupStoryRail(railPage.stories, viewed);
@@ -118,7 +118,7 @@ export default async function SocialStoryPage({
     Promise.all(
       [...storyRows.values()].map(async (row) => ({
         id: row.id,
-        media: await signedSocialMediaItems(row.media, row.author_id, "stories"),
+        media: await signedStoryPlaybackItems(row.media, row.author_id),
       })),
     ),
     loadLikedStoryIds(supabase, ctx.user.id, storyIds),

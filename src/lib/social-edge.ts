@@ -4,7 +4,11 @@ import {
   type SocialMediaContentType,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { socialMuxThumbnailUrl, type SocialMuxPlaybackPolicy } from "@/lib/social-mux";
+import {
+  socialMuxPlaybackRequiresTokens,
+  socialMuxThumbnailUrl,
+  type SocialMuxPlaybackPolicy,
+} from "@/lib/social-mux";
 
 // Auth-light Social reads can run on Vercel Edge. AWS signing cannot.
 // Same-origin Node routes re-sign avatars/media so the Edge HTML does
@@ -50,7 +54,12 @@ export function socialStoryRailCover(
 ): { kind: "image" | "video"; url: string } | null {
   const first = socialMediaProxies(media, authorId, "stories")[0];
   if (!first?.url) return null;
-  if (first.playbackId) return { kind: "image", url: first.url };
+  // Public / legacy Mux stills are the unsigned thumbnail (#676).
+  // Signed playback 403s that URL. Do not paint it as an image.
+  if (first.playbackId) {
+    if (socialMuxPlaybackRequiresTokens(first.playbackPolicy)) return null;
+    return { kind: "image", url: first.url };
+  }
   return { kind: first.kind, url: first.url };
 }
 

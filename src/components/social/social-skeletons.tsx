@@ -282,11 +282,11 @@ export function SocialStoriesSkeleton() {
 }
 
 export function SocialStoryViewerSkeleton() {
+  // docs/design-locks/stories-open-smooth-lock-v1.md
+  // The open frame is the dark stage. A surface-muted fill was the grey hitch.
   return (
     <div data-social-story-viewer-skeleton="" className={SOCIAL_STORY_STAGE_CLASS}>
-      <div className="flex h-full items-center justify-center">
-        <Skeleton className="h-full w-full md:h-[min(90vh-16px,840px)] md:w-[calc(min(90vh-16px,840px)*9/16)] md:rounded-[16px]" />
-      </div>
+      <div className="h-full w-full" />
     </div>
   );
 }
