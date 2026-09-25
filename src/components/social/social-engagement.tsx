@@ -286,7 +286,7 @@ export function SocialLikeButton({
   }
 
   return (
-    <span className={icon ? cn(SOCIAL_POST_ACTION_HIT_CLASS, "flex-col") : "inline"}>
+    <span className={icon ? "relative inline-flex shrink-0" : "inline"}>
       <button
         type="button"
         disabled={disabled}
@@ -294,10 +294,7 @@ export function SocialLikeButton({
         aria-label={view.liked ? SOCIAL.post.unlike : SOCIAL.post.like}
         className={
           icon
-            ? cn(
-                "inline-flex size-10 shrink-0 items-center justify-center",
-                view.liked && "text-accent",
-              )
+            ? cn(SOCIAL_POST_ACTION_HIT_CLASS, view.liked && "text-accent")
             : "t-body-sm text-ink-2"
         }
         onClick={onToggle}
@@ -315,7 +312,11 @@ export function SocialLikeButton({
           </>
         )}
       </button>
-      {error ? <FormError error={error} /> : null}
+      {error ? (
+        <span className={icon ? "absolute top-full left-0 z-10" : undefined}>
+          <FormError error={error} />
+        </span>
+      ) : null}
     </span>
   );
 }
