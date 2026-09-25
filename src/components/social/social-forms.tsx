@@ -38,6 +38,7 @@ import {
   SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS,
   SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS,
   SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS,
+  SOCIAL_WRITE_COMPOSE_FOOTER_CLASS,
   SOCIAL_WRITE_COMPOSE_HOST_CLASS,
   SOCIAL_WRITE_COMPOSE_POST_CLASS,
   SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
@@ -646,9 +647,6 @@ export function SocialCreateCompose({
                   </li>
                 ))}
               </ul>
-              <label className="sr-only" htmlFor="social-create-body">
-                {SOCIAL.home.composerPrompt}
-              </label>
               <div
                 data-social-write-pill=""
                 className={cn(
@@ -657,6 +655,9 @@ export function SocialCreateCompose({
                   writing && SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS,
                 )}
               >
+                <label className="sr-only" htmlFor="social-create-body">
+                  {SOCIAL.home.composerPrompt}
+                </label>
                 <Textarea
                   variant="bare"
                   id="social-create-body"
@@ -684,12 +685,7 @@ export function SocialCreateCompose({
             </div>
           )}
         </div>
-        <div
-          className={cn(
-            "flex flex-col gap-[var(--space-2)]",
-            media.length === 0 && "mt-auto",
-          )}
-        >
+        <div className={SOCIAL_WRITE_COMPOSE_FOOTER_CLASS} data-social-write-footer="">
           <div className={SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS} data-social-create-attach-row="">
             <button
               type="button"
@@ -723,29 +719,27 @@ export function SocialCreateCompose({
             />
           </div>
           {media.length === 0 ? (
-            <>
+            <div
+              data-social-write-pill=""
+              className={cn(SOCIAL_WRITE_COMPOSE_PILL_CLASS, writing && SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS)}
+            >
               <label className="sr-only" htmlFor="social-create-body">
                 {SOCIAL.home.composerPrompt}
               </label>
-              <div
-                data-social-write-pill=""
-                className={cn(SOCIAL_WRITE_COMPOSE_PILL_CLASS, writing && SOCIAL_WRITE_COMPOSE_PILL_WRITING_CLASS)}
-              >
-                <Textarea
-                  variant="bare"
-                  id="social-create-body"
-                  name="body"
-                  rows={writing ? 4 : 1}
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  placeholder={SOCIAL.home.composerPrompt}
-                  className={cn(
-                    SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS,
-                    writing && SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS,
-                  )}
-                />
-              </div>
-            </>
+              <Textarea
+                variant="bare"
+                id="social-create-body"
+                name="body"
+                rows={writing ? 4 : 1}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder={SOCIAL.home.composerPrompt}
+                className={cn(
+                  SOCIAL_WRITE_COMPOSE_PILL_FIELD_CLASS,
+                  writing && SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS,
+                )}
+              />
+            </div>
           ) : null}
         </div>
         <FormError error={error} />

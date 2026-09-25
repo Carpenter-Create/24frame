@@ -93,6 +93,17 @@ describe("Social create kinds", () => {
     expect(chrome).toContain("py-0 text-[length:var(--text-sm)] leading-none");
     expect(chrome).not.toContain("size-48 shrink-0");
     expect(src).toContain("data-social-write-voice-stage");
+    expect(chrome).toContain("mt-auto flex shrink-0 flex-col gap-[var(--space-2)]");
+    expect(write).toContain("data-social-write-footer");
+    expect(write).not.toContain("data-social-write-mode");
+    expect(write.indexOf("data-social-write-voice-stage")).toBeLessThan(
+      write.indexOf("data-social-write-footer"),
+    );
+    const footer = write.slice(write.indexOf("data-social-write-footer"));
+    expect(footer.indexOf("data-social-create-attach-row")).toBeLessThan(
+      footer.indexOf("data-social-write-pill"),
+    );
+    expect(footer.indexOf("data-social-write-voice-stage")).toBe(-1);
     const voice = readFileSync("src/components/chrome/house-voice-mic.tsx", "utf8");
     expect(voice).toContain('weight={hero ? "fill"');
     expect(voice).toContain('className={hero ? "size-14"');

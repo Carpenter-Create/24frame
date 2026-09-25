@@ -827,6 +827,10 @@ export const SOCIAL_WRITE_COMPOSE_PILL_FIELD_WRITING_CLASS = "h-auto min-h-12 le
 export const SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS =
   "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted";
 
+// §0.1. Icons sit on the pill. Gap 8. Inset stays the host pad H 16.
+export const SOCIAL_WRITE_COMPOSE_FOOTER_CLASS =
+  "mt-auto flex shrink-0 flex-col gap-[var(--space-2)]";
+
 export const SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS = "flex items-center gap-2";
 
 export const SOCIAL_CREATE_WELL_CLASS =
