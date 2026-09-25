@@ -817,8 +817,9 @@ export const SOCIAL_WRITE_COMPOSE_ROW_CLASS =
   "-mx-[var(--space-4)] -mb-[max(var(--space-4),env(safe-area-inset-bottom))] mt-auto flex min-h-12 items-end gap-[var(--space-2)] border-t border-hairline bg-transparent px-[var(--space-4)] pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
 
 // 16px floor. text-sm (15px) makes iOS Safari zoom the page on focus.
+// Flat caption. No elevation on the field.
 export const SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS =
-  "max-h-[40vh] min-h-12 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent py-3 text-[16px] leading-normal text-ink caret-ink shadow-none outline-none placeholder:text-ink-2";
+  "max-h-[40vh] min-h-12 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent py-3 text-[16px] leading-normal text-ink caret-ink outline-none placeholder:text-ink-2";
 
 /** Grow the caption up to 40vh. Past that, scroll so the caret line stays inside the field. */
 export function fitSocialWriteComposeField(field: HTMLTextAreaElement): void {
