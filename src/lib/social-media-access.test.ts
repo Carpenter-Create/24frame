@@ -21,7 +21,7 @@ const STORY_KEY = `stories/${OTHER}/${OBJECT}.mp4`;
 const POST_KEY = `posts/${OTHER}/${OBJECT}.jpg`;
 const OWN_POST = `posts/${USER}/${OBJECT}.jpg`;
 const NOW = new Date("2026-09-24T00:00:00.000Z");
-const LIVE = "2026-09-25T00:00:00.000Z";
+const LIVE = "2099-01-01T00:00:00.000Z";
 const EXPIRED = "2026-09-23T00:00:00.000Z";
 
 function storyMedia(key = STORY_KEY) {

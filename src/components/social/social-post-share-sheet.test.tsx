@@ -42,6 +42,10 @@ describe("SocialPostShareSheet", () => {
     expect(html).toContain("rounded-t-[16px]");
     expect(html).toContain("md:rounded-[16px]");
     expect(html).toContain("max-h-[90vh]");
+    expect(html).not.toContain("h-[70vh]");
+    expect(src).not.toContain("h-[70vh]");
+    expect(src).not.toContain("bg-[#181820]");
+    expect(src).toContain("attempt_id");
     expect(html).toContain("shadow-none");
     expect(html).toContain("bg-ink/40");
     expect(html).toContain("h-10");

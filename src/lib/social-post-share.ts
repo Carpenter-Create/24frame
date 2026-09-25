@@ -16,6 +16,9 @@ export const POST_SHARE_RECIPIENT_CAP = 16;
 export const POST_SHARE_TOAST_MS = 2000;
 export const POST_SHARE_CARD_WIDTH_CLASS = "w-[240px]";
 
+const POST_SHARE_ATTEMPT_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export type PostShareMarker = {
   postId: string;
   authorId: string;
@@ -58,9 +61,61 @@ export function postSharePeerIds(raw: readonly unknown[]): { ok: true; ids: stri
   return { ok: true, ids };
 }
 
+export function postShareAttemptId(raw: string): string | null {
+  const id = raw.trim();
+  if (!POST_SHARE_ATTEMPT_RE.test(id)) return null;
+  return id;
+}
+
+/** Recent DMs, followees, and self — the same people the sheet can list. */
+export function postSharePeerAllowed(peerId: string, allowlist: ReadonlySet<string>): boolean {
+  return peerId.length > 0 && allowlist.has(peerId);
+}
+
+/**
+ * Wall posts (no group) are visible to any authenticated member.
+ * A group post is visible only when can_access_group_content is true.
+ * Missing group id or a failed access check refuses the peer.
+ */
+export function recipientMayViewPost(input: {
+  groupId: string | null | undefined;
+  access: boolean | null;
+}): boolean {
+  if (input.groupId === null) return true;
+  if (!input.groupId) return false;
+  return input.access === true;
+}
+
+/** jsonb `@>` value. A JSON string survives postgrest-js array serialization. */
+export function postShareAttemptContains(postId: string, attemptId: string): string {
+  return JSON.stringify([{ kind: POST_DM_SHARE_KIND, postId, attemptId }]);
+}
+
+export function postShareFailureCopy(names: readonly string[]): string {
+  const clean = names.map((name) => name.trim()).filter(Boolean);
+  if (clean.length === 0) return SOCIAL.post.shareFailed;
+  return SOCIAL.post.shareFailedPeers(clean.join(", "));
+}
+
+export function postShareSheetError(
+  result: { error?: string; failedPeerIds?: string[] } | null | undefined,
+  people: readonly { id: string; name: string }[],
+): { error?: string; failedPeerIds?: string[] } {
+  const failed = result?.failedPeerIds ?? [];
+  if (!result || failed.length === 0) return result ?? { error: SOCIAL.post.shareFailed };
+  const names = failed.flatMap((id) => {
+    const person = people.find((item) => item.id === id);
+    return person?.name ? [person.name] : [];
+  });
+  if (names.length === 0) return result;
+  return { ...result, error: postShareFailureCopy(names) };
+}
+
 export function postShareUiAfter(
-  result: { error?: string } | null | undefined,
+  result: { error?: string; failedPeerIds?: string[] } | null | undefined,
 ): { close: boolean; error: string } {
+  const failed = result?.failedPeerIds ?? [];
+  if (failed.length > 0) return { close: false, error: result?.error || SOCIAL.post.shareFailed };
   if (result && !result.error) return { close: true, error: "" };
   return { close: false, error: result?.error || SOCIAL.post.shareFailed };
 }
@@ -80,15 +135,18 @@ export function postDmInsertRow(input: {
   authorHandle?: string;
   caption?: string | null;
   note?: string;
+  attemptId?: string;
   media: SocialMediaItem[];
 }) {
   const authorHandle = bareHandle(input.authorHandle ?? "");
   const note = input.note?.trim() ?? "";
   const caption = postShareCaptionSnip(input.caption);
-  const marker: PostShareMarker & { kind: typeof POST_DM_SHARE_KIND } = {
+  const attemptId = input.attemptId ? postShareAttemptId(input.attemptId) : null;
+  const marker: PostShareMarker & { kind: typeof POST_DM_SHARE_KIND; attemptId?: string } = {
     kind: POST_DM_SHARE_KIND,
     postId: input.postId,
     authorId: input.authorId,
+    ...(attemptId ? { attemptId } : {}),
     ...(authorHandle ? { authorHandle } : {}),
     ...(caption ? { caption } : {}),
   };
@@ -184,7 +242,8 @@ export function dmPostInboxExcerpt(input: {
   if (!marker) return null;
   const comment = dmPostComment(input);
   if (comment) return comment;
-  if (marker.authorHandle) return postSendSystemLine(marker.authorHandle);
-  if (input.senderId && input.senderId === input.viewerId) return SOCIAL.dms.sentPost;
+  const mine = !!input.senderId && input.senderId === input.viewerId;
+  if (mine && marker.authorHandle) return postSendSystemLine(marker.authorHandle);
+  if (mine) return SOCIAL.dms.sentPost;
   return SOCIAL.dms.sentYouPost;
 }

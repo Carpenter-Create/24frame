@@ -6,14 +6,22 @@ import {
   dmPostComment,
   dmPostInboxExcerpt,
   postDmInsertRow,
+  postShareAttemptContains,
+  postShareAttemptId,
   postShareCaptionSnip,
+  postShareFailureCopy,
+  postSharePeerAllowed,
   postSharePeerIds,
   postSharePermalink,
+  postShareSheetError,
   postShareUiAfter,
   presentDmPostShare,
+  recipientMayViewPost,
   POST_SHARE_CAPTION_SNIP,
   POST_SHARE_RECIPIENT_CAP,
 } from "@/lib/social-post-share";
+
+const ATTEMPT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
 const author = "11111111-1111-4111-8111-111111111111";
 const objectId = "22222222-2222-4222-8222-222222222222";
@@ -123,8 +131,45 @@ describe("post DM share card", () => {
     expect(
       dmPostInboxExcerpt({ ...row, senderId: "u1", viewerId: "u1" }),
     ).toBe(SOCIAL.dms.youSentPost("ada"));
+    expect(
+      dmPostInboxExcerpt({ ...row, senderId: "u1", viewerId: "u2" }),
+    ).toBe(SOCIAL.dms.sentYouPost);
     expect(SOCIAL.dms.youSentPost("ada")).not.toMatch(/\/social\/p|https?:/);
     expect(postShareUiAfter({})).toEqual({ close: true, error: "" });
     expect(postShareUiAfter({ error: "no" }).close).toBe(false);
+    expect(postShareUiAfter({ failedPeerIds: ["u2"], error: "no" }).close).toBe(false);
+  });
+
+  it("keeps one attempt on the marker and names the peers a retry must skip", () => {
+    const row = postDmInsertRow({
+      senderId: "u1",
+      conversationId: "conv-1",
+      postId: "p1",
+      authorId: author,
+      authorHandle: "ada",
+      attemptId: ATTEMPT,
+      media: [muxVideo],
+    });
+    expect(row.media.at(-1)).toMatchObject({ attemptId: ATTEMPT, kind: "post-share", postId: "p1" });
+    expect(postShareAttemptId(ATTEMPT)).toBe(ATTEMPT);
+    expect(postShareAttemptId("nope")).toBeNull();
+    expect(postShareAttemptContains("p1", ATTEMPT)).toBe(
+      JSON.stringify([{ kind: "post-share", postId: "p1", attemptId: ATTEMPT }]),
+    );
+    expect(postSharePeerAllowed("u2", new Set(["u2"]))).toBe(true);
+    expect(postSharePeerAllowed("u9", new Set(["u2"]))).toBe(false);
+    expect(recipientMayViewPost({ groupId: null, access: false })).toBe(true);
+    expect(recipientMayViewPost({ groupId: "g1", access: true })).toBe(true);
+    expect(recipientMayViewPost({ groupId: "g1", access: false })).toBe(false);
+    expect(recipientMayViewPost({ groupId: "g1", access: null })).toBe(false);
+    expect(recipientMayViewPost({ groupId: undefined, access: true })).toBe(false);
+    expect(postShareFailureCopy([])).toBe(SOCIAL.post.shareFailed);
+    expect(postShareFailureCopy(["Lauren"])).toBe(SOCIAL.post.shareFailedPeers("Lauren"));
+    expect(
+      postShareSheetError(
+        { error: SOCIAL.post.shareFailed, failedPeerIds: ["u2"] },
+        [{ id: "u2", name: "Lauren Montoya" }],
+      ).error,
+    ).toBe(SOCIAL.post.shareFailedPeers("Lauren Montoya"));
   });
 });

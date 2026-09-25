@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { displayHandle, SOCIAL } from "@/lib/social";
 import {
   postSharePermalink,
+  postShareSheetError,
   postShareToast,
   postShareUiAfter,
   POST_SHARE_TOAST_MS,
@@ -51,7 +52,7 @@ export function SocialPostShareSentToast() {
         data-social-post-share-sent=""
         role="status"
         aria-live="polite"
-        className="rounded-[8px] bg-[#181820] px-4 py-2 t-body-sm font-medium text-white shadow-none"
+        className="rounded-[8px] bg-[#181818] px-4 py-2 t-body-sm font-medium text-white shadow-none"
       >
         {SOCIAL.post.sent}
       </p>
@@ -124,6 +125,7 @@ export function SocialPostShareSheet({
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(!provided);
   const [sending, setSending] = useState(false);
+  const [attemptId] = useState(() => crypto.randomUUID());
 
   useEffect(() => {
     if (!open) return undefined;
@@ -177,10 +179,11 @@ export function SocialPostShareSheet({
     setError("");
     const form = new FormData();
     form.set("post_id", postId);
+    form.set("attempt_id", attemptId);
     for (const id of selectedIds) form.append("peer_id", id);
     const message = note.trim();
     if (message) form.set("note", message);
-    const result = await sendSocialPostShare(form);
+    const result = postShareSheetError(await sendSocialPostShare(form), people);
     const outcome = postShareUiAfter(result);
     if (outcome.close) {
       if (postShareToast(result).show) onSent?.();
@@ -239,7 +242,7 @@ export function SocialPostShareSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex h-[70vh] max-h-[90vh] w-full flex-col rounded-t-[16px] bg-[#181818] p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-none md:max-w-[420px] md:rounded-[16px]"
+        className="relative z-10 flex max-h-[90vh] w-full min-h-0 flex-col overflow-hidden rounded-t-[16px] bg-[#181818] p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-none md:max-w-[420px] md:rounded-[16px]"
       >
         <h2 id={titleId} className="sr-only">
           {SOCIAL.post.share}
@@ -287,7 +290,7 @@ export function SocialPostShareSheet({
             {error}
           </InlineNotice>
         ) : null}
-        <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
+        <div className="mt-4 min-h-0 flex-auto overflow-y-auto">
           {loading ? null : shown.length === 0 && !error ? (
             <p data-social-post-share-empty="" className="py-8 text-center t-body-sm text-white/70">
               {searching ? SOCIAL.search.noResults : SOCIAL.post.shareEmpty}

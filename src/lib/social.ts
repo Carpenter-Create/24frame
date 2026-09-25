@@ -888,6 +888,7 @@ export const SOCIAL = {
     shareCancel: "Cancel",
     shareEmpty: "No people yet.",
     shareFailed: "Could not send this post.",
+    shareFailedPeers: (names: string) => `Could not send to ${names}.`,
     shareUnavailable: "Sharing is not available in this browser.",
   },
   dms: {
