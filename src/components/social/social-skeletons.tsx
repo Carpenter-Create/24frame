@@ -24,8 +24,6 @@ import {
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_HOME_SPINE_CLASS,
-  SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS,
-  SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_PROFILE_COVER_CLASS,
   SOCIAL_PROFILE_COVER_EMPTY_CLASS,
@@ -86,7 +84,7 @@ export function SocialHomeCenterSkeleton({
   const composerSkeleton = (
     <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
       <div className={SOCIAL_COMPOSER_ROW_CLASS}>
-        <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-8")} />
+        <Skeleton className={cn(SOCIAL_AVATAR_SM_CLASS, "size-10")} />
         <Skeleton className={cn(SOCIAL_COMPOSER_FIELD_CLASS, "bg-surface-muted")} />
       </div>
       <div className={SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS}>
@@ -98,16 +96,7 @@ export function SocialHomeCenterSkeleton({
   const body = (
     <>
       {topicsSkeleton}
-      {topics ? (
-        <div data-social-home-topics-composer-rule="" className={SOCIAL_HOME_TOPICS_COMPOSER_RULE_CLASS}>
-          <div
-            data-social-home-topics-composer-divider=""
-            aria-hidden="true"
-            className={SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS}
-          />
-          {composerSkeleton}
-        </div>
-      ) : composerSkeleton}
+      {composerSkeleton}
       <SocialStoriesRailSkeleton tall />
       {middle}
       <div data-social-feed-skeleton="" className={SOCIAL_FEED_GUTTER_CLASS}>

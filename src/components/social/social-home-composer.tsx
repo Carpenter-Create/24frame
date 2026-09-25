@@ -15,8 +15,9 @@ import { SOCIAL_CREATE_CAMERA_ACCEPT } from "@/lib/social-create-media";
 import { SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
 import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
-// FB-row lock v1.3. One row on phone and desktop. Band is 32.
-// Share something has no drawn edge. Photo and Camera stay glyph 16, hit 32, flush.
+// FB-row lock v1.6. One row on phone and desktop. White band, pad Y 8.
+// Top and bottom hairlines only. Share something has no drawn edge.
+// Photo and Camera stay glyph 16, hit 32, flush.
 // Prompt and avatar open the Create sheet default face.
 // Photo reuses the Create media library pick. Camera reuses that pick
 // with capture=environment. Icon only — no Photo/Camera labels.
@@ -72,7 +73,7 @@ export function SocialHomeComposer({
             aria-label={SOCIAL.create.title}
             className={SOCIAL_COMPOSER_ROW_CLASS}
           >
-            <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
+            <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-10" />
             <span data-social-composer-prompt="" className={`${SOCIAL_COMPOSER_FIELD_CLASS} shadow-none`}>
               {socialComposerPrompt(authorName)}
             </span>

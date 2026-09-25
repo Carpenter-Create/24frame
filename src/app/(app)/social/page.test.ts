@@ -189,9 +189,11 @@ describe("Social home", () => {
     expect(html).not.toContain("/social/create?kind=text");
     expect(html).toContain(SOCIAL.create.title);
     expect(html).not.toContain("data-social-composer-action");
-    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-home-topics-composer-divider"));
-    expect(html.indexOf("data-social-home-topics-composer-divider")).toBeLessThan(html.indexOf("data-social-home-composer"));
-    expect(html).toContain("h-px w-full shrink-0 bg-hairline");
+    expect(html).not.toContain("data-social-home-topics-composer-divider");
+    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-home-composer"));
+    expect(html).toContain("border-y");
+    expect(html).toContain("border-x-0");
+    expect(html).toContain("py-[var(--space-2)]");
     expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
     expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-tabs"));
     expect(html).not.toMatch(/>Topics</);

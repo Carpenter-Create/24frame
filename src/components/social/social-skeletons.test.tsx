@@ -56,10 +56,8 @@ describe("Social loading skeletons", () => {
     expect(home).toContain('data-social-home-stack="lock_topics_composer_stories_wall"');
     expect(home).toContain("data-social-home-composer-skeleton");
     expect(home).toContain("data-social-home-topics-skeleton");
+    expect(home).not.toContain("data-social-home-topics-composer-divider");
     expect(home.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
-      home.indexOf("data-social-home-topics-composer-divider"),
-    );
-    expect(home.indexOf("data-social-home-topics-composer-divider")).toBeLessThan(
       home.indexOf("data-social-home-composer-skeleton"),
     );
     expect(home.indexOf("data-social-home-composer-skeleton")).toBeLessThan(
