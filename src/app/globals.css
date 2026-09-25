@@ -279,16 +279,8 @@ body {
   }
 }
 
-/* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation. */
-@keyframes social-story-stage-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.social-story-stage-in {
-  animation: social-story-stage-in 180ms ease-out both;
-}
-
+/* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation.
+   Open stays opaque. The old stage-in fade from zero was the hitch. */
 @keyframes social-story-activate {
   from { opacity: 0; transform: translateX(24px); }
   to { opacity: 1; transform: none; }

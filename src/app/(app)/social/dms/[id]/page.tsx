@@ -172,6 +172,7 @@ export default async function SocialDmThreadPage({
         kind: card.kind,
         url: card.url,
         playbackId: card.playbackId,
+        playbackPolicy: card.playbackPolicy,
         href: card.href,
       },
     };

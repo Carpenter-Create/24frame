@@ -383,6 +383,7 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Profile",
     ]);
     expect(rail).toContain("data-social-stories-mobile");
+    expect(rail.slice(rail.indexOf('data-social-stories-mobile=""'))).toContain("data-social-story-media");
     expect(chrome).toContain("129:215");
     expect(chrome).toContain("129:415");
     expect(chrome).toContain("129:615");

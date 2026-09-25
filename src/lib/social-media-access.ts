@@ -2,9 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import {
   isForbiddenMediaKey,
   isOwnedSocialMediaKey,
+  isSocialMuxMediaItem,
   parsePostMedia,
   parseSocialMediaObjectKey,
 } from "@/lib/social-media";
+import { isSocialMuxId } from "@/lib/social-mux";
 import { isStoryLive } from "@/lib/social-stories";
 
 // GC-P1-3. Sign /api/social/media only for a key attached to a row the
@@ -40,6 +42,55 @@ function mediaStoresKey(media: unknown, key: string): boolean {
  */
 export function socialMediaJsonContains(key: string): string {
   return JSON.stringify([{ key }]);
+}
+
+/** jsonb `@>` needle for a Mux playback id stored on post or story media. */
+export function socialMuxPlaybackJsonContains(playbackId: string): string {
+  return JSON.stringify([{ playbackId }]);
+}
+
+function mediaStoresPlaybackId(
+  media: unknown,
+  playbackId: string,
+  authorId: string,
+  lane: "stories" | "posts",
+): boolean {
+  return parsePostMedia(media).some(
+    (item) =>
+      isSocialMuxMediaItem(item) &&
+      item.playbackId === playbackId &&
+      isOwnedSocialMediaKey(item.key, authorId, lane),
+  );
+}
+
+/**
+ * Mint /api/social/mux-playback only when a post or story row this session
+ * can select stores the playback id. posts_select and stories_select stay
+ * the authorization layer. Story follow and expires_at are checked again.
+ * A playback id alone is not a grant. Fail closed.
+ */
+export function socialMuxPlaybackReadGrant(input: {
+  userId: string;
+  playbackId: string;
+  now?: Date;
+  followeeIds?: readonly string[];
+  stories?: readonly SocialMediaStoryGrant[];
+  posts?: readonly SocialMediaPostGrant[];
+}): boolean {
+  if (!input.userId || !isSocialMuxId(input.playbackId)) return false;
+  const now = input.now ?? new Date();
+  const followees = new Set(input.followeeIds ?? []);
+  const storyVisible = (input.stories ?? []).some((story) => {
+    if (story.status !== "active") return false;
+    if (!isStoryLive(story.expires_at, now)) return false;
+    if (story.author_id !== input.userId && !followees.has(story.author_id)) return false;
+    return mediaStoresPlaybackId(story.media, input.playbackId, story.author_id, "stories");
+  });
+  if (storyVisible) return true;
+  return (input.posts ?? []).some((post) => {
+    if (post.status !== "active") return false;
+    return mediaStoresPlaybackId(post.media, input.playbackId, post.author_id, "posts");
+  });
 }
 
 export function socialMediaReadGrant(input: {
@@ -112,6 +163,56 @@ export async function viewerMaySignSocialMedia(userId: string, key: string, now 
       .limit(8);
     if (error) return false;
     return socialMediaReadGrant({ userId, key, now, posts: posts ?? [] });
+  } catch {
+    return false;
+  }
+}
+
+export async function viewerMayMintSocialMuxPlayback(
+  userId: string,
+  playbackId: string,
+  now = new Date(),
+): Promise<boolean> {
+  if (!userId || !isSocialMuxId(playbackId)) return false;
+  try {
+    const supabase = await createClient();
+    const needle = socialMuxPlaybackJsonContains(playbackId);
+    const [{ data: posts, error: postError }, { data: stories, error: storyError }] = await Promise.all([
+      supabase
+        .from("posts")
+        .select("author_id, status, media")
+        .eq("status", "active")
+        .contains("media", needle)
+        .limit(8),
+      supabase
+        .from("stories")
+        .select("author_id, status, expires_at, media")
+        .eq("status", "active")
+        .gt("expires_at", now.toISOString())
+        .contains("media", needle)
+        .limit(8),
+    ]);
+    if (postError || storyError) return false;
+    const storyRows = stories ?? [];
+    const otherAuthors = [...new Set(storyRows.map((row) => row.author_id).filter((id) => id && id !== userId))];
+    let followeeIds: string[] = [];
+    if (otherAuthors.length > 0) {
+      const { data: follows, error: followError } = await supabase
+        .from("follows")
+        .select("followee_id")
+        .eq("follower_id", userId)
+        .in("followee_id", otherAuthors);
+      if (followError) return false;
+      followeeIds = (follows ?? []).flatMap((row) => (row.followee_id ? [row.followee_id] : []));
+    }
+    return socialMuxPlaybackReadGrant({
+      userId,
+      playbackId,
+      now,
+      followeeIds,
+      stories: storyRows,
+      posts: posts ?? [],
+    });
   } catch {
     return false;
   }

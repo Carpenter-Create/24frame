@@ -69,6 +69,23 @@ describe("SocialDmStoryShare", () => {
     expect(mux).not.toContain("/social/stories");
     expect(mux).not.toContain("shadow");
 
+    const signed = renderToStaticMarkup(
+      createElement(SocialDmStoryShare, {
+        ...author,
+        unavailable: false,
+        kind: "video",
+        url: "",
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        playbackPolicy: "signed",
+        href: null,
+      }),
+    );
+    expect(signed).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
+    expect(signed).toContain('data-social-mux-playback="pending"');
+    expect(signed).not.toContain(SOCIAL.dms.storyUnavailable);
+    expect(signed).not.toContain("<video");
+    expect(signed).not.toContain("/api/social/media");
+
     const file = renderToStaticMarkup(
       createElement(SocialDmStoryShare, {
         ...author,

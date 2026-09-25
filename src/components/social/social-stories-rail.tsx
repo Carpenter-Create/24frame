@@ -250,7 +250,10 @@ export function SocialStoriesRail({
                   card.unseen ? "border-accent" : "border-hairline",
                 )}
               >
-                <span className="relative flex size-[58px] items-center justify-center overflow-hidden rounded-full bg-surface-muted">
+                <span
+                  data-social-story-media=""
+                  className="relative flex size-[58px] items-center justify-center overflow-hidden rounded-full bg-surface-muted"
+                >
                   <SocialAvatar name={name} photoUrl={photo ?? null} size="sm" className="size-full" />
                 </span>
               </span>

@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
 vi.mock("@/lib/social-mux-server", () => ({ mintSocialMuxPlaybackTokens: vi.fn() }));
+vi.mock("@/lib/social-media-access", () => ({ viewerMayMintSocialMuxPlayback: vi.fn() }));
 
+import { viewerMayMintSocialMuxPlayback } from "@/lib/social-media-access";
 import { mintSocialMuxPlaybackTokens } from "@/lib/social-mux-server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { GET } from "./route";
@@ -30,8 +32,19 @@ describe("GET /api/social/mux-playback", () => {
     expect(mintSocialMuxPlaybackTokens).not.toHaveBeenCalled();
   });
 
-  it("returns player tokens for a signed-in reader", async () => {
+  it("is 403 when no visible post or story stores the playback id, and does not mint", async () => {
     vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "ada@example.com" });
+    vi.mocked(viewerMayMintSocialMuxPlayback).mockResolvedValue(false);
+    const res = await GET(new Request(`http://local/api/social/mux-playback?playbackId=${PLAYBACK_ID}`));
+    expect(res.status).toBe(403);
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(viewerMayMintSocialMuxPlayback).toHaveBeenCalledWith("u1", PLAYBACK_ID);
+    expect(mintSocialMuxPlaybackTokens).not.toHaveBeenCalled();
+  });
+
+  it("returns player tokens only after a post or story grant", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "ada@example.com" });
+    vi.mocked(viewerMayMintSocialMuxPlayback).mockResolvedValue(true);
     vi.mocked(mintSocialMuxPlaybackTokens).mockResolvedValue({
       playback: "play.jwt",
       thumbnail: "thumb.jwt",
@@ -45,6 +58,7 @@ describe("GET /api/social/mux-playback", () => {
       thumbnail: "thumb.jwt",
       storyboard: "board.jwt",
     });
+    expect(viewerMayMintSocialMuxPlayback).toHaveBeenCalledWith("u1", PLAYBACK_ID);
     expect(mintSocialMuxPlaybackTokens).toHaveBeenCalledWith(PLAYBACK_ID);
   });
 });

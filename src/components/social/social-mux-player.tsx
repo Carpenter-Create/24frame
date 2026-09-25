@@ -21,7 +21,7 @@ import {
 
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
-function MuxPoster({ src, onReady }: { src: string; onReady: () => void }) {
+function MuxPoster({ src, onReady }: { src: string; onReady?: () => void }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- thumb hold until decoded frames
     <img
@@ -130,7 +130,9 @@ export function SocialMuxPlayer({
               style={playerStyle(chromeless)}
             />
           ) : null}
-          {painted ? null : <MuxPoster src={poster} onReady={releaseHold} />}
+          {/* Unsigned signed thumbs 403 before the JWT. That error must not
+              clear the open hold. loadeddata is the paint. */}
+          {painted ? null : <MuxPoster src={poster} />}
         </>
       ) : (
         <>
