@@ -364,8 +364,9 @@ describe("Social Home miss list v1 P0 lock", () => {
       "max-md:border-b max-md:border-solid max-md:border-hairline",
     );
     expect(SOCIAL_STORIES_FEED_RULE_CLASS.startsWith("max-md:")).toBe(true);
-    expect(card).toContain("SOCIAL_POST_ACTIONS_CLASS");
-    expect(card.slice(card.indexOf("export function SocialPostCard"))).not.toContain("gap-3.5");
+    expect(card.slice(card.indexOf("export function SocialPostCard"))).toContain(
+      'className="flex items-center gap-3.5"',
+    );
     expect(icons).toContain("export const SOCIAL_ICON_SIZE_POST_ACTION = 24");
     const like = readFileSync("src/components/social/social-engagement.tsx", "utf8");
     const likeFn = like.slice(like.indexOf("export function SocialLikeButton"));
