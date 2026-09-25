@@ -76,7 +76,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("What&#x27;s on your mind");
     expect(html).not.toContain("Share something,");
     expect(html.split("Share something").length - 1).toBe(1);
-    expect(html).not.toContain(SOCIAL.create.title);
+    expect(html).toContain(`aria-label="${SOCIAL.create.title}"`);
     expect(html).not.toContain('data-social-icon="plus"');
     expect(html).not.toContain('data-social-icon="broadcast"');
     expect(html).toContain("text-ink-2");

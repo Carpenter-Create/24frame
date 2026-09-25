@@ -69,6 +69,7 @@ export function SocialHomeComposer({
         href={socialCreateHref("text")}
         data-social-composer-prompt-row=""
         data-social-composer-write=""
+        aria-label={SOCIAL.create.title}
         className={SOCIAL_COMPOSER_ROW_CLASS}
       >
         <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-10" />

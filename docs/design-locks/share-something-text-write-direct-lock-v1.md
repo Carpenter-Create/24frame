@@ -13,7 +13,7 @@ The Home **Share something** text / placeholder hit opens **write compose** imme
 
 | Surface | Lock |
 |---------|------|
-| Prompt + avatar (`data-social-composer-prompt-row`) | Link to write compose (`/social/create?kind=text`). No Create sheet |
+| Prompt + avatar (`data-social-composer-prompt-row`) | Link to write compose (`/social/create?kind=text`). No Create sheet. `aria-label={SOCIAL.create.title}` stays. Visible text stays **Share something** |
 | Write compose | Existing create surface, kind text. Body field focused for the keyboard |
 | Attach | That write compose can attach photo or video (`Add photo or video`). No second chooser |
 | Home Photo and Camera | Unchanged. Same media picks, glyph 16, hit 32 |

@@ -233,6 +233,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).toContain("data-social-home-composer");
     expect(composer).toContain('socialCreateHref("text")');
     expect(composer).toContain("data-social-composer-write");
+    expect(composer).toContain("aria-label={SOCIAL.create.title}");
     expect(composer).not.toContain("SocialCreateSheet");
     expect(composer).not.toContain("data-social-create-sheet");
     const writeDirect = readFileSync(
@@ -240,6 +241,7 @@ describe("Social Home miss list v1 P0 lock", () => {
       "utf8",
     );
     expect(writeDirect).toContain("/social/create?kind=text");
+    expect(writeDirect).toContain("aria-label={SOCIAL.create.title}");
     expect(writeDirect).toContain("Add photo or video");
     expect(composer).toContain("socialComposerPrompt(authorName)");
     expect(composer).toContain("SocialAvatar");
