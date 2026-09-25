@@ -932,7 +932,7 @@ describe("SocialPostCard media", () => {
     expect(postCard).toContain("<SocialPostMedia items={post.media} href={permalink ? href : undefined} />");
   });
 
-  it("leads hairline rows with author, then media and copy", () => {
+  it("leads hairline rows with author, then copy, then media when both exist", () => {
     const html = renderToStaticMarkup(
       <SocialPostCard
         post={{
@@ -953,8 +953,9 @@ describe("SocialPostCard media", () => {
       />,
     );
     expect(html.indexOf("Ada Lovelace")).toBeGreaterThan(-1);
-    expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("data-social-post-media"));
-    expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("hello"));
+    expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("data-social-post-caption"));
+    expect(html.indexOf("data-social-post-caption")).toBeLessThan(html.indexOf("hello"));
+    expect(html.indexOf("hello")).toBeLessThan(html.indexOf("data-social-post-media"));
   });
 
   it("renders signed image and video URLs", () => {
@@ -1035,7 +1036,7 @@ describe("SocialPostCard 24Frame blend", () => {
     };
   }
 
-  it("uses one card structure: header time, then icons, likes, caption, quiet comments", () => {
+  it("uses Facebook order when the post has both text and media", () => {
     const html = renderToStaticMarkup(
       <SocialPostCard
         post={cardPost({
@@ -1067,10 +1068,11 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html).toContain("data-social-comment-trail");
     expect(html).toContain("self-start text-left");
     expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("data-social-post-time"));
-    expect(html.indexOf("data-social-post-time")).toBeLessThan(html.indexOf("data-social-post-media"));
+    expect(html.indexOf("data-social-post-time")).toBeLessThan(html.indexOf("data-social-post-caption"));
+    expect(html.indexOf("data-social-post-caption")).toBeLessThan(html.indexOf("data-social-post-media"));
     expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("data-social-post-actions"));
     expect(html.indexOf("data-social-post-actions")).toBeLessThan(html.indexOf(`4 ${SOCIAL.post.likes}`));
-    expect(html.indexOf(`4 ${SOCIAL.post.likes}`)).toBeLessThan(html.indexOf("data-social-post-caption"));
+    expect(html.indexOf(`4 ${SOCIAL.post.likes}`)).toBeLessThan(html.indexOf("data-social-comment-trail"));
     expect(html.indexOf("data-social-post-caption")).toBeLessThan(html.indexOf("data-social-comment-trail"));
     expect(html).not.toContain("data-social-post-mobile");
     expect(html).not.toContain("hidden md:flex");
@@ -1081,6 +1083,22 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html).not.toContain(SOCIAL.home.photoKind);
     expect(html).not.toContain(SOCIAL.follow.following);
     expect(html).not.toContain("truncate");
+  });
+
+  it("keeps media-only posts as author, media, actions, likes", () => {
+    const html = renderToStaticMarkup(
+      <SocialPostCard
+        post={cardPost({
+          body: null,
+          commentCount: 0,
+          media: [{ kind: "image", url: "https://cf.example/signed-image" }],
+        })}
+      />,
+    );
+    expect(html).not.toContain("data-social-post-caption");
+    expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("data-social-post-media"));
+    expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("data-social-post-actions"));
+    expect(html.indexOf("data-social-post-actions")).toBeLessThan(html.indexOf(`4 ${SOCIAL.post.likes}`));
   });
 
   it("keeps the same stack for text-only posts and hides the trail when N is 0", () => {

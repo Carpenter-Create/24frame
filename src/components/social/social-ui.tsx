@@ -477,8 +477,14 @@ export function SocialPostCard({
   post: SocialPostCardModel;
   permalink?: boolean;
 }) {
-  // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
-  // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
+  // One card at every breakpoint.
+  // Text + media: docs/design-locks/social-feed-text-media-caption-above-lock-v1.md
+  //   author → caption → media → actions → likes → comments when N > 0.
+  // Media face stays social-feed-photo-scale-immersive-lock-v1.md
+  //   (full-bleed, min(70vh, 560), tap immersive). This card only reorders the caption.
+  // Text-only stays the 2026-09-20 blend:
+  //   author → actions → likes → caption → comments when N > 0.
+  // Media-only: author → media → actions → likes.
   // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
@@ -494,12 +500,30 @@ export function SocialPostCard({
       {socialRelativeTime(post.createdAt)}
     </time>
   );
-  const caption = post.body ? (
+  const captionText = post.body ? (
     <>
       <span className="font-semibold">{handle} </span>
       {post.body}
     </>
   ) : null;
+  const caption = captionText ? (
+    permalink ? (
+      <Link
+        href={href}
+        data-social-post-caption=""
+        className="t-body-sm text-ink whitespace-pre-wrap break-words"
+      >
+        {captionText}
+      </Link>
+    ) : (
+      <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
+        {captionText}
+      </p>
+    )
+  ) : null;
+  // Both text and media: caption sits above the media face. Otherwise it
+  // stays in the action stack (text-only) or is absent (media-only).
+  const captionAboveMedia = caption != null && media;
   return (
     <article
       data-social-post={post.id}
@@ -538,6 +562,7 @@ export function SocialPostCard({
           ) : null}
         </div>
       </div>
+      {captionAboveMedia ? caption : null}
       {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
       <div className="flex flex-col gap-1">
         <div data-social-post-actions="" className="flex items-center gap-3.5">
@@ -556,21 +581,7 @@ export function SocialPostCard({
           <SocialPostShareButton postId={post.id} />
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-        {caption ? (
-          permalink ? (
-            <Link
-              href={href}
-              data-social-post-caption=""
-              className="t-body-sm text-ink whitespace-pre-wrap break-words"
-            >
-              {caption}
-            </Link>
-          ) : (
-            <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
-              {caption}
-            </p>
-          )
-        ) : null}
+        {captionAboveMedia ? null : caption}
         <SocialCommentTrigger post={thread} />
       </div>
     </article>
