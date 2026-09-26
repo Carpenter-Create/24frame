@@ -74,5 +74,6 @@ export async function readSocialFollowingWall(input: {
     liked,
     media: signedSocialMediaByPostId(wall.posts),
     canLike: !!viewer,
+    viewerId: session.ctx.user.id,
   });
 }

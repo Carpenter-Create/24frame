@@ -17,6 +17,7 @@ export const SOCIAL_OPTIMISTIC_LOCK = {
   likeHref: "/api/social/like",
   postHref: "/api/social/post",
   commentHref: "/api/social/comment",
+  postOwnHref: "/api/social/post-own",
   followHref: "/api/social/follow",
 } as const;
 
@@ -239,6 +240,27 @@ export async function persistSocialComment(
   };
 }
 
+export function persistSocialPostCaption(form: FormData): Promise<{ error?: string }> {
+  return persistSocialOwn(SOCIAL_OPTIMISTIC_LOCK.postOwnHref, "PATCH", form, SOCIAL.post.editFailed);
+}
+
+export function persistSocialPostDelete(form: FormData): Promise<{ error?: string }> {
+  return persistSocialOwn(SOCIAL_OPTIMISTIC_LOCK.postOwnHref, "DELETE", form, SOCIAL.post.deleteFailed);
+}
+
+async function persistSocialOwn(
+  href: string,
+  method: "PATCH" | "DELETE",
+  body: FormData,
+  fallback: string,
+): Promise<{ error?: string }> {
+  const res = await fetch(href, { method, body, cache: "no-store" });
+  const json = (await res.json().catch(() => null)) as { error?: string } | null;
+  const error = typeof json?.error === "string" ? json.error.trim() : "";
+  if (!res.ok || error) return { error: error || fallback };
+  return {};
+}
+
 export async function persistSocialCommentDelete(form: FormData): Promise<{ error?: string }> {
   const res = await fetch(SOCIAL_OPTIMISTIC_LOCK.commentHref, {
     method: "DELETE",
@@ -393,6 +415,7 @@ export function socialOptimisticPostCard(post: SocialOptimisticPost): {
   groupSlug: string | null;
   groupName: string | null;
   canLike: boolean;
+  owned?: boolean;
   media: SocialOptimisticPostMedia[];
 } {
   return {
@@ -408,6 +431,7 @@ export function socialOptimisticPostCard(post: SocialOptimisticPost): {
     groupSlug: post.groupSlug,
     groupName: post.groupName,
     canLike: false,
+    owned: true,
     media: [...post.media],
   };
 }

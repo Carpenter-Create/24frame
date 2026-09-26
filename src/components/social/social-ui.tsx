@@ -70,6 +70,7 @@ import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
+import { SocialPostCaptionPlace, SocialPostOwnerMenu, SocialPostPresence } from "./social-post-owner";
 import { SocialMediaImage } from "./social-media-image";
 import { SocialProfileLinkRow } from "./social-profile-links";
 import { SocialProfileBanner, SocialProfileCoverBlock } from "./social-profile-banner";
@@ -175,6 +176,7 @@ export type SocialPostCardModel = {
   groupName: string | null;
   canLike: boolean;
   media: SocialPostMediaItem[];
+  owned?: boolean;
 };
 
 export function SocialPostMedia({
@@ -461,6 +463,7 @@ export function socialAuthorPostCard(input: {
   liked: boolean;
   canLike: boolean;
   media: SocialPostMediaItem[];
+  owned?: boolean;
 }): SocialPostCardModel {
   return {
     id: input.post.id,
@@ -477,6 +480,7 @@ export function socialAuthorPostCard(input: {
     groupName: null,
     canLike: input.canLike,
     media: input.media,
+    owned: input.owned ?? false,
   };
 }
 
@@ -510,39 +514,28 @@ export function SocialPostCard({
       {socialRelativeTime(post.createdAt)}
     </time>
   );
-  const captionText = post.body ? (
-    <>
-      <span className="font-semibold">{handle} </span>
-      {post.body}
-    </>
-  ) : null;
-  const caption = captionText ? (
-    permalink ? (
-      <Link
-        href={href}
-        data-social-post-caption=""
-        className="t-body-sm text-ink whitespace-pre-wrap break-words"
-      >
-        {captionText}
-      </Link>
-    ) : (
-      <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
-        {captionText}
-      </p>
-    )
-  ) : null;
-  // Both text and media: caption sits above the media face. Otherwise it
-  // stays in the action stack (text-only) or is absent (media-only).
-  const captionAboveMedia = caption != null && media;
+  const captionPlace = (place: "above" | "below") => (
+    <SocialPostCaptionPlace
+      postId={post.id}
+      serverBody={post.body}
+      hasMedia={media}
+      place={place}
+      href={href}
+      permalink={permalink}
+      handle={handle}
+    />
+  );
   return (
+    <SocialPostPresence postId={post.id}>
     <article
       data-social-post={post.id}
+      data-social-post-owned={post.owned ? "" : undefined}
       data-social-post-href={permalink ? href : undefined}
       className={SOCIAL_FEED_ROW_CLASS}
     >
       <div className={`flex min-w-0 items-center gap-2.5 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-1.5">
           {post.authorHandle ? (
             <Link
               href={socialMemberHref(post.authorHandle)}
@@ -571,8 +564,16 @@ export function SocialPostCard({
             </>
           ) : null}
         </div>
+        {post.owned ? (
+          <SocialPostOwnerMenu
+            postId={post.id}
+            body={post.body}
+            hasMedia={media}
+            groupSlug={post.groupSlug}
+          />
+        ) : null}
       </div>
-      {captionAboveMedia ? caption : null}
+      {captionPlace("above")}
       {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
       <div className={`flex flex-col gap-1 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <div data-social-post-actions="" className="flex items-center gap-3.5">
@@ -597,10 +598,11 @@ export function SocialPostCard({
           <SocialPostShareButton postId={post.id} />
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-        {captionAboveMedia ? null : caption}
+        {captionPlace("below")}
         <SocialCommentTrigger post={thread} />
       </div>
     </article>
+    </SocialPostPresence>
   );
 }
 

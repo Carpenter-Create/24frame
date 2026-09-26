@@ -247,6 +247,7 @@ export default async function SocialPublicProfilePage({
                 liked: liked.has(post.id),
                 canLike: !!own,
                 media: media.get(post.id) ?? [],
+                owned: isSelf,
               }),
             ),
             imageIds: mediaIds.imageIds,
@@ -270,6 +271,7 @@ export default async function SocialPublicProfilePage({
                   liked: liked.has(item.post.id),
                   canLike: !!own,
                   media: media.get(item.post.id) ?? [],
+                  owned: item.post.author_id === ctx.user.id,
                 }),
               };
             }),

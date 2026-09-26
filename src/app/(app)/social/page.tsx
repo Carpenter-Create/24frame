@@ -188,6 +188,7 @@ async function SocialHomeCenter({
               liked,
               media,
               canLike: !!profile,
+              viewerId: ctx.user.id,
             })}
             empty={
               <div data-social-following-empty="" className="flex flex-col gap-3">

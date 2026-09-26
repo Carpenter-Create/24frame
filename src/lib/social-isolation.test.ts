@@ -117,6 +117,15 @@ describe("social isolation lock", () => {
     expect(likeApi).toContain("toggleSocialLike");
     expect(likeApi).toContain('from "@/app/(app)/social/light-actions"');
     expect(postApi).toContain("writeSocialPost");
+    expect(postApi).not.toContain("updateSocialPostCaption");
+    expect(postApi).not.toContain("deleteSocialPost");
+    const postOwnApi = readFileSync("src/app/api/social/post-own/route.ts", "utf8");
+    expect(postOwnApi).toContain("updateSocialPostCaption");
+    expect(postOwnApi).toContain("deleteSocialPost");
+    expect(postOwnApi).not.toContain("writeSocialPost");
+    expect(postOwnApi).not.toContain("SERVICE_ROLE");
+    expect(light).toContain("export async function updateSocialPostCaption");
+    expect(light).toContain("export async function deleteSocialPost");
     expect(commentApi).toContain("createSocialComment");
     expect(commentApi).toContain("deleteSocialComment");
     expect(commentApi).toContain('from "@/app/(app)/social/light-actions"');

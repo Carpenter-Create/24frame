@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -27,6 +28,9 @@ describe("social cache keys — one SoT", () => {
     expect(SOCIAL_HOT_TTL_SECONDS).toBeLessThanOrEqual(120);
     expect(SOCIAL_QUERY_STALE_MS).toBeGreaterThanOrEqual(30_000);
     expect(SOCIAL_QUERY_STALE_MS).toBeLessThanOrEqual(60_000);
+    const src = readFileSync("src/lib/social-cache-keys.ts", "utf8");
+    expect(src).toContain("posts.status = removed");
+    expect(src).toContain("not authorization");
   });
 
   it("keeps Query tuples aligned with the Redis identity", () => {

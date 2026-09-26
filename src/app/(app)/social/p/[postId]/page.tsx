@@ -74,6 +74,7 @@ export default async function SocialPostPage({
             groupSlug: group?.slug ?? null,
             groupName: group?.name ?? null,
             canLike: !!profile,
+            owned: post.author_id === ctx.user.id,
             media,
           }}
         />
