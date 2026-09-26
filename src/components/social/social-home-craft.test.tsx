@@ -6,10 +6,12 @@ vi.mock("next/image", () => ({
   default: ({
     src,
     className,
+    loading,
   }: {
     src: string;
     className?: string;
-  }) => createElement("img", { src, className, alt: "" }),
+    loading?: string;
+  }) => createElement("img", { src, className, alt: "", loading }),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -477,6 +479,7 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     const media = image.slice(image.indexOf("data-social-story-media"), image.indexOf("data-social-avatar"));
     expect(media).toContain("/api/social/media?key=");
     expect(media).toContain(encodeURIComponent(imageKey));
+    expect(media).toContain('loading="eager"');
     expect(media).not.toContain("signed-avatar");
     expect(image).toContain('aria-label="Maya Chen"');
     expect(image).not.toContain("Maya C.");
@@ -509,6 +512,46 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(video).not.toContain("autoplay");
     expect(video).toContain("border-hairline");
     expect(video).not.toContain("border-accent");
+  });
+
+  it("does not paint an unsigned Mux poster on a signed story card", () => {
+    const authorId = "11111111-1111-4111-8111-111111111111";
+    const objectId = "22222222-2222-4222-8222-222222222222";
+    const playbackId = "uNbxnGLKJ00yfbijDO8COxT";
+    const html = renderToStaticMarkup(
+      <SocialStoriesRail
+        authors={new Map([[authorId, { display_name: "Maya Chen", handle: "maya" }]])}
+        faces={new Map()}
+        canCreate={false}
+        cards={[
+          {
+            authorId,
+            storyIds: ["s1"],
+            unseen: true,
+            latest: {
+              id: "s1",
+              author_id: authorId,
+              body: null,
+              media: [
+                {
+                  kind: "video",
+                  key: `stories/${authorId}/${objectId}.mp4`,
+                  contentType: "video/mp4",
+                  provider: "mux",
+                  playbackId,
+                  playbackPolicy: "signed",
+                },
+              ],
+              expires_at: "2099-01-01T00:00:00.000Z",
+              created_at: "2026-09-14T12:00:00.000Z",
+            },
+          },
+        ]}
+      />,
+    );
+    expect(html).toContain('data-social-story-mux-thumb="pending"');
+    expect(html).not.toContain("image.mux.com");
+    expect(html).not.toContain("<img");
   });
 
   it("keeps Home rail tall FB-style and Create story when surface is home", () => {

@@ -47,16 +47,34 @@ export type SocialEdgeMediaItem = {
   playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
-/** Rail / neighbor cover. Stills stay on the image proxy. Video is not a <video> src. */
+export type SocialStoryRailCoverResult = {
+  kind: "image" | "video";
+  url: string;
+  playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
+};
+
+/**
+ * Rail / neighbor cover. Stills stay on the image proxy. Video is not a <video> src.
+ * Signed Mux thumbs 403 without a JWT — leave url empty so the rail can mint one.
+ * An unsigned image.mux.com src is what Safari paints as the broken-image glyph.
+ */
 export function socialStoryRailCover(
   media: unknown,
   authorId: string,
-): { kind: "image" | "video"; url: string } | null {
+): SocialStoryRailCoverResult | null {
   const first = socialMediaProxies(media, authorId, "stories")[0];
   if (!first) return null;
   if (first.playbackId) {
-    const thumb = first.url || socialMuxThumbnailUrl(first.playbackId);
-    return thumb ? { kind: "image", url: thumb } : { kind: "video", url: "" };
+    const needsToken = socialMuxPlaybackRequiresTokens(first.playbackPolicy);
+    const url = needsToken ? "" : first.url || socialMuxThumbnailUrl(first.playbackId);
+    if (!url && !needsToken) return { kind: "video", url: "" };
+    return {
+      kind: "image",
+      url,
+      playbackId: first.playbackId,
+      ...(first.playbackPolicy ? { playbackPolicy: first.playbackPolicy } : {}),
+    };
   }
   if (first.kind === "video") return { kind: "video", url: "" };
   if (!first.url) return null;
