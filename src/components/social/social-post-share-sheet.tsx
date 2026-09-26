@@ -9,6 +9,9 @@ import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/cn";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
+import { SOCIAL_POST_ACTION_HIT_CLASS } from "@/lib/social-chrome";
 import { displayHandle, SOCIAL } from "@/lib/social";
 import {
   postSharePermalink,
@@ -64,7 +67,13 @@ export function SocialPostShareSentToast() {
   return typeof document !== "undefined" ? createPortal(node, document.body) : node;
 }
 
-export function SocialPostShareButton({ postId }: { postId: string }) {
+export function SocialPostShareButton({
+  postId,
+  tone = "canvas",
+}: {
+  postId: string;
+  tone?: "canvas" | "stage";
+}) {
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -82,10 +91,10 @@ export function SocialPostShareButton({ postId }: { postId: string }) {
         aria-label={SOCIAL.post.share}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="text-ink"
+        className={tone === "stage" ? cn(SOCIAL_POST_ACTION_HIT_CLASS, "text-band-ink") : "text-ink"}
         onClick={() => setOpen(true)}
       >
-        <SocialIcon name="paper-plane-tilt" size={22} />
+        <SocialIcon name="paper-plane-tilt" size={tone === "stage" ? SOCIAL_ICON_SIZE_POST_ACTION : 22} />
       </button>
       {open ? (
         <SocialPostShareSheet

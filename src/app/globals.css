@@ -352,6 +352,29 @@ body:has([data-social-write-compose]) :is(#vercel-toolbar, vercel-live-feedback,
   --media-object-position: center;
 }
 
+/* Feed tap immersive. Opacity only. No translate.
+   docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md */
+@keyframes social-feed-immersive-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.social-feed-immersive-in {
+  animation: social-feed-immersive-in 180ms ease-out both;
+}
+
+.social-feed-immersive-media {
+  --media-background-color: #0A0A0B;
+  --media-object-fit: contain;
+  --media-object-position: center;
+  background-color: #0A0A0B;
+}
+
+html:has([data-social-feed-immersive]) [data-house-lead-stack],
+html:has([data-social-feed-immersive]) [data-house-phone-bottom-nav] {
+  display: none;
+}
+
 .social-mux-player mux-player {
   display: block;
   width: 100%;

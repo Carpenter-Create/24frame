@@ -44,7 +44,13 @@ function CarouselSlideFace({ item }: { item: SocialPostMediaItem }) {
   return <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />;
 }
 
-export function SocialFeedCarousel({ items }: { items: readonly SocialPostMediaItem[] }) {
+export function SocialFeedCarousel({
+  items,
+  onOpen,
+}: {
+  items: readonly SocialPostMediaItem[];
+  onOpen?: (index: number) => void;
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const total = items.length;
@@ -92,6 +98,15 @@ export function SocialFeedCarousel({ items }: { items: readonly SocialPostMediaI
             aria-hidden={slide === index ? undefined : true}
           >
             <CarouselSlideFace item={item} />
+            {onOpen ? (
+              <button
+                type="button"
+                data-social-feed-media-open=""
+                aria-label={item.kind === "video" ? SOCIAL.post.viewVideo : SOCIAL.post.viewPhoto}
+                className="absolute inset-0 z-[1] cursor-pointer"
+                onClick={() => onOpen(slide)}
+              />
+            ) : null}
           </div>
         ))}
       </div>

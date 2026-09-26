@@ -52,7 +52,8 @@ describe("rich calm visual register v1.4", () => {
     expect(cover).toContain("object-cover");
     expect(cover).toContain("absolute inset-0");
     expect(cover).not.toContain("object-contain");
-    expect(photo).toContain('className={cn("object-cover", className)}');
+    expect(photo).toContain("object-cover object-center");
+    expect(photo).toContain('fit === "contain"');
     expect(rail).toContain("absolute inset-0");
     expect(rail).not.toContain("object-contain");
     const register = readFileSync(
