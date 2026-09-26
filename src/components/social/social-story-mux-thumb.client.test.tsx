@@ -1,12 +1,13 @@
 import "@/test/minimal-document";
 
+import { readFileSync } from "node:fs";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 
 import { SocialStoryMuxThumb } from "@/components/social/social-story-mux-thumb";
 import { SOCIAL_MUX_PLAYBACK_ROUTE, socialMuxThumbnailUrl } from "@/lib/social-mux";
-import { minimalDocument, serializeElement, uninstallMinimalDocument } from "@/test/minimal-document";
+import { installMinimalDocument, minimalDocument, serializeElement, uninstallMinimalDocument } from "@/test/minimal-document";
 
 const PLAYBACK_A = "uNbxnGLKJ00yfbijDO8COxT";
 const PLAYBACK_B = "zSecondPlaybackId01";
@@ -191,5 +192,44 @@ describe("SocialStoryMuxThumb client mint", () => {
     expect(html()).toContain("https://image.mux.com/public-still.webp");
     expect(html()).not.toContain(THUMB_TOKEN);
     expect(html()).not.toContain('data-social-story-mux-thumb="pending"');
+  });
+
+  it("does not reuse the prior mint when signed playback returns for the same id", async () => {
+    mount({ playbackId: PLAYBACK_A, playbackPolicy: "signed" });
+    await settleFetch(
+      jsonResponse(200, { playback: "play.jwt", thumbnail: THUMB_TOKEN, storyboard: "board.jwt" }),
+    );
+
+    await act(async () => {
+      root?.render(
+        <SocialStoryMuxThumb
+          playbackId={PLAYBACK_A}
+          playbackPolicy="public"
+          url="https://image.mux.com/public-still.webp"
+        />,
+      );
+    });
+
+    await act(async () => {
+      root?.render(<SocialStoryMuxThumb playbackId={PLAYBACK_A} playbackPolicy="signed" url="" />);
+    });
+
+    expect(html()).toContain('data-social-story-mux-thumb="pending"');
+    expect(html()).not.toContain(THUMB_TOKEN);
+    expect(html()).not.toContain("image.mux.com");
+    expect(html()).not.toContain("<img");
+  });
+
+  it("clears the minimal document globals after the file", () => {
+    const src = readFileSync(new URL("../../test/minimal-document.ts", import.meta.url), "utf8");
+    const at = src.indexOf("installMinimalDocument();\n");
+    expect(src.slice(at, at + 90)).toContain("afterAll(() => {\n  uninstallMinimalDocument();");
+    expect(globalThis.document).toBeTruthy();
+    uninstallMinimalDocument();
+    expect("document" in globalThis).toBe(false);
+    expect("window" in globalThis).toBe(false);
+    expect("HTMLIFrameElement" in globalThis).toBe(false);
+    expect("IS_REACT_ACT_ENVIRONMENT" in globalThis).toBe(false);
+    installMinimalDocument();
   });
 });

@@ -1,6 +1,11 @@
 // Node Vitest has no DOM. This is enough for react-dom/client to commit a
 // span or img and flush useEffect. Import this module before react-dom/client
 // so that module captures document at init.
+//
+// Globals are installed at import and removed in afterAll. Vitest reuses the
+// worker global, so leaving document/window set leaks into later files.
+
+import { afterAll } from "vitest";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -189,10 +194,12 @@ const globals = globalThis as unknown as {
   HTMLIFrameElement: typeof HTMLIFrameElementStub;
   IS_REACT_ACT_ENVIRONMENT: boolean;
 };
-globals.document = documentHost;
-globals.window = globalThis;
-globals.HTMLIFrameElement = HTMLIFrameElementStub;
-globals.IS_REACT_ACT_ENVIRONMENT = true;
+export function installMinimalDocument() {
+  globals.document = documentHost;
+  globals.window = globalThis;
+  globals.HTMLIFrameElement = HTMLIFrameElementStub;
+  globals.IS_REACT_ACT_ENVIRONMENT = true;
+}
 
 export function uninstallMinimalDocument() {
   delete (globalThis as { document?: unknown }).document;
@@ -200,6 +207,11 @@ export function uninstallMinimalDocument() {
   delete (globalThis as { HTMLIFrameElement?: unknown }).HTMLIFrameElement;
   delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
 }
+
+installMinimalDocument();
+afterAll(() => {
+  uninstallMinimalDocument();
+});
 
 export function minimalDocument(): MiniDocument {
   return documentHost;
