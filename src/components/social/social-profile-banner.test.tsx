@@ -3,8 +3,25 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/image", () => ({
-  default: ({ src, className }: { src: string; className?: string }) =>
-    createElement("img", { src, className, alt: "" }),
+  default: ({
+    src,
+    className,
+    priority,
+    loading,
+  }: {
+    src: string;
+    className?: string;
+    priority?: boolean;
+    loading?: "eager" | "lazy";
+  }) =>
+    createElement("img", {
+      src,
+      className,
+      alt: "",
+      loading,
+      "data-priority": priority ? "" : undefined,
+      "data-loading": loading,
+    }),
 }));
 
 import {
@@ -32,6 +49,10 @@ describe("SocialProfileBanner", () => {
       <SocialProfileBanner coverUrl="https://cf.example/cover.jpg" />,
     );
     expect(html).toContain('src="https://cf.example/cover.jpg"');
+    expect(html).toContain('loading="lazy"');
+    expect(html).toContain('data-loading="lazy"');
+    expect(html).not.toContain("data-priority");
+    expect(html).not.toContain('rel="preload"');
     expect(html).toContain("data-social-profile-cover");
     expect(html).toContain(SOCIAL_PROFILE_COVER_CLASS);
     expect(html).not.toContain("data-social-profile-cover-empty");
@@ -65,6 +86,10 @@ describe("SocialProfileCoverBlock", () => {
       />,
     );
     expect(html).toContain('src="https://cf.example/cover.jpg"');
+    expect(html).toContain('loading="lazy"');
+    expect(html).toContain('data-loading="lazy"');
+    expect(html).not.toContain("data-priority");
+    expect(html).not.toContain('rel="preload"');
     expect(html).toContain("data-social-profile-cover-edit");
     expect(html).not.toContain("data-social-profile-cover-empty");
     expect(html).not.toContain(SOCIAL_PROFILE_COVER_EMPTY_CLASS);

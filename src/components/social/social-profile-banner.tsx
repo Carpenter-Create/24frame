@@ -10,6 +10,13 @@ import {
 import { SOCIAL_PROFILE_COVER_IMAGE_SIZES } from "@/lib/social-media-display";
 import { socialProfileCoverPhoto } from "@/lib/social-profile-cover";
 
+// Cover bytes load through the same-origin signer, which 302s to a presigned
+// GET. next/image priority, and an eager img, make React emit
+// <link rel="preload"> for that signer. Chrome follows the redirect and then
+// warns that the presigned object was not used, because the img request is
+// the signer rather than the object URL. Lazy still fetches an in-view cover
+// from the img and does not hoist that preload.
+
 /** Visitor cover. No photo → no band. Owner empty wash lives on SocialProfileCoverBlock. */
 export function SocialProfileBanner({ coverUrl }: { coverUrl?: string | null }) {
   const photo = socialProfileCoverPhoto(coverUrl);
@@ -22,7 +29,7 @@ export function SocialProfileBanner({ coverUrl }: { coverUrl?: string | null }) 
       <SocialMediaImage
         src={photo}
         sizes={SOCIAL_PROFILE_COVER_IMAGE_SIZES}
-        priority
+        loading="lazy"
         className={SOCIAL_PROFILE_COVER_IMAGE_CLASS}
       />
     </div>
@@ -51,7 +58,7 @@ export function SocialProfileCoverBlock({
           <SocialMediaImage
             src={photo}
             sizes={SOCIAL_PROFILE_COVER_IMAGE_SIZES}
-            priority
+            loading="lazy"
             className={SOCIAL_PROFILE_COVER_IMAGE_CLASS}
           />
         ) : null}

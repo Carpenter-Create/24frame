@@ -14,6 +14,7 @@ import {
   type SocialMuxPlaybackPolicy,
   type SocialMuxPlaybackTokens,
 } from "@/lib/social-mux";
+import type { QuietMuxPlayerStyle } from "@/lib/social-mux-player-quiet";
 
 // Mux Player is browser-only. SSR paints the host so feed tests stay
 // static. Signed policy mints tokens on the Node route. Public policy
@@ -22,7 +23,7 @@ import {
 // Feed face is cover. Immersive passes contain.
 // docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md
 
-const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
+const MuxPlayer = dynamic(() => import("./social-mux-player-mount"), { ssr: false });
 
 function MuxPoster({
   src,
@@ -49,7 +50,7 @@ function MuxPoster({
   );
 }
 
-function playerStyle(chromeless: boolean, fit: "cover" | "contain") {
+function playerStyle(chromeless: boolean, fit: "cover" | "contain"): QuietMuxPlayerStyle {
   const cover = {
     aspectRatio: "auto",
     width: "100%",
@@ -67,7 +68,7 @@ function playerStyle(chromeless: boolean, fit: "cover" | "contain") {
   return {
     ...base,
     "--controls": "none",
-  } as const;
+  };
 }
 
 export function SocialMuxPlayer({
@@ -102,8 +103,6 @@ export function SocialMuxPlayer({
     setPaintedId(playbackId);
     releaseHold();
   };
-  const mediaClass = fit === "contain" ? "size-full object-contain" : "size-full object-cover";
-
   useEffect(() => {
     if (!signed) return;
     const controller = new AbortController();
@@ -145,13 +144,11 @@ export function SocialMuxPlayer({
                 storyboard: tokens.storyboard,
               }}
               streamType="on-demand"
-              playsInline
               autoPlay={autoPlay}
               muted={muted}
               preload="metadata"
               onLoadedData={paint}
               poster={poster}
-              className={mediaClass}
               style={playerStyle(chromeless, fit)}
             />
           ) : null}
@@ -164,13 +161,11 @@ export function SocialMuxPlayer({
           <MuxPlayer
             playbackId={playbackId}
             streamType="on-demand"
-            playsInline
             autoPlay={autoPlay}
             muted={muted}
             preload="metadata"
             onLoadedData={paint}
             poster={poster}
-            className={mediaClass}
             style={playerStyle(chromeless, fit)}
           />
           {painted ? null : <MuxPoster src={poster} fit={fit} onReady={releaseHold} />}
