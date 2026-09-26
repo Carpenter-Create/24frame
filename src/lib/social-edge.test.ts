@@ -65,13 +65,18 @@ describe("Social Edge media proxies", () => {
         [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "signed" }],
         AUTHOR,
       ),
-    ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
+    ).toEqual({ kind: "image", url: "", playbackId, playbackPolicy: "signed" });
     expect(
       socialStoryRailCover(
         [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "public" }],
         AUTHOR,
       ),
-    ).toEqual({ kind: "image", url: `https://image.mux.com/${playbackId}/thumbnail.webp` });
+    ).toEqual({
+      kind: "image",
+      url: `https://image.mux.com/${playbackId}/thumbnail.webp`,
+      playbackId,
+      playbackPolicy: "public",
+    });
   });
 
   it("blanks a video url when there is no playback id and keeps stills on the image proxy", () => {

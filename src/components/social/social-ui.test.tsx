@@ -982,12 +982,39 @@ describe("SocialPostCard media", () => {
       />,
     );
     expect(html).toContain("data-social-post-media");
+    expect(html).toContain("data-social-post-carousel");
     expect(html).toContain('data-social-post-image=""');
     expect(html).toContain('src="https://cf.example/signed-image"');
-    expect(html).toContain("data-social-post-video");
-    expect(html).toContain("data-social-video-closed");
-    expect(html).not.toContain("signed-video");
+    expect(html).toContain("1 of 2");
     expect(html).not.toContain("<video");
+    expect(html).not.toContain("signed-video");
+    expect(html).not.toContain("grid-cols");
+    expect(html).toContain("data-social-carousel-mux-missing");
+
+    const singleVideo = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p1v",
+          body: "hello",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [{ kind: "video", url: "https://cf.example/signed-video" }],
+        }}
+      />,
+    );
+    expect(singleVideo).toContain("data-social-post-video");
+    expect(singleVideo).toContain("data-social-video-closed");
+    expect(singleVideo).not.toContain("signed-video");
+    expect(singleVideo).not.toContain("<video");
+    expect(singleVideo).not.toContain("data-social-post-carousel");
 
     const mux = renderToStaticMarkup(
       <SocialPostCard
@@ -1010,6 +1037,81 @@ describe("SocialPostCard media", () => {
     );
     expect(mux).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
     expect(uiSrc).toContain("SocialFeedVideo");
+  });
+
+  it("swipes two or more media as one carousel and keeps a single frame for one", () => {
+    const multi = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p4",
+          body: "two stills",
+          likeCount: 4,
+          commentCount: 1,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: true,
+          media: [
+            { kind: "image", url: "https://cf.example/one.jpg" },
+            { kind: "image", url: "https://cf.example/two.jpg" },
+            { kind: "video", url: "https://cf.example/proxy.mp4", playbackId: "playback123456" },
+          ],
+        }}
+      />,
+    );
+    expect(multi).toContain("data-social-post-carousel");
+    expect(multi).toContain("data-social-post-carousel-track");
+    expect(multi).toContain("snap-x");
+    expect(multi).toContain("social-feed-carousel-slide");
+    expect(multi.match(/data-social-post-carousel-slide/g)?.length).toBe(3);
+    expect(multi.match(/data-social-post-carousel-dot="/g)?.length).toBe(3);
+    expect(multi).toContain('data-social-post-carousel-dot="active"');
+    expect(multi).toContain("1 of 3");
+    expect(multi).toContain("Show media 1 of 3");
+    expect(multi).toContain('data-social-mux-player="playback123456"');
+    expect(multi).not.toContain("proxy.mp4");
+    expect(multi).not.toContain("<video");
+    expect(multi).not.toContain("grid-cols");
+    expect(multi).not.toContain("collage");
+    expect(multi.indexOf("Ada Lovelace")).toBeLessThan(multi.indexOf("data-social-post-caption"));
+    expect(multi.indexOf("data-social-post-caption")).toBeLessThan(multi.indexOf("data-social-post-carousel"));
+    expect(multi.indexOf("two stills")).toBeLessThan(multi.indexOf("data-social-post-carousel"));
+    expect(multi.indexOf("data-social-post-carousel")).toBeLessThan(multi.indexOf("data-social-post-actions"));
+    expect(multi.indexOf("data-social-post-actions")).toBeLessThan(multi.indexOf(`4 ${SOCIAL.post.likes}`));
+    expect(multi).not.toContain("truncate");
+
+    const mediaOnly = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p5",
+          body: null,
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [
+            { kind: "image", url: "https://cf.example/one.jpg" },
+            { kind: "image", url: "https://cf.example/two.jpg" },
+          ],
+        }}
+      />,
+    );
+    expect(mediaOnly).not.toContain("data-social-post-caption");
+    expect(mediaOnly.indexOf("data-social-post-carousel")).toBeLessThan(
+      mediaOnly.indexOf("data-social-post-actions"),
+    );
+    expect(mediaOnly).toContain("1 of 2");
   });
 });
 

@@ -60,7 +60,9 @@ import {
   socialMediaFrameClass,
   type SocialMediaOrientation,
 } from "@/lib/social-media-display";
+import { socialFeedUsesCarousel } from "@/lib/social-feed-carousel";
 import { SocialAvatar } from "./social-avatar";
+import { SocialFeedCarousel } from "./social-feed-carousel";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialCommentTrigger } from "./social-comment-thread";
 import { SocialPostShareButton } from "./social-post-share-sheet";
@@ -185,6 +187,9 @@ export function SocialPostMedia({
   frameClass?: string;
 }) {
   if (items.length === 0) return null;
+  if (socialFeedUsesCarousel(items.length)) {
+    return <SocialFeedCarousel items={items} />;
+  }
   return (
     <div data-social-post-media="" className={SOCIAL_POST_MEDIA_CLASS}>
       {items.map((item) => (
@@ -485,12 +490,12 @@ export function SocialPostCard({
   // One card at every breakpoint.
   // Text + media: docs/design-locks/social-feed-text-media-caption-above-lock-v1.md
   //   author → caption → media → actions → likes → comments when N > 0.
-  // Media face stays social-feed-photo-scale-immersive-lock-v1.md
-  //   (full-bleed, min(70vh, 560), tap immersive). This card only reorders the caption.
+  // Two or more media items (Adam lock 2026-09-25): that media face is one
+  // full-bleed swipe carousel with dots and N of M. No collage.
   // Text-only stays the 2026-09-20 blend:
   //   author → actions → likes → caption → comments when N > 0.
   // Media-only: author → media → actions → likes.
-  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
+  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count, collage.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
   const href = socialPostHref(post.id);

@@ -400,6 +400,32 @@ export const SOCIAL_POST_ACTION_HEART_NUDGE_CLASS = "translate-y-px";
 export const SOCIAL_STORIES_FEED_RULE_CLASS =
   "max-md:border-b max-md:border-solid max-md:border-hairline";
 
+// Adam lock 2026-09-25. Feed posts with 2 or more media items use one
+// full-bleed swipe stage. Phone uses the same bleed as the single
+// media face so the stage meets the viewport. Desktop stays the
+// column width. N=1 keeps socialMediaFrameClass. No collage grid.
+export const SOCIAL_FEED_CAROUSEL_BLEED_CLASS =
+  `relative px-0 ${SOCIAL_MOBILE_BLEED_CLASS}`;
+
+export const SOCIAL_FEED_CAROUSEL_TRACK_CLASS =
+  "no-scrollbar flex w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain";
+
+export const SOCIAL_FEED_CAROUSEL_SLIDE_CLASS =
+  "social-feed-carousel-slide relative w-full min-w-full shrink-0 snap-start overflow-hidden bg-surface-muted";
+
+export const SOCIAL_FEED_CAROUSEL_COUNT_CLASS =
+  "absolute right-[var(--space-3)] top-[var(--space-3)] z-10 rounded-full bg-ink/70 px-[var(--space-2)] py-[var(--space-1)] t-body-sm text-accent-contrast";
+
+export const SOCIAL_FEED_CAROUSEL_DOTS_CLASS =
+  "absolute bottom-[var(--space-3)] left-1/2 z-10 flex -translate-x-1/2 items-center justify-center gap-[var(--space-2)] rounded-full bg-ink/50 px-[var(--space-2)]";
+
+export const SOCIAL_FEED_CAROUSEL_DOT_HIT_CLASS =
+  "flex size-6 shrink-0 items-center justify-center";
+
+export const SOCIAL_FEED_CAROUSEL_DOT_CLASS = "size-2 rounded-full bg-accent-contrast/50";
+
+export const SOCIAL_FEED_CAROUSEL_DOT_ACTIVE_CLASS = "size-2 rounded-full bg-accent-contrast";
+
 // Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
 // (uppercase + 0.12em track turns `10h` into `10 H`).
 export const SOCIAL_POST_TIME_CLASS =
