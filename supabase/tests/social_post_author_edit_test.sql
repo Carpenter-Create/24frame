@@ -2,7 +2,8 @@
 -- Author may edit caption on a new or old post and soft-delete
 -- (status = removed). Non-authors, including create_group staff, cannot.
 -- Removed posts leave feed select, comments, and the public like list.
--- The row stays. Client DELETE stays closed. Stories are not in this file.
+-- The row stays. There is no DELETE policy, so a hard DELETE
+-- removes nothing. Stories are not in this file.
 
 begin;
 select plan(29);
@@ -31,8 +32,13 @@ select ok(
   ),
   'protect_post_author_mutation exists');
 select ok(
-  not has_table_privilege('authenticated', 'public.posts', 'DELETE'),
-  'authenticated still has no DELETE on posts');
+  not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'posts'
+      and cmd = 'DELETE'
+  ),
+  'posts has no DELETE policy');
 select ok(
   not exists (
     select 1

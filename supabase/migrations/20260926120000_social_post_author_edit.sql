@@ -2,8 +2,10 @@
 -- 20260926120000_social_post_author_edit.sql
 --
 -- INTENT: Own-post caption edit and soft-delete. Extends Pack 2 posts
--- (posts_update_author, post_status active|hidden|removed, edited_at,
--- no client DELETE). Does not add a posts.deleted_at column.
+-- (posts_update_author, post_status active|hidden|removed, edited_at).
+-- Does not add a posts.deleted_at column. Does not add a DELETE policy.
+-- Default grants may already include table DELETE for authenticated;
+-- with no DELETE policy, RLS removes nothing. This file does not REVOKE.
 --
 -- Author (auth.uid() = author_id) may:
 --   1. change body on an active post — trigger stamps edited_at.
@@ -127,8 +129,13 @@ begin
     raise exception 'protect_post_author_mutation must not call is_gc_staff or 24frame.*';
   end if;
 
-  if has_table_privilege('authenticated', 'public.posts', 'DELETE') then
-    raise exception 'authenticated must not gain DELETE on posts';
+  if exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'posts'
+      and cmd = 'DELETE'
+  ) then
+    raise exception 'posts must not gain a DELETE policy';
   end if;
 end
 $$;
