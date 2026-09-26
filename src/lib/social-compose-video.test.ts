@@ -16,6 +16,7 @@ import {
   paintSocialComposeVideoPoster,
   planSocialComposeAttach,
   socialComposePosterSize,
+  stampSocialComposeSourcePixels,
   type SocialComposePosterCanvas,
 } from "@/lib/social-compose-video";
 import {
@@ -189,6 +190,12 @@ describe("write compose video attach", () => {
     expect(composeVideoUploadPixels({ width: 0, height: 2160 })).toBeNull();
     expect(composeVideoUploadPixels({ width: Number.NaN, height: 10 })).toBeNull();
     expect(composeVideoUploadPixels(null)).toBeNull();
+    expect(stampSocialComposeSourcePixels({ kind: "video" }, { width: 1080.2, height: 1920.8 })).toEqual({
+      kind: "video",
+      width: 1080,
+      height: 1921,
+    });
+    expect(stampSocialComposeSourcePixels({ kind: "video" }, null)).toEqual({ kind: "video" });
   });
 
   it("shows compose progress and the story frame path, and skips the detached probe", () => {
@@ -210,6 +217,8 @@ describe("write compose video attach", () => {
     expect(text).toContain('preload="auto"');
     expect(text).toContain("muted");
     expect(text).toContain("playsInline");
+    expect(text).toContain("autoPlay");
+    expect(text).toContain("node.play()");
     expect(compose.indexOf("new AbortController()")).toBeGreaterThan(-1);
     expect(compose.indexOf("new AbortController()")).toBeLessThan(loopAt);
     expect(loop).not.toContain("new AbortController");
@@ -218,6 +227,8 @@ describe("write compose video attach", () => {
     expect(loop).toContain('slot.kind === "video" ? { intent: "video" as const } : {}');
     expect(loop).not.toContain('intent: "video",');
     expect(loop).toContain("composeVideoUploadPixels(measured)");
+    expect(loop).toContain("stampSocialComposeSourcePixels");
+    expect(text).toContain("socialMediaFrameFields");
     expect(loop).not.toContain('pixels: slot.kind === "video" ? null');
     expect(compose).not.toContain("probeSocialVideoPixels");
     expect(compose).toContain("SocialComposeVideoPreview");

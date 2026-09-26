@@ -1,7 +1,9 @@
 import {
   isSocialMuxMediaItem,
   ownedMediaItems,
+  socialMediaFrameFields,
   type SocialMediaContentType,
+  type SocialMediaItem,
   type SocialMediaLane,
 } from "@/lib/social-media";
 import {
@@ -45,7 +47,13 @@ export type SocialEdgeMediaItem = {
   contentType: SocialMediaContentType;
   playbackId?: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
+  width?: number;
+  height?: number;
 };
+
+function edgeFrame(item: SocialMediaItem): { width?: number; height?: number } {
+  return socialMediaFrameFields(item) ?? {};
+}
 
 /** Rail / neighbor cover. Stills stay on the image proxy. Video is not a <video> src. */
 export function socialStoryRailCover(
@@ -78,11 +86,13 @@ export function socialMediaProxies(
           contentType: item.contentType,
           playbackId: item.playbackId,
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
+          ...edgeFrame(item),
         }
       : {
           kind: item.kind,
           url: item.kind === "video" ? "" : socialMediaHref(item.key),
           contentType: item.contentType,
+          ...edgeFrame(item),
         },
   );
 }

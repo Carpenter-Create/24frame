@@ -45,7 +45,17 @@ export function composeVideoUploadPixels(
   if (!measured) return null;
   const { width, height } = measured;
   if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
-  return { width, height };
+  return { width: Math.round(width), height: Math.round(height) };
+}
+
+/** Attach measured preview pixels so a vertical clip is not stored as a bare video. */
+export function stampSocialComposeSourcePixels<T extends object>(
+  item: T,
+  measured: SocialComposeSourcePixels | null | undefined,
+): T & { width?: number; height?: number } {
+  const pixels = composeVideoUploadPixels(measured);
+  if (!pixels) return item;
+  return { ...item, width: pixels.width, height: pixels.height };
 }
 
 export function socialComposePosterSize(

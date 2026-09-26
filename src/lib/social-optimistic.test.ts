@@ -224,6 +224,48 @@ describe("Social optimistic mutation SoT", () => {
         { kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT", playbackPolicy: "signed" },
       ]);
     }
+    const portrait = beginSocialPostPublish({
+      body: "vertical",
+      mediaItems: [
+        {
+          kind: "video",
+          key: "posts/u1/a.mp4",
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+          width: 1080,
+          height: 1920,
+        },
+      ],
+      mediaPreview: [
+        {
+          kind: "video",
+          url: "blob:clip",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+          width: 1080,
+          height: 1920,
+        },
+      ],
+      authorName: "Ada Lovelace",
+    });
+    expect(portrait.ok).toBe(true);
+    if (portrait.ok) {
+      expect(portrait.form.get("media")).toContain('"width":1080');
+      expect(portrait.form.get("media")).toContain('"height":1920');
+      expect(portrait.form.get("media")).toContain('"playbackId":"uNbxnGLKJ00yfbijDO8COxT"');
+      expect(portrait.post.media).toEqual([
+        {
+          kind: "video",
+          url: "blob:clip",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+          width: 1080,
+          height: 1920,
+        },
+      ]);
+    }
     expect(started.post.body).toBe("hello");
     expect(started.post.authorHandle).toBe("ada");
     expect(started.post.media).toEqual([{ kind: "image", url: "blob:photo" }]);

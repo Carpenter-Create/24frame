@@ -48,6 +48,7 @@ import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
   SOCIAL_MEDIA_ACCEPT,
   SOCIAL_MEDIA_MAX_ITEMS,
+  socialMediaFrameFields,
   socialMediaKindFor,
   type SocialMediaItem,
   type SocialMediaKind,
@@ -58,6 +59,7 @@ import {
   composeVideoUploadPixels,
   paintSocialComposeVideoPoster,
   planSocialComposeAttach,
+  stampSocialComposeSourcePixels,
   type SocialComposePosterCanvas,
   type SocialComposeSourcePixels,
 } from "@/lib/social-compose-video";
@@ -157,58 +159,68 @@ export function SocialComposeVideoPreview({
     if (!node) return;
     bindStoryReviewVideo(node, src);
     const frame = storyReviewFrameSeconds();
+    let held = false;
     const reportPixels = () => {
       const pixels = composeVideoUploadPixels({ width: node.videoWidth, height: node.videoHeight });
       if (pixels) onPixelsRef.current?.(pixels);
     };
     const paint = () => {
+      if (node.videoWidth <= 0) return;
       const canvas = node.ownerDocument.createElement("canvas");
       const url = paintSocialComposeVideoPoster(node, canvas as unknown as SocialComposePosterCanvas);
       if (url) setPoster(url);
     };
-    const seek = () => {
+    // iOS Safari does not paint a blob frame until muted playback starts.
+    // The poster stays behind the element so a blank still cannot cover it.
+    const holdFrame = () => {
+      if (held || node.videoWidth <= 0 || node.currentTime < frame) return;
+      held = true;
+      paint();
+    };
+    const present = () => {
+      reportPixels();
       if (node.currentTime < frame) {
         try {
           node.currentTime = frame;
-          return;
         } catch {
           // WebKit can reject the seek until the moov is readable.
         }
       }
-      paint();
+      void node.play().catch(() => undefined);
     };
     node.addEventListener("loadedmetadata", reportPixels);
-    node.addEventListener("loadeddata", seek);
-    node.addEventListener("seeked", paint);
+    node.addEventListener("loadeddata", present);
+    node.addEventListener("timeupdate", holdFrame);
     if (node.videoWidth > 0) reportPixels();
-    if (node.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) seek();
+    if (node.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) present();
     return () => {
       node.removeEventListener("loadedmetadata", reportPixels);
-      node.removeEventListener("loadeddata", seek);
-      node.removeEventListener("seeked", paint);
+      node.removeEventListener("loadeddata", present);
+      node.removeEventListener("timeupdate", holdFrame);
     };
   }, [src]);
 
   return (
     <>
-      <video
-        ref={ref}
-        data-social-create-video=""
-        src={storyReviewMediaSrc(src)}
-        className="absolute inset-0 size-full object-cover"
-        playsInline
-        muted
-        preload="auto"
-      />
       {poster ? (
         // eslint-disable-next-line @next/next/no-img-element -- local frame from the attached video
         <img
           data-social-create-video-poster=""
           src={poster}
-          alt={SOCIAL.home.videoKind}
+          alt=""
           className="absolute inset-0 size-full object-cover"
         />
       ) : null}
+      <video
+        ref={ref}
+        data-social-create-video=""
+        src={storyReviewMediaSrc(src)}
+        className="absolute inset-0 size-full object-cover"
+        autoPlay
+        playsInline
+        muted
+        preload="auto"
+      />
     </>
   );
 }
@@ -227,6 +239,7 @@ function persistKeys(media: SocialMediaItem[]) {
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
         }
       : {}),
+    ...(socialMediaFrameFields(item) ?? {}),
   }));
 }
 
@@ -271,6 +284,7 @@ function publishOptimisticPost({
           url,
           ...(item.playbackId ? { playbackId: item.playbackId } : {}),
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
+          ...(socialMediaFrameFields(item) ?? {}),
         },
       ];
     }),
@@ -533,7 +547,6 @@ export function SocialCreateCompose({
   const uploadAbortRef = useRef(new Map<string, AbortController>());
   const dismissedRef = useRef(new Set<string>());
   const pixelsRef = useRef(new Map<string, SocialComposeSourcePixels>());
-  const pixelWaitersRef = useRef(new Map<string, Set<(pixels: SocialComposeSourcePixels | null) => void>>());
   const writeFormRef = useRef<HTMLFormElement>(null);
   const writeBodyRef = useRef<HTMLTextAreaElement>(null);
   const hasVideo =
@@ -606,37 +619,6 @@ export function SocialCreateCompose({
     const pixels = composeVideoUploadPixels(measured);
     if (!pixels) return;
     pixelsRef.current.set(localId, pixels);
-    const waiters = pixelWaitersRef.current.get(localId);
-    if (!waiters) return;
-    for (const resolve of [...waiters]) resolve(pixels);
-    pixelWaitersRef.current.delete(localId);
-  }
-
-  function waitForComposePixels(localId: string, signal: AbortSignal): Promise<SocialComposeSourcePixels | null> {
-    const known = pixelsRef.current.get(localId);
-    if (known) return Promise.resolve(known);
-    if (signal.aborted) return Promise.resolve(null);
-    return new Promise((resolve) => {
-      let settled = false;
-      const finish = (value: SocialComposeSourcePixels | null) => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(timer);
-        signal.removeEventListener("abort", onAbort);
-        pixelWaitersRef.current.get(localId)?.delete(finish);
-        resolve(value);
-      };
-      const onAbort = () => finish(null);
-      const timer = window.setTimeout(() => {
-        finish(pixelsRef.current.get(localId) ?? null);
-      }, 2000);
-      signal.addEventListener("abort", onAbort);
-      const bucket = pixelWaitersRef.current.get(localId) ?? new Set();
-      bucket.add(finish);
-      pixelWaitersRef.current.set(localId, bucket);
-      const raced = pixelsRef.current.get(localId);
-      if (raced) finish(raced);
-    });
   }
 
   function dismissLocal(slot: WriteComposeLocal) {
@@ -702,12 +684,7 @@ export function SocialCreateCompose({
           uploadAbortRef.current.delete(slot.localId);
           continue;
         }
-        const measured =
-          slot.kind === "video" ? await waitForComposePixels(slot.localId, controller.signal) : null;
-        if (dismissedRef.current.has(slot.localId) || !composeSlotMayUpload(controller.signal)) {
-          uploadAbortRef.current.delete(slot.localId);
-          continue;
-        }
+        const measured = slot.kind === "video" ? (pixelsRef.current.get(slot.localId) ?? null) : null;
         const result = await uploadSocialPostMedia([file], carried, SOCIAL_MEDIA_MAX_ITEMS, "posts", {
           ...(slot.kind === "video" ? { intent: "video" as const } : {}),
           originalQuality,
@@ -732,7 +709,13 @@ export function SocialCreateCompose({
           composeSlotMayUpload(controller.signal);
         uploadAbortRef.current.delete(slot.localId);
         if (!stillWanted || result.aborted) continue;
-        const item = result.items?.[0];
+        const uploaded = result.items?.[0];
+        const item = uploaded
+          ? stampSocialComposeSourcePixels(
+              uploaded,
+              slot.kind === "video" ? pixelsRef.current.get(slot.localId) : null,
+            )
+          : uploaded;
         if (result.error || !item) {
           URL.revokeObjectURL(slot.previewUrl);
           const drop = new Set(prepared.slice(index).map((row) => row.localId));

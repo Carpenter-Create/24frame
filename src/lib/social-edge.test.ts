@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { socialMediaFrameClass } from "@/lib/social-media-display";
 import {
   SOCIAL_AVATAR_ROUTE,
   SOCIAL_EDGE_RUNTIME,
@@ -150,6 +151,28 @@ describe("Social Edge media proxies", () => {
       AUTHOR,
     );
     expect(legacy[0]?.playbackPolicy).toBe("public");
+  });
+
+  it("keeps vertical source pixels so the feed frame is portrait", () => {
+    const key = `posts/${AUTHOR}/${OBJECT}.mp4`;
+    const items = socialMediaProxies(
+      [
+        {
+          kind: "video",
+          key,
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+          width: 1080,
+          height: 1920,
+        },
+      ],
+      AUTHOR,
+    );
+    expect(items[0]).toMatchObject({ kind: "video", playbackId: "uNbxnGLKJ00yfbijDO8COxT", width: 1080, height: 1920 });
+    expect(socialMediaFrameClass(items[0] ?? {})).toContain("aspect-[4/5]");
+    expect(socialMediaFrameClass(items[0] ?? {})).not.toContain("aspect-video");
   });
 });
 
