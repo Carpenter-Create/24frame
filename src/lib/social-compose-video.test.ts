@@ -11,6 +11,7 @@ import {
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_IMAGE_MAX_BYTES, SOCIAL_VIDEO_MAX_BYTES } from "@/lib/social-media";
 import {
+  commitSocialComposeMediaItem,
   composeSlotMayUpload,
   composeVideoUploadPixels,
   paintSocialComposeVideoPoster,
@@ -196,6 +197,18 @@ describe("write compose video attach", () => {
       height: 1921,
     });
     expect(stampSocialComposeSourcePixels({ kind: "video" }, null)).toEqual({ kind: "video" });
+    expect(commitSocialComposeMediaItem({ kind: "video", key: "clip" }, null)).toBeNull();
+    expect(commitSocialComposeMediaItem({ kind: "video", key: "clip" }, { width: 0, height: 1920 })).toBeNull();
+    expect(commitSocialComposeMediaItem({ kind: "video", key: "clip" }, { width: 1080, height: 1920 })).toEqual({
+      kind: "video",
+      key: "clip",
+      width: 1080,
+      height: 1920,
+    });
+    expect(commitSocialComposeMediaItem({ kind: "image", key: "still" }, null)).toEqual({
+      kind: "image",
+      key: "still",
+    });
   });
 
   it("shows compose progress and the story frame path, and skips the detached probe", () => {
@@ -219,6 +232,15 @@ describe("write compose video attach", () => {
     expect(text).toContain("playsInline");
     expect(text).toContain("autoPlay");
     expect(text).toContain("node.play()");
+    const hold = text.slice(text.indexOf("const holdFrame"), text.indexOf("const present"));
+    expect(hold).toContain("reportPixels()");
+    expect(hold).toContain("node.pause()");
+    const previewFn = text.slice(
+      text.indexOf("export function SocialComposeVideoPreview"),
+      text.indexOf("function persistKeys"),
+    );
+    const previewJsx = previewFn.slice(previewFn.lastIndexOf("return ("));
+    expect(previewJsx.indexOf("<video")).toBeLessThan(previewJsx.indexOf("data-social-create-video-poster"));
     expect(compose.indexOf("new AbortController()")).toBeGreaterThan(-1);
     expect(compose.indexOf("new AbortController()")).toBeLessThan(loopAt);
     expect(loop).not.toContain("new AbortController");
@@ -227,7 +249,13 @@ describe("write compose video attach", () => {
     expect(loop).toContain('slot.kind === "video" ? { intent: "video" as const } : {}');
     expect(loop).not.toContain('intent: "video",');
     expect(loop).toContain("composeVideoUploadPixels(measured)");
-    expect(loop).toContain("stampSocialComposeSourcePixels");
+    expect(loop.indexOf("waitForComposePixels")).toBeGreaterThan(loop.indexOf("uploadSocialPostMedia"));
+    expect(loop.indexOf("commitSocialComposeMediaItem")).toBeGreaterThan(loop.indexOf("waitForComposePixels"));
+    const mediaCommit = loop.lastIndexOf("setMedia");
+    const dismissBeforeCommit = loop.lastIndexOf("dismissedRef.current.has", mediaCommit);
+    expect(dismissBeforeCommit).toBeGreaterThan(loop.indexOf("uploadSocialPostMedia"));
+    expect(dismissBeforeCommit).toBeLessThan(mediaCommit);
+    expect(loop.slice(dismissBeforeCommit, mediaCommit)).not.toContain("await ");
     expect(text).toContain("socialMediaFrameFields");
     expect(loop).not.toContain('pixels: slot.kind === "video" ? null');
     expect(compose).not.toContain("probeSocialVideoPixels");

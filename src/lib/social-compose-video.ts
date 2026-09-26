@@ -58,6 +58,23 @@ export function stampSocialComposeSourcePixels<T extends object>(
   return { ...item, width: pixels.width, height: pixels.height };
 }
 
+/**
+ * A video may enter post media only with source pixels.
+ * Missing dims are not committed — the feed would otherwise treat them as landscape.
+ */
+export function commitSocialComposeMediaItem<T extends { kind: string }>(
+  item: T,
+  measured: SocialComposeSourcePixels | null | undefined,
+): T | (T & { width: number; height: number }) | null {
+  if (item.kind !== "video") return item;
+  const pixels = composeVideoUploadPixels(measured);
+  if (!pixels) return null;
+  return stampSocialComposeSourcePixels(item, pixels);
+}
+
+/** How long compose waits for the visible preview to report pixels before refusing the commit. */
+export const SOCIAL_COMPOSE_PIXEL_WAIT_MS = 4000;
+
 export function socialComposePosterSize(
   width: number,
   height: number,

@@ -55,11 +55,12 @@ import {
 } from "@/lib/social-media";
 import { uploadSocialPostMedia } from "@/lib/social-media-upload";
 import {
+  commitSocialComposeMediaItem,
   composeSlotMayUpload,
   composeVideoUploadPixels,
   paintSocialComposeVideoPoster,
   planSocialComposeAttach,
-  stampSocialComposeSourcePixels,
+  SOCIAL_COMPOSE_PIXEL_WAIT_MS,
   type SocialComposePosterCanvas,
   type SocialComposeSourcePixels,
 } from "@/lib/social-compose-video";
@@ -155,6 +156,10 @@ export function SocialComposeVideoPreview({
   const onPixelsRef = useRef(onPixels);
 
   useEffect(() => {
+    onPixelsRef.current = onPixels;
+  }, [onPixels]);
+
+  useEffect(() => {
     const node = ref.current;
     if (!node) return;
     bindStoryReviewVideo(node, src);
@@ -170,12 +175,14 @@ export function SocialComposeVideoPreview({
       const url = paintSocialComposeVideoPoster(node, canvas as unknown as SocialComposePosterCanvas);
       if (url) setPoster(url);
     };
-    // iOS Safari does not paint a blob frame until muted playback starts.
-    // The poster stays behind the element so a blank still cannot cover it.
+    // iOS paints a blob only after muted playback. Pause on the review frame
+    // and keep that JPEG above the element so the clip cannot run out to grey.
     const holdFrame = () => {
       if (held || node.videoWidth <= 0 || node.currentTime < frame) return;
       held = true;
+      reportPixels();
       paint();
+      node.pause();
     };
     const present = () => {
       reportPixels();
@@ -202,15 +209,6 @@ export function SocialComposeVideoPreview({
 
   return (
     <>
-      {poster ? (
-        // eslint-disable-next-line @next/next/no-img-element -- local frame from the attached video
-        <img
-          data-social-create-video-poster=""
-          src={poster}
-          alt=""
-          className="absolute inset-0 size-full object-cover"
-        />
-      ) : null}
       <video
         ref={ref}
         data-social-create-video=""
@@ -221,6 +219,15 @@ export function SocialComposeVideoPreview({
         muted
         preload="auto"
       />
+      {poster ? (
+        // eslint-disable-next-line @next/next/no-img-element -- held review frame above the paused element
+        <img
+          data-social-create-video-poster=""
+          src={poster}
+          alt=""
+          className="absolute inset-0 size-full object-cover"
+        />
+      ) : null}
     </>
   );
 }
@@ -547,6 +554,7 @@ export function SocialCreateCompose({
   const uploadAbortRef = useRef(new Map<string, AbortController>());
   const dismissedRef = useRef(new Set<string>());
   const pixelsRef = useRef(new Map<string, SocialComposeSourcePixels>());
+  const pixelWaitersRef = useRef(new Map<string, Set<(pixels: SocialComposeSourcePixels | null) => void>>());
   const writeFormRef = useRef<HTMLFormElement>(null);
   const writeBodyRef = useRef<HTMLTextAreaElement>(null);
   const hasVideo =
@@ -619,6 +627,37 @@ export function SocialCreateCompose({
     const pixels = composeVideoUploadPixels(measured);
     if (!pixels) return;
     pixelsRef.current.set(localId, pixels);
+    const waiters = pixelWaitersRef.current.get(localId);
+    if (!waiters) return;
+    for (const resolve of [...waiters]) resolve(pixels);
+    pixelWaitersRef.current.delete(localId);
+  }
+
+  function waitForComposePixels(localId: string, signal: AbortSignal): Promise<SocialComposeSourcePixels | null> {
+    const known = pixelsRef.current.get(localId);
+    if (known) return Promise.resolve(known);
+    if (signal.aborted || dismissedRef.current.has(localId)) return Promise.resolve(null);
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value: SocialComposeSourcePixels | null) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        signal.removeEventListener("abort", onAbort);
+        pixelWaitersRef.current.get(localId)?.delete(finish);
+        resolve(value);
+      };
+      const onAbort = () => finish(pixelsRef.current.get(localId) ?? null);
+      const timer = window.setTimeout(() => {
+        finish(pixelsRef.current.get(localId) ?? null);
+      }, SOCIAL_COMPOSE_PIXEL_WAIT_MS);
+      signal.addEventListener("abort", onAbort);
+      const bucket = pixelWaitersRef.current.get(localId) ?? new Set();
+      bucket.add(finish);
+      pixelWaitersRef.current.set(localId, bucket);
+      const raced = pixelsRef.current.get(localId);
+      if (raced) finish(raced);
+    });
   }
 
   function dismissLocal(slot: WriteComposeLocal) {
@@ -707,15 +746,18 @@ export function SocialCreateCompose({
           uploadAbortRef.current.has(slot.localId) &&
           !dismissedRef.current.has(slot.localId) &&
           composeSlotMayUpload(controller.signal);
+        if (!stillWanted || result.aborted) {
+          uploadAbortRef.current.delete(slot.localId);
+          continue;
+        }
+        const measuredNow =
+          slot.kind === "video" ? await waitForComposePixels(slot.localId, controller.signal) : null;
         uploadAbortRef.current.delete(slot.localId);
-        if (!stillWanted || result.aborted) continue;
+        if (dismissedRef.current.has(slot.localId)) continue;
         const uploaded = result.items?.[0];
         const item = uploaded
-          ? stampSocialComposeSourcePixels(
-              uploaded,
-              slot.kind === "video" ? pixelsRef.current.get(slot.localId) : null,
-            )
-          : uploaded;
+          ? commitSocialComposeMediaItem(uploaded, slot.kind === "video" ? measuredNow : null)
+          : null;
         if (result.error || !item) {
           URL.revokeObjectURL(slot.previewUrl);
           const drop = new Set(prepared.slice(index).map((row) => row.localId));
@@ -725,9 +767,10 @@ export function SocialCreateCompose({
             uploadAbortRef.current.delete(rest.localId);
             URL.revokeObjectURL(rest.previewUrl);
           }
-          setError(result.error ?? SOCIAL.home.uploadFailed);
+          setError(result.error ?? (slot.kind === "video" ? SOCIAL.home.videoPreparing : SOCIAL.home.uploadFailed));
           break;
         }
+        if (dismissedRef.current.has(slot.localId)) continue;
         carried = [...carried, item];
         setPreviews((current) => ({ ...current, [item.key]: slot.previewUrl }));
         setMedia((current) => [...current, item]);
