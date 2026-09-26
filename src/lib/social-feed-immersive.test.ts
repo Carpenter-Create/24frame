@@ -1,47 +1,91 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
-  shareSocialPostLink,
+  SOCIAL_IMMERSIVE_FOCUSABLE_SELECTOR,
+  SOCIAL_IMMERSIVE_KEEP_ABOVE_SELECTOR,
+  SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR,
+  SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR,
   socialImmersiveCaptionNeedsMore,
-  socialPostShareUrl,
+  socialImmersiveEscapeDismisses,
+  socialImmersiveFocusables,
+  socialImmersiveNestedSheetOpen,
+  socialImmersiveOutsideSheetOpen,
+  socialImmersiveShellStaysActive,
+  socialImmersiveTabWrapIndex,
 } from "./social-feed-immersive";
 
 describe("social feed immersive helpers", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it("caps a long caption at three lines before more", () => {
     expect(socialImmersiveCaptionNeedsMore("short note")).toBe(false);
     expect(socialImmersiveCaptionNeedsMore("a".repeat(141))).toBe(true);
     expect(socialImmersiveCaptionNeedsMore("one\ntwo\nthree\nfour")).toBe(true);
   });
 
-  it("builds the post permalink for share", () => {
-    expect(socialPostShareUrl("p1", "https://app.24frame.co")).toBe("https://app.24frame.co/social/p/p1");
+  it("lets Escape dismiss the stage only when no comment or share sheet is open", () => {
+    expect(socialImmersiveEscapeDismisses("Escape", false)).toBe(true);
+    expect(socialImmersiveEscapeDismisses("Escape", true)).toBe(false);
+    expect(socialImmersiveEscapeDismisses("Tab", false)).toBe(false);
+    expect(SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR).toContain(
+      "[data-social-feed-immersive] [data-social-comment-thread]",
+    );
+    expect(SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR).toContain("[data-social-post-share-sheet]");
+    let seen = "";
+    expect(
+      socialImmersiveNestedSheetOpen({
+        querySelector: (selector) => {
+          seen = selector;
+          return null;
+        },
+      }),
+    ).toBe(false);
+    expect(seen).toBe(SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR);
+    expect(socialImmersiveNestedSheetOpen({ querySelector: () => ({}) })).toBe(true);
+    expect(SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR).toBe("[data-social-post-share-sheet]");
+    expect(
+      socialImmersiveOutsideSheetOpen({
+        querySelector: (selector) => (selector === SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR ? {} : null),
+      }),
+    ).toBe(true);
+    expect(socialImmersiveOutsideSheetOpen({ querySelector: () => null })).toBe(false);
   });
 
-  it("opens the platform share sheet with the post url and does not copy after a cancel", async () => {
-    const share = vi.fn().mockResolvedValue(undefined);
-    const writeText = vi.fn();
-    vi.stubGlobal("navigator", { share, clipboard: { writeText } });
-    await expect(shareSocialPostLink("p1", "https://app.24frame.co")).resolves.toBe("shared");
-    expect(share).toHaveBeenCalledWith({ url: "https://app.24frame.co/social/p/p1" });
-    expect(writeText).not.toHaveBeenCalled();
+  it("leaves the dialog and an already-open share sheet out of the inert set", () => {
+    expect(socialImmersiveShellStaysActive({ isDialog: true, alreadyInert: false, keepAbove: false })).toBe(
+      true,
+    );
+    expect(socialImmersiveShellStaysActive({ isDialog: false, alreadyInert: true, keepAbove: false })).toBe(
+      true,
+    );
+    expect(socialImmersiveShellStaysActive({ isDialog: false, alreadyInert: false, keepAbove: true })).toBe(
+      true,
+    );
+    expect(socialImmersiveShellStaysActive({ isDialog: false, alreadyInert: false, keepAbove: false })).toBe(
+      false,
+    );
+    expect(SOCIAL_IMMERSIVE_KEEP_ABOVE_SELECTOR).toContain("[data-social-post-share-sheet]");
+    expect(SOCIAL_IMMERSIVE_KEEP_ABOVE_SELECTOR).toContain("[data-social-post-share-toast]");
   });
 
-  it("leaves the link uncopied when share is cancelled", async () => {
-    const share = vi.fn().mockRejectedValue(new DOMException("Share canceled", "AbortError"));
-    const writeText = vi.fn();
-    vi.stubGlobal("navigator", { share, clipboard: { writeText } });
-    await expect(shareSocialPostLink("p1", "https://app.24frame.co")).resolves.toBe("aborted");
-    expect(writeText).not.toHaveBeenCalled();
-  });
-
-  it("copies the permalink when the platform share sheet is absent", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    vi.stubGlobal("navigator", { clipboard: { writeText } });
-    await expect(shareSocialPostLink("p1", "https://app.24frame.co")).resolves.toBe("copied");
-    expect(writeText).toHaveBeenCalledWith("https://app.24frame.co/social/p/p1");
+  it("cycles Tab inside the dialog and pulls outside focus back in", () => {
+    expect(socialImmersiveTabWrapIndex(3, 2, true, false)).toBe(0);
+    expect(socialImmersiveTabWrapIndex(3, 0, true, true)).toBe(2);
+    expect(socialImmersiveTabWrapIndex(3, 1, true, false)).toBeNull();
+    expect(socialImmersiveTabWrapIndex(3, 1, true, true)).toBeNull();
+    expect(socialImmersiveTabWrapIndex(3, -1, true, false)).toBeNull();
+    expect(socialImmersiveTabWrapIndex(3, -1, false, false)).toBe(0);
+    expect(socialImmersiveTabWrapIndex(3, -1, false, true)).toBe(2);
+    expect(socialImmersiveTabWrapIndex(0, -1, false, false)).toBeNull();
+    let seen = "";
+    const kept = { closest: () => null };
+    const hidden = { closest: () => ({}) };
+    expect(
+      socialImmersiveFocusables({
+        querySelectorAll: (selector) => {
+          seen = selector;
+          return [kept, hidden];
+        },
+      }),
+    ).toEqual([kept]);
+    expect(seen).toBe(SOCIAL_IMMERSIVE_FOCUSABLE_SELECTOR);
   });
 });

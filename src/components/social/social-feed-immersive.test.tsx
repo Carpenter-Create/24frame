@@ -67,6 +67,8 @@ describe("SocialFeedImmersive", () => {
     expect(SOCIAL_POST_ACTION_GLYPH).toBe(24);
     expect(immersiveSrc).not.toContain("md:grid-cols");
     expect(immersiveSrc).not.toContain("data-social-feed-immersive-rail");
+    expect(immersiveSrc).not.toContain("navigator.share");
+    expect(immersiveSrc).not.toContain("shareSocialPostLink");
     expect(css).toContain("animation: social-feed-immersive-in 180ms ease-out both");
     expect(css).toContain("html:has([data-social-feed-immersive]) [data-house-lead-stack]");
     expect(css).toContain("html:has([data-social-feed-immersive]) [data-house-phone-bottom-nav]");
@@ -91,6 +93,26 @@ describe("SocialFeedImmersive", () => {
     expect(long).toContain("data-social-feed-immersive-more");
     expect(long).toContain(SOCIAL.post.captionMore);
     expect(long).toContain("line-clamp-3");
+  });
+
+  it("keeps Escape on the open sheet and traps focus in the dialog", () => {
+    const onKey = immersiveSrc.slice(
+      immersiveSrc.indexOf("const onKey"),
+      immersiveSrc.indexOf('window.addEventListener("keydown", onKey)'),
+    );
+    expect(onKey).toContain("event.stopPropagation()");
+    expect(onKey).toContain("socialImmersiveEscapeDismisses");
+    expect(onKey).toContain("socialImmersiveNestedSheetOpen");
+    expect(onKey).not.toContain('if (event.key === "Escape") onClose()');
+    expect(onKey).toContain('event.key !== "Tab"');
+    expect(onKey).toContain("socialImmersiveOutsideSheetOpen");
+    expect(onKey).toContain("socialImmersiveTabWrapIndex");
+    expect(onKey).toContain("event.preventDefault()");
+    expect(immersiveSrc).toContain("socialImmersiveMarkShellInert");
+    expect(immersiveSrc).toContain("socialImmersiveClearShellInert");
+    expect(immersiveSrc).toContain('querySelector<HTMLElement>("[data-social-feed-immersive-close]")');
+    expect(immersiveSrc).toContain("previouslyFocused.focus({ preventScroll: true })");
+    expect(SOCIAL_FEED_IMMERSIVE_STAGE_CLASS).toContain("z-[45]");
   });
 
   it("plays Mux video with contain and does not use a raw file player when a playback id exists", () => {
