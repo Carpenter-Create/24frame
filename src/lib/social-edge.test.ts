@@ -198,19 +198,22 @@ describe("Social Edge vs Node runtime lock", () => {
       expect(src).not.toContain("@aws-sdk");
       expect(src).not.toContain("MUX_TOKEN_SECRET");
     }
-    // Education cover signing is node-only. Explore uses the shared signer.
+    // Explore signs Mux posters on Node so the grid does not mint per cell.
     expect(explore).toContain('export const runtime = "nodejs"');
-    expect(explore).toContain("signSocialForYouCourseCovers");
-    expect(explore).not.toContain('export const runtime = "edge"');
     expect(explore).not.toContain("@/lib/s3-avatars");
     expect(explore).not.toContain("@/lib/s3-social-media");
-    expect(explore).not.toContain("@/lib/s3-education");
     expect(explore).not.toContain("@/lib/social-mux-server");
     expect(explore).not.toContain("signedAvatarUrl");
     expect(explore).not.toContain("signedSocialMedia");
-    expect(explore).not.toContain("signedEducationCoverUrls");
     expect(explore).not.toContain("@aws-sdk");
     expect(explore).not.toContain("MUX_TOKEN_SECRET");
+    expect(explore).not.toContain("SocialStoryMuxThumb");
+    expect(explore).toContain("signExploreMuxPosterUrls");
+    expect(explore).toContain("assertExploreSearchAllowed");
+    // Course-cover signing stays on the For You callers.
+    expect(explore).not.toContain("signSocialForYouCourseCovers");
+    expect(explore).not.toContain("@/lib/s3-education");
+    expect(explore).not.toContain("signedEducationCoverUrls");
     expect(publicProfile).toContain("socialAvatarHref");
     expect(publicProfile).toContain("socialMediaProxiesByPostId");
     expect(publicProfile).toContain("loadCachedSocialProfileByHandle");

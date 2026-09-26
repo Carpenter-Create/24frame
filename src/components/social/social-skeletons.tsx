@@ -24,6 +24,9 @@ import {
   SOCIAL_TOPIC_RAIL_CLASS,
   SOCIAL_TOPIC_RAIL_ROWS,
   SOCIAL_TOPIC_RAIL_STACK_CLASS,
+  SOCIAL_EXPLORE_CHROME_CLASS,
+  SOCIAL_EXPLORE_GRID_CLASS,
+  SOCIAL_EXPLORE_PAGE_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_HOME_SPINE_CLASS,
@@ -324,6 +327,16 @@ export function SocialExploreResultsSkeleton() {
   );
 }
 
+export function SocialExploreGridSkeleton() {
+  return (
+    <div data-social-explore-grid-skeleton="" className={SOCIAL_EXPLORE_GRID_CLASS}>
+      {Array.from({ length: 12 }, (_, i) => (
+        <Skeleton key={i} className="aspect-square w-full" />
+      ))}
+    </div>
+  );
+}
+
 function SocialDiscoveryColumnSkeleton() {
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
@@ -337,6 +350,21 @@ function SocialDiscoveryColumnSkeleton() {
   );
 }
 
+function SocialExploreColumnSkeleton() {
+  return (
+    <>
+      <div className={SOCIAL_EXPLORE_CHROME_CLASS}>
+        <div className="flex flex-col gap-2 pb-6">
+          <Skeleton className="h-7 w-36" />
+          <Skeleton className="h-3.5 w-56" />
+        </div>
+        <Skeleton className="h-10 w-full rounded-[var(--radius)]" />
+      </div>
+      <SocialExploreGridSkeleton />
+    </>
+  );
+}
+
 export function SocialSearchSkeleton() {
   return (
     <div data-social-search-skeleton="">
@@ -347,11 +375,11 @@ export function SocialSearchSkeleton() {
 
 export function SocialExploreSkeleton() {
   return (
-    <div data-social-explore-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <SocialDiscoveryColumnSkeleton />
-      </div>
-      <SocialForYouSkeleton />
+    <div
+      data-social-explore-skeleton=""
+      className={cn(SOCIAL_HOME_CENTER_CLASS, SOCIAL_EXPLORE_PAGE_CLASS, SOCIAL_MOBILE_BLEED_CLASS)}
+    >
+      <SocialExploreColumnSkeleton />
     </div>
   );
 }

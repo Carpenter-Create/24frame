@@ -1059,13 +1059,14 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SOCIAL_HOME_CENTER_CLASS");
     expect(home).toContain("SocialDesktopForYouSlot");
     expect(home).not.toContain("SOCIAL_PROFILE_CENTER_CLASS");
-    expect(explore).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(explore).toContain("SOCIAL_HOME_CENTER_CLASS");
-    expect(explore).toContain("SocialDesktopForYouSlot");
-    expect(explore).toContain("SocialForYouSkeleton");
+    expect(explore).toContain("SOCIAL_EXPLORE_GRID_CLASS");
+    expect(explore).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(explore).not.toContain("SocialDesktopForYouSlot");
+    expect(explore).not.toContain("SocialForYouSkeleton");
     expect(explore).not.toContain("SocialForYouRail");
     expect(explore).not.toContain("loadSuggestedPeople");
-    expect(explore).toContain("signSocialForYouCourseCovers");
+    expect(explore).not.toContain("signSocialForYouCourseCovers");
     expect(explore).not.toContain("signedEducationCoverUrls");
     expect(messages).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(messages).toContain("SOCIAL_HOME_CENTER_CLASS");
@@ -1078,11 +1079,13 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(thread).not.toContain("SocialDesktopForYouSlot");
     expect(thread).not.toContain("SocialForYouRail");
     const exploreSkeleton = homeSkeleton.slice(
-      homeSkeleton.indexOf("export function SocialExploreSkeleton"),
+      homeSkeleton.indexOf("export function SocialExploreGridSkeleton"),
       homeSkeleton.indexOf("export function SocialDmsRowsSkeleton"),
     );
-    expect(exploreSkeleton).toContain("SOCIAL_HOME_LAYOUT_CLASS");
-    expect(exploreSkeleton).toContain("SocialForYouSkeleton");
+    expect(exploreSkeleton).toContain("SOCIAL_EXPLORE_GRID_CLASS");
+    expect(exploreSkeleton).toContain("SOCIAL_EXPLORE_PAGE_CLASS");
+    expect(exploreSkeleton).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(exploreSkeleton).not.toContain("SocialForYouSkeleton");
     const dmsSkeleton = homeSkeleton.slice(homeSkeleton.indexOf("export function SocialDmsSkeleton"));
     expect(dmsSkeleton).toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(dmsSkeleton).toContain("SocialForYouSkeleton");

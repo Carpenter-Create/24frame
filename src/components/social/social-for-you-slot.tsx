@@ -6,7 +6,7 @@ import { loadCachedFolloweeIds } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import type { SocialSession } from "@/lib/social-session";
 
-// One For You data path for Home, Explore, Messages, and Profile.
+// One For You data path for Home, Messages, and Profile.
 // Cover signing stays at the
 // caller: education S3 is node-only, and the public profile route is edge.
 // Omit the signer and CourseCard paints its plate.

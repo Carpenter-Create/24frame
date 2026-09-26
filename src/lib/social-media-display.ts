@@ -10,6 +10,8 @@ export const SOCIAL_POST_IMAGE_SIZES =
   `(max-width: 1023px) 100vw, ${SOCIAL_DESKTOP_MEASURE.center}px`;
 export const SOCIAL_PROFILE_COVER_IMAGE_SIZES = SOCIAL_POST_IMAGE_SIZES;
 export const SOCIAL_PROFILE_TILE_IMAGE_SIZES = "(max-width: 768px) 33vw, 297px";
+/** Explore cells: 3-col phone, 4-col inside the 720 desktop column. */
+export const SOCIAL_EXPLORE_CELL_IMAGE_SIZES = `(max-width: 1023px) 33vw, ${Math.round(SOCIAL_DESKTOP_MEASURE.center / 4)}px`;
 export const SOCIAL_STORY_CARD_IMAGE_SIZES = "(max-width: 768px) 108px, 112px";
 export const SOCIAL_OVERVIEW_FACE_IMAGE_SIZES = "32px";
 
