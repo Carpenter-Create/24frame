@@ -128,8 +128,10 @@ export const SOCIAL_HOME_TOPICS_CLASS =
   "min-w-0 py-0 -mt-[var(--space-2)]";
 
 // Profile desktop row matches Home: this column plus SocialForYouRail
-// at lg+. Explore and Messages use that same row. The center stays
+// at lg+. Messages uses that same row. The center stays
 // the shared 720. The pair stays tight. Phone stays the full phone canvas.
+// Explore is the discovery grid column, not this pair.
+// docs/design-locks/social-explore-discovery-lock-v1.md
 export const SOCIAL_PROFILE_CENTER_CLASS = socialShellCenterClass;
 
 // 40px face. Export name stays so search, home, and overview share one SoT.
@@ -713,6 +715,26 @@ export const SOCIAL_PROFILE_TILE_CLASS =
 
 export const SOCIAL_PROFILE_PLAY_CLASS =
   "pointer-events-none absolute right-1.5 top-1.5 z-10 text-band-ink";
+
+// Explore discovery. One media grid for trending and search.
+// Phone 3 columns, desktop 4 inside the shared Explore column.
+// Hairline 2 between cells. Phone outer inset 0 via the mobile bleed
+// on the page. Desktop grid is flush to the column; search stays inset 16.
+// Page wash is the lock hex. Dark keeps the house canvas.
+// docs/design-locks/social-explore-discovery-lock-v1.md
+export const SOCIAL_EXPLORE_PAGE_CLASS = "bg-[#FAFAFB] dark:bg-transparent";
+
+export const SOCIAL_EXPLORE_CHROME_CLASS = "px-[var(--space-4)]";
+
+export const SOCIAL_EXPLORE_GRID_CLASS = "grid grid-cols-3 gap-[2px] lg:grid-cols-4";
+
+export const SOCIAL_EXPLORE_CELL_CLASS =
+  "relative block aspect-square w-full overflow-hidden bg-surface-muted";
+
+export const SOCIAL_EXPLORE_CELL_MEDIA_CLASS = "size-full object-cover";
+
+export const SOCIAL_EXPLORE_STACK_CLASS =
+  "pointer-events-none absolute right-1 top-1 z-10 text-band-ink";
 
 export const SOCIAL_HIGHLIGHT_RING_CLASS =
   "rounded-full border-2 border-accent p-[2px]";

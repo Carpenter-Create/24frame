@@ -28,9 +28,10 @@ describe("Explore vs people discovery lock (Adam 2026-09-20)", () => {
     expect(explore).toContain("data-social-explore-trending");
     expect(explore).toContain("data-social-explore-grid");
     expect(explore).toContain("socialMediaProxiesByPostId");
-    expect(explore).toContain("SOCIAL_PROFILE_GRID_CLASS");
-    expect(explore).toContain("SocialDesktopForYouSlot");
-    expect(explore).toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(explore).toContain("SOCIAL_EXPLORE_GRID_CLASS");
+    expect(explore).not.toContain("SOCIAL_PROFILE_GRID_CLASS");
+    expect(explore).not.toContain("SocialDesktopForYouSlot");
+    expect(explore).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
     expect(explore).not.toContain("SocialForYouRail");
     expect(explore).not.toContain("SocialSuggestedPeople");
     expect(explore).not.toContain("loadSuggestedPeople");

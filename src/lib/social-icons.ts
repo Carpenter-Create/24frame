@@ -23,6 +23,7 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "film-strip",
   "film-slate",
   "squares-four",
+  "stack",
   "magnifying-glass",
   "tray",
   "paper-plane-tilt",
@@ -72,6 +73,8 @@ export const SOCIAL_ICON_SIZE_PROFILE_LINK = 20;
 // Profile action-row Share is the glyph inside a 44px hit.
 export const SOCIAL_ICON_SIZE_SHARE = 20;
 export const SOCIAL_ICON_SIZE_PROFILE_PLAY = 16;
+/** Explore cell cue when a post has two or more media items. */
+export const SOCIAL_ICON_SIZE_EXPLORE_STACK = 16;
 export const SOCIAL_ICON_SIZE_SHARE_SHEET_CLOSE = 18;
 export const SOCIAL_ICON_SIZE_SHARE_SHEET_ACTION = 22;
 export const SOCIAL_ICON_SIZE_STORY_PICKER = 24;
