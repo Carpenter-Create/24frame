@@ -25,7 +25,12 @@ export function SocialStoryMuxThumb({
   url: string;
 }) {
   const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
-  const [token, setToken] = useState<string | null>(null);
+  // Home rail cards are keyed by author, so this instance survives a new
+  // story. A thumbnail JWT is valid only for the playback id that minted it.
+  // The check is on render: a new id, or a policy that no longer accepts that
+  // JWT, drops the poster before the next fetch settles. Same bind as SocialMuxPlayer.
+  const [mint, setMint] = useState<{ playbackId: string; token: string } | null>(null);
+  const token = signed && mint?.playbackId === playbackId ? mint.token : null;
 
   useEffect(() => {
     if (!signed) return;
@@ -36,8 +41,9 @@ export function SocialStoryMuxThumb({
     })
       .then(async (response) => (response.ok ? response.json() : null))
       .then((body: unknown) => {
+        if (controller.signal.aborted) return;
         const next = socialMuxPlaybackTokensFromJson(body);
-        if (next) setToken(next.thumbnail);
+        if (next) setMint({ playbackId, token: next.thumbnail });
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
