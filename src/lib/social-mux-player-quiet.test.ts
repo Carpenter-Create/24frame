@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assignConnectedMuxPlayer,
+  assignQuietMuxPlaybackFlags,
   mountQuietMuxPlayer,
   type QuietMuxPlayerElement,
   type QuietMuxPlayerProps,
@@ -92,6 +93,27 @@ describe("mountQuietMuxPlayer", () => {
     const player = fakePlayer();
     expect(() => assignConnectedMuxPlayer(player, PROPS)).toThrow(/connected/);
     expect(player.playbackId).toBe("");
+    expect(player.calls).toEqual([]);
+  });
+
+  it("writes mute and autoplay on the same connected element", () => {
+    const player = fakePlayer();
+    player.isConnected = true;
+    assignConnectedMuxPlayer(player, { ...PROPS, onLoadedData: () => {} });
+    const callsAfterMount = [...player.calls];
+    assignQuietMuxPlaybackFlags(player, { muted: false, autoPlay: true });
+    expect(player.muted).toBe(false);
+    expect(player.autoplay).toBe(true);
+    expect(player.playbackId).toBe(PROPS.playbackId);
+    expect(player.poster).toBe(PROPS.poster);
+    expect(player.calls).toEqual(callsAfterMount);
+  });
+
+  it("refuses mute and autoplay writes while the element is disconnected", () => {
+    const player = fakePlayer();
+    expect(() => assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true })).toThrow(/connected/);
+    expect(player.muted).toBe(false);
+    expect(player.autoplay).toBe(false);
     expect(player.calls).toEqual([]);
   });
 

@@ -72,6 +72,12 @@ export function cssPropertyName(name: string): string {
   return name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
 
+function assertMuxPlayerConnected(player: QuietMuxPlayerElement): void {
+  if (!player.isConnected) {
+    throw new Error("Mux player fields are assigned after the element is connected");
+  }
+}
+
 export function mountQuietMuxPlayer(
   host: QuietMuxHost,
   create: () => QuietMuxPlayerElement,
@@ -85,19 +91,26 @@ export function mountQuietMuxPlayer(
   return player;
 }
 
+// Mute and autoplay can change on a story without building a new element.
+export function assignQuietMuxPlaybackFlags(
+  player: QuietMuxPlayerElement,
+  flags: Pick<QuietMuxPlayerProps, "autoPlay" | "muted">,
+): void {
+  assertMuxPlayerConnected(player);
+  player.muted = flags.muted;
+  player.autoplay = flags.autoPlay;
+}
+
 export function assignConnectedMuxPlayer(
   player: QuietMuxPlayerElement,
   props: QuietMuxPlayerProps,
 ): void {
-  if (!player.isConnected) {
-    throw new Error("Mux player fields are assigned after the element is connected");
-  }
+  assertMuxPlayerConnected(player);
   player.playbackId = props.playbackId;
   player.streamType = props.streamType;
   player.preload = props.preload;
   player.poster = props.poster;
-  player.muted = props.muted;
-  player.autoplay = props.autoPlay;
+  assignQuietMuxPlaybackFlags(player, props);
   if (props.tokens) player.tokens = props.tokens;
   applyQuietMuxPlayerStyle(player, props.style);
   if (props.onLoadedData) player.addEventListener("loadeddata", props.onLoadedData);

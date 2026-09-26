@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import {
+  assignQuietMuxPlaybackFlags,
   mountQuietMuxPlayer,
   type QuietMuxHost,
   type QuietMuxPlayerElement,
@@ -13,9 +14,12 @@ import {
 // preload, and style before the node is appended, which is the Media Chrome
 // warning. This host appends a bare mux-player, then assigns those fields.
 // Class and playsinline stay on the quiet mount. Callers cannot override them.
+// Playback id, stream, preload, poster, style, and tokens identify the element.
+// Mute and autoplay are written on that live element so a story keeps its place.
 
 export default function SocialMuxPlayerMount(props: QuietMuxPlayerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<QuietMuxPlayerElement | null>(null);
   const propsRef = useRef(props);
   useEffect(() => {
     propsRef.current = props;
@@ -31,13 +35,12 @@ export default function SocialMuxPlayerMount(props: QuietMuxPlayerProps) {
     const host = hostRef.current;
     if (!host) return;
     let cancelled = false;
-    let player: QuietMuxPlayerElement | null = null;
     const onLoaded = () => propsRef.current.onLoadedData?.();
 
     void import("@mux/mux-player-react").then(() => {
       if (cancelled || !host.isConnected) return;
       const current = propsRef.current;
-      player = mountQuietMuxPlayer(
+      const player = mountQuietMuxPlayer(
         host as unknown as QuietMuxHost,
         () => document.createElement("mux-player") as unknown as QuietMuxPlayerElement,
         {
@@ -52,23 +55,24 @@ export default function SocialMuxPlayerMount(props: QuietMuxPlayerProps) {
           onLoadedData: onLoaded,
         },
       );
+      playerRef.current = player;
     });
 
     return () => {
       cancelled = true;
+      const player = playerRef.current;
       player?.removeEventListener("loadeddata", onLoaded);
       player?.remove();
+      playerRef.current = null;
     };
-  }, [
-    props.autoPlay,
-    props.muted,
-    props.playbackId,
-    props.poster,
-    props.preload,
-    props.streamType,
-    styleKey,
-    tokenKey,
-  ]);
+  }, [props.playbackId, props.poster, props.preload, props.streamType, styleKey, tokenKey]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player?.isConnected) return;
+    const current = propsRef.current;
+    assignQuietMuxPlaybackFlags(player, { autoPlay: current.autoPlay, muted: current.muted });
+  }, [props.autoPlay, props.muted]);
 
   return <div ref={hostRef} className="size-full" />;
 }
