@@ -373,6 +373,13 @@ export async function writeSocialPost(
   if (videoRejection) return { error: socialMediaRuleMessage(videoRejection) };
   if (!body && media.items.length === 0) return { error: SOCIAL.home.emptyPost };
 
+  // Match createSocialStory: refuse keys the source bucket does not hold.
+  for (const item of media.items) {
+    if (isSocialMuxMediaItem(item)) continue;
+    const rejection = storedSocialMediaRejection(item, await headSocialMediaObject(item.key));
+    if (rejection) return { error: socialMediaRuleMessage(rejection, "posts", item.kind) };
+  }
+
   const { error } = await supabase.from("posts").insert(
     postInsertRow({ authorId: user.id, body, groupId, media: media.items, category }),
   );
