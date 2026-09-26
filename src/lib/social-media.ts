@@ -315,13 +315,20 @@ export function mediaItemsForInsert(
       if (item.data.kind !== "video" || !isSocialMuxMediaItem(item.data)) {
         return { ok: false, error: "invalid" };
       }
-      if (lane === "stories") {
-        return { ok: false, error: "type" };
-      }
     }
     items.push(item.data);
   }
   return { ok: true, items };
+}
+
+/** Post and story video complete only with a Mux playback id. */
+export function socialPublishedVideoRejection(
+  items: readonly SocialMediaItem[],
+): SocialMediaRuleError | null {
+  for (const item of items) {
+    if (item.kind === "video" && !isSocialMuxMediaItem(item)) return "type";
+  }
+  return null;
 }
 
 export function validateMediaUpload(input: {
@@ -345,7 +352,7 @@ export function validateMediaUpload(input: {
   return { ok: true, kind, contentType: input.contentType };
 }
 
-/** HeadObject must match the story row. Missing, empty, oversized, or a different type fails closed. */
+/** HeadObject must match the post or story row. Missing, empty, oversized, or a different type fails closed. */
 export function storedSocialMediaRejection(
   item: { kind: SocialMediaKind; contentType: string },
   head: { bytes: number; contentType: string | null } | null,

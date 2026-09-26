@@ -56,6 +56,7 @@ describe("Social loading skeletons", () => {
     expect(home).toContain('data-social-home-stack="lock_topics_composer_stories_wall"');
     expect(home).toContain("data-social-home-composer-skeleton");
     expect(home).toContain("data-social-home-topics-skeleton");
+    expect(home).not.toContain("data-social-home-topics-composer-divider");
     expect(home.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
       home.indexOf("data-social-home-composer-skeleton"),
     );
@@ -74,7 +75,7 @@ describe("Social loading skeletons", () => {
     expect(topicsSkeleton).toContain("overflow-x-auto");
     expect(topicsSkeleton).not.toContain("h-4 w-16");
     expect(topicsSkeleton).not.toContain("gap-2");
-    expect(topicsSkeleton.match(/h-10 w-24 shrink-0 rounded-full/g)?.length).toBe(8);
+    expect(topicsSkeleton.match(/h-8 w-24 shrink-0 rounded-full/g)?.length).toBe(8);
     expect(topicsSkeleton).not.toContain("flex-wrap");
     expect(home).toContain("data-social-stories-skeleton");
     expect(home).toContain("data-social-for-you-skeleton");
@@ -108,6 +109,8 @@ describe("Social loading skeletons", () => {
     expect(create).toContain("data-social-create-skeleton");
     expect(stories).toContain("data-social-stories-index-skeleton");
     expect(viewer).toContain("data-social-story-viewer-skeleton");
+    expect(viewer).not.toContain("animate-pulse");
+    expect(viewer).not.toContain("bg-surface-muted");
     expect(explore).toContain("data-social-explore-skeleton");
     expect(explore).toContain("data-social-explore-results-skeleton");
     expect(explore).toContain("data-social-for-you-skeleton");

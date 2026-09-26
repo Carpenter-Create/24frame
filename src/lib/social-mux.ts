@@ -1,12 +1,12 @@
 // Social Mux encode + playback SoT. Client-safe — no token secret.
-// Video + Go live posts only. Stories / welcome / Education stay off this module.
+// Stories, posts, and everywhere Social video play here.
+// Education and title film stay off this module.
 // Playback is Auto (adaptive). Do not add a quality Settings maze.
 
 export const SOCIAL_MUX_PROVIDER = "mux" as const;
 export const SOCIAL_MUX_DEFAULT_RESOLUTION = "1080p" as const;
 export const SOCIAL_MUX_ORIGINAL_RESOLUTION = "2160p" as const;
 export const SOCIAL_MUX_4K_MIN_EDGE = 2160;
-export const SOCIAL_MUX_PLAYBACK_HOST = "stream.mux.com";
 export const SOCIAL_MUX_IMAGE_HOST = "image.mux.com";
 
 export const SOCIAL_MUX_ID_RE = /^[A-Za-z0-9_-]{8,120}$/;
@@ -110,10 +110,6 @@ export function socialMuxAssetSettings(input: {
     videoQuality: "basic",
     maxResolutionTier: fourK ? SOCIAL_MUX_ORIGINAL_RESOLUTION : SOCIAL_MUX_DEFAULT_RESOLUTION,
   };
-}
-
-export function socialMuxPlaybackUrl(playbackId: string): string {
-  return `https://${SOCIAL_MUX_PLAYBACK_HOST}/${playbackId}.m3u8`;
 }
 
 export function socialMuxThumbnailUrl(playbackId: string, token?: string): string {

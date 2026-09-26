@@ -7,10 +7,12 @@ import { SocialStoryRailFace } from "@/components/social/social-story-rail-face"
 import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
+  SOCIAL_MOBILE_BLEED_CLASS,
+  SOCIAL_STORIES_FEED_RULE_CLASS,
+  SOCIAL_HOME_STORIES_TRACK_CLASS,
   SOCIAL_HOME_STORY_CREATE_FACE_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
   SOCIAL_HOME_STORY_FACE_RING_CLASS,
-  SOCIAL_HOME_STORY_NAME_CLASS,
   SOCIAL_HOME_STORY_PLUS_CLASS,
   SOCIAL_STORIES_CARD_CLASS,
   SOCIAL_STORIES_FACE_CLASS,
@@ -21,6 +23,10 @@ import {
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
 import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel, socialStoryHref } from "@/lib/social";
+
+function storyCardHref(card: SocialStoryRailCard): string {
+  return socialStoryHref(card.openId ?? card.latest.id);
+}
 
 function storyLabel(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -62,9 +68,9 @@ function HomeTallStoriesRail({
       data-social-stories=""
       data-social-stories-surface="home"
       data-social-stories-tall=""
-      className="overflow-x-auto"
+      className={cn("overflow-x-auto", SOCIAL_MOBILE_BLEED_CLASS, SOCIAL_STORIES_FEED_RULE_CLASS)}
     >
-      <div className="flex w-max gap-2 pr-4 pb-2">
+      <div className={SOCIAL_HOME_STORIES_TRACK_CLASS}>
         {canCreate ? (
           <Link
             href={SOCIAL_ROUTES.storiesNew}
@@ -95,9 +101,10 @@ function HomeTallStoriesRail({
           return (
             <Link
               key={card.authorId}
-              href={socialStoryHref(card.latest.id)}
+              href={storyCardHref(card)}
               data-social-story-card={card.authorId}
               data-social-story-unseen={card.unseen ? "" : undefined}
+              aria-label={name}
               className={SOCIAL_HOME_STORY_CARD_CLASS}
             >
               <span data-social-story-media="" className="absolute inset-0 bg-surface-muted">
@@ -116,7 +123,6 @@ function HomeTallStoriesRail({
                   className="size-full"
                 />
               </span>
-              <span className={SOCIAL_HOME_STORY_NAME_CLASS}>{storyLabel(name)}</span>
             </Link>
           );
         })}
@@ -160,7 +166,7 @@ export function SocialStoriesRail({
   const mediaClass = SOCIAL_STORIES_MEDIA_CLASS;
 
   return (
-    <div data-social-stories="" data-social-stories-surface={surface} className="overflow-x-auto">
+    <div data-social-stories="" data-social-stories-surface={surface} className={cn("overflow-x-auto", SOCIAL_MOBILE_BLEED_CLASS)}>
       <div className="hidden w-max gap-3 pb-2 md:flex">
         {canCreate ? (
           <Link
@@ -192,7 +198,7 @@ export function SocialStoriesRail({
           return (
             <Link
               key={card.authorId}
-              href={socialStoryHref(card.latest.id)}
+              href={storyCardHref(card)}
               data-social-story-card={card.authorId}
               data-social-story-unseen={card.unseen ? "" : undefined}
               className="flex w-[112px] shrink-0 flex-col items-center gap-1.5"
@@ -235,7 +241,7 @@ export function SocialStoriesRail({
           return (
             <Link
               key={`m-${card.authorId}`}
-              href={socialStoryHref(card.latest.id)}
+              href={storyCardHref(card)}
               data-social-story-card={card.authorId}
               data-social-story-unseen={card.unseen ? "" : undefined}
               className="flex w-[68px] shrink-0 flex-col items-center gap-1"
@@ -246,7 +252,10 @@ export function SocialStoriesRail({
                   card.unseen ? "border-accent" : "border-hairline",
                 )}
               >
-                <span className="relative flex size-[58px] items-center justify-center overflow-hidden rounded-full bg-surface-muted">
+                <span
+                  data-social-story-media=""
+                  className="relative flex size-[58px] items-center justify-center overflow-hidden rounded-full bg-surface-muted"
+                >
                   <SocialAvatar name={name} photoUrl={photo ?? null} size="sm" className="size-full" />
                 </span>
               </span>

@@ -1,6 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { dmStoryInboxExcerpt } from "@/lib/social-dm-story";
+import { dmPostInboxExcerpt } from "@/lib/social-post-share";
 import { probeRange, splitProbe } from "@/lib/list-bounds";
 import {
   SOCIAL_DM_INBOX_LIMIT,
@@ -105,7 +106,7 @@ export async function loadDmParticipants(
 }
 
 /**
- * Newest message per room, story shares only.
+ * Newest message per room, story and post shares.
  * The inbox RPC has no body. A URL stored on an older row must not surface.
  */
 export async function loadDmStoryInboxLines(
@@ -127,12 +128,19 @@ export async function loadDmStoryInboxLines(
   for (const row of data ?? []) {
     if (!row.conversation_id || seen.has(row.conversation_id)) continue;
     seen.add(row.conversation_id);
-    const line = dmStoryInboxExcerpt({
-      body: row.body,
-      media: row.media,
-      senderId: row.sender_id,
-      viewerId,
-    });
+    const line =
+      dmStoryInboxExcerpt({
+        body: row.body,
+        media: row.media,
+        senderId: row.sender_id,
+        viewerId,
+      }) ??
+      dmPostInboxExcerpt({
+        body: row.body,
+        media: row.media,
+        senderId: row.sender_id,
+        viewerId,
+      });
     if (line) lines.set(row.conversation_id, line);
   }
   return lines;

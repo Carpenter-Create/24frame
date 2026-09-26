@@ -59,19 +59,22 @@ describe("SocialFeedVideo", () => {
     );
     expect(html).toContain('data-social-mux-player="abc12345xx"');
     expect(html).toContain('data-social-mux-playback="pending"');
+    expect(html).toContain('data-social-mux-poster=""');
+    expect(html).toContain("https://image.mux.com/abc12345xx/thumbnail.webp");
     expect(html).not.toContain("data-mux-player-stub");
     expect(html).not.toContain('data-mux-has-tokens="yes"');
   });
 
-  it("keeps the naive player for leftover S3 videos", () => {
+  it("fails closed when a Social video has no Mux playback id", () => {
     const html = renderToStaticMarkup(
       createElement(SocialFeedVideo, {
         item: { url: "https://cf.example/signed-video" },
       }),
     );
+    expect(html).toContain("data-social-video-closed");
     expect(html).toContain("data-social-post-video");
-    expect(html).toContain("<video");
-    expect(html).toContain("https://cf.example/signed-video#t=0.1");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("https://cf.example/signed-video");
     expect(html).not.toContain("data-social-mux-player");
   });
 

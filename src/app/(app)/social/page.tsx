@@ -14,7 +14,8 @@ import {
   SocialHomeCenterSkeleton,
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
-import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
+import { cn } from "@/lib/cn";
+import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_HOME_SPINE_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls, signedSocialMediaByPostId } from "@/lib/social-edge";
 import { socialFollowingWallView } from "@/lib/social-following-wall";
 import { SocialFollowingWallBound } from "@/components/social/social-following-wall-bound";
@@ -139,7 +140,7 @@ async function SocialHomeCenter({
   const photoUrl = faces.get(ctx.user.id) ?? null;
 
   return (
-    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={cn(SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_SPINE_CLASS)}>
       <div className="sr-only">
         <h1>{SOCIAL.home.title}</h1>
         <p>{SOCIAL.home.subtitle}</p>

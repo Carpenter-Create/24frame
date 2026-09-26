@@ -15,6 +15,20 @@ export function isStoryLive(expiresAt: string, now = new Date()): boolean {
   return expires.getTime() > now.getTime();
 }
 
+/** Oldest still-live item. Tray href uses this. Preview face stays newest. */
+export function oldestLiveStoryId(
+  rows: readonly { id: string; created_at: string }[],
+): string | null {
+  if (rows.length === 0) return null;
+  let oldest = rows[0];
+  if (!oldest) return null;
+  for (const row of rows) {
+    const byTime = Date.parse(row.created_at) - Date.parse(oldest.created_at);
+    if (byTime < 0 || (byTime === 0 && row.id.localeCompare(oldest.id) < 0)) oldest = row;
+  }
+  return oldest.id;
+}
+
 export function storyRailUnseen(
   storyIds: readonly string[],
   viewedIds: ReadonlySet<string>,

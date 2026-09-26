@@ -8,6 +8,8 @@ import {
   DM_THREAD_BUBBLE_THEIRS_CLASS,
   DM_THREAD_BURST_GAP_MS,
   DM_THREAD_COLUMN_CLASS,
+  DM_THREAD_COMPOSER_CAMERA_CLASS,
+  DM_THREAD_COMPOSER_CAMERA_GLYPH,
   DM_THREAD_COMPOSER_CLASS,
   DM_THREAD_ROOT_CLASS,
   DM_THREAD_COMPOSER_FIELD_CLASS,
@@ -32,6 +34,7 @@ import {
   dmThreadShowsAvatar,
   dmThreadSideClass,
   dmThreadStackClass,
+  dmThreadPostSystemLine,
   dmThreadStorySystemLine,
   dmThreadSystemLineAlignClass,
   dmThreadTimeLabel,
@@ -203,6 +206,15 @@ describe("DM thread message format", () => {
       SOCIAL.dms.sentYouStory,
     );
     expect(dmThreadStorySystemLine({ mine: true, authorHandle: null, senderName: "Ada" })).toBeNull();
+    expect(
+      dmThreadPostSystemLine({ mine: true, authorHandle: "ada", senderName: "Ada Lovelace" }),
+    ).toBe(SOCIAL.dms.youSentPost("ada"));
+    expect(
+      dmThreadPostSystemLine({ mine: false, authorHandle: "ada", senderName: "Bob One" }),
+    ).toBe(SOCIAL.dms.theySentAuthorPost("Bob One", "ada"));
+    expect(dmThreadPostSystemLine({ mine: false, authorHandle: null, senderName: "Bob One" })).toBe(
+      SOCIAL.dms.sentYouPost,
+    );
   });
 
   it("pins the composer to the bottom of the thread chrome", () => {
@@ -225,6 +237,31 @@ describe("DM thread message format", () => {
     expect(DM_THREAD_COMPOSER_CLASS).not.toContain("bottom-[calc(6.5rem");
     expect(DM_THREAD_COMPOSER_FIELD_CLASS).toContain("h-10");
     expect(DM_THREAD_COMPOSER_SEND_CLASS).not.toContain("w-full");
+    expect(DM_THREAD_COMPOSER_CAMERA_GLYPH).toBe(24);
+    expect(DM_THREAD_COMPOSER_CAMERA_CLASS).toContain("size-10");
+    expect(DM_THREAD_COMPOSER_CAMERA_CLASS).toContain("text-ink");
+    expect(DM_THREAD_COMPOSER_CAMERA_CLASS).toContain("shrink-0");
+    expect(DM_THREAD_COMPOSER_CAMERA_CLASS).not.toContain("shadow");
+    expect(DM_THREAD_COMPOSER_CAMERA_CLASS).not.toContain("w-full");
+
+    const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    const compose = forms.slice(
+      forms.indexOf("export function SocialDmCompose"),
+      forms.indexOf("export function SocialGroupTitleForm"),
+    );
+    const fieldAt = compose.indexOf('id="social-dm-body"');
+    const cameraAt = compose.indexOf('data-social-dm-camera=""');
+    const sendAt = compose.indexOf('aria-label={SOCIAL.dms.submit}');
+    expect(fieldAt).toBeGreaterThan(-1);
+    expect(sendAt).toBeGreaterThan(fieldAt);
+    expect(cameraAt).toBeGreaterThan(sendAt);
+    expect(compose).toContain('name="camera"');
+    expect(compose).toContain("size={DM_THREAD_COMPOSER_CAMERA_GLYPH}");
+    expect(compose).toContain("accept={SOCIAL_MEDIA_ACCEPT}");
+    expect(compose).toContain('type="button"');
+    expect(compose).not.toContain("uploadSocialMedia");
+    expect(compose).not.toContain("HouseVoiceMic");
+    expect(compose).not.toContain("capture=");
 
     const stick = readFileSync("src/components/social/social-dm-thread-stick.tsx", "utf8");
     expect(stick).toContain("[data-social-dm-column]");

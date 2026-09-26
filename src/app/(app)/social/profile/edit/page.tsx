@@ -1,7 +1,7 @@
 import { SocialProfileEditForm } from "@/components/social/social-profile-edit";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { SOCIAL_PROFILE_EDIT_FACE_PARAM, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL_WELCOME_VIDEO_PRESENT } from "@/lib/social-query";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { parseSocialProfileEditFace } from "@/lib/social-profile-edit";
 import { requireSocialSession } from "@/lib/social-session";
@@ -23,9 +23,7 @@ export default async function SocialProfileEditPage({
     signedAvatarUrl(ctx.user.id),
   ]);
   if (!profile) redirect(SOCIAL_ROUTES.profile);
-  const welcomeVideoUrl = profile.welcome_video_key
-    ? await signedSocialMediaUrl(profile.welcome_video_key)
-    : null;
+  const welcomeVideoUrl = profile.welcome_video_key ? SOCIAL_WELCOME_VIDEO_PRESENT : null;
 
   return (
     <SocialProfileEditForm

@@ -7,6 +7,9 @@ import {
   socialProfileQueryKey,
 } from "@/lib/social-cache-keys";
 import { socialAvatarHref, socialMediaHref } from "@/lib/social-edge";
+
+/** Presence only. Not a media URL — welcome has no Mux playback id. */
+export const SOCIAL_WELCOME_VIDEO_PRESENT = "present";
 import type { SocialProfileCounts } from "@/lib/social-feed";
 import type { SocialProfileRow } from "@/lib/social-feed";
 
@@ -47,7 +50,7 @@ export function socialProfileFaceFromRow(row: SocialProfileQueryRow): SocialProf
     bio: row.bio ?? "",
     photoUrl: socialAvatarHref(row.id),
     coverUrl: row.cover_key ? socialMediaHref(row.cover_key) : null,
-    welcomeVideoUrl: row.welcome_video_key ? socialMediaHref(row.welcome_video_key) : null,
+    welcomeVideoUrl: row.welcome_video_key ? SOCIAL_WELCOME_VIDEO_PRESENT : null,
     crafts: row.crafts ?? [],
     topics: row.topics ?? [],
     imdbUrl: row.imdb_url ?? null,

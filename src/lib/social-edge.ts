@@ -4,7 +4,11 @@ import {
   type SocialMediaContentType,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { socialMuxThumbnailUrl, type SocialMuxPlaybackPolicy } from "@/lib/social-mux";
+import {
+  socialMuxPlaybackRequiresTokens,
+  socialMuxThumbnailUrl,
+  type SocialMuxPlaybackPolicy,
+} from "@/lib/social-mux";
 
 // Auth-light Social reads can run on Vercel Edge. AWS signing cannot.
 // Same-origin Node routes re-sign avatars/media so the Edge HTML does
@@ -43,14 +47,37 @@ export type SocialEdgeMediaItem = {
   playbackPolicy?: SocialMuxPlaybackPolicy;
 };
 
-/** Rail / neighbor cover. Same proxy as playback. Video stays a still (no second CDN). */
+export type SocialStoryRailCoverResult = {
+  kind: "image" | "video";
+  url: string;
+  playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
+};
+
+/**
+ * Rail / neighbor cover. Stills stay on the image proxy. Video is not a <video> src.
+ * Signed Mux thumbs 403 without a JWT — leave url empty so the rail can mint one.
+ * An unsigned image.mux.com src is what Safari paints as the broken-image glyph.
+ */
 export function socialStoryRailCover(
   media: unknown,
   authorId: string,
-): { kind: "image" | "video"; url: string } | null {
+): SocialStoryRailCoverResult | null {
   const first = socialMediaProxies(media, authorId, "stories")[0];
-  if (!first?.url) return null;
-  if (first.playbackId) return { kind: "image", url: first.url };
+  if (!first) return null;
+  if (first.playbackId) {
+    const needsToken = socialMuxPlaybackRequiresTokens(first.playbackPolicy);
+    const url = needsToken ? "" : first.url || socialMuxThumbnailUrl(first.playbackId);
+    if (!url && !needsToken) return { kind: "video", url: "" };
+    return {
+      kind: "image",
+      url,
+      playbackId: first.playbackId,
+      ...(first.playbackPolicy ? { playbackPolicy: first.playbackPolicy } : {}),
+    };
+  }
+  if (first.kind === "video") return { kind: "video", url: "" };
+  if (!first.url) return null;
   return { kind: first.kind, url: first.url };
 }
 
@@ -63,14 +90,16 @@ export function socialMediaProxies(
     isSocialMuxMediaItem(item)
       ? {
           kind: item.kind,
-          url: socialMuxThumbnailUrl(item.playbackId),
+          url: socialMuxPlaybackRequiresTokens(item.playbackPolicy)
+            ? ""
+            : socialMuxThumbnailUrl(item.playbackId),
           contentType: item.contentType,
           playbackId: item.playbackId,
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
         }
       : {
           kind: item.kind,
-          url: socialMediaHref(item.key),
+          url: item.kind === "video" ? "" : socialMediaHref(item.key),
           contentType: item.contentType,
         },
   );

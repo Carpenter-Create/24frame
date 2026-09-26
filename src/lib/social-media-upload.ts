@@ -12,8 +12,8 @@ import {
 } from "@/lib/social-media";
 import { probeSocialVideoPixels, SOCIAL_MUX_PROVIDER, type SocialMuxIntent } from "@/lib/social-mux";
 
-// One client upload helper for Social posts. Images stay on the media
-// S3 lane. Video + Go live go to Mux. Stories do not import this module.
+// One client upload helper for Social posts and story video.
+// Images stay on the media S3 lane. Video goes to Mux.
 
 export type SocialPostUploadOptions = {
   intent?: SocialMuxIntent;
@@ -34,8 +34,8 @@ export async function uploadSocialPostMedia(
   const next: SocialMediaItem[] = [];
   for (const file of chosen) {
     const kind = socialMediaKindFor(file.type);
-    if (kind === "video" && lane === "posts") {
-      const uploaded = await uploadSocialMuxVideo(file, options);
+    if (kind === "video" && (lane === "posts" || lane === "stories")) {
+      const uploaded = await uploadSocialMuxVideoFile(file, { ...options, lane });
       if (uploaded.error || !uploaded.item) return { error: uploaded.error ?? SOCIAL.home.uploadFailed };
       next.push(uploaded.item);
       continue;
@@ -84,15 +84,16 @@ async function uploadSocialS3Media(
   };
 }
 
-async function uploadSocialMuxVideo(
+export async function uploadSocialMuxVideoFile(
   file: File,
-  options: SocialPostUploadOptions,
+  options: SocialPostUploadOptions & { lane?: SocialMediaLane; signal?: AbortSignal } = {},
 ): Promise<{ item?: SocialMediaItem; error?: string }> {
+  const lane = options.lane ?? "posts";
   const pixels = await probeSocialVideoPixels(file);
   const body = new FormData();
   body.set("content_type", file.type);
   body.set("byte_length", String(file.size));
-  body.set("lane", "posts");
+  body.set("lane", lane);
   body.set("intent", options.intent ?? "video");
   if (options.originalQuality) body.set("original_quality", "1");
   if (pixels) {
@@ -114,6 +115,7 @@ async function uploadSocialMuxVideo(
       method: "PUT",
       headers: { "Content-Type": created.contentType },
       body: file,
+      signal: options.signal,
     });
   } catch {
     return { error: SOCIAL.home.uploadFailed };
@@ -130,7 +132,7 @@ async function uploadSocialMuxVideo(
   } catch {
     return { error: SOCIAL.home.videoPreparing };
   }
-  if (ready.error || !ready.item) {
+  if (ready.error || !ready.item?.playbackId) {
     return { error: ready.error ?? SOCIAL.home.videoPreparing };
   }
   return {

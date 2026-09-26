@@ -4,8 +4,7 @@ import { SocialIcon } from "@/components/social/social-icon";
 import { SocialStoryViewer, type SocialStoryNeighbor } from "@/components/social/social-story-viewer";
 import { SOCIAL_STORY_STAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaItems } from "@/lib/s3-social-media";
-import { socialStoryRailCover } from "@/lib/social-edge";
+import { socialMediaProxies, socialStoryRailCover } from "@/lib/social-edge";
 import { followingAuthorIds } from "@/lib/social-home";
 import { isStoryLive } from "@/lib/social-stories";
 import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
@@ -96,7 +95,8 @@ export default async function SocialStoryPage({
       ...railPage.stories.map((row) => row.author_id),
     ]),
   ];
-  const [viewed, authors, photoUrl, media, faces] = await Promise.all([
+  const media = socialMediaProxies(story.media, story.author_id, "stories");
+  const [viewed, authors, photoUrl, faces] = await Promise.all([
     profile
       ? loadViewedStoryIds(
           supabase,
@@ -106,7 +106,6 @@ export default async function SocialStoryPage({
       : Promise.resolve(new Set<string>()),
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrl(story.author_id),
-    signedSocialMediaItems(story.media, story.author_id, "stories"),
     signedAvatarUrls(peopleIds),
   ]);
   const rail = groupStoryRail(railPage.stories, viewed);
@@ -114,13 +113,11 @@ export default async function SocialStoryPage({
   for (const row of authorStoriesPage.stories) storyRows.set(row.id, row);
   storyRows.set(story.id, story);
   const storyIds = [...storyRows.keys()];
-  const [signedEntries, likedStoryIds, likeCounts] = await Promise.all([
-    Promise.all(
-      [...storyRows.values()].map(async (row) => ({
-        id: row.id,
-        media: await signedSocialMediaItems(row.media, row.author_id, "stories"),
-      })),
-    ),
+  const mediaEntries = [...storyRows.values()].map((row) => ({
+    id: row.id,
+    media: socialMediaProxies(row.media, row.author_id, "stories"),
+  }));
+  const [likedStoryIds, likeCounts] = await Promise.all([
     loadLikedStoryIds(supabase, ctx.user.id, storyIds),
     loadStoryLikeCounts(supabase, storyIds),
   ]);
@@ -133,7 +130,7 @@ export default async function SocialStoryPage({
       },
     ]),
   );
-  const mediaById = new Map(signedEntries.map((entry) => [entry.id, entry.media]));
+  const mediaById = new Map(mediaEntries.map((entry) => [entry.id, entry.media]));
   const railIds = rail.map((card) => card.authorId);
   const authorOrder = railIds.includes(story.author_id) ? railIds : [story.author_id, ...railIds];
   const tray: SocialStoryTrayAuthor[] = authorOrder.flatMap((id) => {

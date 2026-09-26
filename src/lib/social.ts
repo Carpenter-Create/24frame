@@ -63,6 +63,18 @@ export function isSocialStoryCreatePath(pathname: string): boolean {
   return path === SOCIAL_ROUTES.storiesNew;
 }
 
+/** Write compose. Not Go live. */
+export function isSocialWriteComposePath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  return path === SOCIAL_ROUTES.create;
+}
+
+/** First tap leaves write compose for Social home. A warm house hop wins; otherwise push. */
+export function leaveSocialWriteCompose(ownHome: () => boolean, pushHome: () => void): void {
+  if (ownHome()) return;
+  pushHome();
+}
+
 /** Open DM thread. Not the inbox, not New message. */
 export function isSocialDmThreadPath(pathname: string): boolean {
   const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
@@ -70,6 +82,17 @@ export function isSocialDmThreadPath(pathname: string): boolean {
   if (!path.startsWith(prefix)) return false;
   const id = path.slice(prefix.length);
   return id.length > 0 && !id.includes("/") && id !== "new";
+}
+
+/** New message and New group chat. Not the inbox, not an open thread. */
+export function isSocialDmComposePath(pathname: string): boolean {
+  const path = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+  return path === `${SOCIAL_ROUTES.dms}/new` || path === `${SOCIAL_ROUTES.dms}/new/group`;
+}
+
+/** Thread or compose. The inbox keeps the Social shell and phone dock. */
+export function isSocialDmImmersivePath(pathname: string): boolean {
+  return isSocialDmThreadPath(pathname) || isSocialDmComposePath(pathname);
 }
 
 /** Open story viewer. Not the index, not the create stage. */
@@ -486,8 +509,10 @@ export const SOCIAL = {
     recentChats: "Recent chats",
     chatsEmpty: "No messages yet",
     findPeople: "Find people",
-    composerPrompt: "Write something",
-    composerPromptNamed: "Write something",
+    composerPrompt: "Share something",
+    composerPromptNamed: "Share something",
+    composerPhoto: "Photo",
+    composerCamera: "Camera",
     followingTab: "Following",
     forYouTab: "For you",
     compose: "Write a post",
@@ -621,6 +646,12 @@ export const SOCIAL = {
     previous: "Previous story",
     next: "Next story",
     replyTo: (name: string) => `Reply to ${name}…`,
+    sendMessage: "Send message",
+    saySomething: "Say something…",
+    saySomethingExpanded: "Add a comment or @mention friends…",
+    activity: "Activity",
+    activityEmpty: "No views yet.",
+    activityFailed: "Could not load activity.",
     like: "Like",
     unlike: "Unlike",
     send: "Send story",
@@ -873,6 +904,20 @@ export const SOCIAL = {
     commentFailed: "Could not post that comment.",
     commentDelete: "Remove",
     commentDeleteFailed: "Could not remove that comment.",
+    share: "Share",
+    shareSearch: "Search",
+    writeMessage: "Write a message…",
+    send: "Send",
+    sent: "Sent",
+    shareCopyLink: "Copy link",
+    shareCopied: "Copied",
+    shareTo: "Share to…",
+    shareClose: "Close",
+    shareCancel: "Cancel",
+    shareEmpty: "No people yet.",
+    shareFailed: "Could not send this post.",
+    shareFailedPeers: (names: string) => `Could not send to ${names}.`,
+    shareUnavailable: "Sharing is not available in this browser.",
   },
   dms: {
     title: "Messages",
@@ -880,6 +925,13 @@ export const SOCIAL = {
     empty: "No conversations yet.",
     startCta: "Start a conversation",
     newMessage: "New message",
+    to: "To:",
+    search: "Search",
+    groupChat: "Group chat",
+    groupChatHint: "Message up to 16 people",
+    newGroupChat: "New group chat",
+    groupName: "Group name (optional)",
+    suggested: "Suggested",
     chat: "Chat",
     searchPeople: "Search people",
     membershipSealed: "People are chosen when the conversation starts.",
@@ -910,6 +962,12 @@ export const SOCIAL = {
     sentYouStory: "Sent you a story",
     youSentStory: (handle: string) => `You sent @${handle}'s story`,
     theySentAuthorStory: (name: string, handle: string) => `${name} sent @${handle}'s story`,
+    sentPost: "Sent a post",
+    sentYouPost: "Sent you a post",
+    youSentPost: (handle: string) => `You sent @${handle}'s post`,
+    theySentAuthorPost: (name: string, handle: string) => `${name} sent @${handle}'s post`,
+    postUnavailable: "Post unavailable",
+    postMeta: "Post",
     threadPlaceholder: "Message…",
     storyUnavailable: "Story unavailable",
     storyMeta: "Story",

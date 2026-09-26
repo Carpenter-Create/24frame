@@ -1193,18 +1193,52 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-app-rail");
   });
 
-  it("keeps Social chrome on the DM inbox and new message", () => {
+  it("hides phone Social chrome on write compose and restores it on Home", () => {
+    navigation.pathname = "/social/create";
+    const compose = renderShell();
+    expect(compose).toContain('data-social-write-compose=""');
+    expect(compose).toContain("min-h-dvh w-full");
+    expect(compose).not.toContain("data-house-phone-bottom-nav");
+    expect(compose).not.toContain("data-house-lead-chrome");
+    expect(compose).toContain("data-app-rail");
+
+    navigation.pathname = "/social";
+    const home = renderShell();
+    expect(home).not.toContain("data-social-write-compose");
+    expect(home).toContain("data-house-lead-chrome");
+    expect(home).toContain("data-house-phone-bottom-nav");
+
+    navigation.pathname = "/social/create/live";
+    const live = renderShell();
+    expect(live).not.toContain("data-social-write-compose");
+    expect(live).toContain("data-house-phone-bottom-nav");
+  });
+
+  it("keeps Social chrome on the DM inbox", () => {
     navigation.pathname = "/social/dms";
     const inbox = renderShell();
     expect(inbox).not.toContain("data-social-dm-thread");
+    expect(inbox).not.toContain("data-social-dm-compose");
     expect(inbox).toContain("data-house-lead-chrome");
     expect(inbox).toContain("data-house-phone-bottom-nav");
+  });
 
+  it("hides the Social shell and phone dock on DM compose", () => {
     navigation.pathname = "/social/dms/new";
-    const compose = renderShell();
-    expect(compose).not.toContain("data-social-dm-thread");
-    expect(compose).toContain("data-house-lead-chrome");
-    expect(compose).toContain("data-house-phone-bottom-nav");
+    const direct = renderShell();
+    expect(direct).toContain('data-social-dm-compose=""');
+    expect(direct).not.toContain("data-social-dm-thread");
+    expect(direct).not.toContain("data-house-lead-chrome");
+    expect(direct).not.toContain("data-house-phone-bottom-nav");
+    expect(direct).toContain("min-h-full w-full");
+    expect(direct).toContain("data-app-rail");
+
+    navigation.pathname = "/social/dms/new/group";
+    const group = renderShell();
+    expect(group).toContain('data-social-dm-compose=""');
+    expect(group).not.toContain("data-house-lead-chrome");
+    expect(group).not.toContain("data-house-phone-bottom-nav");
+    expect(group).toContain("data-app-rail");
   });
 
   it("hides the Social shell on an open story", () => {

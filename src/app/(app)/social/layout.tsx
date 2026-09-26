@@ -1,4 +1,5 @@
 import { SocialProfileSaveHop } from "@/components/social/social-own-profile";
+import { SocialStoryOpenHold } from "@/components/social/social-story-open-hold";
 import { loadSocialSession } from "@/lib/social-session";
 
 // Sync Social segment layout. Stays mounted across /social/* so the
@@ -9,5 +10,10 @@ import { loadSocialSession } from "@/lib/social-session";
 // never waits on loading.tsx or the profile RSC.
 export default function SocialLayout({ children }: { children: React.ReactNode }) {
   void loadSocialSession();
-  return <SocialProfileSaveHop>{children}</SocialProfileSaveHop>;
+  return (
+    <SocialProfileSaveHop>
+      <SocialStoryOpenHold />
+      {children}
+    </SocialProfileSaveHop>
+  );
 }

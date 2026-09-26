@@ -1,9 +1,11 @@
 import { SocialMediaImage } from "@/components/social/social-media-image";
-import { SOCIAL_STORY_CARD_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
+import { SocialStoryMuxThumb } from "@/components/social/social-story-mux-thumb";
+import { SOCIAL_STORY_CARD_IMAGE_SIZES } from "@/lib/social-media-display";
 import { socialStoryRailCover } from "@/lib/social-edge";
 
-// Home tall card fill. Story media cover, not the profile photo.
-// Video is a paused still on the same media path. No second CDN.
+// Home tall card fill. Story stills only. Video is not a native src.
+// loading=eager: the rail is overflow-x. iOS Safari's lazy loader misses
+// those images and paints the broken-image glyph on a card that is on screen.
 
 export function SocialStoryRailCover({
   media,
@@ -13,18 +15,28 @@ export function SocialStoryRailCover({
   authorId: string;
 }) {
   const cover = socialStoryRailCover(media, authorId);
-  if (!cover) return null;
-  if (cover.kind === "video") {
+  if (cover?.playbackId) {
     return (
-      <video
-        data-social-story-cover=""
-        muted
-        playsInline
-        preload="metadata"
-        src={socialVideoDisplaySrc(cover.url)}
-        className="pointer-events-none absolute inset-0 size-full object-cover"
+      <SocialStoryMuxThumb
+        playbackId={cover.playbackId}
+        playbackPolicy={cover.playbackPolicy}
+        url={cover.url}
       />
     );
   }
-  return <SocialMediaImage src={cover.url} sizes={SOCIAL_STORY_CARD_IMAGE_SIZES} alt="" />;
+  if (!cover || cover.kind !== "image" || !cover.url) {
+    if (cover?.kind === "video") {
+      return <div data-social-video-closed="" className="absolute inset-0 size-full object-cover" />;
+    }
+    return null;
+  }
+  return (
+    <SocialMediaImage
+      src={cover.url}
+      sizes={SOCIAL_STORY_CARD_IMAGE_SIZES}
+      alt=""
+      loading="eager"
+      className="absolute inset-0 size-full object-cover"
+    />
+  );
 }

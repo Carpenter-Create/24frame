@@ -7,11 +7,21 @@ import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
   SOCIAL_CENTER_WIDTH_CLASS,
   SOCIAL_COMPOSER_CLASS,
+  SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_COMPOSER_ROW_CLASS,
   SOCIAL_CONTENT_PAIR_WIDTH,
   SOCIAL_DESKTOP_FRAME_PAD_CLASS,
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_FEED_TAIL_RULE_CLASS,
+  SOCIAL_HOME_TOPICS_CLASS,
+  SOCIAL_POST_ACTION_HEART_NUDGE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
+  SOCIAL_POST_ACTIONS_CLASS,
+  SOCIAL_STORIES_FEED_RULE_CLASS,
+  SOCIAL_MOBILE_BLEED_CLASS,
+  SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
@@ -84,6 +94,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_HOME_STACK_ORDER).toEqual(["topics", "composer", "stories", "wall"]);
     expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialHomeComposer"));
     expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
+    expect(home).not.toContain("data-social-home-topics-composer-divider");
+    expect(home).not.toContain("SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS");
+    expect(homeSkeleton).not.toContain("data-social-home-topics-composer-divider");
+    expect(chrome).not.toContain("SOCIAL_HOME_TOPICS_COMPOSER_DIVIDER_CLASS");
     expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
     expect(homeSkeleton.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
       homeSkeleton.indexOf("data-social-home-composer-skeleton"),
@@ -119,8 +133,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain('"/education"');
     expect(SOCIAL.home.followingTab).toBe("Following");
     expect(SOCIAL.home.forYouTab).toBe("For you");
-    expect(SOCIAL.home.composerPrompt).toBe("Write something");
-    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.home.composerPrompt).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe(SOCIAL.home.composerPrompt);
+    expect(SOCIAL.home.composerPhoto).toBe("Photo");
+    expect(SOCIAL.home.composerCamera).toBe("Camera");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
@@ -214,9 +231,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain('icon="users"');
     expect(home).toContain("SocialHomeTabs");
     expect(composer).toContain("data-social-home-composer");
-    expect(composer).toContain("data-social-create-sheet");
-    expect(composer).toContain("SocialCreateSheet");
-    expect(composer).not.toContain("socialCreateHref");
+    expect(composer).toContain('socialCreateHref("text")');
+    expect(composer).toContain("data-social-composer-write");
+    expect(composer).toContain("aria-label={SOCIAL.create.title}");
+    expect(composer).not.toContain("SocialCreateSheet");
+    expect(composer).not.toContain("data-social-create-sheet");
+    const writeDirect = readFileSync(
+      "docs/design-locks/share-something-text-write-direct-lock-v1.md",
+      "utf8",
+    );
+    expect(writeDirect).toContain("/social/create?kind=text");
+    expect(writeDirect).toContain("aria-label={SOCIAL.create.title}");
+    expect(writeDirect).toContain("Add photo or video");
     expect(composer).toContain("socialComposerPrompt(authorName)");
     expect(composer).toContain("SocialAvatar");
     expect(composer).toContain("authorPhotoUrl");
@@ -229,16 +255,55 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(composer).not.toContain("data-social-composer-action");
     expect(composer).not.toContain("ACTIONS");
-    expect(composer).not.toContain("SocialIcon");
-    expect(composer).not.toContain("plus");
+    expect(composer).toContain("SocialIcon");
+    expect(composer).toContain('icon="image"');
+    expect(composer).toContain('icon="camera"');
+    expect(composer).not.toContain('name="plus"');
+    expect(composer).not.toContain('icon="broadcast"');
+    expect(composer).not.toContain("t-label");
+    expect(composer).toContain("aria-label={label}");
+    expect(composer).toContain("SOCIAL.home.composerPhoto");
+    expect(composer).toContain("SOCIAL.home.composerCamera");
+    expect(composer).toContain("useSocialCreateMediaPick");
+    expect(composer).toContain("SOCIAL_CREATE_CAMERA_ACCEPT");
     expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
+    expect(SOCIAL_COMPOSER_CLASS).toContain("items-center");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("flex-col");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("h-20");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-y");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-x-0");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-none");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("px-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("py-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("py-0");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-px");
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("rounded-[var(--radius-lg)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toMatch(/(?:^|\s)border(?:\s|$)/);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("p-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("gap-[var(--space-2)]");
+    expect(composer).toContain('className="size-10"');
+    expect(composer).not.toContain("size-8");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_ROW_CLASS).not.toContain("gap-[var(--space-3)]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("h-10");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("rounded-[20px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("border-0");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).toContain("outline-none");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("h-8");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("rounded-[16px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("shadow-");
+    expect(chrome).toContain("SOCIAL_COMPOSER_ROW_CLASS");
+    expect(chrome).toContain("gap-[var(--space-3)]");
+    expect(chrome).toContain("SOCIAL_COMPOSER_AFFORDANCE_ROW_CLASS");
+    expect(chrome).toContain("ml-[var(--space-2)]");
+    expect(chrome).not.toContain("pl-[calc(2.5rem+var(--space-3))]");
     expect(shell).not.toContain("SocialRailAccountChip");
     expect(shell).not.toContain("data-social-rail-account");
     expect(forYou).not.toContain("SocialOnboardingChecklist");
@@ -283,14 +348,75 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_FEED_GUTTER_CLASS");
     expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col divide-y divide-hairline");
     expect(SOCIAL_FEED_GUTTER_CLASS).toContain("divide-y divide-hairline");
+    expect(SOCIAL_FEED_TAIL_RULE_CLASS).toBe(
+      "max-md:border-b max-md:border-solid max-md:border-hairline",
+    );
+    expect(SOCIAL_FEED_TAIL_RULE_CLASS.startsWith("max-md:")).toBe(true);
+    expect(SOCIAL_FEED_TAIL_RULE_CLASS).not.toMatch(/(?:^|\s)border-b(?:\s|$)/);
+    expect(SOCIAL_FEED_ROW_CLASS).toContain(SOCIAL_FEED_TAIL_RULE_CLASS);
+    expect(SOCIAL_POST_ACTIONS_CLASS).toBe("flex flex-row items-center gap-2");
+    expect(SOCIAL_POST_ACTION_HIT_CLASS).toBe(
+      "inline-flex size-10 shrink-0 items-center justify-center text-ink-2 active:opacity-70",
+    );
+    expect(SOCIAL_POST_ACTION_HIT_CLASS).not.toContain("scale");
+    expect(SOCIAL_POST_ACTION_HEART_NUDGE_CLASS).toBe("translate-y-px");
+    expect(SOCIAL_STORIES_FEED_RULE_CLASS).toBe(
+      "max-md:border-b max-md:border-solid max-md:border-hairline",
+    );
+    expect(SOCIAL_STORIES_FEED_RULE_CLASS.startsWith("max-md:")).toBe(true);
+    expect(card.slice(card.indexOf("export function SocialPostCard"))).toContain(
+      'className="flex items-center gap-3.5"',
+    );
+    expect(icons).toContain("export const SOCIAL_ICON_SIZE_POST_ACTION = 24");
+    const like = readFileSync("src/components/social/social-engagement.tsx", "utf8");
+    const likeFn = like.slice(like.indexOf("export function SocialLikeButton"));
+    const comments = readFileSync("src/components/social/social-comment-thread.tsx", "utf8");
+    const alignLock = readFileSync("docs/design-locks/social-home-post-actions-align-lock-v1.md", "utf8");
+    expect(likeFn).toContain("SOCIAL_POST_ACTION_HIT_CLASS");
+    expect(likeFn).toContain("SOCIAL_POST_ACTION_HEART_NUDGE_CLASS");
+    expect(likeFn).toContain("text-accent");
+    expect(likeFn).not.toContain("size-10");
+    expect(likeFn).not.toContain("flex-col");
+    expect(likeFn.indexOf("</button>")).toBeLessThan(likeFn.indexOf("<FormError"));
+    expect(likeFn).toContain("absolute top-full left-0");
+    expect(alignLock).toContain("text-ink-2");
+    expect(alignLock).toContain("#3D4450");
+    expect(alignLock).toContain("#1769FF");
+    expect(alignLock).not.toMatch(/Idle `#5E646E`/);
+    expect(comments).toContain("SOCIAL_POST_ACTION_HIT_CLASS");
+    expect(comments).not.toContain("HEART_NUDGE");
+    const homeStories = rail.slice(rail.indexOf("function HomeTallStoriesRail"), rail.indexOf("export function SocialStoriesRail"));
+    expect(homeStories).toContain("SOCIAL_STORIES_FEED_RULE_CLASS");
+    expect(rail.slice(rail.indexOf("export function SocialStoriesRail"))).not.toContain("SOCIAL_STORIES_FEED_RULE_CLASS");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-surface-muted");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("py-");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("gap-");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
-    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("border");
+    expect(SOCIAL_FEED_ROW_CLASS.replace(SOCIAL_FEED_TAIL_RULE_CLASS, "")).not.toContain("border");
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("rounded");
     expect(SOCIAL_FEED_ROW_CLASS).not.toMatch(/(?:^|\s)(?:m[ytb]|my)-/);
+    expect(SOCIAL_FEED_ROW_CLASS).toContain("py-[var(--space-4)]");
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("p-[var(--space-4)]");
+    expect(SOCIAL_MOBILE_BLEED_CLASS.startsWith("max-md:")).toBe(true);
+    expect(SOCIAL_MOBILE_BLEED_CLASS).toContain("-mx-[var(--chrome-gutter)]");
+    expect(SOCIAL_MOBILE_BLEED_CLASS).not.toMatch(/(?:^|\s)-mx-/);
+    expect(SOCIAL_FEED_ROW_CLASS).toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_POST_MEDIA_CLASS).toContain("px-0");
+    expect(SOCIAL_POST_MEDIA_CLASS).toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_HOME_TOPICS_CLASS).not.toContain(SOCIAL_MOBILE_BLEED_CLASS);
+    expect(SOCIAL_DESKTOP_FRAME_PAD_CLASS).toContain("max-md:px-[var(--chrome-gutter)]");
+    expect(chrome).toContain('export const SOCIAL_FEED_CHROME_CLASS = "px-[var(--space-4)]"');
+    expect(chrome).toContain('export const SOCIAL_HOME_SPINE_CLASS = "gap-[var(--space-2)]"');
+    expect(home).toContain("SOCIAL_HOME_SPINE_CLASS");
+    expect(rail).toContain("SOCIAL_HOME_STORIES_TRACK_CLASS");
+    expect(chrome).toContain('export const SOCIAL_HOME_STORIES_TRACK_CLASS = "flex w-max gap-2 px-0 pt-0 pb-2"');
+    expect(rail).not.toContain("pr-4 pb-2");
+    expect(card).toContain("SOCIAL_FEED_CHROME_CLASS");
+    expect(card).toContain("w-full");
+    expect(card).toContain("SOCIAL_POST_MEDIA_CLASS");
+    expect(card).not.toContain("md:rounded-[8px]");
     expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(forYou).not.toContain("SOCIAL.forYou.native");
@@ -383,6 +509,7 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Profile",
     ]);
     expect(rail).toContain("data-social-stories-mobile");
+    expect(rail.slice(rail.indexOf('data-social-stories-mobile=""'))).toContain("data-social-story-media");
     expect(chrome).toContain("129:215");
     expect(chrome).toContain("129:415");
     expect(chrome).toContain("129:615");
@@ -425,7 +552,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).toContain("w-[112px]");
     expect(rail).toContain("SOCIAL_STORIES_CARD_CLASS");
     expect(rail).toContain("SOCIAL_STORIES_PLUS_WELL_CLASS");
-    expect(rail).toContain("SOCIAL_HOME_STORY_NAME_CLASS");
+    expect(rail).not.toContain("SOCIAL_HOME_STORY_NAME_CLASS");
+    expect(rail).toContain("aria-label={name}");
+    expect(chrome).not.toContain("SOCIAL_HOME_STORY_NAME_CLASS");
+    expect(chrome).not.toContain("from-band/72");
     expect(rail).toContain("SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS");
     expect(chrome).toMatch(
       /export const SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS =\s*"t-body-sm font-medium text-ink"/,
@@ -444,10 +574,17 @@ describe("Social Home miss list v1 P0 lock", () => {
       /export const SOCIAL_STORIES_PLUS_WELL_CLASS =\s*"[^"]*\bbg-accent\b[^"]*\btext-accent-contrast\b/,
     );
     expect(chrome).toContain("h-[168px]");
-    expect(chrome).toContain("h-[192px]");
-    expect(chrome).toContain("h-[200px]");
+    expect(chrome).toContain("h-[240px]");
+    expect(chrome).toContain("h-[256px]");
+    expect(chrome).toContain("w-[136px]");
+    expect(chrome).toContain("w-[144px]");
+    expect(chrome).toContain("h-[224px]");
+    expect(chrome).toContain("w-[128px]");
     expect(chrome).toContain("w-[112px]");
-    expect(chrome).toContain("w-[108px]");
+    expect(chrome).not.toContain("h-[208px]");
+    expect(chrome).not.toContain("w-[120px]");
+    expect(chrome).not.toContain("h-[192px]");
+    expect(chrome).not.toContain("w-[108px]");
     expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_PLUS = 20");
     expect(icons).toContain("SOCIAL_ICON_SIZE_TAB = 22");
     expect(icons).toContain("SOCIAL_ICON_SIZE_COMPOSER = 22");

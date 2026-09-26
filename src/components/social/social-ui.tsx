@@ -9,8 +9,12 @@ import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_POST_ACTION_HEART_NUDGE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
+  SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_POST_TIME_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
@@ -50,6 +54,7 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { socialProfileRendersCoverBand } from "@/lib/social-profile-cover";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import {
   SOCIAL_POST_IMAGE_SIZES,
   socialMediaFrameClass,
@@ -60,6 +65,7 @@ import { SocialAvatar } from "./social-avatar";
 import { SocialFeedCarousel } from "./social-feed-carousel";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialCommentTrigger } from "./social-comment-thread";
+import { SocialPostShareButton } from "./social-post-share-sheet";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
@@ -185,7 +191,7 @@ export function SocialPostMedia({
     return <SocialFeedCarousel items={items} />;
   }
   return (
-    <div data-social-post-media="" className="flex flex-col gap-2">
+    <div data-social-post-media="" className={SOCIAL_POST_MEDIA_CLASS}>
       {items.map((item) => (
         <SocialPostMediaFrame
           key={item.playbackId ?? item.url}
@@ -209,7 +215,7 @@ function SocialPostMediaFrame({
 }) {
   const frame = cn(
     frameClass ?? socialMediaFrameClass(item),
-    "relative overflow-hidden bg-surface-muted md:rounded-[8px]",
+    "relative w-full overflow-hidden bg-surface-muted",
   );
   if (item.kind === "video") {
     return (
@@ -481,10 +487,14 @@ export function SocialPostCard({
   post: SocialPostCardModel;
   permalink?: boolean;
 }) {
-  // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
-  // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
-  // Adam lock 2026-09-25: text plus two or more media items puts the caption
-  // above the carousel. Single media and text-only keep the blend order.
+  // One card at every breakpoint.
+  // Text + media: docs/design-locks/social-feed-text-media-caption-above-lock-v1.md
+  //   author → caption → media → actions → likes → comments when N > 0.
+  // Two or more media items (Adam lock 2026-09-25): that media face is one
+  // full-bleed swipe carousel with dots and N of M. No collage.
+  // Text-only stays the 2026-09-20 blend:
+  //   author → actions → likes → caption → comments when N > 0.
+  // Media-only: author → media → actions → likes.
   // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count, collage.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
@@ -500,35 +510,37 @@ export function SocialPostCard({
       {socialRelativeTime(post.createdAt)}
     </time>
   );
-  const captionBody = post.body ? (
+  const captionText = post.body ? (
     <>
       <span className="font-semibold">{handle} </span>
       {post.body}
     </>
   ) : null;
-  const caption = captionBody ? (
+  const caption = captionText ? (
     permalink ? (
       <Link
         href={href}
         data-social-post-caption=""
         className="t-body-sm text-ink whitespace-pre-wrap break-words"
       >
-        {captionBody}
+        {captionText}
       </Link>
     ) : (
       <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
-        {captionBody}
+        {captionText}
       </p>
     )
   ) : null;
-  const captionAboveMedia = socialFeedUsesCarousel(post.media.length) && caption != null;
+  // Both text and media: caption sits above the media face. Otherwise it
+  // stays in the action stack (text-only) or is absent (media-only).
+  const captionAboveMedia = caption != null && media;
   return (
     <article
       data-social-post={post.id}
       data-social-post-href={permalink ? href : undefined}
       className={SOCIAL_FEED_ROW_CLASS}
     >
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className={`flex min-w-0 items-center gap-2.5 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
           {post.authorHandle ? (
@@ -562,7 +574,7 @@ export function SocialPostCard({
       </div>
       {captionAboveMedia ? caption : null}
       {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
-      <div className="flex flex-col gap-1">
+      <div className={`flex flex-col gap-1 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <div data-social-post-actions="" className="flex items-center gap-3.5">
           {post.canLike ? (
             <SocialLikeButton
@@ -573,15 +585,19 @@ export function SocialPostCard({
               icon
             />
           ) : (
-            <SocialIcon name="heart" size={22} />
+            <span className={SOCIAL_POST_ACTION_HIT_CLASS}>
+              <SocialIcon
+                name="heart"
+                size={SOCIAL_ICON_SIZE_POST_ACTION}
+                className={SOCIAL_POST_ACTION_HEART_NUDGE_CLASS}
+              />
+            </span>
           )}
           <SocialCommentTrigger post={thread} icon />
-          <span data-social-post-share="" className="text-ink">
-            <SocialIcon name="paper-plane-tilt" size={22} />
-          </span>
+          <SocialPostShareButton postId={post.id} />
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-        {caption && !captionAboveMedia ? caption : null}
+        {captionAboveMedia ? null : caption}
         <SocialCommentTrigger post={thread} />
       </div>
     </article>

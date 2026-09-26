@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+import { useHouseClient } from "@/components/chrome/house-client-shell";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +16,8 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
+  DM_THREAD_COMPOSER_CAMERA_CLASS,
+  DM_THREAD_COMPOSER_CAMERA_GLYPH,
   DM_THREAD_COMPOSER_CLASS,
   DM_THREAD_COMPOSER_FIELD_CLASS,
   DM_THREAD_COMPOSER_ROW_CLASS,
@@ -24,9 +29,18 @@ import {
   SOCIAL_PERSON_PRIMARY_CLASS,
   SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
-  SOCIAL_PILL_CLASS,
-  SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_REPLY_PILL_CLASS,
+  SOCIAL_STORY_STAGE_IN_CLASS,
+  SOCIAL_WRITE_COMPOSE_CHROME_CLASS,
+  SOCIAL_WRITE_COMPOSE_HOST_CLASS,
+  SOCIAL_WRITE_COMPOSE_ROW_CLASS,
+  SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS,
+  bindSocialWriteComposeViewport,
+  fitSocialWriteComposeField,
+  SOCIAL_WRITE_COMPOSE_POST_CLASS,
+  SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
+  SOCIAL_WRITE_COMPOSE_X_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
@@ -47,6 +61,7 @@ import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 import {
   displayHandle,
+  leaveSocialWriteCompose,
   SOCIAL,
   SOCIAL_ROUTES,
   socialHandleDisplayError,
@@ -63,6 +78,7 @@ import {
   runSocialOptimisticMutation,
 } from "@/lib/social-optimistic";
 import { cn } from "@/lib/cn";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import { SocialAvatar } from "./social-avatar";
 import { SocialHandleField } from "./social-handle-field";
 import { SocialIcon } from "./social-icon";
@@ -385,6 +401,7 @@ export function SocialCreateCompose({
   initialStep?: SocialCreateMediaStep | null;
 }) {
   const router = useRouter();
+  const house = useHouseClient();
   const [pickedFiles, setPickedFiles] = useState(takeSocialHomeComposerMedia);
   const kind: SocialCreateKind = initialKind ?? "text";
   const ingestPicked = pickedFiles.length > 0 && kind === "media";
@@ -398,9 +415,26 @@ export function SocialCreateCompose({
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [originalQuality, setOriginalQuality] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const writeFormRef = useRef<HTMLFormElement>(null);
+  const writeBodyRef = useRef<HTMLTextAreaElement>(null);
   const hasVideo =
     pickedFiles.some((file) => socialMediaKindFor(file.type) === "video") ||
     media.some((item) => item.kind === "video");
+
+  useEffect(() => {
+    const form = writeFormRef.current;
+    if (!form) return;
+    return bindSocialWriteComposeViewport(form, () => {
+      const field = writeBodyRef.current;
+      if (field) fitSocialWriteComposeField(field);
+    });
+  }, [kind]);
+
+  useEffect(() => {
+    const field = writeBodyRef.current;
+    if (!field) return;
+    fitSocialWriteComposeField(field);
+  }, [body, kind]);
 
   useEffect(() => {
     if (!ingestPicked) return;
@@ -443,7 +477,7 @@ export function SocialCreateCompose({
   }, [kind, router, step]);
 
   async function onPick(files: ArrayLike<File> | null) {
-    if (!files || files.length === 0 || kind !== "media") return;
+    if (!files || files.length === 0) return;
     const chosen = Array.from(files);
     setPickedFiles(chosen);
     setError("");
@@ -465,7 +499,9 @@ export function SocialCreateCompose({
         return next;
       });
       setMedia((current) => [...current, ...result.items!]);
-      setStep((current) => (current === "caption" ? current : "review"));
+      if (kind === "media") {
+        setStep((current) => (current === "caption" ? current : "review"));
+      }
     }
   }
 
@@ -532,11 +568,152 @@ export function SocialCreateCompose({
     );
   }
 
+  if (kind === "text") {
+    return (
+      <form
+        ref={writeFormRef}
+        data-social-create-form=""
+        data-social-create-kind="text"
+        data-social-write-voice=""
+        className={cn(SOCIAL_WRITE_COMPOSE_HOST_CLASS, SOCIAL_STORY_STAGE_IN_CLASS)}
+        onSubmit={(event) => {
+          event.preventDefault();
+          ingestSpeechLearning({
+            text: body,
+            source: "typed",
+            workspace: "social",
+          });
+          publishOptimisticPost({
+            body,
+            media,
+            previews,
+            authorName,
+            authorHandle,
+            authorPhotoUrl,
+            onNavigate: () => {
+              router.push(SOCIAL_ROUTES.home);
+            },
+            setError,
+          });
+        }}
+      >
+        <div className={SOCIAL_WRITE_COMPOSE_CHROME_CLASS}>
+          <button
+            type="button"
+            data-social-create-dismiss=""
+            aria-label={SOCIAL.create.close}
+            className={SOCIAL_WRITE_COMPOSE_X_CLASS}
+            onClick={() =>
+              leaveSocialWriteCompose(
+                () => house?.navigateOwned(SOCIAL_ROUTES.home) ?? false,
+                () => router.push(SOCIAL_ROUTES.home),
+              )
+            }
+          >
+            <SocialIcon name="x" size={22} className="text-ink" />
+          </button>
+          <button type="submit" disabled={uploading} className={SOCIAL_WRITE_COMPOSE_POST_CLASS}>
+            {SOCIAL.home.submit}
+          </button>
+        </div>
+        <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
+          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
+          <span className="min-w-0 t-body font-medium text-ink">{authorName}</span>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col pt-[var(--space-2)]">
+          {media.length > 0 ? (
+            <ul
+              data-social-create-preview=""
+              className="mt-[var(--space-2)] flex flex-col gap-[var(--space-2)]"
+            >
+              {media.map((item) => (
+                <li key={item.key}>
+                  <div className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS}>
+                    {previews[item.key] && item.kind === "video" ? (
+                      <video
+                        src={previews[item.key]}
+                        className="h-full w-full object-cover"
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : previews[item.key] ? (
+                      <Image
+                        src={previews[item.key]}
+                        alt={SOCIAL.home.photoKind}
+                        fill
+                        unoptimized
+                        sizes="100vw"
+                        className="object-cover"
+                      />
+                    ) : null}
+                    <button
+                      type="button"
+                      aria-label={SOCIAL.home.removeAttach}
+                      className={cn(
+                        SOCIAL_POST_ACTION_HIT_CLASS,
+                        "absolute right-[var(--space-2)] top-[var(--space-2)] bg-surface",
+                      )}
+                      onClick={() => setMedia((current) => current.filter((row) => row.key !== item.key))}
+                    >
+                      <SocialIcon name="x" size={20} className="text-ink-2" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="min-h-0 flex-1" data-social-write-stage="" />
+          )}
+        </div>
+        <div className={SOCIAL_WRITE_COMPOSE_ROW_CLASS} data-social-write-compose-row="">
+          <label className="sr-only" htmlFor="social-create-body">
+            {SOCIAL.home.composerPrompt}
+          </label>
+          <Textarea
+            ref={writeBodyRef}
+            variant="bare"
+            id="social-create-body"
+            name="body"
+            rows={1}
+            value={body}
+            onChange={(e) => {
+              setBody(e.target.value);
+              fitSocialWriteComposeField(e.currentTarget);
+            }}
+            placeholder={SOCIAL.home.composerPrompt}
+            className={SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS}
+          />
+          <button
+            type="button"
+            data-social-create-attach="library"
+            aria-label={SOCIAL.home.attach}
+            className={cn(SOCIAL_POST_ACTION_HIT_CLASS, "text-ink")}
+            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={SOCIAL_MEDIA_ACCEPT}
+            multiple
+            className="sr-only"
+            data-social-create-attach-input=""
+            aria-label={SOCIAL.home.attach}
+            onChange={(event) => void onPick(event.target.files)}
+          />
+        </div>
+        <FormError error={error} />
+      </form>
+    );
+  }
+
   return (
     <form
       data-social-create-form=""
       data-social-create-kind={kind}
-      data-social-create-media-step={kind === "media" ? "caption" : undefined}
+      data-social-create-media-step="caption"
       className={SOCIAL_CREATE_CARD_CLASS}
       onSubmit={(event) => {
         event.preventDefault();
@@ -637,14 +814,7 @@ export function SocialCreateCompose({
           ))}
         </select>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2 t-body-sm text-ink-2">
-          <span className="hidden md:inline">{SOCIAL.home.audience}</span>
-          <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS, "inline-flex items-center gap-1.5")}>
-            <SocialIcon name="users" size={14} className="text-ink-2" />
-            {SOCIAL.home.audienceFollowing}
-          </span>
-        </p>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
           {SOCIAL.home.submit}
         </button>
@@ -844,6 +1014,7 @@ export function SocialMessageButton({ peerId }: { peerId: string }) {
 
 export function SocialDmCompose({ conversationId }: { conversationId: string }) {
   const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   return (
     <form
       data-social-dm-form=""
@@ -875,6 +1046,28 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
         <button type="submit" aria-label={SOCIAL.dms.submit} className={DM_THREAD_COMPOSER_SEND_CLASS}>
           <SocialIcon name="paper-plane-tilt" size={18} />
         </button>
+        <button
+          type="button"
+          data-social-dm-camera=""
+          aria-label={SOCIAL.home.attach}
+          className={DM_THREAD_COMPOSER_CAMERA_CLASS}
+          onClick={() => fileRef.current?.click()}
+        >
+          <SocialIcon name="camera" size={DM_THREAD_COMPOSER_CAMERA_GLYPH} className="text-ink" />
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept={SOCIAL_MEDIA_ACCEPT}
+          className="sr-only"
+          tabIndex={-1}
+          data-social-dm-attach-input=""
+          aria-label={SOCIAL.home.attach}
+          onChange={(event) => {
+            // Library open only. No DM media insert on this path.
+            event.currentTarget.value = "";
+          }}
+        />
       </div>
       <FormError error={error} />
     </form>
