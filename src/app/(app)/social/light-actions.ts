@@ -42,7 +42,14 @@ import {
   type StorySendPerson,
 } from "@/lib/social-story-actions";
 import { commentBodyError, commentInsertRow, normalizeCommentBody } from "@/lib/social-comments";
-import { bustSocialFollowHotCache } from "@/lib/social-hot-cache";
+import { bustSocialFeedHotCache, bustSocialFollowHotCache } from "@/lib/social-hot-cache";
+import {
+  postAuthorRefusal,
+  postCaptionUpdateRow,
+  postCaptionWrite,
+  postHasMedia,
+  postSoftDeleteUpdateRow,
+} from "@/lib/social-post-own";
 import {
   isFollowUniqueViolation,
   newFollowerNoticeCopy,
@@ -449,5 +456,84 @@ export async function deleteSocialComment(formData: FormData): Promise<ActionRes
 
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.profile);
+  return {};
+}
+
+function revalidateOwnPost(postId: string, groupSlug: string) {
+  revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(socialPostHref(postId));
+  if (groupSlug) revalidatePath(socialGroupHref(groupSlug));
+}
+
+export async function updateSocialPostCaption(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const postId = String(formData.get("post_id") ?? "").trim();
+  if (!postId) return { error: SOCIAL.post.missing };
+
+  const { data: post, error: readError } = await supabase
+    .from("posts")
+    .select("id, author_id, body, media, status")
+    .eq("id", postId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (readError || !post) return { error: SOCIAL.post.missing };
+
+  const refused = postAuthorRefusal(user.id, post.author_id);
+  if (refused) return { error: refused };
+
+  const written = postCaptionWrite(String(formData.get("body") ?? ""), postHasMedia(post.media));
+  if ("error" in written) return written;
+  if ((post.body ?? null) === written.body) return {};
+
+  const { data: saved, error } = await supabase
+    .from("posts")
+    .update(postCaptionUpdateRow(written.body, new Date().toISOString()))
+    .eq("id", postId)
+    .eq("author_id", user.id)
+    .eq("status", "active")
+    .select("id")
+    .maybeSingle();
+  if (error) return { error: error.message || SOCIAL.post.editFailed };
+  if (!saved) return { error: SOCIAL.post.notAuthor };
+
+  await bustSocialFeedHotCache(user.id);
+  revalidateOwnPost(postId, String(formData.get("group_slug") ?? "").trim());
+  return {};
+}
+
+export async function deleteSocialPost(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const postId = String(formData.get("post_id") ?? "").trim();
+  if (!postId) return { error: SOCIAL.post.missing };
+
+  const { data: post, error: readError } = await supabase
+    .from("posts")
+    .select("id, author_id, status")
+    .eq("id", postId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (readError || !post) return { error: SOCIAL.post.missing };
+
+  const refused = postAuthorRefusal(user.id, post.author_id);
+  if (refused) return { error: refused };
+
+  const { data: saved, error } = await supabase
+    .from("posts")
+    .update(postSoftDeleteUpdateRow())
+    .eq("id", postId)
+    .eq("author_id", user.id)
+    .eq("status", "active")
+    .select("id")
+    .maybeSingle();
+  if (error) return { error: error.message || SOCIAL.post.deleteFailed };
+  if (!saved) return { error: SOCIAL.post.notAuthor };
+
+  await bustSocialFeedHotCache(user.id);
+  revalidateOwnPost(postId, String(formData.get("group_slug") ?? "").trim());
   return {};
 }

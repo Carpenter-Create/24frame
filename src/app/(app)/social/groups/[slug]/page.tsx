@@ -96,6 +96,7 @@ export default async function SocialGroupPage({
             groupSlug: group.slug,
             groupName: group.name,
             canLike: !!profile,
+            owned: post.author_id === ctx.user.id,
             media: media.get(post.id) ?? [],
           };
         })}

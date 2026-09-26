@@ -211,6 +211,7 @@ async function SocialProfileMain({
               liked: liked.has(post.id),
               canLike: true,
               media: media.get(post.id) ?? [],
+              owned: true,
             }),
           ),
           imageIds: mediaIds.imageIds,
@@ -234,6 +235,7 @@ async function SocialProfileMain({
                 liked: liked.has(item.post.id),
                 canLike: true,
                 media: media.get(item.post.id) ?? [],
+                owned: item.post.author_id === profile.id,
               }),
             };
           }),

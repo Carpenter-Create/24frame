@@ -688,6 +688,8 @@ describe("social writes stay on the live spine", () => {
     expect(light).toContain("export async function toggleSocialLike");
     expect(light).toContain("export async function createSocialComment");
     expect(light).toContain("export async function deleteSocialComment");
+    expect(light).toContain("export async function updateSocialPostCaption");
+    expect(light).toContain("export async function deleteSocialPost");
     expect(actions).not.toContain("toggleSocialFollow");
     expect(actions).not.toContain("from \"@/lib/s3\"");
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");
