@@ -438,6 +438,9 @@ export const SOCIAL_POST_ACTIONS_ROW_CLASS = "flex items-center gap-[var(--space
 // #0A0A0B has no house token (--band is #1b1f23). One class, same
 // precedent as the story stage. Desktop uses this same fullscreen
 // stage — a trailing caption column is out.
+// z-[45] is the stage on document.body. The comment host (z-50) mounts
+// inside this stage and paints above the dock. The Share sheet is a
+// separate body portal at z-[60], above the stage. Do not raise this.
 export const SOCIAL_FEED_IMMERSIVE_STAGE_CLASS =
   "fixed inset-0 z-[45] bg-[#0A0A0B] text-band-ink social-feed-immersive-in";
 

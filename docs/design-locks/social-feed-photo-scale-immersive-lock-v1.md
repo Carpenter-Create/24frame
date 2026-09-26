@@ -54,6 +54,8 @@
 | Desktop | Same fullscreen immersive (not a required FB right-rail clone). Optional trailing caption column **OUT** v1 — bottom caption+actions is the one SoT |
 | Motion | Open fade **180ms** · **no** bounce |
 
+**Stacking:** The stage portals to `document.body` at **`z-[45]`**. The comment thread mounts inside that stage (host **`z-50`**) and paints above the dock. The Share sheet stays the existing body portal at **`z-[60]`**, above the stage. Do not raise the stage over either sheet.
+
 ---
 
 ## Explicit OUT
