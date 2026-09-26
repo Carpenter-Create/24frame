@@ -41,9 +41,11 @@ type ThreadPost = {
 export function SocialCommentTrigger({
   post,
   icon = false,
+  tone = "canvas",
 }: {
   post: ThreadPost;
   icon?: boolean;
+  tone?: "canvas" | "stage";
 }) {
   const [open, setOpen] = useState(false);
   const count = useSocialCommentCount(post.id, post.commentCount ?? 0);
@@ -59,7 +61,11 @@ export function SocialCommentTrigger({
           data-social-comment-open=""
           {...(showTrail ? { "data-social-comment-trail": "" } : {})}
           aria-label={SOCIAL.post.commentsTitle}
-          className={icon ? SOCIAL_POST_ACTION_HIT_CLASS : "self-start text-left t-body-sm text-ink-2"}
+          className={
+            icon
+              ? cn(SOCIAL_POST_ACTION_HIT_CLASS, tone === "stage" && "text-band-ink")
+              : "self-start text-left t-body-sm text-ink-2"
+          }
           onClick={() => setOpen(true)}
         >
           {icon ? (

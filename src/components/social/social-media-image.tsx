@@ -16,6 +16,7 @@ export function SocialMediaImage({
   className,
   sizes,
   priority = false,
+  fit = "cover",
   loading,
   onLoad,
   onError,
@@ -25,6 +26,7 @@ export function SocialMediaImage({
   className?: string;
   sizes: string;
   priority?: boolean;
+  fit?: "cover" | "contain";
   /** Eager for images inside a horizontal scroller. iOS Safari drops lazy loads there. */
   loading?: "eager" | "lazy";
   onLoad?: (event: SyntheticEvent<HTMLImageElement>) => void;
@@ -36,7 +38,7 @@ export function SocialMediaImage({
       alt={alt}
       fill
       sizes={sizes}
-      className={cn("object-cover", className)}
+      className={cn(fit === "contain" ? "object-contain object-center" : "object-cover object-center", className)}
       priority={priority}
       loading={loading}
       unoptimized={isAnimatedRasterSrc(src) || isSessionGatedSocialSrc(src)}

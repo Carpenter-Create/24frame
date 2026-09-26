@@ -112,6 +112,19 @@ describe("mountQuietMuxPlayer", () => {
       "style:object-fit=cover",
     ]);
 
+    const contained = fakePlayer();
+    contained.isConnected = true;
+    assignConnectedMuxPlayer(contained, {
+      ...PROPS,
+      style: { ...open, objectFit: "contain" },
+    });
+    expect(contained.calls.filter((call) => call.startsWith("style:"))).toEqual([
+      "style:aspect-ratio=auto",
+      "style:width=100%",
+      "style:height=100%",
+      "style:object-fit=contain",
+    ]);
+
     const injected = fakePlayer();
     injected.isConnected = true;
     assignConnectedMuxPlayer(injected, {

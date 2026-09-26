@@ -11,25 +11,25 @@ export type QuietMuxTokens = {
   storyboard: string;
 };
 
-// House tokens from playerStyle(chromeless). Other CSS names and values never reach setProperty.
+// House tokens from playerStyle. Other CSS names and values never reach setProperty.
 export type QuietMuxPlayerStyle = {
   readonly aspectRatio: "auto";
   readonly width: "100%";
   readonly height: "100%";
-  readonly objectFit: "cover";
+  readonly objectFit: "cover" | "contain";
   readonly "--controls"?: "none";
 };
 
 const QUIET_MUX_PLAYER_STYLE_KEYS = ["aspectRatio", "width", "height", "objectFit", "--controls"] as const;
 
 const QUIET_MUX_PLAYER_STYLE_VALUES = {
-  aspectRatio: "auto",
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  "--controls": "none",
+  aspectRatio: ["auto"],
+  width: ["100%"],
+  height: ["100%"],
+  objectFit: ["cover", "contain"],
+  "--controls": ["none"],
 } as const satisfies {
-  readonly [K in keyof QuietMuxPlayerStyle]-?: NonNullable<QuietMuxPlayerStyle[K]>;
+  readonly [K in keyof QuietMuxPlayerStyle]-?: readonly NonNullable<QuietMuxPlayerStyle[K]>[];
 };
 
 export type QuietMuxPlayerProps = {
@@ -106,7 +106,8 @@ export function assignConnectedMuxPlayer(
 function applyQuietMuxPlayerStyle(player: QuietMuxPlayerElement, style: QuietMuxPlayerStyle): void {
   for (const name of QUIET_MUX_PLAYER_STYLE_KEYS) {
     const value = style[name];
-    if (value !== QUIET_MUX_PLAYER_STYLE_VALUES[name]) continue;
+    if (value === undefined) continue;
+    if (!(QUIET_MUX_PLAYER_STYLE_VALUES[name] as readonly string[]).includes(value)) continue;
     player.style.setProperty(cssPropertyName(name), value);
   }
 }

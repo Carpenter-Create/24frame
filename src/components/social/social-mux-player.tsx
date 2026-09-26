@@ -20,10 +20,20 @@ import type { QuietMuxPlayerStyle } from "@/lib/social-mux-player-quiet";
 // static. Signed policy mints tokens on the Node route. Public policy
 // and rows with no policy play the playback id alone.
 // Adaptive Auto — no quality Settings control in v1.
+// Feed face is cover. Immersive passes contain.
+// docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md
 
 const MuxPlayer = dynamic(() => import("./social-mux-player-mount"), { ssr: false });
 
-function MuxPoster({ src, onReady }: { src: string; onReady?: () => void }) {
+function MuxPoster({
+  src,
+  fit,
+  onReady,
+}: {
+  src: string;
+  fit: "cover" | "contain";
+  onReady?: () => void;
+}) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- thumb hold until decoded frames
     <img
@@ -32,18 +42,32 @@ function MuxPoster({ src, onReady }: { src: string; onReady?: () => void }) {
       data-social-mux-poster=""
       onLoad={onReady}
       onError={onReady}
-      className="pointer-events-none absolute inset-0 size-full object-cover"
+      className={cn(
+        "pointer-events-none absolute inset-0 size-full",
+        fit === "contain" ? "object-contain" : "object-cover",
+      )}
     />
   );
 }
 
-function playerStyle(chromeless: boolean): QuietMuxPlayerStyle {
-  return {
+function playerStyle(chromeless: boolean, fit: "cover" | "contain"): QuietMuxPlayerStyle {
+  const cover = {
     aspectRatio: "auto",
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    ...(chromeless ? { "--controls": "none" as const } : {}),
+  } as const;
+  const contain = {
+    aspectRatio: "auto",
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+  } as const;
+  const base = fit === "contain" ? contain : cover;
+  if (!chromeless) return base;
+  return {
+    ...base,
+    "--controls": "none",
   };
 }
 
@@ -51,6 +75,7 @@ export function SocialMuxPlayer({
   playbackId,
   playbackPolicy,
   className,
+  fit = "cover",
   muted = false,
   autoPlay = false,
   chromeless = false,
@@ -59,6 +84,7 @@ export function SocialMuxPlayer({
   playbackId: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
   className?: string;
+  fit?: "cover" | "contain";
   muted?: boolean;
   autoPlay?: boolean;
   chromeless?: boolean;
@@ -77,7 +103,6 @@ export function SocialMuxPlayer({
     setPaintedId(playbackId);
     releaseHold();
   };
-
   useEffect(() => {
     if (!signed) return;
     const controller = new AbortController();
@@ -101,7 +126,12 @@ export function SocialMuxPlayer({
       data-social-mux-player={playbackId}
       data-social-mux-playback={signed ? (tokens ? "signed" : "pending") : "public"}
       data-social-post-video=""
-      className={cn("relative", SOCIAL_MUX_PLAYER_CLASS, className)}
+      className={cn(
+        "relative",
+        SOCIAL_MUX_PLAYER_CLASS,
+        fit === "contain" && "social-feed-immersive-media object-contain",
+        className,
+      )}
     >
       {signed ? (
         <>
@@ -119,12 +149,12 @@ export function SocialMuxPlayer({
               preload="metadata"
               onLoadedData={paint}
               poster={poster}
-              style={playerStyle(chromeless)}
+              style={playerStyle(chromeless, fit)}
             />
           ) : null}
           {/* Unsigned signed thumbs 403 before the JWT. That error must not
               clear the open hold. The still leaves once the player mounts. */}
-          {socialMuxCoveringPoster(signed, Boolean(tokens)) ? <MuxPoster src={poster} /> : null}
+          {socialMuxCoveringPoster(signed, Boolean(tokens)) ? <MuxPoster src={poster} fit={fit} /> : null}
         </>
       ) : (
         <>
@@ -136,9 +166,9 @@ export function SocialMuxPlayer({
             preload="metadata"
             onLoadedData={paint}
             poster={poster}
-            style={playerStyle(chromeless)}
+            style={playerStyle(chromeless, fit)}
           />
-          {painted ? null : <MuxPoster src={poster} onReady={releaseHold} />}
+          {painted ? null : <MuxPoster src={poster} fit={fit} onReady={releaseHold} />}
         </>
       )}
     </div>
