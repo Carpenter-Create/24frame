@@ -11,6 +11,8 @@ import {
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_IMAGE_MAX_BYTES, SOCIAL_VIDEO_MAX_BYTES } from "@/lib/social-media";
 import {
+  composeSlotMayUpload,
+  composeVideoUploadPixels,
   paintSocialComposeVideoPoster,
   planSocialComposeAttach,
   socialComposePosterSize,
@@ -173,13 +175,32 @@ describe("write compose video attach", () => {
     expect(video).not.toContain("data-social-create-video-poster");
   });
 
+  it("uploads a queued clip only while its controller is live, and keeps real preview dims", () => {
+    const live = new AbortController();
+    expect(composeSlotMayUpload(live.signal)).toBe(true);
+    live.abort();
+    expect(composeSlotMayUpload(live.signal)).toBe(false);
+    expect(composeSlotMayUpload(undefined)).toBe(false);
+    expect(composeSlotMayUpload(null)).toBe(false);
+    expect(composeVideoUploadPixels({ width: 3840, height: 2160 })).toEqual({
+      width: 3840,
+      height: 2160,
+    });
+    expect(composeVideoUploadPixels({ width: 0, height: 2160 })).toBeNull();
+    expect(composeVideoUploadPixels({ width: Number.NaN, height: 10 })).toBeNull();
+    expect(composeVideoUploadPixels(null)).toBeNull();
+  });
+
   it("shows compose progress and the story frame path, and skips the detached probe", () => {
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
     const upload = readFileSync("src/lib/social-media-upload.ts", "utf8");
+    const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
     const textStart = forms.indexOf("export function SocialCreateCompose");
     const textEnd = forms.indexOf("export { SocialStoryCompose }");
     const text = forms.slice(forms.indexOf("function SocialComposeUploadProgress"), textEnd);
     const compose = forms.slice(textStart, textEnd);
+    const loopAt = compose.indexOf("for (let index = 0; index < prepared.length");
+    const loop = compose.slice(loopAt, compose.indexOf("} finally", loopAt));
     expect(text).toContain("data-social-create-upload-progress");
     expect(text).toContain("data-social-create-video");
     expect(text).toContain("data-social-create-video-poster");
@@ -189,12 +210,24 @@ describe("write compose video attach", () => {
     expect(text).toContain('preload="auto"');
     expect(text).toContain("muted");
     expect(text).toContain("playsInline");
-    expect(compose).toContain("pixels: slot.kind === \"video\" ? null : undefined");
+    expect(compose.indexOf("new AbortController()")).toBeGreaterThan(-1);
+    expect(compose.indexOf("new AbortController()")).toBeLessThan(loopAt);
+    expect(loop).not.toContain("new AbortController");
+    expect(loop.indexOf("dismissedRef.current.has")).toBeLessThan(loop.indexOf("uploadSocialPostMedia"));
+    expect(loop.indexOf("composeSlotMayUpload")).toBeLessThan(loop.indexOf("uploadSocialPostMedia"));
+    expect(loop).toContain('slot.kind === "video" ? { intent: "video" as const } : {}');
+    expect(loop).not.toContain('intent: "video",');
+    expect(loop).toContain("composeVideoUploadPixels(measured)");
+    expect(loop).not.toContain('pixels: slot.kind === "video" ? null');
+    expect(compose).not.toContain("probeSocialVideoPixels");
     expect(compose).toContain("SocialComposeVideoPreview");
     expect(compose).toContain("if (uploading) return;");
     expect(compose).toContain("disabled={uploading}");
     expect(compose).not.toContain("disabled={uploading ||");
     expect(text).not.toContain('preload="metadata"');
+    expect(chrome).toContain("§5 same-slot overlay");
+    expect(chrome).toContain('SOCIAL_WRITE_COMPOSE_PROGRESS_FILL_CLASS = "h-full rounded-full bg-accent"');
+    expect(chrome).toContain("rounded-full bg-surface");
     expect(upload).toContain("options.pixels === undefined");
     expect(upload).toContain("putSocialMediaWithProgress");
     expect(upload).toContain('headers: { "Content-Type": signed.contentType }');

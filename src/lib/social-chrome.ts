@@ -865,7 +865,10 @@ export const SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS = "bg-accent/10 text-accen
 export const SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS =
   "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted";
 
-// Upload bytes on the same preview slot. Surface track stays visible on the muted face.
+// §5 same-slot overlay (write-compose-voice-first-immersive-lock-v1).
+// Video stays in this preview slot. Sporty is `bg-accent` (Post / active).
+// Track is `bg-surface` so the bar reads on the muted face. No new hex.
+// Shape matches house course-glance progress: h-1.5, rounded-full, accent fill.
 export const SOCIAL_WRITE_COMPOSE_PROGRESS_TRACK_CLASS =
   "absolute inset-x-[var(--space-4)] bottom-[var(--space-4)] z-10 h-1.5 overflow-hidden rounded-full bg-surface";
 

@@ -25,6 +25,29 @@ export function planSocialComposeAttach(file: File): SocialComposeAttachPlan {
   return { ok: true, file: picked.file, kind: picked.kind };
 }
 
+export type SocialComposeSourcePixels = { width: number; height: number };
+
+/**
+ * A queued clip may upload only while its pre-registered controller is live.
+ * Dismiss aborts that controller before the loop reaches the slot.
+ */
+export function composeSlotMayUpload(signal: AbortSignal | null | undefined): boolean {
+  return signal != null && !signal.aborted;
+}
+
+/**
+ * Dims from the visible compose preview. Null skips the detached pixel probe
+ * so a second decoder cannot blank iOS Safari.
+ */
+export function composeVideoUploadPixels(
+  measured: SocialComposeSourcePixels | null | undefined,
+): SocialComposeSourcePixels | null {
+  if (!measured) return null;
+  const { width, height } = measured;
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height };
+}
+
 export function socialComposePosterSize(
   width: number,
   height: number,
