@@ -12,13 +12,9 @@ import {
 // Browser-only. The React mux-player wrapper writes stream, poster, muted,
 // preload, and style before the node is appended, which is the Media Chrome
 // warning. This host appends a bare mux-player, then assigns those fields.
+// Class and playsinline stay on the quiet mount. Callers cannot override them.
 
-type SocialMuxPlayerMountProps = QuietMuxPlayerProps & {
-  playsInline?: boolean;
-  className?: string;
-};
-
-export default function SocialMuxPlayerMount(props: SocialMuxPlayerMountProps) {
+export default function SocialMuxPlayerMount(props: QuietMuxPlayerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const propsRef = useRef(props);
   useEffect(() => {

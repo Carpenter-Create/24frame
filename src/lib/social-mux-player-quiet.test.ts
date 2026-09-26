@@ -5,7 +5,16 @@ import {
   mountQuietMuxPlayer,
   type QuietMuxPlayerElement,
   type QuietMuxPlayerProps,
+  type QuietMuxPlayerStyle,
 } from "./social-mux-player-quiet";
+
+const HOUSE_STYLE: QuietMuxPlayerStyle = {
+  aspectRatio: "auto",
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  "--controls": "none",
+};
 
 const PROPS: QuietMuxPlayerProps = {
   playbackId: "abc12345xx",
@@ -15,7 +24,7 @@ const PROPS: QuietMuxPlayerProps = {
   autoPlay: false,
   muted: true,
   tokens: { playback: "play.jwt", thumbnail: "thumb.jwt", storyboard: "board.jwt" },
-  style: { aspectRatio: "auto", objectFit: "cover", "--controls": "none" },
+  style: HOUSE_STYLE,
 };
 
 function fakePlayer(): QuietMuxPlayerElement & { calls: string[] } {
@@ -69,6 +78,8 @@ describe("mountQuietMuxPlayer", () => {
     expect(player.tokens).toEqual(PROPS.tokens);
     expect(player.calls.slice(appendAt + 1)).toEqual([
       "style:aspect-ratio=auto",
+      "style:width=100%",
+      "style:height=100%",
       "style:object-fit=cover",
       "style:--controls=none",
       "listen:loadeddata",
@@ -82,5 +93,40 @@ describe("mountQuietMuxPlayer", () => {
     expect(() => assignConnectedMuxPlayer(player, PROPS)).toThrow(/connected/);
     expect(player.playbackId).toBe("");
     expect(player.calls).toEqual([]);
+  });
+
+  it("writes only the house style tokens", () => {
+    const player = fakePlayer();
+    player.isConnected = true;
+    const open: QuietMuxPlayerStyle = {
+      aspectRatio: "auto",
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    };
+    assignConnectedMuxPlayer(player, { ...PROPS, style: open });
+    expect(player.calls.filter((call) => call.startsWith("style:"))).toEqual([
+      "style:aspect-ratio=auto",
+      "style:width=100%",
+      "style:height=100%",
+      "style:object-fit=cover",
+    ]);
+
+    const injected = fakePlayer();
+    injected.isConnected = true;
+    assignConnectedMuxPlayer(injected, {
+      ...PROPS,
+      style: {
+        ...HOUSE_STYLE,
+        backgroundImage: "url(https://example.invalid/x)",
+        width: "1px",
+      } as unknown as QuietMuxPlayerStyle,
+    });
+    expect(injected.calls.filter((call) => call.startsWith("style:"))).toEqual([
+      "style:aspect-ratio=auto",
+      "style:height=100%",
+      "style:object-fit=cover",
+      "style:--controls=none",
+    ]);
   });
 });

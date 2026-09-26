@@ -14,6 +14,7 @@ import {
   type SocialMuxPlaybackPolicy,
   type SocialMuxPlaybackTokens,
 } from "@/lib/social-mux";
+import type { QuietMuxPlayerStyle } from "@/lib/social-mux-player-quiet";
 
 // Mux Player is browser-only. SSR paints the host so feed tests stay
 // static. Signed policy mints tokens on the Node route. Public policy
@@ -36,15 +37,14 @@ function MuxPoster({ src, onReady }: { src: string; onReady?: () => void }) {
   );
 }
 
-function playerStyle(chromeless: boolean): Record<string, string> {
-  const style: Record<string, string> = {
+function playerStyle(chromeless: boolean): QuietMuxPlayerStyle {
+  return {
     aspectRatio: "auto",
     width: "100%",
     height: "100%",
     objectFit: "cover",
+    ...(chromeless ? { "--controls": "none" as const } : {}),
   };
-  if (chromeless) style["--controls"] = "none";
-  return style;
 }
 
 export function SocialMuxPlayer({
@@ -114,13 +114,11 @@ export function SocialMuxPlayer({
                 storyboard: tokens.storyboard,
               }}
               streamType="on-demand"
-              playsInline
               autoPlay={autoPlay}
               muted={muted}
               preload="metadata"
               onLoadedData={paint}
               poster={poster}
-              className="size-full object-cover"
               style={playerStyle(chromeless)}
             />
           ) : null}
@@ -133,13 +131,11 @@ export function SocialMuxPlayer({
           <MuxPlayer
             playbackId={playbackId}
             streamType="on-demand"
-            playsInline
             autoPlay={autoPlay}
             muted={muted}
             preload="metadata"
             onLoadedData={paint}
             poster={poster}
-            className="size-full object-cover"
             style={playerStyle(chromeless)}
           />
           {painted ? null : <MuxPoster src={poster} onReady={releaseHold} />}

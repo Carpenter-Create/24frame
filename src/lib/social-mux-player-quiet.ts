@@ -11,6 +11,27 @@ export type QuietMuxTokens = {
   storyboard: string;
 };
 
+// House tokens from playerStyle(chromeless). Other CSS names and values never reach setProperty.
+export type QuietMuxPlayerStyle = {
+  readonly aspectRatio: "auto";
+  readonly width: "100%";
+  readonly height: "100%";
+  readonly objectFit: "cover";
+  readonly "--controls"?: "none";
+};
+
+const QUIET_MUX_PLAYER_STYLE_KEYS = ["aspectRatio", "width", "height", "objectFit", "--controls"] as const;
+
+const QUIET_MUX_PLAYER_STYLE_VALUES = {
+  aspectRatio: "auto",
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  "--controls": "none",
+} as const satisfies {
+  readonly [K in keyof QuietMuxPlayerStyle]-?: NonNullable<QuietMuxPlayerStyle[K]>;
+};
+
 export type QuietMuxPlayerProps = {
   playbackId: string;
   streamType: "on-demand";
@@ -19,7 +40,7 @@ export type QuietMuxPlayerProps = {
   autoPlay: boolean;
   muted: boolean;
   tokens?: QuietMuxTokens;
-  style: Readonly<Record<string, string>>;
+  style: QuietMuxPlayerStyle;
   onLoadedData?: () => void;
 };
 
@@ -78,8 +99,14 @@ export function assignConnectedMuxPlayer(
   player.muted = props.muted;
   player.autoplay = props.autoPlay;
   if (props.tokens) player.tokens = props.tokens;
-  for (const [name, value] of Object.entries(props.style)) {
+  applyQuietMuxPlayerStyle(player, props.style);
+  if (props.onLoadedData) player.addEventListener("loadeddata", props.onLoadedData);
+}
+
+function applyQuietMuxPlayerStyle(player: QuietMuxPlayerElement, style: QuietMuxPlayerStyle): void {
+  for (const name of QUIET_MUX_PLAYER_STYLE_KEYS) {
+    const value = style[name];
+    if (value !== QUIET_MUX_PLAYER_STYLE_VALUES[name]) continue;
     player.style.setProperty(cssPropertyName(name), value);
   }
-  if (props.onLoadedData) player.addEventListener("loadeddata", props.onLoadedData);
 }
