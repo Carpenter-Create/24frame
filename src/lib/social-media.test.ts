@@ -285,6 +285,14 @@ describe("posts.media persist shape", () => {
       assetId: "SqQnqz6s5MBuXGvJaUWdXu",
     };
     expect(mediaItemsForInsert([video], USER)).toEqual({ ok: true, items: [video] });
+    expect(mediaItemsForInsert([{ ...video, width: 1080, height: 1920 }], USER)).toEqual({
+      ok: true,
+      items: [{ ...video, width: 1080, height: 1920 }],
+    });
+    expect(mediaItemsForInsert([{ ...video, width: 0, height: 1920 }], USER)).toEqual({
+      ok: true,
+      items: [video],
+    });
     expect(mediaItemsForInsert([{ ...video, playbackPolicy: "signed" }], USER)).toEqual({
       ok: true,
       items: [{ ...video, playbackPolicy: "signed" }],

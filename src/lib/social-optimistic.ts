@@ -4,6 +4,7 @@
 // apply/await/refresh loops or a second persist helper.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
+import { socialMediaFrameFields } from "@/lib/social-media";
 import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   runOptimisticMutation,
@@ -29,6 +30,8 @@ export type SocialOptimisticPostMedia = {
   url: string;
   playbackId?: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
+  width?: number;
+  height?: number;
 };
 
 export type SocialOptimisticPost = {
@@ -59,6 +62,8 @@ export type SocialPostPublishDraft = {
     uploadId?: string;
     assetId?: string;
     playbackPolicy?: SocialMuxPlaybackPolicy;
+    width?: number;
+    height?: number;
   }[];
   mediaPreview?: readonly SocialOptimisticPostMedia[];
   authorId?: string;
@@ -442,6 +447,7 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
             ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
           }
         : {}),
+      ...(socialMediaFrameFields(item) ?? {}),
     }))),
   );
   if (draft.groupId) form.set("group_id", draft.groupId);
@@ -466,6 +472,7 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
         url: item.url,
         ...(item.playbackId ? { playbackId: item.playbackId } : {}),
         ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
+        ...(socialMediaFrameFields(item) ?? {}),
       })),
   };
   return { ok: true, form, post };

@@ -38,6 +38,15 @@ export function socialMuxPlaybackRequiresTokens(
   return playbackPolicy === "signed";
 }
 
+/**
+ * A covering still is only the signed hold before a playback JWT exists.
+ * Once tokens are in hand the player mounts with its own poster and controls.
+ * Leaving the still up hides play — iOS often withholds loadeddata until then.
+ */
+export function socialMuxCoveringPoster(signed: boolean, hasTokens: boolean): boolean {
+  return signed && !hasTokens;
+}
+
 export function isSocialMuxId(value: string): boolean {
   return SOCIAL_MUX_ID_RE.test(value);
 }
