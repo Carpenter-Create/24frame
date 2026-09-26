@@ -751,7 +751,9 @@ export function SocialCreateCompose({
           continue;
         }
         const measuredNow =
-          slot.kind === "video" ? await waitForComposePixels(slot.localId, controller.signal) : null;
+          slot.kind === "video" && !result.error
+            ? await waitForComposePixels(slot.localId, controller.signal)
+            : null;
         uploadAbortRef.current.delete(slot.localId);
         if (dismissedRef.current.has(slot.localId)) continue;
         const uploaded = result.items?.[0];

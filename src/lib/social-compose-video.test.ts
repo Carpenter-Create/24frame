@@ -273,6 +273,8 @@ describe("write compose video attach", () => {
     expect(loop).toContain("composeVideoUploadPixels(measured)");
     expect(loop.indexOf("waitForComposePixels")).toBeGreaterThan(loop.indexOf("uploadSocialPostMedia"));
     expect(loop.indexOf("commitSocialComposeMediaItem")).toBeGreaterThan(loop.indexOf("waitForComposePixels"));
+    const pixelWait = loop.slice(loop.indexOf("const measuredNow"), loop.indexOf("waitForComposePixels"));
+    expect(pixelWait).toContain("!result.error");
     const mediaCommit = loop.lastIndexOf("setMedia");
     const dismissBeforeCommit = loop.lastIndexOf("dismissedRef.current.has", mediaCommit);
     expect(dismissBeforeCommit).toBeGreaterThan(loop.indexOf("uploadSocialPostMedia"));
