@@ -556,6 +556,7 @@ export const SOCIAL = {
     clearRecent: "Clear",
     empty: "No posts to explore yet.",
     noResults: "No matching posts.",
+    rateLimited: "Too many requests. Please try again later.",
     truncated: `Showing the first ${SOCIAL_EXPLORE_POSTS_LIMIT} matching posts. More exist — this list is not complete.`,
   },
   search: {

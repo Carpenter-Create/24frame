@@ -3,9 +3,15 @@ import { readFileSync } from "node:fs";
 import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mintSocialMuxPlaybackTokens } from "@/lib/social-mux-server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { SOCIAL, socialPostHref } from "@/lib/social";
+import {
+  SOCIAL_EXPLORE_SEARCH_RATE,
+  assertExploreSearchAllowed,
+  resetExploreSearchRateForTests,
+} from "@/lib/social-explore-search-rate-limit";
 import {
   SOCIAL_EXPLORE_CELL_CLASS,
   SOCIAL_EXPLORE_CELL_MEDIA_CLASS,
@@ -38,6 +44,13 @@ vi.mock("@/lib/s3-avatars", () => ({
 }));
 vi.mock("@/lib/s3-education", () => ({
   signedEducationCoverUrls: vi.fn(async () => new Map()),
+}));
+vi.mock("@/lib/social-mux-server", () => ({
+  mintSocialMuxPlaybackTokens: vi.fn(async () => ({
+    playback: "play.jwt",
+    thumbnail: "thumb.jwt",
+    storyboard: "board.jwt",
+  })),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn().mockResolvedValue({
@@ -83,9 +96,15 @@ function stub() {
 
 describe("Social Explore", () => {
   beforeEach(() => {
+    resetExploreSearchRateForTests();
     vi.clearAllMocks();
     stub();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(mintSocialMuxPlaybackTokens).mockResolvedValue({
+      playback: "play.jwt",
+      thumbnail: "thumb.jwt",
+      storyboard: "board.jwt",
+    });
   });
 
   it("is a media discovery shell without Home lenses or a people hub", async () => {
@@ -124,7 +143,16 @@ describe("Social Explore", () => {
     expect(src).not.toContain("SocialForYouRail");
     expect(src).not.toContain('from "@/components/social/social-for-you-covers"');
     expect(src).not.toContain("signSocialForYouCourseCovers");
-    expect(src).toContain('export const runtime = "edge"');
+    expect(src).toContain('export const runtime = "nodejs"');
+    expect(src).not.toContain("SocialStoryMuxThumb");
+    expect(src).not.toContain("@/lib/social-mux-server");
+    expect(src).toContain("signExploreMuxPosterUrls");
+    expect(src).toContain("assertExploreSearchAllowed");
+    const hitsFn = src.slice(src.indexOf("function SocialExploreHits"));
+    const mediaFn = src.slice(src.indexOf("function SocialExploreMedia"), src.indexOf("function SocialExploreHits"));
+    expect(mediaFn).not.toContain("assertExploreSearchAllowed");
+    expect(hitsFn.indexOf("assertExploreSearchAllowed")).toBeGreaterThan(-1);
+    expect(hitsFn.indexOf("assertExploreSearchAllowed")).toBeLessThan(hitsFn.indexOf("loadExploreSearch"));
     expect(src).not.toContain("SocialLensRow");
     expect(src).not.toContain("SocialSuggestedPeople");
     expect(src).not.toContain("loadSuggestedPeople");
@@ -304,8 +332,11 @@ describe("Social Explore", () => {
     expect(html).toContain("data-social-explore-grid");
     expect(html).toContain("data-social-explore-stack");
     expect(html).toContain('data-social-icon="stack"');
-    expect(html).toContain("data-social-story-mux-thumb");
+    expect(html).toContain("data-social-explore-video");
     expect(html).toContain(`https://image.mux.com/${playbackId}/thumbnail.webp`);
+    expect(html).not.toContain("?token=");
+    expect(html).not.toContain("data-social-story-mux-thumb");
+    expect(mintSocialMuxPlaybackTokens).not.toHaveBeenCalled();
     expect(html).toContain(`href="${socialPostHref("m-stack")}"`);
     expect(html).toContain(`href="${socialPostHref("m-video")}"`);
     expect(html).toContain('data-social-explore-clear=""');
@@ -317,5 +348,86 @@ describe("Social Explore", () => {
     expect(html).not.toContain("data-social-profile-play");
     expect(html).not.toContain("squares-four");
     expect(html).not.toContain("data-social-explore-trending");
+  });
+
+  it("refuses Explore search once the per-user meter is full", async () => {
+    for (let i = 0; i < SOCIAL_EXPLORE_SEARCH_RATE.perUserPerMinute; i += 1) {
+      await assertExploreSearchAllowed("u1");
+    }
+    const from = vi.fn(() => emptyQuery());
+    vi.mocked(createClient).mockResolvedValue({ from } as never);
+    const html = await renderServerMarkup(
+      await SocialExplorePage({ searchParams: Promise.resolve({ q: "ada" }) }),
+    );
+    expect(html).toContain("data-social-explore-rate-limited");
+    expect(html).toContain("data-social-explore-query");
+    expect(html).toContain(SOCIAL.explore.rateLimited);
+    expect(html).not.toContain("data-social-explore-grid");
+    expect(from).not.toHaveBeenCalled();
+    expect(mintSocialMuxPlaybackTokens).not.toHaveBeenCalled();
+  });
+
+  it("still loads trending after the search meter is full", async () => {
+    for (let i = 0; i < SOCIAL_EXPLORE_SEARCH_RATE.perUserPerMinute; i += 1) {
+      await assertExploreSearchAllowed("u1");
+    }
+    const from = vi.fn(() => emptyQuery());
+    vi.mocked(createClient).mockResolvedValue({ from } as never);
+    const html = await renderServerMarkup(
+      await SocialExplorePage({ searchParams: Promise.resolve({}) }),
+    );
+    expect(html).toContain("data-social-explore-trending");
+    expect(html).not.toContain("data-social-explore-rate-limited");
+    expect(from).toHaveBeenCalled();
+  });
+
+  it("paints a server-signed Mux poster for a signed cover", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const clip = "33333333-3333-4333-8333-333333333333";
+    const playbackId = "uNbxnGLKJ00yfbijDO8COxT";
+    const posts = [
+      {
+        id: "m-signed",
+        body: "Signed clip",
+        author_id: author,
+        media: [
+          {
+            kind: "video",
+            key: `posts/${author}/${clip}.mp4`,
+            contentType: "video/mp4",
+            provider: "mux",
+            playbackId,
+            playbackPolicy: "signed",
+          },
+        ],
+      },
+    ];
+    const postsChain: Record<string, unknown> = {};
+    const self = () => postsChain;
+    postsChain.select = vi.fn(self);
+    postsChain.eq = vi.fn(self);
+    postsChain.is = vi.fn(self);
+    postsChain.or = vi.fn(self);
+    postsChain.ilike = vi.fn(self);
+    postsChain.order = vi.fn(self);
+    postsChain.in = vi.fn(self);
+    postsChain.range = vi.fn(async () => ({ data: posts, error: null }));
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "posts") return postsChain;
+        return emptyQuery();
+      }),
+    } as never);
+
+    const html = await renderServerMarkup(
+      await SocialExplorePage({ searchParams: Promise.resolve({}) }),
+    );
+    expect(html).toContain("data-social-explore-video");
+    expect(html).toContain(`https://image.mux.com/${playbackId}/thumbnail.webp?token=thumb.jwt`);
+    expect(html).not.toContain("data-social-story-mux-thumb");
+    expect(html).not.toContain("<video");
+    expect(html).not.toContain("Signed clip");
+    expect(mintSocialMuxPlaybackTokens).toHaveBeenCalledTimes(1);
+    expect(mintSocialMuxPlaybackTokens).toHaveBeenCalledWith(playbackId);
   });
 });
