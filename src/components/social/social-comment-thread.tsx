@@ -15,12 +15,12 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_COMMENT_COMPOSER_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_COMMENT_SHEET_HOST_CLASS,
   SOCIAL_COMMENT_SHEET_SCRIM_CLASS,
   SOCIAL_COMMENT_SHEET_SURFACE_CLASS,
-  SOCIAL_POST_ACTION_GLYPH,
-  SOCIAL_POST_ACTION_HIT_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import { socialMemberHref, socialRelativeTime, SOCIAL } from "@/lib/social";
 import {
   applyOptimisticCommentCount,
@@ -63,13 +63,13 @@ export function SocialCommentTrigger({
           aria-label={SOCIAL.post.commentsTitle}
           className={
             icon
-              ? cn(SOCIAL_POST_ACTION_HIT_CLASS, tone === "stage" ? "text-band-ink" : "text-ink-2")
+              ? cn(SOCIAL_POST_ACTION_HIT_CLASS, tone === "stage" && "text-band-ink")
               : "self-start text-left t-body-sm text-ink-2"
           }
           onClick={() => setOpen(true)}
         >
           {icon ? (
-            <SocialIcon name="chat-circle" size={SOCIAL_POST_ACTION_GLYPH} />
+            <SocialIcon name="chat-circle" size={SOCIAL_ICON_SIZE_POST_ACTION} />
           ) : (
             `${count} ${SOCIAL.post.comments}`
           )}

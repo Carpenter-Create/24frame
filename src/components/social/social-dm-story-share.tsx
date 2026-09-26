@@ -12,6 +12,7 @@ import {
   type StoryShareFullscreenHost,
 } from "@/lib/social-dm-story-fullscreen";
 import { SOCIAL } from "@/lib/social";
+import { isSocialMuxId, type SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 
 // Send craft v1.4. The card is the story frame. Media fills it.
 // The author chip sits on the picture. Not a caption bar under a pasted still.
@@ -61,6 +62,7 @@ export function SocialDmStoryShare({
   kind,
   url,
   playbackId,
+  playbackPolicy,
   href,
 }: {
   authorName: string;
@@ -69,17 +71,13 @@ export function SocialDmStoryShare({
   kind: "image" | "video" | null;
   url: string | null;
   playbackId?: string;
+  playbackPolicy?: SocialMuxPlaybackPolicy;
   href: string | null;
 }) {
   const frame = "absolute inset-0 size-full overflow-hidden bg-[#0A0A0B]";
+  const muxPlay = kind === "video" && !!playbackId && isSocialMuxId(playbackId);
   let media: ReactNode = null;
-  if (unavailable || !url || !kind) {
-    media = (
-      <p className={`${frame} flex items-center justify-center px-[8px] text-center t-body-sm text-white/80 break-words`}>
-        {SOCIAL.dms.storyUnavailable}
-      </p>
-    );
-  } else if (kind === "video") {
+  if (!unavailable && kind === "video" && (muxPlay || url)) {
     media = (
       <div
         data-social-dm-story-video=""
@@ -87,22 +85,28 @@ export function SocialDmStoryShare({
         onClick={(event) => fullscreenSameHost(event.currentTarget)}
       >
         <SocialFeedVideo
-          item={{ url, playbackId }}
+          item={{ url: url ?? "", playbackId, playbackPolicy }}
           className="absolute inset-0 size-full object-cover"
         />
       </div>
     );
-  } else if (href) {
+  } else if (!unavailable && kind === "image" && url && href) {
     media = (
       <Link href={href} data-social-dm-story-photo="" className={`${frame} block`}>
         <SocialMediaImage src={url} sizes="168px" alt="" />
       </Link>
     );
-  } else {
+  } else if (!unavailable && kind === "image" && url) {
     media = (
       <div data-social-dm-story-photo="" className={frame}>
         <SocialMediaImage src={url} sizes="168px" alt="" />
       </div>
+    );
+  } else {
+    media = (
+      <p className={`${frame} flex items-center justify-center px-[8px] text-center t-body-sm text-white/80 break-words`}>
+        {SOCIAL.dms.storyUnavailable}
+      </p>
     );
   }
 

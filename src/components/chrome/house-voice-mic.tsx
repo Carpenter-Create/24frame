@@ -9,6 +9,14 @@ import {
   HOUSE_VOICE_MIC_CLASS,
   HOUSE_VOICE_MIC_LISTENING_CLASS,
 } from "@/lib/form-control";
+import {
+  SOCIAL_WRITE_COMPOSE_MIC_CLASS,
+  SOCIAL_WRITE_COMPOSE_MIC_LISTENING_CLASS,
+  SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS,
+  SOCIAL_WRITE_VOICE_HERO_CLASS,
+  SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS,
+  SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS,
+} from "@/lib/social-chrome";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import {
   houseVoiceLabel,
@@ -49,6 +57,7 @@ export function HouseVoiceMic({
   locale,
   getValue,
   onValue,
+  presentation = "icon",
 }: {
   surface: HouseVoiceSurface;
   workspace: SpeechLearningWorkspace;
@@ -57,6 +66,8 @@ export function HouseVoiceMic({
   locale?: string;
   getValue: () => string;
   onValue: (next: string) => void;
+  /** Compose voice faces stay visible when speech is unavailable. */
+  presentation?: "icon" | "hero" | "footer";
 }) {
   const probed = useSyncExternalStore(
     subscribeSpeechRecognition,
@@ -65,6 +76,7 @@ export function HouseVoiceMic({
   );
   const available = supported ?? probed;
   const [listening, setListening] = useState(false);
+  const [recording, setRecording] = useState(false);
   const listeningRef = useRef(false);
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const baselineRef = useRef("");
@@ -92,10 +104,22 @@ export function HouseVoiceMic({
     };
   }, []);
 
-  if (!available) return null;
+  const hero = presentation === "hero";
+  const footer = presentation === "footer";
+  if (!available && !hero && !footer) return null;
 
   const mode = houseVoiceTranscriptMode(surface);
-  const label = listening ? HOUSE_VOICE.listening : houseVoiceLabel(surface);
+  const label = hero
+    ? listening
+      ? HOUSE_VOICE.stop
+      : HOUSE_VOICE.voice
+    : footer
+      ? listening
+        ? HOUSE_VOICE.stop
+        : HOUSE_VOICE.dictate
+      : listening
+        ? HOUSE_VOICE.listening
+        : houseVoiceLabel(surface);
 
   function detach(rec: SpeechRecognitionLike | null) {
     if (!rec) return;
@@ -113,6 +137,7 @@ export function HouseVoiceMic({
   function stop() {
     listeningRef.current = false;
     setListening(false);
+    setRecording(false);
     detach(recRef.current);
   }
 
@@ -128,6 +153,7 @@ export function HouseVoiceMic({
     spokenRef.current = "";
     rec.onresult = (event) => {
       const { finals, interim } = transcriptsFromSpeechEvent(event);
+      if (finals.length > 0 || interim) setRecording(true);
       for (const spoken of finals) {
         if (mode === "replace") {
           spokenRef.current = applySpeechTranscript(spokenRef.current, spoken, "append");
@@ -191,17 +217,28 @@ export function HouseVoiceMic({
       aria-pressed={listening}
       aria-label={label}
       className={cn(
-        HOUSE_ICON_BUTTON_CLASS,
-        HOUSE_VOICE_MIC_CLASS,
-        FORM_CONTROL_FOCUS_CLASS,
-        listening && HOUSE_VOICE_MIC_LISTENING_CLASS,
+        hero
+          ? SOCIAL_WRITE_VOICE_HERO_CLASS
+          : footer
+            ? cn(SOCIAL_WRITE_COMPOSE_MIC_CLASS, FORM_CONTROL_FOCUS_CLASS)
+            : cn(HOUSE_ICON_BUTTON_CLASS, HOUSE_VOICE_MIC_CLASS, FORM_CONTROL_FOCUS_CLASS),
+        hero && listening && SOCIAL_WRITE_VOICE_HERO_LISTENING_CLASS,
+        hero && recording && SOCIAL_WRITE_VOICE_HERO_RECORDING_CLASS,
+        footer && listening && SOCIAL_WRITE_COMPOSE_MIC_LISTENING_CLASS,
+        footer && recording && SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS,
+        !hero && !footer && listening && HOUSE_VOICE_MIC_LISTENING_CLASS,
       )}
       onClick={() => {
         if (listeningRef.current) stop();
         else start();
       }}
     >
-      <Microphone className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} aria-hidden />
+      <Microphone
+        size={footer ? 24 : undefined}
+        className={hero ? "size-14" : footer ? undefined : "size-4"}
+        weight={hero ? "fill" : footer ? "fill" : PHOSPHOR_CHROME_IDLE_WEIGHT}
+        aria-hidden
+      />
     </button>
   );
 }

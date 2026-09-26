@@ -28,10 +28,11 @@ import {
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_FOLLOW_COMPACT_CLASS,
   SOCIAL_FOLLOW_COMPACT_IDLE_CLASS,
-  SOCIAL_POST_ACTION_GLYPH,
+  SOCIAL_POST_ACTION_HEART_NUDGE_CLASS,
   SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_HEART_LIKED_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import {
   FOLLOW_CONFIRM_MS,
   followButtonLabel,
@@ -288,7 +289,7 @@ export function SocialLikeButton({
   }
 
   return (
-    <span className="inline">
+    <span className={icon ? "relative inline-flex shrink-0" : "inline"}>
       <button
         type="button"
         disabled={disabled}
@@ -302,23 +303,30 @@ export function SocialLikeButton({
                   ? view.liked
                     ? SOCIAL_STORY_HEART_LIKED_CLASS
                     : "text-band-ink"
-                  : view.liked
-                    ? "text-ink"
-                    : "text-ink-2",
+                  : view.liked && "text-accent",
               )
             : "t-body-sm text-ink-2"
         }
         onClick={onToggle}
       >
         {icon ? (
-          <SocialIcon name="heart" active={view.liked} size={SOCIAL_POST_ACTION_GLYPH} />
+          <SocialIcon
+            name="heart"
+            active={view.liked}
+            size={SOCIAL_ICON_SIZE_POST_ACTION}
+            className={SOCIAL_POST_ACTION_HEART_NUDGE_CLASS}
+          />
         ) : (
           <>
             {view.likeCount} {SOCIAL.post.likes}
           </>
         )}
       </button>
-      {error ? <FormError error={error} /> : null}
+      {error ? (
+        <span className={icon ? "absolute top-full left-0 z-10" : undefined}>
+          <FormError error={error} />
+        </span>
+      ) : null}
     </span>
   );
 }

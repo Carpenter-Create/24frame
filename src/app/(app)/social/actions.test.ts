@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthUser } from "@/lib/supabase/auth";
@@ -32,6 +33,7 @@ import {
   createSocialComment,
   deleteSocialComment,
   sendSocialStoryItem,
+  sendSocialPostShare,
   toggleSocialFollow,
   toggleSocialLike,
   toggleSocialStoryLike,
@@ -125,6 +127,137 @@ function stub({
   const rpc = vi.fn(async () => ({ data: rpcData, error: rpcError }));
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
   return { from, rpc, inserts, updates, deletes };
+}
+
+const POST_SHARE_AUTHOR = "11111111-1111-4111-8111-111111111111";
+const POST_SHARE_ATTEMPT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+
+function postShareForm(peerIds: string[], note?: string) {
+  const form = new FormData();
+  form.set("post_id", "p1");
+  form.set("attempt_id", POST_SHARE_ATTEMPT);
+  for (const id of peerIds) form.append("peer_id", id);
+  if (note) form.set("note", note);
+  return form;
+}
+
+function mockPostShare({
+  followeeIds = ["u2", "u3"],
+  groupId = null,
+  access = true,
+  accessError = null,
+  failInsertPeers,
+}: {
+  followeeIds?: string[];
+  groupId?: string | null;
+  access?: boolean | null;
+  accessError?: { message: string } | null;
+  failInsertPeers?: Set<string>;
+} = {}) {
+  const objectId = "22222222-2222-4222-8222-222222222222";
+  const media = [
+    {
+      kind: "video" as const,
+      key: `posts/${POST_SHARE_AUTHOR}/${objectId}.mp4`,
+      contentType: "video/mp4" as const,
+      provider: "mux" as const,
+      playbackId: "abc12345xx",
+    },
+  ];
+  const inserted = new Set<string>();
+  const failOnce = new Set(failInsertPeers ?? []);
+  const inserts: { table: string; row: unknown }[] = [];
+  const allowProfiles = [
+    ...followeeIds.map((id, index) => ({
+      id,
+      handle: `peer${index}`,
+      display_name: index === 0 ? "Lauren" : `Person ${id}`,
+      status: "active" as const,
+    })),
+    { id: "u1", handle: "ada", display_name: "Ada", status: "active" as const },
+  ];
+  const from = vi.fn((table: string) => {
+    const calls: string[] = [];
+    const eqs: [string, string][] = [];
+    const chain: Record<string, unknown> = {};
+    const self = () => chain;
+    chain.select = vi.fn(self);
+    chain.eq = vi.fn((column: string, value: string) => {
+      eqs.push([column, value]);
+      return chain;
+    });
+    chain.order = vi.fn(self);
+    chain.range = vi.fn(self);
+    chain.in = vi.fn(() => {
+      calls.push("in");
+      return chain;
+    });
+    chain.contains = vi.fn(() => {
+      calls.push("contains");
+      return chain;
+    });
+    chain.limit = vi.fn(self);
+    chain.maybeSingle = vi.fn(async () => {
+      if (table === "posts") {
+        return {
+          data: {
+            id: "p1",
+            author_id: POST_SHARE_AUTHOR,
+            body: "DO YALL KNOW",
+            status: "active",
+            group_id: groupId,
+            media,
+          },
+          error: null,
+        };
+      }
+      return {
+        data: { id: "u1", handle: "ada", display_name: "Ada", status: "active", bio: null },
+        error: null,
+      };
+    });
+    chain.insert = vi.fn((row: { conversation_id?: string }) => {
+      const peerId = String(row.conversation_id ?? "").replace(/^conv-/, "");
+      const fail = failOnce.has(peerId);
+      if (fail) failOnce.delete(peerId);
+      else inserted.add(peerId);
+      const error = fail ? { message: "insert failed" } : null;
+      if (!error) inserts.push({ table, row });
+      const result = { data: null, error };
+      return {
+        then: (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve),
+      };
+    });
+    chain.then = (resolve: (value: unknown) => unknown) => {
+      if (table === "follows") {
+        return Promise.resolve({
+          data: followeeIds.map((id) => ({ followee_id: id })),
+          error: null,
+        }).then(resolve);
+      }
+      if (table === "profiles" && calls.includes("in")) {
+        return Promise.resolve({ data: allowProfiles, error: null }).then(resolve);
+      }
+      if (table === "messages" && calls.includes("contains")) {
+        const conversationId = eqs.find(([column]) => column === "conversation_id")?.[1] ?? "";
+        const peerId = conversationId.replace(/^conv-/, "");
+        const data = inserted.has(peerId) ? [{ id: `prior-${peerId}` }] : [];
+        return Promise.resolve({ data, error: null }).then(resolve);
+      }
+      return Promise.resolve({ data: null, error: null }).then(resolve);
+    };
+    return chain;
+  });
+  const rpc = vi.fn(async (name: string, args?: Record<string, unknown>) => {
+    if (name === "get_dm_inbox") return { data: [], error: null };
+    if (name === "can_access_group_content") return { data: access, error: accessError };
+    if (name === "open_or_get_direct_conversation") {
+      return { data: `conv-${String(args?.p_peer ?? "")}`, error: null };
+    }
+    return { data: null, error: { message: "unexpected rpc" } };
+  });
+  vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+  return { from, rpc, inserts };
 }
 
 describe("social actions", () => {
@@ -517,7 +650,14 @@ describe("social actions", () => {
     const { inserts } = stub({ profile: null });
     const object = "22222222-2222-4222-8222-222222222222";
     const media = [
-      { kind: "video" as const, key: `stories/${author}/${object}.mp4`, contentType: "video/mp4" as const },
+      {
+        kind: "video" as const,
+        key: `stories/${author}/${object}.mp4`,
+        contentType: "video/mp4" as const,
+        provider: "mux" as const,
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        playbackPolicy: "signed" as const,
+      },
     ];
     const form = new FormData();
     form.set("media", JSON.stringify(media));
@@ -649,6 +789,108 @@ describe("social actions", () => {
     });
   });
 
+  it("sends a post share card to each selected person", async () => {
+    const { from, rpc, inserts } = mockPostShare();
+    const form = postShareForm(["u2", "u3"], "watch this");
+    expect(await sendSocialPostShare(form)).toEqual({});
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
+    expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u3" });
+    expect(rpc).not.toHaveBeenCalledWith("can_access_group_content", expect.anything());
+    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(inserts).toHaveLength(2);
+    expect(inserts[0]).toMatchObject({
+      table: "messages",
+      row: {
+        sender_id: "u1",
+        conversation_id: "conv-u2",
+        body: "watch this",
+        status: "active",
+      },
+    });
+    const row = inserts[0]?.row as { media: Array<Record<string, unknown>> };
+    expect(row.media.at(-1)).toMatchObject({
+      kind: "post-share",
+      postId: "p1",
+      authorId: POST_SHARE_AUTHOR,
+      authorHandle: "ada",
+      caption: "DO YALL KNOW",
+      attemptId: POST_SHARE_ATTEMPT,
+    });
+    expect(row.media.some((item) => item.playbackId === "abc12345xx")).toBe(true);
+    expect(JSON.stringify(row)).not.toMatch(/\/social\/p\/|https?:/);
+  });
+
+  it("refuses a peer who is not on the story-send allowlist", async () => {
+    const { rpc, inserts } = mockPostShare({ followeeIds: ["u2"] });
+    const result = await sendSocialPostShare(postShareForm(["u2", "u9"]));
+    expect(result.failedPeerIds).toEqual(["u9"]);
+    expect(result.error).toBe(SOCIAL.post.shareFailed);
+    expect(inserts).toHaveLength(1);
+    const opened = rpc.mock.calls
+      .filter(([name]) => name === "open_or_get_direct_conversation")
+      .map(([, args]) => (args as { p_peer: string }).p_peer);
+    expect(opened).toEqual(["u2"]);
+  });
+
+  it("refuses a group post when the recipient cannot view it and copies no media", async () => {
+    const { rpc, inserts } = mockPostShare({
+      followeeIds: ["u2"],
+      groupId: "g1",
+      access: false,
+    });
+    const result = await sendSocialPostShare(postShareForm(["u2"]));
+    expect(result.failedPeerIds).toEqual(["u2"]);
+    expect(result.error).toBe(SOCIAL.post.shareFailedPeers("Lauren"));
+    expect(inserts).toEqual([]);
+    expect(rpc).toHaveBeenCalledWith("can_access_group_content", { p_group: "g1", p_user: "u2" });
+    expect(rpc).not.toHaveBeenCalledWith("open_or_get_direct_conversation", expect.anything());
+    expect(JSON.stringify(inserts)).not.toContain("abc12345xx");
+    const send = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
+    const fn = send.slice(
+      send.indexOf("export async function sendSocialPostShare"),
+      send.indexOf("export async function listStorySendPeople"),
+    );
+    const view = fn.indexOf("recipientMayViewPost");
+    expect(view).toBeGreaterThan(-1);
+    expect(fn.indexOf("ownedMediaItems")).toBeGreaterThan(view);
+    expect(fn.indexOf("open_or_get_direct_conversation")).toBeGreaterThan(view);
+  });
+
+  it("fails closed when the group access check errors", async () => {
+    const { rpc, inserts } = mockPostShare({
+      followeeIds: ["u2"],
+      groupId: "g1",
+      accessError: { message: "no" },
+    });
+    const result = await sendSocialPostShare(postShareForm(["u2"]));
+    expect(result.failedPeerIds).toEqual(["u2"]);
+    expect(inserts).toEqual([]);
+    expect(rpc).not.toHaveBeenCalledWith("open_or_get_direct_conversation", expect.anything());
+  });
+
+  it("skips peers already sent for this attempt when the sheet retries", async () => {
+    const { inserts } = mockPostShare({ failInsertPeers: new Set(["u3"]) });
+    const form = postShareForm(["u2", "u3"]);
+    const first = await sendSocialPostShare(form);
+    expect(first.failedPeerIds).toEqual(["u3"]);
+    expect(inserts).toHaveLength(1);
+    expect(await sendSocialPostShare(form)).toEqual({});
+    expect(inserts).toHaveLength(2);
+    const rooms = inserts.map((entry) => (entry.row as { conversation_id: string }).conversation_id);
+    expect(rooms.filter((id) => id === "conv-u2")).toEqual(["conv-u2"]);
+    expect(rooms.filter((id) => id === "conv-u3")).toEqual(["conv-u3"]);
+  });
+
+  it("does not open a conversation when the share attempt id is missing", async () => {
+    const { rpc, inserts } = mockPostShare();
+    const form = new FormData();
+    form.set("post_id", "p1");
+    form.append("peer_id", "u2");
+    expect(await sendSocialPostShare(form)).toEqual({ error: SOCIAL.post.shareFailed });
+    expect(inserts).toEqual([]);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("creates a comment when a profile exists", async () => {
     const { inserts } = stub({ profile: { id: "u1" } });
     const form = new FormData();
@@ -776,9 +1018,42 @@ describe("social actions", () => {
     form.append("peer_id", "u2");
     form.append("peer_id", "u3");
     await expect(startSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-g");
+    expect(rpc).toHaveBeenCalledTimes(1);
     expect(rpc).toHaveBeenCalledWith("create_group_conversation", { p_peers: ["u2", "u3"] });
     expect(from).not.toHaveBeenCalledWith("conversations");
     expect(from).not.toHaveBeenCalledWith("conversation_participants");
+  });
+
+  it("sets an optional name on a fresh multi-party DM and leaves a 1:1 untitled", async () => {
+    const named = stub({ profile: { id: "u1" }, rpcData: "conv-g" });
+    const form = new FormData();
+    form.append("peer_id", "u2");
+    form.append("peer_id", "u3");
+    form.set("title", "Desk room");
+    await expect(startSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-g");
+    expect(named.rpc).toHaveBeenNthCalledWith(1, "create_group_conversation", { p_peers: ["u2", "u3"] });
+    expect(named.rpc).toHaveBeenNthCalledWith(2, "set_group_conversation_title", {
+      p_conversation: "conv-g",
+      p_title: "Desk room",
+    });
+
+    const direct = stub({ profile: { id: "u1" }, rpcData: "conv-1" });
+    const one = new FormData();
+    one.append("peer_id", "u2");
+    one.set("title", "Nope");
+    await expect(startSocialDm(one)).rejects.toThrow("REDIRECT:/social/dms/conv-1");
+    expect(direct.rpc).toHaveBeenCalledTimes(1);
+    expect(direct.rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
+  });
+
+  it("rejects an overlong group name before creating a room", async () => {
+    const { rpc } = stub({ profile: { id: "u1" }, rpcData: "conv-g" });
+    const form = new FormData();
+    form.append("peer_id", "u2");
+    form.append("peer_id", "u3");
+    form.set("title", "x".repeat(81));
+    expect(await startSocialDm(form)).toEqual({ error: SOCIAL.dms.titleInvalid });
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("persists image and video keys on posts.media", async () => {
@@ -786,20 +1061,79 @@ describe("social actions", () => {
     const object = "22222222-2222-4222-8222-222222222222";
     vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
     const { inserts } = stub({ profile: { id: author } });
+    const native = new FormData();
+    native.set("body", "with media");
+    native.set(
+      "media",
+      JSON.stringify([
+        { kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" },
+        { kind: "video", key: `posts/${author}/${object}.mp4`, contentType: "video/mp4" },
+      ]),
+    );
+    expect(await createSocialPost(native)).toEqual({ error: SOCIAL.home.mediaType });
     const media = [
       { kind: "image" as const, key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" as const },
-      { kind: "video" as const, key: `posts/${author}/${object}.mp4`, contentType: "video/mp4" as const },
+      {
+        kind: "video" as const,
+        key: `posts/${author}/${object}.mp4`,
+        contentType: "video/mp4" as const,
+        provider: "mux" as const,
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        playbackPolicy: "signed" as const,
+      },
     ];
     const form = new FormData();
     form.set("body", "with media");
     form.set("media", JSON.stringify(media));
     await expect(createSocialPost(form)).rejects.toThrow("REDIRECT:/social");
+    expect(headSocialMediaObject).toHaveBeenCalledTimes(1);
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`);
     expect(inserts).toEqual([
       {
         table: "posts",
         row: postInsertRow({ authorId: author, body: "with media", media }),
       },
     ]);
+  });
+
+  it("rejects a post when the stored object is missing, oversized, or a different type", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const form = new FormData();
+    form.set("body", "Testing a post with a photo attached");
+    form.set(
+      "media",
+      JSON.stringify([{ kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" }]),
+    );
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaMissing });
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce({
+      bytes: 11 * 1024 * 1024,
+      contentType: "image/jpeg",
+    });
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaTooLarge });
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce({ bytes: 1200, contentType: "video/mp4" });
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaType });
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`);
+
+    const second = "44444444-4444-4444-8444-444444444444";
+    const pair = new FormData();
+    pair.set("body", "two stills");
+    pair.set(
+      "media",
+      JSON.stringify([
+        { kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" },
+        { kind: "image", key: `posts/${author}/${second}.jpg`, contentType: "image/jpeg" },
+      ]),
+    );
+    vi.mocked(headSocialMediaObject)
+      .mockResolvedValueOnce({ bytes: 1200, contentType: "image/jpeg" })
+      .mockResolvedValueOnce(null);
+    expect(await createSocialPost(pair)).toEqual({ error: SOCIAL.home.mediaMissing });
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`posts/${author}/${second}.jpg`);
+    expect(inserts).toEqual([]);
   });
 
   it("rejects another author's media key on create", async () => {
@@ -938,8 +1272,7 @@ describe("social actions", () => {
       "media",
       JSON.stringify([{ kind: "video", key: `stories/${author}/${object}.mp4`, contentType: "video/mp4" }]),
     );
-    vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
-    expect(await createSocialStory(video)).toEqual({ error: SOCIAL.stories.mediaMissing });
+    expect(await createSocialStory(video)).toEqual({ error: SOCIAL.stories.mediaType });
     expect(inserts).toEqual([]);
   });
 
@@ -1009,16 +1342,40 @@ describe("social actions", () => {
     expect(await finalizeSocialMuxUpload(finish)).toEqual({ error: SOCIAL.home.videoPreparing });
   });
 
-  it("does not open a Mux upload on the stories lane", async () => {
+  it("opens a Mux upload on the stories lane and finalizes that key", async () => {
     const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
     vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
     stub({ profile: { id: author } });
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(object);
+    vi.mocked(createSocialMuxDirectUpload).mockResolvedValue({
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      url: "https://storage.googleapis.com/mux-upload",
+    });
     const form = new FormData();
     form.set("content_type", "video/mp4");
     form.set("byte_length", "1200");
     form.set("lane", "stories");
-    expect(await createSocialMuxUpload(form)).toEqual({ error: SOCIAL.home.mediaType });
-    expect(createSocialMuxDirectUpload).not.toHaveBeenCalled();
+    expect(await createSocialMuxUpload(form)).toEqual({
+      key: `stories/${author}/${object}.mp4`,
+      url: "https://storage.googleapis.com/mux-upload",
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      kind: "video",
+      contentType: "video/mp4",
+    });
+    expect(createSocialMuxDirectUpload).toHaveBeenCalled();
+    vi.mocked(finalizeSocialMuxDirectUpload).mockResolvedValue({
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+      playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+    });
+    const finish = new FormData();
+    finish.set("upload_id", "zd01Pe2bNpYhxbrwYABgFE");
+    finish.set("key", `stories/${author}/${object}.mp4`);
+    finish.set("content_type", "video/mp4");
+    expect(await finalizeSocialMuxUpload(finish)).toMatchObject({
+      item: { playbackId: "uNbxnGLKJ00yfbijDO8COxT", key: `stories/${author}/${object}.mp4` },
+    });
   });
 
   it("stores bio newlines and counts them toward 150", async () => {

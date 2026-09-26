@@ -271,7 +271,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .app-sheet-rise,
-  .app-sheet-scrim-fade {
+  .app-sheet-scrim-fade,
+  .social-story-open-settle,
+  .social-story-activate,
+  .social-story-activate-prev {
     animation: none !important;
   }
   .app-sheet-rise {
@@ -279,24 +282,31 @@ body {
   }
 }
 
-/* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation. */
-@keyframes social-story-stage-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* Rich calm v1.4. Viewer and rail paint only. Listed durations. No elevation.
+   Open-smooth v1.1: hops slide 220ms and stay opaque. A fade from zero is the jump. */
 
-.social-story-stage-in {
-  animation: social-story-stage-in 180ms ease-out both;
+/* §0.2. Preview comment FAB is not write-compose chrome. */
+body:has([data-social-write-compose]) :is(#vercel-toolbar, vercel-live-feedback, [data-vercel-toolbar]) {
+  display: none !important;
 }
 
 @keyframes social-story-activate {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: none; }
+  from { transform: translateX(24px); }
+  to { transform: none; }
 }
 
 @keyframes social-story-activate-prev {
-  from { opacity: 0; transform: translateX(-24px); }
-  to { opacity: 1; transform: none; }
+  from { transform: translateX(-24px); }
+  to { transform: none; }
+}
+
+@keyframes social-story-open-settle {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.social-story-open-settle {
+  animation: social-story-open-settle 220ms ease-out both;
 }
 
 .social-story-activate {
@@ -371,6 +381,14 @@ html:has([data-social-feed-immersive]) [data-house-phone-bottom-nav] {
   height: 100%;
   aspect-ratio: unset;
   object-fit: cover;
+}
+
+/* Adam lock 2026-09-25. Feed carousel slide cap. Same Media Immersion
+   box for every slide so the stage does not jump while swiping.
+   Cover crop lives on the media. Width bleed is a chrome class. */
+.social-feed-carousel-slide {
+  height: min(70vh, 560px);
+  max-height: min(70vh, 560px);
 }
 
 /* Stories posted confirm. The studio host lives in the page scroller;

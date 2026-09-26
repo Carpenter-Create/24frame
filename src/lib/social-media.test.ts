@@ -13,6 +13,7 @@ import {
   welcomeVideoKeyFromMedia,
   parsePostMedia,
   socialMediaObjectKey,
+  socialPublishedVideoRejection,
   storedSocialMediaRejection,
   validateMediaUpload,
 } from "./social-media";
@@ -273,7 +274,7 @@ describe("posts.media persist shape", () => {
     });
   });
 
-  it("keeps Mux playback ids on owned post video keys and rejects stories Mux", () => {
+  it("keeps Mux playback ids on owned post and story video", () => {
     const video = {
       kind: "video" as const,
       key: `posts/${USER}/${OBJECT}.mp4`,
@@ -284,6 +285,14 @@ describe("posts.media persist shape", () => {
       assetId: "SqQnqz6s5MBuXGvJaUWdXu",
     };
     expect(mediaItemsForInsert([video], USER)).toEqual({ ok: true, items: [video] });
+    expect(mediaItemsForInsert([{ ...video, width: 1080, height: 1920 }], USER)).toEqual({
+      ok: true,
+      items: [{ ...video, width: 1080, height: 1920 }],
+    });
+    expect(mediaItemsForInsert([{ ...video, width: 0, height: 1920 }], USER)).toEqual({
+      ok: true,
+      items: [video],
+    });
     expect(mediaItemsForInsert([{ ...video, playbackPolicy: "signed" }], USER)).toEqual({
       ok: true,
       items: [{ ...video, playbackPolicy: "signed" }],
@@ -307,10 +316,19 @@ describe("posts.media persist shape", () => {
         USER,
         "stories",
       ),
-    ).toEqual({ ok: false, error: "type" });
+    ).toEqual({
+      ok: true,
+      items: [{ ...video, key: `stories/${USER}/${OBJECT}.mp4` }],
+    });
     expect(
       mediaItemsForInsert([{ ...video, provider: "mux", playbackId: undefined }], USER),
     ).toEqual({ ok: false, error: "invalid" });
+    expect(socialPublishedVideoRejection([video])).toBeNull();
+    expect(
+      socialPublishedVideoRejection([
+        { kind: "video", key: `stories/${USER}/${OBJECT}.mp4`, contentType: "video/mp4" },
+      ]),
+    ).toBe("type");
   });
 });
 

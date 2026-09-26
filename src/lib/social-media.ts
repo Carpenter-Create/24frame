@@ -66,6 +66,9 @@ export type SocialMediaItem = {
   uploadId?: string;
   assetId?: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
+  /** Source pixels. Feed portrait is 4:5 only when both are present. */
+  width?: number;
+  height?: number;
 };
 
 export const SOCIAL_MEDIA_ACCEPT = SOCIAL_MEDIA_CONTENT_TYPES.join(",");
@@ -91,6 +94,12 @@ const EXT_BY_TYPE: Record<SocialMediaContentType, string> = {
 
 const muxIdSchema = z.string().refine(isSocialMuxId);
 
+const sourcePixelSchema = z.preprocess(
+  (value) =>
+    typeof value === "number" && Number.isInteger(value) && value > 0 && value <= 16384 ? value : undefined,
+  z.number().int().positive().max(16384).optional(),
+);
+
 const itemSchema = z.object({
   kind: z.enum(["image", "video"]),
   key: z.string().min(1).max(200),
@@ -100,7 +109,32 @@ const itemSchema = z.object({
   uploadId: muxIdSchema.optional(),
   assetId: muxIdSchema.optional(),
   playbackPolicy: z.enum(SOCIAL_MUX_PLAYBACK_POLICIES).optional(),
+  width: sourcePixelSchema,
+  height: sourcePixelSchema,
 });
+
+/** Both edges, or nothing. One side must not flip a feed frame. */
+export function socialMediaFrameFields(item: {
+  width?: number | null;
+  height?: number | null;
+}): { width: number; height: number } | null {
+  const width = item.width;
+  const height = item.height;
+  if (width == null || height == null) return null;
+  if (!Number.isInteger(width) || !Number.isInteger(height)) return null;
+  if (width <= 0 || height <= 0 || width > 16384 || height > 16384) return null;
+  return { width, height };
+}
+
+function storedMediaItem(item: SocialMediaItem): SocialMediaItem {
+  const frame = socialMediaFrameFields(item);
+  if (frame) return { ...item, width: frame.width, height: frame.height };
+  if (item.width == null && item.height == null) return item;
+  const next = { ...item };
+  delete next.width;
+  delete next.height;
+  return next;
+}
 
 export function isSocialMuxMediaItem(item: SocialMediaItem): item is SocialMediaItem & {
   provider: typeof SOCIAL_MUX_PROVIDER;
@@ -252,7 +286,7 @@ export function parsePostMedia(value: unknown): SocialMediaItem[] {
     if (isForbiddenMediaKey(parsed.data.key)) continue;
     if (socialMediaKindFor(parsed.data.contentType) !== parsed.data.kind) continue;
     if (parsed.data.provider === SOCIAL_MUX_PROVIDER && !isSocialMuxMediaItem(parsed.data)) continue;
-    items.push(parsed.data);
+    items.push(storedMediaItem(parsed.data));
   }
   return items;
 }
@@ -315,13 +349,20 @@ export function mediaItemsForInsert(
       if (item.data.kind !== "video" || !isSocialMuxMediaItem(item.data)) {
         return { ok: false, error: "invalid" };
       }
-      if (lane === "stories") {
-        return { ok: false, error: "type" };
-      }
     }
-    items.push(item.data);
+    items.push(storedMediaItem(item.data));
   }
   return { ok: true, items };
+}
+
+/** Post and story video complete only with a Mux playback id. */
+export function socialPublishedVideoRejection(
+  items: readonly SocialMediaItem[],
+): SocialMediaRuleError | null {
+  for (const item of items) {
+    if (item.kind === "video" && !isSocialMuxMediaItem(item)) return "type";
+  }
+  return null;
 }
 
 export function validateMediaUpload(input: {
@@ -345,7 +386,7 @@ export function validateMediaUpload(input: {
   return { ok: true, kind, contentType: input.contentType };
 }
 
-/** HeadObject must match the story row. Missing, empty, oversized, or a different type fails closed. */
+/** HeadObject must match the post or story row. Missing, empty, oversized, or a different type fails closed. */
 export function storedSocialMediaRejection(
   item: { kind: SocialMediaKind; contentType: string },
   head: { bytes: number; contentType: string | null } | null,

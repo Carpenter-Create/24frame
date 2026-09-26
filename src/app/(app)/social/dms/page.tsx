@@ -8,7 +8,7 @@ import { signSocialForYouCourseCovers } from "@/components/social/social-for-you
 import { SocialDesktopForYouSlot } from "@/components/social/social-for-you-slot";
 import { SocialDmsRowsSkeleton, SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SocialConversationFaces } from "@/components/social/social-ui";
-import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_DM_INBOX_ROW_CLASS, SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { conversationRoomLabel, dmInboxDisplayPeerIds, SOCIAL, SOCIAL_ROUTES, socialDmHref, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox, loadDmStoryInboxLines } from "@/lib/social-dms";
@@ -90,7 +90,7 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
             others.map((person) => person.name),
           );
           return (
-            <li key={row.conversation_id} className="border-b border-hairline py-[var(--space-4)]">
+            <li key={row.conversation_id} className={SOCIAL_DM_INBOX_ROW_CLASS}>
               <Link
                 href={socialDmHref(row.conversation_id)}
                 className="flex items-center gap-[var(--space-3)]"

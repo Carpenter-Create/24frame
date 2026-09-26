@@ -1,21 +1,12 @@
-import { HouseEmpty } from "@/components/chrome/house";
-import { PageHeader } from "@/components/ui/page-header";
-import { SocialDmComposePicker } from "@/components/social/social-dm-compose-picker";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { SocialDmComposeEmpty, SocialDmComposePicker } from "@/components/social/social-dm-compose-picker";
+import { loadDmComposeRoster } from "@/lib/social-dm-compose-roster";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialDmComposePage() {
   const session = await requireSocialSession();
   const profile = await ensureOwnSocialProfile(session.supabase, session.ctx.user);
-
-  return (
-    <div data-social-dm-new="">
-      <PageHeader
-        title={SOCIAL.dms.newMessage}
-        backLink={{ href: SOCIAL_ROUTES.dms, label: SOCIAL.dms.title }}
-      />
-      {profile ? <SocialDmComposePicker /> : <HouseEmpty>{SOCIAL.dms.noProfileCta}</HouseEmpty>}
-    </div>
-  );
+  if (!profile) return <SocialDmComposeEmpty mode="direct" />;
+  const people = await loadDmComposeRoster(session.supabase, session.ctx.user.id);
+  return <SocialDmComposePicker mode="direct" people={people} />;
 }

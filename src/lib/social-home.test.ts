@@ -10,7 +10,13 @@ import {
   socialChecklistItems,
 } from "./social-home";
 import { SOCIAL_COMPOSER_CLASS } from "./social-chrome";
-import { isStoryLive, storyExpiresAt, storyInsertRow, storyRailUnseen } from "./social-stories";
+import {
+  isStoryLive,
+  oldestLiveStoryId,
+  storyExpiresAt,
+  storyInsertRow,
+  storyRailUnseen,
+} from "./social-stories";
 
 describe("Social Home stack lock", () => {
   it("locks Topics → composer → Stories → wall on phone and desktop", () => {
@@ -18,8 +24,21 @@ describe("Social Home stack lock", () => {
     expect(SOCIAL_HOME_STACK_ORDER).toEqual(["topics", "composer", "stories", "wall"]);
     expect(SOCIAL_COMPOSER_CLASS).toMatch(/^flex /);
     expect(SOCIAL_COMPOSER_CLASS).not.toContain("hidden");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
-    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-y");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-x-0");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-none");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("items-center");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("flex-col");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("gap-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("px-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("py-[var(--space-2)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("py-0");
+    expect(SOCIAL_COMPOSER_CLASS).not.toMatch(/(?:^|\s)border(?:\s|$)/);
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("p-[var(--space-4)]");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("h-20");
   });
 });
 
@@ -79,5 +98,17 @@ describe("stories live window", () => {
     expect(storyInsertRow({ authorId: "u1", body: null, media: [], now }).expires_at).toBe(
       "2026-09-15T12:00:00.000Z",
     );
+    expect(
+      oldestLiveStoryId([
+        { id: "newer", created_at: "2026-09-14T18:00:00.000Z" },
+        { id: "older", created_at: "2026-09-14T12:00:00.000Z" },
+      ]),
+    ).toBe("older");
+    expect(
+      oldestLiveStoryId([
+        { id: "b", created_at: "2026-09-14T12:00:00.000Z" },
+        { id: "a", created_at: "2026-09-14T12:00:00.000Z" },
+      ]),
+    ).toBe("a");
   });
 });

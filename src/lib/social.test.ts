@@ -26,7 +26,11 @@ import {
   quietDmAddError,
   SOCIAL,
   isSocialStoryCreatePath,
+  isSocialDmComposePath,
+  isSocialDmImmersivePath,
   isSocialDmThreadPath,
+  isSocialWriteComposePath,
+  leaveSocialWriteCompose,
   isSocialStoryOpenPath,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
@@ -92,8 +96,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.emptyHint).toBe(
       "Posts, stories, and updates from people you follow show up here.",
     );
-    expect(SOCIAL.home.composerPrompt).toBe("Write something");
-    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.home.composerPrompt).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Share something");
+    expect(SOCIAL.home.composerPhoto).toBe("Photo");
+    expect(SOCIAL.home.composerCamera).toBe("Camera");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.firstName).toBe("First name");
@@ -172,11 +178,45 @@ describe("social copy lock", () => {
     expect(isSocialDmThreadPath("/social/dms/thread-1/")).toBe(true);
     expect(isSocialDmThreadPath(SOCIAL_ROUTES.dms)).toBe(false);
     expect(isSocialDmThreadPath(`${SOCIAL_ROUTES.dms}/new`)).toBe(false);
+    expect(isSocialDmThreadPath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(false);
     expect(isSocialDmThreadPath(SOCIAL_ROUTES.home)).toBe(false);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new`)).toBe(true);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new/`)).toBe(true);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(true);
+    expect(isSocialDmComposePath(`${SOCIAL_ROUTES.dms}/new/group/`)).toBe(true);
+    expect(isSocialDmComposePath(SOCIAL_ROUTES.dms)).toBe(false);
+    expect(isSocialDmComposePath("/social/dms/thread-1")).toBe(false);
+    expect(isSocialDmImmersivePath("/social/dms/thread-1")).toBe(true);
+    expect(isSocialDmImmersivePath(`${SOCIAL_ROUTES.dms}/new`)).toBe(true);
+    expect(isSocialDmImmersivePath(`${SOCIAL_ROUTES.dms}/new/group`)).toBe(true);
+    expect(isSocialDmImmersivePath(SOCIAL_ROUTES.dms)).toBe(false);
+    expect(isSocialWriteComposePath(SOCIAL_ROUTES.create)).toBe(true);
+    expect(isSocialWriteComposePath(`${SOCIAL_ROUTES.create}/`)).toBe(true);
+    expect(isSocialWriteComposePath(SOCIAL_ROUTES.createLive)).toBe(false);
+    expect(isSocialWriteComposePath(SOCIAL_ROUTES.home)).toBe(false);
+    let pushes = 0;
+    leaveSocialWriteCompose(
+      () => true,
+      () => {
+        pushes += 1;
+      },
+    );
+    expect(pushes).toBe(0);
+    leaveSocialWriteCompose(
+      () => false,
+      () => {
+        pushes += 1;
+      },
+    );
+    expect(pushes).toBe(1);
     expect(SOCIAL.stories.replyTo("Ada")).toBe("Reply to Ada…");
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
     expect(SOCIAL.stories.reply).toBe("Reply quietly…");
+    expect(SOCIAL.stories.sendMessage).toBe("Send message");
+    expect(SOCIAL.stories.saySomething).toBe("Say something…");
+    expect(SOCIAL.stories.saySomethingExpanded).toBe("Add a comment or @mention friends…");
+    expect(SOCIAL.stories.activity).toBe("Activity");
     expect(SOCIAL.stories.subtitle).toBe("Add a video. It stays visible for 24 hours.");
     expect(SOCIAL.stories.empty).toBe("Add a video.");
     expect(SOCIAL.stories.attach).toBe("Add video");
@@ -273,7 +313,16 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.roomFull).toContain("16");
     expect(SOCIAL.dms.addBatch).toContain("16");
     expect(SOCIAL.dms.chat).toBe("Chat");
+    expect(SOCIAL.dms.to).toBe("To:");
+    expect(SOCIAL.dms.search).toBe("Search");
+    expect(SOCIAL.dms.groupChat).toBe("Group chat");
+    expect(SOCIAL.dms.groupChatHint).toBe("Message up to 16 people");
+    expect(SOCIAL.dms.newGroupChat).toBe("New group chat");
+    expect(SOCIAL.dms.groupName).toBe("Group name (optional)");
+    expect(SOCIAL.dms.suggested).toBe("Suggested");
     expect(JSON.stringify(SOCIAL.dms)).not.toContain("Create group");
+    expect(JSON.stringify(SOCIAL.dms)).not.toContain("Channel");
+    expect(JSON.stringify(SOCIAL.dms)).not.toContain("AI chats");
     expect(SOCIAL.dms.olderPage).toContain("older");
     expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
@@ -507,11 +556,13 @@ describe("profile opt-in", () => {
     expect(socialFollowsTabLabel("followers")).toBe(SOCIAL.profile.followersTab);
     expect(SOCIAL.profile.followsSearch).toBe("Search username or display name");
     expect(SOCIAL.follow.followBack).toBe("Follow back");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
-    expect(socialComposerPrompt(null)).toBe("Write something");
-    expect(socialComposerPrompt("")).toBe("Write something");
-    expect(SOCIAL.home.composerPrompt).toBe("Write something");
-    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe("Share something");
+    expect(socialComposerPrompt("Ada Lovelace")).not.toContain("Ada");
+    expect(socialComposerPrompt(null)).toBe("Share something");
+    expect(socialComposerPrompt("")).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe(SOCIAL.home.composerPrompt);
+    expect(SOCIAL.home.composerPrompt).toBe("Share something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Share something");
     expect(SOCIAL.forYou).not.toHaveProperty("topics");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.activityTab).toBe("Activity");
@@ -637,6 +688,8 @@ describe("social writes stay on the live spine", () => {
     expect(light).toContain("export async function toggleSocialLike");
     expect(light).toContain("export async function createSocialComment");
     expect(light).toContain("export async function deleteSocialComment");
+    expect(light).toContain("export async function updateSocialPostCaption");
+    expect(light).toContain("export async function deleteSocialPost");
     expect(actions).not.toContain("toggleSocialFollow");
     expect(actions).not.toContain("from \"@/lib/s3\"");
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");
@@ -746,7 +799,9 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/stories/[id]/page.tsx",
     ];
     for (const file of feed) {
-      expect(readFileSync(file, "utf8")).toMatch(/signedSocialMedia|socialMediaProxies/);
+      expect(readFileSync(file, "utf8")).toMatch(
+        /signedSocialMedia|socialMediaProxies/,
+      );
     }
     const groupPost = readFileSync("src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx", "utf8");
     expect(groupPost).toContain("redirect(socialPostHref(post.id))");

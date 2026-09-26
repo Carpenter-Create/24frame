@@ -7,6 +7,7 @@ import {
   socialPersonLabel,
 } from "@/lib/social";
 import { storySendSystemLine } from "@/lib/social-dm-story";
+import { postSendSystemLine } from "@/lib/social-post-share";
 
 // DM thread message format lock v1.
 // docs/design-locks/dm-thread-message-format-lock-v1.md
@@ -78,6 +79,13 @@ export const DM_THREAD_COMPOSER_FIELD_CLASS =
 
 export const DM_THREAD_COMPOSER_SEND_CLASS =
   "flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast";
+
+// Far-right media accessory. Hit 40, ink via text-ink. Glyph size is separate.
+// docs/design-locks/dm-voice-note-lock-v1.md §B chrome only — Send stays left of the camera.
+export const DM_THREAD_COMPOSER_CAMERA_GLYPH = 24;
+
+export const DM_THREAD_COMPOSER_CAMERA_CLASS =
+  "inline-flex size-10 shrink-0 items-center justify-center text-ink active:opacity-70";
 
 // Header density geometry, hosted at the top of the thread viewport.
 // Safe-area sits above the 48 row. Surface #FFFFFF is bg-surface.
@@ -209,6 +217,19 @@ export function dmThreadStorySystemLine(input: {
   const name = input.senderName?.trim() ?? "";
   if (name && handle) return SOCIAL.dms.theySentAuthorStory(name, handle);
   return SOCIAL.dms.sentYouStory;
+}
+
+/** Side-aligned post-share line. Same chat grammar as the story line. */
+export function dmThreadPostSystemLine(input: {
+  mine: boolean;
+  authorHandle: string | null;
+  senderName: string | null;
+}): string {
+  const handle = bareHandle(input.authorHandle ?? "");
+  if (input.mine) return postSendSystemLine(handle);
+  const name = input.senderName?.trim() ?? "";
+  if (name && handle) return SOCIAL.dms.theySentAuthorPost(name, handle);
+  return SOCIAL.dms.sentYouPost;
 }
 
 function chicagoParts(date: Date, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatPart[] {

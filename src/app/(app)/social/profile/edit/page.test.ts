@@ -19,9 +19,6 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
 }));
-vi.mock("@/lib/s3-social-media", () => ({
-  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
-}));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
 }));

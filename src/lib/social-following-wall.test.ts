@@ -30,6 +30,7 @@ describe("social following wall view", () => {
         ],
       ]),
       canLike: true,
+      viewerId: "u1",
     });
     expect(view.truncated).toBe(true);
     expect(view.nextCursor).toBe("c1");
@@ -48,6 +49,7 @@ describe("social following wall view", () => {
         groupSlug: "writers",
         groupName: "Writers",
         canLike: true,
+        owned: false,
         media: [{ kind: "image", url: "/api/social/media?key=posts%2Fu2%2Fa.jpg", contentType: "image/jpeg" }],
       },
     ]);

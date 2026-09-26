@@ -39,13 +39,9 @@ export function isSessionGatedSocialSrc(src: string): boolean {
   return path === SOCIAL_MEDIA_ROUTE || path.startsWith(`${SOCIAL_AVATAR_ROUTE}/`);
 }
 
-/**
- * Media fragment so the browser can paint a first frame without a stored
- * poster object. Hash is client-only — signed query params stay intact.
- */
-export function socialVideoDisplaySrc(src: string): string {
-  if (!src || src.includes("#")) return src;
-  return `${src}#t=0.1`;
+/** Local capture preview. Not published Social playback. */
+export function isLocalMediaPreviewSrc(src: string): boolean {
+  return src.startsWith("blob:") || src.startsWith("data:");
 }
 
 export type SocialMediaOrientation = "portrait" | "landscape";
@@ -91,7 +87,7 @@ export function socialMediaOrientation(
 }
 
 /**
- * Feed media frame SoT. Stills, Mux poster, Mux player, native video.
+ * Feed media frame SoT. Stills, Mux poster, and Mux player.
  * Height is min(70vh, 560px, aspect height). Width stays the container.
  * Portrait crops inside the cap. Landscape follows aspect until the cap.
  * docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md

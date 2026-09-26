@@ -1,6 +1,11 @@
 // One SoT for Social hot-cache + TanStack Query keys.
 // Redis REST keys stay server-only at use; this module is client-safe (no env, no client).
 
+// Tombstone is posts.status = removed. These windows are not authorization.
+// Soft-delete busts the actor's feed key and invalidates that viewer's
+// following-wall query. Another viewer's hot feed entry can linger until
+// SOCIAL_HOT_TTL_SECONDS, and their following-wall query until
+// SOCIAL_QUERY_STALE_MS. The next read follows RLS.
 export const SOCIAL_HOT_TTL_SECONDS = 60;
 export const SOCIAL_QUERY_STALE_MS = 45_000;
 

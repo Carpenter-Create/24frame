@@ -65,6 +65,8 @@ export const SOCIAL_ICON_SIZE_STORY_PLUS = 20;
 export const SOCIAL_ICON_SIZE_COMPOSER = 22;
 export const SOCIAL_ICON_SIZE_CREATE_TILE = 32;
 export const SOCIAL_ICON_SIZE_SEARCH = 16;
+/** Post Like / Comment / Share glyph. Hit stays 40. */
+export const SOCIAL_ICON_SIZE_POST_ACTION = 24;
 export const SOCIAL_ICON_SIZE_HEADER = 20;
 export const SOCIAL_ICON_SIZE_PROFILE_LINK = 20;
 // Profile action-row Share is the glyph inside a 44px hit.

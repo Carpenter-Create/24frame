@@ -10,10 +10,12 @@ import { loadPeopleSearch } from "@/lib/social-feed";
 import {
   isOwnedSocialMediaKey,
   isSocialMediaContentType,
+  isSocialMuxMediaItem,
   mediaItemsForInsert,
   parseSocialMediaLane,
   socialMediaKindFor,
   socialMediaObjectKey,
+  socialPublishedVideoRejection,
   storedSocialMediaRejection,
   validateMediaUpload,
   profileCoverKeyFromMedia,
@@ -280,7 +282,7 @@ export async function createSocialMuxUpload(formData: FormData): Promise<{
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const lane = parseSocialMediaLane(String(formData.get("lane") ?? ""));
-  if (lane !== "posts") return { error: SOCIAL.home.mediaType };
+  if (lane !== "posts" && lane !== "stories") return { error: SOCIAL.home.mediaType };
   const checked = validateMediaUpload({
     contentType: String(formData.get("content_type") ?? ""),
     byteLength: Number(formData.get("byte_length") ?? 0),
@@ -324,7 +326,10 @@ export async function finalizeSocialMuxUpload(formData: FormData): Promise<{
   const uploadId = String(formData.get("upload_id") ?? "").trim();
   const key = String(formData.get("key") ?? "").trim();
   const contentType = String(formData.get("content_type") ?? "").trim();
-  if (!isSocialMuxId(uploadId) || !isOwnedSocialMediaKey(key, user.id, "posts")) {
+  if (
+    !isSocialMuxId(uploadId) ||
+    (!isOwnedSocialMediaKey(key, user.id, "posts") && !isOwnedSocialMediaKey(key, user.id, "stories"))
+  ) {
     return { error: SOCIAL.home.mediaForbidden };
   }
   if (!isSocialMediaContentType(contentType) || socialMediaKindFor(contentType) !== "video") {
@@ -364,7 +369,16 @@ export async function writeSocialPost(
   const groupId = groupIdRaw.length > 0 ? groupIdRaw : null;
   const category = groupId ? null : normalizeSocialCategory(String(formData.get("category") ?? ""));
   if (!media.ok) return { error: socialMediaRuleMessage(media.error) };
+  const videoRejection = socialPublishedVideoRejection(media.items);
+  if (videoRejection) return { error: socialMediaRuleMessage(videoRejection) };
   if (!body && media.items.length === 0) return { error: SOCIAL.home.emptyPost };
+
+  // Match createSocialStory: refuse keys the source bucket does not hold.
+  for (const item of media.items) {
+    if (isSocialMuxMediaItem(item)) continue;
+    const rejection = storedSocialMediaRejection(item, await headSocialMediaObject(item.key));
+    if (rejection) return { error: socialMediaRuleMessage(rejection, "posts", item.kind) };
+  }
 
   const { error } = await supabase.from("posts").insert(
     postInsertRow({ authorId: user.id, body, groupId, media: media.items, category }),
@@ -394,8 +408,11 @@ export async function createSocialStory(formData: FormData): Promise<ActionResul
   const media = mediaItemsForInsert(formData.get("media"), user.id, "stories");
   if (!media.ok) return { error: socialMediaRuleMessage(media.error, "stories") };
   if (media.items.length === 0) return { error: SOCIAL.stories.empty };
+  const videoRejection = socialPublishedVideoRejection(media.items);
+  if (videoRejection) return { error: socialMediaRuleMessage(videoRejection, "stories") };
 
   for (const item of media.items) {
+    if (isSocialMuxMediaItem(item)) continue;
     const rejection = storedSocialMediaRejection(item, await headSocialMediaObject(item.key));
     if (rejection) return { error: socialMediaRuleMessage(rejection, "stories", item.kind) };
   }
@@ -565,10 +582,22 @@ export async function startSocialDm(formData: FormData): Promise<ActionResult> {
     redirect(socialDmHref(data));
   }
 
+  const parsed = normalizeConversationTitle(String(formData.get("title") ?? ""));
+  if (!parsed) return { error: SOCIAL.dms.titleInvalid };
+
   const { data, error } = await supabase.rpc("create_group_conversation", {
     p_peers: peers,
   });
   if (error || !data) return { error: quietDmAddError(error?.message ?? SOCIAL.dms.missing) };
+
+  if (parsed.title) {
+    const { error: titleError } = await supabase.rpc("set_group_conversation_title", {
+      p_conversation: data,
+      p_title: parsed.title,
+    });
+    if (titleError) return { error: quietDmAddError(titleError.message) };
+  }
+
   redirect(socialDmHref(data));
 }
 

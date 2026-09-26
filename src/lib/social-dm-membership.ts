@@ -26,6 +26,18 @@ export function dmComposeCta(otherCount: number, cap = DM_MEMBERSHIP_CAP): "chat
   return null;
 }
 
+// Screen A creates or opens a 1:1. One other person only.
+export function dmDirectComposeCta(otherCount: number): "chat" | null {
+  return otherCount === 1 ? "chat" : null;
+}
+
+// Screen B creates a fresh multi-party DM. At least two others, never over the cap.
+export function dmGroupComposeCta(otherCount: number, cap = DM_MEMBERSHIP_CAP): "chat" | null {
+  const total = dmMembershipTotal(otherCount);
+  if (otherCount >= 2 && total <= cap) return "chat";
+  return null;
+}
+
 export const DM_COMPOSE_HOST_CLASS = "flex flex-col p-4";
 
 export const DM_COMPOSE_SEARCH_CLASS =
@@ -33,9 +45,10 @@ export const DM_COMPOSE_SEARCH_CLASS =
 
 export const DM_COMPOSE_HELPER_CLASS = "pt-2 t-body-sm text-ink-2";
 
-export const DM_COMPOSE_ROW_CLASS = "flex w-full items-center gap-2 py-2 text-left disabled:opacity-40";
+export const DM_COMPOSE_ROW_CLASS =
+  "flex min-h-14 w-full items-center gap-2 px-4 text-left disabled:opacity-40";
 
 export const DM_COMPOSE_AVATAR_CLASS = "size-10 shrink-0";
 
 export const DM_COMPOSE_CTA_CLASS =
-  "mt-4 flex h-12 w-full items-center justify-center rounded-full bg-accent t-body-sm font-medium text-accent-contrast disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-ink-3";
+  "flex h-12 w-full items-center justify-center rounded-full bg-accent t-body-sm font-medium text-accent-contrast disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-ink-3";

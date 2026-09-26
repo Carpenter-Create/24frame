@@ -11,13 +11,12 @@ import type { SocialMuxPlaybackPolicy } from "@/lib/social-mux";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_FEED_CHROME_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
-  SOCIAL_FEED_MEDIA_BLEED_CLASS,
   SOCIAL_FEED_ROW_CLASS,
-  SOCIAL_POST_ACTION_GLYPH,
+  SOCIAL_POST_ACTION_HEART_NUDGE_CLASS,
   SOCIAL_POST_ACTION_HIT_CLASS,
-  SOCIAL_POST_ACTIONS_ROW_CLASS,
-  SOCIAL_POST_CAPTION_CLASS,
+  SOCIAL_POST_MEDIA_CLASS,
   SOCIAL_POST_TIME_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
@@ -57,19 +56,24 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { socialProfileRendersCoverBand } from "@/lib/social-profile-cover";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import {
   SOCIAL_POST_IMAGE_SIZES,
   socialMediaFrameClass,
   type SocialMediaOrientation,
 } from "@/lib/social-media-display";
+import { socialFeedUsesCarousel } from "@/lib/social-feed-carousel";
 import { SocialAvatar } from "./social-avatar";
-import { SocialFeedImmersive, SocialPostShareControl } from "./social-feed-immersive";
+import { SocialFeedCarousel } from "./social-feed-carousel";
+import { SocialFeedImmersive } from "./social-feed-immersive";
 import { SocialFeedVideo } from "./social-feed-video";
 import { SocialCommentTrigger } from "./social-comment-thread";
+import { SocialPostShareButton } from "./social-post-share-sheet";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
+import { SocialPostCaptionPlace, SocialPostOwnerMenu, SocialPostPresence } from "./social-post-owner";
 import { SocialMediaImage } from "./social-media-image";
 import { SocialProfileLinkRow } from "./social-profile-links";
 import { SocialProfileBanner, SocialProfileCoverBlock } from "./social-profile-banner";
@@ -175,6 +179,7 @@ export type SocialPostCardModel = {
   groupName: string | null;
   canLike: boolean;
   media: SocialPostMediaItem[];
+  owned?: boolean;
 };
 
 export function SocialPostMedia({
@@ -187,11 +192,11 @@ export function SocialPostMedia({
   frameClass?: string;
 }) {
   if (items.length === 0) return null;
+  if (socialFeedUsesCarousel(items.length)) {
+    return <SocialFeedCarousel items={items} onOpen={onOpen} />;
+  }
   return (
-    <div
-      data-social-post-media=""
-      className={cn("@container flex w-full flex-col gap-2", SOCIAL_FEED_MEDIA_BLEED_CLASS)}
-    >
+    <div data-social-post-media="" className={cn("@container", SOCIAL_POST_MEDIA_CLASS)}>
       {items.map((item, index) => (
         <SocialPostMediaFrame
           key={item.playbackId ?? item.url}
@@ -218,7 +223,7 @@ function SocialPostMediaFrame({
 }) {
   const frame = cn(
     frameClass ?? socialMediaFrameClass(item),
-    "relative overflow-hidden bg-surface-muted",
+    "relative w-full overflow-hidden bg-surface-muted",
   );
   const open = (
     <button
@@ -468,6 +473,7 @@ export function socialAuthorPostCard(input: {
   liked: boolean;
   canLike: boolean;
   media: SocialPostMediaItem[];
+  owned?: boolean;
 }): SocialPostCardModel {
   return {
     id: input.post.id,
@@ -484,6 +490,7 @@ export function socialAuthorPostCard(input: {
     groupName: null,
     canLike: input.canLike,
     media: input.media,
+    owned: input.owned ?? false,
   };
 }
 
@@ -494,9 +501,15 @@ export function SocialPostCard({
   post: SocialPostCardModel;
   permalink?: boolean;
 }) {
-  // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
-  // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
-  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
+  // One card at every breakpoint.
+  // Text + media: docs/design-locks/social-feed-text-media-caption-above-lock-v1.md
+  //   author → caption → media → actions → likes → comments when N > 0.
+  // Two or more media items (Adam lock 2026-09-25): that media face is one
+  // full-bleed swipe carousel with dots and N of M. No collage.
+  // Text-only stays the 2026-09-20 blend:
+  //   author → actions → likes → caption → comments when N > 0.
+  // Media-only: author → media → actions → likes.
+  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count, collage.
   const media = post.media.length > 0;
   const [immersiveIndex, setImmersiveIndex] = useState<number | null>(null);
   const closeImmersive = useCallback(() => setImmersiveIndex(null), []);
@@ -513,21 +526,28 @@ export function SocialPostCard({
       {socialRelativeTime(post.createdAt)}
     </time>
   );
-  const caption = post.body ? (
-    <>
-      <span className="font-semibold">{handle} </span>
-      {post.body}
-    </>
-  ) : null;
+  const captionPlace = (place: "above" | "below") => (
+    <SocialPostCaptionPlace
+      postId={post.id}
+      serverBody={post.body}
+      hasMedia={media}
+      place={place}
+      href={href}
+      permalink={permalink}
+      handle={handle}
+    />
+  );
   return (
+    <SocialPostPresence postId={post.id}>
     <article
       data-social-post={post.id}
+      data-social-post-owned={post.owned ? "" : undefined}
       data-social-post-href={permalink ? href : undefined}
       className={SOCIAL_FEED_ROW_CLASS}
     >
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className={`flex min-w-0 items-center gap-2.5 ${SOCIAL_FEED_CHROME_CLASS}`}>
         <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-1.5">
           {post.authorHandle ? (
             <Link
               href={socialMemberHref(post.authorHandle)}
@@ -556,13 +576,22 @@ export function SocialPostCard({
             </>
           ) : null}
         </div>
+        {post.owned ? (
+          <SocialPostOwnerMenu
+            postId={post.id}
+            body={post.body}
+            hasMedia={media}
+            groupSlug={post.groupSlug}
+          />
+        ) : null}
       </div>
+      {captionPlace("above")}
       {media ? <SocialPostMedia items={post.media} onOpen={setImmersiveIndex} /> : null}
       {immersiveIndex != null ? (
         <SocialFeedImmersive post={post} index={immersiveIndex} onClose={closeImmersive} />
       ) : null}
-      <div className="flex flex-col gap-1">
-        <div data-social-post-actions="" className={SOCIAL_POST_ACTIONS_ROW_CLASS}>
+      <div className={`flex flex-col gap-1 ${SOCIAL_FEED_CHROME_CLASS}`}>
+        <div data-social-post-actions="" className="flex items-center gap-3.5">
           {post.canLike ? (
             <SocialLikeButton
               postId={post.id}
@@ -572,32 +601,23 @@ export function SocialPostCard({
               icon
             />
           ) : (
-            <span className={cn(SOCIAL_POST_ACTION_HIT_CLASS, "text-ink-2")}>
-              <SocialIcon name="heart" size={SOCIAL_POST_ACTION_GLYPH} />
+            <span className={SOCIAL_POST_ACTION_HIT_CLASS}>
+              <SocialIcon
+                name="heart"
+                size={SOCIAL_ICON_SIZE_POST_ACTION}
+                className={SOCIAL_POST_ACTION_HEART_NUDGE_CLASS}
+              />
             </span>
           )}
           <SocialCommentTrigger post={thread} icon />
-          <SocialPostShareControl postId={post.id} />
+          <SocialPostShareButton postId={post.id} />
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-        {caption ? (
-          permalink ? (
-            <Link
-              href={href}
-              data-social-post-caption=""
-              className={SOCIAL_POST_CAPTION_CLASS}
-            >
-              {caption}
-            </Link>
-          ) : (
-            <p data-social-post-caption="" className={SOCIAL_POST_CAPTION_CLASS}>
-              {caption}
-            </p>
-          )
-        ) : null}
+        {captionPlace("below")}
         <SocialCommentTrigger post={thread} />
       </div>
     </article>
+    </SocialPostPresence>
   );
 }
 

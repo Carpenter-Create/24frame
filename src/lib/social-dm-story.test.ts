@@ -42,6 +42,27 @@ describe("story DM card", () => {
     expect(JSON.stringify(card)).not.toMatch(/\/social\/stories/);
   });
 
+  it("keeps a signed Mux story playable when the proxy url is blank", () => {
+    const row = storyDmInsertRow({
+      senderId: "u1",
+      conversationId: "conv-1",
+      storyId: "s1",
+      authorId: author,
+      expiresAt: "2099-01-01T00:00:00.000Z",
+      media: [{ ...video, playbackPolicy: "signed" }],
+    });
+    const card = presentDmStoryShare({ body: row.body, media: row.media });
+    expect(card).toMatchObject({
+      unavailable: false,
+      kind: "video",
+      url: "",
+      playbackId: "abc12345xx",
+      playbackPolicy: "signed",
+      href: null,
+    });
+    expect(card?.url).not.toContain("/api/social/media");
+  });
+
   it("keeps a photo on the story viewer href and hides an expired story", () => {
     const still = {
       kind: "image" as const,

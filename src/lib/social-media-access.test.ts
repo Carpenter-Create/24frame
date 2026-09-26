@@ -1,9 +1,18 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
-import { socialMediaJsonContains, socialMediaReadGrant, viewerMaySignSocialMedia } from "@/lib/social-media-access";
+import {
+  socialMediaJsonContains,
+  socialMediaReadGrant,
+  socialMuxPlaybackJsonContains,
+  socialMuxPlaybackReadGrant,
+  viewerMayMintSocialMuxPlayback,
+  viewerMaySignSocialMedia,
+} from "@/lib/social-media-access";
+import { SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
 
 const USER = "11111111-1111-4111-8111-111111111111";
 const OTHER = "33333333-3333-4333-8333-333333333333";
@@ -12,7 +21,7 @@ const STORY_KEY = `stories/${OTHER}/${OBJECT}.mp4`;
 const POST_KEY = `posts/${OTHER}/${OBJECT}.jpg`;
 const OWN_POST = `posts/${USER}/${OBJECT}.jpg`;
 const NOW = new Date("2026-09-24T00:00:00.000Z");
-const LIVE = "2026-09-25T00:00:00.000Z";
+const LIVE = "2099-01-01T00:00:00.000Z";
 const EXPIRED = "2026-09-23T00:00:00.000Z";
 
 function storyMedia(key = STORY_KEY) {
@@ -30,6 +39,7 @@ function chain(result: { data: unknown; error?: { message: string } | null }) {
   builder.eq = vi.fn(self);
   builder.gt = vi.fn(self);
   builder.contains = vi.fn(self);
+  builder.in = vi.fn(self);
   builder.limit = vi.fn(self);
   builder.maybeSingle = vi.fn(() => Promise.resolve(result));
   builder.then = (resolve: (value: unknown) => unknown, reject?: (reason: unknown) => unknown) =>
@@ -279,5 +289,168 @@ describe("viewerMaySignSocialMedia", () => {
     await expect(viewerMaySignSocialMedia(USER, POST_KEY, NOW)).resolves.toBe(false);
     await expect(viewerMaySignSocialMedia(USER, "not-a-media-key", NOW)).resolves.toBe(false);
     expect(createClient).toHaveBeenCalledTimes(2);
+  });
+});
+
+const PLAYBACK = "uNbxnGLKJ00yfbijDO8COxT";
+
+function muxMedia(authorId: string, lane: "stories" | "posts") {
+  return [
+    {
+      kind: "video" as const,
+      key: `${lane}/${authorId}/${OBJECT}.mp4`,
+      contentType: "video/mp4" as const,
+      provider: SOCIAL_MUX_PROVIDER,
+      playbackId: PLAYBACK,
+      playbackPolicy: "signed" as const,
+    },
+  ];
+}
+
+describe("socialMuxPlaybackReadGrant", () => {
+  it("denies a playback id that is not on a visible post or story", () => {
+    expect(socialMuxPlaybackReadGrant({ userId: USER, playbackId: PLAYBACK, now: NOW })).toBe(false);
+    expect(socialMuxPlaybackReadGrant({ userId: "", playbackId: PLAYBACK, now: NOW })).toBe(false);
+    expect(socialMuxPlaybackReadGrant({ userId: USER, playbackId: "short", now: NOW })).toBe(false);
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        posts: [{ author_id: OTHER, status: "active", media: postMedia() }],
+      }),
+    ).toBe(false);
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        posts: [{ author_id: OTHER, status: "active", media: muxMedia(USER, "posts") }],
+      }),
+    ).toBe(false);
+  });
+
+  it("allows the author's own live story and a followed live story", () => {
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        stories: [{ author_id: USER, status: "active", expires_at: LIVE, media: muxMedia(USER, "stories") }],
+      }),
+    ).toBe(true);
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        followeeIds: [OTHER],
+        stories: [{ author_id: OTHER, status: "active", expires_at: LIVE, media: muxMedia(OTHER, "stories") }],
+      }),
+    ).toBe(true);
+  });
+
+  it("fails closed for an unfollowed, expired, or inactive story", () => {
+    const story = { author_id: OTHER, status: "active" as const, expires_at: LIVE, media: muxMedia(OTHER, "stories") };
+    expect(
+      socialMuxPlaybackReadGrant({ userId: USER, playbackId: PLAYBACK, now: NOW, stories: [story] }),
+    ).toBe(false);
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        followeeIds: [OTHER],
+        stories: [{ ...story, expires_at: EXPIRED }],
+      }),
+    ).toBe(false);
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        followeeIds: [OTHER],
+        stories: [{ ...story, status: "removed" }],
+      }),
+    ).toBe(false);
+  });
+
+  it("allows an active post the session can read", () => {
+    expect(
+      socialMuxPlaybackReadGrant({
+        userId: USER,
+        playbackId: PLAYBACK,
+        now: NOW,
+        posts: [{ author_id: OTHER, status: "active", media: muxMedia(OTHER, "posts") }],
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("viewerMayMintSocialMuxPlayback", () => {
+  beforeEach(() => {
+    vi.mocked(createClient).mockReset();
+  });
+
+  it("mints only when a selectable row stores the playback id", async () => {
+    const posts = chain({ data: [] });
+    const stories = chain({
+      data: [{ author_id: OTHER, status: "active", expires_at: LIVE, media: muxMedia(OTHER, "stories") }],
+    });
+    const follows = chain({ data: [{ followee_id: OTHER }] });
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "posts") return posts;
+        if (table === "stories") return stories;
+        return follows;
+      }),
+    } as never);
+    await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(true);
+    expect(stories.contains).toHaveBeenCalledWith("media", socialMuxPlaybackJsonContains(PLAYBACK));
+    expect(posts.contains).toHaveBeenCalledWith("media", socialMuxPlaybackJsonContains(PLAYBACK));
+
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "posts") return chain({ data: [], error: { message: "denied" } });
+        return chain({ data: [] });
+      }),
+    } as never);
+    await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(false);
+    await expect(viewerMayMintSocialMuxPlayback(USER, "short", NOW)).resolves.toBe(false);
+  });
+
+  it("never queries messages while deciding a mux playback grant", async () => {
+    const tables: string[] = [];
+    const from = vi.fn((table: string) => {
+      tables.push(table);
+      if (table === "posts") return chain({ data: [] });
+      if (table === "stories") {
+        return chain({
+          data: [{ author_id: OTHER, status: "active", expires_at: LIVE, media: muxMedia(OTHER, "stories") }],
+        });
+      }
+      if (table === "follows") return chain({ data: [{ followee_id: OTHER }] });
+      return chain({ data: [{ id: "not-a-grant" }] });
+    });
+    vi.mocked(createClient).mockResolvedValue({ from } as never);
+    await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(true);
+    expect(tables).toEqual(["posts", "stories", "follows"]);
+    expect(tables).not.toContain("messages");
+
+    tables.length = 0;
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        tables.push(table);
+        return chain({ data: [] });
+      }),
+    } as never);
+    await expect(viewerMayMintSocialMuxPlayback(USER, PLAYBACK, NOW)).resolves.toBe(false);
+    expect(tables).not.toContain("messages");
+
+    const grant = readFileSync("src/lib/social-media-access.ts", "utf8");
+    const mint = grant.slice(grant.indexOf("export async function viewerMayMintSocialMuxPlayback"));
+    const route = readFileSync("src/app/api/social/mux-playback/route.ts", "utf8");
+    expect(mint).not.toContain("messages");
+    expect(route).not.toContain("messages");
   });
 });

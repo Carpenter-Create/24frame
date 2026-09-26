@@ -7,6 +7,9 @@ import { socialMediaKindFor } from "@/lib/social-media";
 // Never land on an empty attach well first. Photo and Video are not tiles.
 
 export const SOCIAL_CREATE_MEDIA_ACCEPT = "image/*,video/*";
+// Home composer Camera. Still capture into the same Create media review.
+// Not a second uploader and not a second viewfinder.
+export const SOCIAL_CREATE_CAMERA_ACCEPT = "image/*";
 export const SOCIAL_CREATE_MEDIA_STEP_PARAM = "step";
 export const SOCIAL_CREATE_MEDIA_STEPS = ["pick", "review", "caption"] as const;
 export type SocialCreateMediaStep = (typeof SOCIAL_CREATE_MEDIA_STEPS)[number];

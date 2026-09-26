@@ -9,10 +9,10 @@ import {
   SOCIAL_MUX_IMAGE_HOST,
   SOCIAL_MUX_ORIGINAL_RESOLUTION,
   socialMuxAssetSettings,
+  socialMuxCoveringPoster,
   socialMuxPassthroughBoundToUser,
   socialMuxPlaybackRequiresTokens,
   socialMuxPlaybackTokensFromJson,
-  socialMuxPlaybackUrl,
   socialMuxThumbnailUrl,
   SOCIAL_MUX_PLAYBACK_ROUTE,
 } from "./social-mux";
@@ -70,14 +70,17 @@ describe("social Mux encode locks", () => {
     });
   });
 
-  it("builds public playback and thumbnail URLs from a playback id", () => {
+  it("builds a thumbnail URL from a playback id and does not mint a native HLS src", () => {
     expect(isSocialMuxId("uNbxnGLKJ00yfbijDO8COxTOyVKT01xpxW")).toBe(true);
     expect(isSocialMuxId("short")).toBe(false);
-    expect(socialMuxPlaybackUrl("abc12345")).toBe("https://stream.mux.com/abc12345.m3u8");
     expect(socialMuxThumbnailUrl("abc12345")).toBe(`https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp`);
     expect(socialMuxThumbnailUrl("abc12345", "thumb.jwt")).toBe(
       `https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp?token=thumb.jwt`,
     );
+    const sot = readFileSync("src/lib/social-mux.ts", "utf8");
+    expect(sot).not.toContain("socialMuxPlaybackUrl");
+    expect(sot).not.toContain(".m3u8");
+    expect(sot).not.toContain("stream.mux.com");
   });
 
   it("keeps token names server-only and out of the client SoT", () => {
@@ -118,6 +121,19 @@ describe("social Mux encode locks", () => {
     expect(socialMuxPassthroughBoundToUser(`${userId}:object`, "  ")).toBe(false);
     expect(socialMuxPassthroughBoundToUser(null, userId)).toBe(false);
     expect(socialMuxPassthroughBoundToUser(undefined, userId)).toBe(false);
+  });
+
+  it("covers a signed feed clip only until the player can mount", () => {
+    expect(socialMuxCoveringPoster(true, false)).toBe(true);
+    expect(socialMuxCoveringPoster(true, true)).toBe(false);
+    expect(socialMuxCoveringPoster(false, false)).toBe(false);
+    expect(socialMuxCoveringPoster(false, true)).toBe(false);
+    const player = readFileSync("src/components/social/social-mux-player.tsx", "utf8");
+    const signedFace = player.slice(player.indexOf("{signed ? ("), player.indexOf(") : ("));
+    expect(signedFace).toContain("socialMuxCoveringPoster(signed, Boolean(tokens))");
+    expect(signedFace).toContain("<MuxPoster");
+    expect(signedFace).not.toContain("painted");
+    expect(signedFace).not.toContain("onReady");
   });
 
   it("mints playback tokens only for signed policy", () => {

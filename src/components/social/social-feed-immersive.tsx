@@ -8,9 +8,10 @@ import { SocialLikeButton } from "@/components/social/social-engagement";
 import { SocialFeedVideo } from "@/components/social/social-feed-video";
 import { SocialIcon } from "@/components/social/social-icon";
 import { SocialMediaImage } from "@/components/social/social-media-image";
+import { SocialPostShareButton } from "@/components/social/social-post-share-sheet";
 import type { SocialPostCardModel } from "@/components/social/social-ui";
 import { cn } from "@/lib/cn";
-import { displayHandle, SOCIAL, socialPostHref } from "@/lib/social";
+import { displayHandle, SOCIAL } from "@/lib/social";
 import {
   SOCIAL_FEED_IMMERSIVE_CAPTION_CLASS,
   SOCIAL_FEED_IMMERSIVE_CLOSE_CLASS,
@@ -20,48 +21,11 @@ import {
   SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_POST_ACTIONS_ROW_CLASS,
 } from "@/lib/social-chrome";
-import {
-  shareSocialPostLink,
-  socialImmersiveCaptionNeedsMore,
-} from "@/lib/social-feed-immersive";
+import { socialImmersiveCaptionNeedsMore } from "@/lib/social-feed-immersive";
 
 // Tap immersive. One fullscreen stage on phone and desktop.
 // docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md
-// Share is not Comment. Platform share of the post permalink — the
-// IG people sheet stays on social-post-share-sheet-ig and is not forked.
-
-export function SocialPostShareControl({
-  postId,
-  tone = "canvas",
-}: {
-  postId: string;
-  tone?: "canvas" | "stage";
-}) {
-  const [copied, setCopied] = useState(false);
-
-  return (
-    <button
-      type="button"
-      data-social-post-share=""
-      data-social-post-share-url={socialPostHref(postId)}
-      aria-label={SOCIAL.post.share}
-      className={cn(SOCIAL_POST_ACTION_HIT_CLASS, tone === "stage" ? "text-band-ink" : "text-ink-2")}
-      onClick={() => {
-        if (typeof window === "undefined") return;
-        void shareSocialPostLink(postId, window.location.origin).then((result) => {
-          setCopied(result === "copied");
-        });
-      }}
-    >
-      <SocialIcon name="paper-plane-tilt" size={SOCIAL_POST_ACTION_GLYPH} />
-      {copied ? (
-        <span className="sr-only" role="status">
-          {SOCIAL.profile.shareCopied}
-        </span>
-      ) : null}
-    </button>
-  );
-}
+// Share opens the existing post Share sheet. Comment stays the thread.
 
 export function SocialFeedImmersive({
   post,
@@ -179,7 +143,7 @@ export function SocialFeedImmersive({
             icon
             tone="stage"
           />
-          <SocialPostShareControl postId={post.id} tone="stage" />
+          <SocialPostShareButton postId={post.id} tone="stage" />
         </div>
       </div>
     </div>

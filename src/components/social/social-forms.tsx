@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+import { useHouseClient } from "@/components/chrome/house-client-shell";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +16,8 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
+  DM_THREAD_COMPOSER_CAMERA_CLASS,
+  DM_THREAD_COMPOSER_CAMERA_GLYPH,
   DM_THREAD_COMPOSER_CLASS,
   DM_THREAD_COMPOSER_FIELD_CLASS,
   DM_THREAD_COMPOSER_ROW_CLASS,
@@ -24,18 +29,46 @@ import {
   SOCIAL_PERSON_PRIMARY_CLASS,
   SOCIAL_PERSON_SECONDARY_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
-  SOCIAL_PILL_CLASS,
-  SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_POST_ACTION_HIT_CLASS,
   SOCIAL_STORY_REPLY_PILL_CLASS,
+  SOCIAL_STORY_STAGE_IN_CLASS,
+  SOCIAL_WRITE_COMPOSE_CHROME_CLASS,
+  SOCIAL_WRITE_COMPOSE_HOST_CLASS,
+  SOCIAL_WRITE_COMPOSE_ROW_CLASS,
+  SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS,
+  bindSocialWriteComposeViewport,
+  fitSocialWriteComposeField,
+  SOCIAL_WRITE_COMPOSE_POST_CLASS,
+  SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS,
+  SOCIAL_WRITE_COMPOSE_PROGRESS_FILL_CLASS,
+  SOCIAL_WRITE_COMPOSE_PROGRESS_TRACK_CLASS,
+  SOCIAL_WRITE_COMPOSE_X_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
   SOCIAL_MEDIA_ACCEPT,
   SOCIAL_MEDIA_MAX_ITEMS,
+  socialMediaFrameFields,
   socialMediaKindFor,
   type SocialMediaItem,
+  type SocialMediaKind,
 } from "@/lib/social-media";
 import { uploadSocialPostMedia } from "@/lib/social-media-upload";
+import {
+  commitSocialComposeMediaItem,
+  composeSlotMayUpload,
+  composeVideoUploadPixels,
+  paintSocialComposeVideoPoster,
+  planSocialComposeAttach,
+  SOCIAL_COMPOSE_PIXEL_WAIT_MS,
+  type SocialComposePosterCanvas,
+  type SocialComposeSourcePixels,
+} from "@/lib/social-compose-video";
+import {
+  bindStoryReviewVideo,
+  storyReviewFrameSeconds,
+  storyReviewMediaSrc,
+} from "@/lib/social-story-recorder";
 import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
 import {
@@ -47,6 +80,7 @@ import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 import {
   displayHandle,
+  leaveSocialWriteCompose,
   SOCIAL,
   SOCIAL_ROUTES,
   socialHandleDisplayError,
@@ -63,6 +97,7 @@ import {
   runSocialOptimisticMutation,
 } from "@/lib/social-optimistic";
 import { cn } from "@/lib/cn";
+import { SOCIAL_ICON_SIZE_POST_ACTION } from "@/lib/social-icons";
 import { SocialAvatar } from "./social-avatar";
 import { SocialHandleField } from "./social-handle-field";
 import { SocialIcon } from "./social-icon";
@@ -83,6 +118,120 @@ function FormError({ error }: { error: string }) {
   return <InlineNotice tone="error">{error}</InlineNotice>;
 }
 
+type WriteComposeLocal = {
+  localId: string;
+  previewUrl: string;
+  kind: SocialMediaKind;
+  /** Null once the bytes are stored. 0–100 while a video is uploading. */
+  progress: number | null;
+  key: string | null;
+};
+
+export function SocialComposeUploadProgress({ percent }: { percent: number }) {
+  const shown = Math.min(100, Math.max(0, Math.round(percent)));
+  return (
+    <div
+      data-social-create-upload-progress=""
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={shown}
+      aria-label={SOCIAL.home.attaching}
+      className={SOCIAL_WRITE_COMPOSE_PROGRESS_TRACK_CLASS}
+    >
+      <div className={SOCIAL_WRITE_COMPOSE_PROGRESS_FILL_CLASS} style={{ width: `${shown}%` }} />
+    </div>
+  );
+}
+
+export function SocialComposeVideoPreview({
+  src,
+  onPixels,
+}: {
+  src: string;
+  onPixels?: (pixels: SocialComposeSourcePixels) => void;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [poster, setPoster] = useState<string | null>(null);
+  const onPixelsRef = useRef(onPixels);
+
+  useEffect(() => {
+    onPixelsRef.current = onPixels;
+  }, [onPixels]);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    bindStoryReviewVideo(node, src);
+    const frame = storyReviewFrameSeconds();
+    let held = false;
+    const reportPixels = () => {
+      const pixels = composeVideoUploadPixels({ width: node.videoWidth, height: node.videoHeight });
+      if (pixels) onPixelsRef.current?.(pixels);
+    };
+    const paint = () => {
+      if (node.videoWidth <= 0) return;
+      const canvas = node.ownerDocument.createElement("canvas");
+      const url = paintSocialComposeVideoPoster(node, canvas as unknown as SocialComposePosterCanvas);
+      if (url) setPoster(url);
+    };
+    // iOS paints a blob only after muted playback. Pause on the review frame
+    // and keep that JPEG above the element so the clip cannot run out to grey.
+    const holdFrame = () => {
+      if (held || node.videoWidth <= 0 || node.currentTime < frame) return;
+      held = true;
+      reportPixels();
+      paint();
+      node.pause();
+    };
+    const present = () => {
+      reportPixels();
+      if (node.currentTime < frame) {
+        try {
+          node.currentTime = frame;
+        } catch {
+          // WebKit can reject the seek until the moov is readable.
+        }
+      }
+      void node.play().catch(() => undefined);
+    };
+    node.addEventListener("loadedmetadata", reportPixels);
+    node.addEventListener("loadeddata", present);
+    node.addEventListener("timeupdate", holdFrame);
+    if (node.videoWidth > 0) reportPixels();
+    if (node.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) present();
+    return () => {
+      node.removeEventListener("loadedmetadata", reportPixels);
+      node.removeEventListener("loadeddata", present);
+      node.removeEventListener("timeupdate", holdFrame);
+    };
+  }, [src]);
+
+  return (
+    <>
+      <video
+        ref={ref}
+        data-social-create-video=""
+        src={storyReviewMediaSrc(src)}
+        className="absolute inset-0 size-full object-cover"
+        autoPlay
+        playsInline
+        muted
+        preload="auto"
+      />
+      {poster ? (
+        // eslint-disable-next-line @next/next/no-img-element -- held review frame above the paused element
+        <img
+          data-social-create-video-poster=""
+          src={poster}
+          alt=""
+          className="absolute inset-0 size-full object-cover"
+        />
+      ) : null}
+    </>
+  );
+}
+
 function persistKeys(media: SocialMediaItem[]) {
   return media.map((item) => ({
     kind: item.kind,
@@ -97,6 +246,7 @@ function persistKeys(media: SocialMediaItem[]) {
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
         }
       : {}),
+    ...(socialMediaFrameFields(item) ?? {}),
   }));
 }
 
@@ -141,6 +291,7 @@ function publishOptimisticPost({
           url,
           ...(item.playbackId ? { playbackId: item.playbackId } : {}),
           ...(item.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
+          ...(socialMediaFrameFields(item) ?? {}),
         },
       ];
     }),
@@ -385,6 +536,7 @@ export function SocialCreateCompose({
   initialStep?: SocialCreateMediaStep | null;
 }) {
   const router = useRouter();
+  const house = useHouseClient();
   const [pickedFiles, setPickedFiles] = useState(takeSocialHomeComposerMedia);
   const kind: SocialCreateKind = initialKind ?? "text";
   const ingestPicked = pickedFiles.length > 0 && kind === "media";
@@ -396,11 +548,40 @@ export function SocialCreateCompose({
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [locals, setLocals] = useState<WriteComposeLocal[]>([]);
   const [originalQuality, setOriginalQuality] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const uploadAbortRef = useRef(new Map<string, AbortController>());
+  const dismissedRef = useRef(new Set<string>());
+  const pixelsRef = useRef(new Map<string, SocialComposeSourcePixels>());
+  const pixelWaitersRef = useRef(new Map<string, Set<(pixels: SocialComposeSourcePixels | null) => void>>());
+  const writeFormRef = useRef<HTMLFormElement>(null);
+  const writeBodyRef = useRef<HTMLTextAreaElement>(null);
   const hasVideo =
     pickedFiles.some((file) => socialMediaKindFor(file.type) === "video") ||
     media.some((item) => item.kind === "video");
+
+  useEffect(() => {
+    const form = writeFormRef.current;
+    if (!form) return;
+    return bindSocialWriteComposeViewport(form, () => {
+      const field = writeBodyRef.current;
+      if (field) fitSocialWriteComposeField(field);
+    });
+  }, [kind]);
+
+  useEffect(() => {
+    const controllers = uploadAbortRef.current;
+    return () => {
+      for (const controller of controllers.values()) controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const field = writeBodyRef.current;
+    if (!field) return;
+    fitSocialWriteComposeField(field);
+  }, [body, kind]);
 
   useEffect(() => {
     if (!ingestPicked) return;
@@ -442,15 +623,184 @@ export function SocialCreateCompose({
     };
   }, [kind, router, step]);
 
+  function publishComposePixels(localId: string, measured: SocialComposeSourcePixels) {
+    const pixels = composeVideoUploadPixels(measured);
+    if (!pixels) return;
+    pixelsRef.current.set(localId, pixels);
+    const waiters = pixelWaitersRef.current.get(localId);
+    if (!waiters) return;
+    for (const resolve of [...waiters]) resolve(pixels);
+    pixelWaitersRef.current.delete(localId);
+  }
+
+  function waitForComposePixels(localId: string, signal: AbortSignal): Promise<SocialComposeSourcePixels | null> {
+    const known = pixelsRef.current.get(localId);
+    if (known) return Promise.resolve(known);
+    if (signal.aborted || dismissedRef.current.has(localId)) return Promise.resolve(null);
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value: SocialComposeSourcePixels | null) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        signal.removeEventListener("abort", onAbort);
+        pixelWaitersRef.current.get(localId)?.delete(finish);
+        resolve(value);
+      };
+      const onAbort = () => finish(pixelsRef.current.get(localId) ?? null);
+      const timer = window.setTimeout(() => {
+        finish(pixelsRef.current.get(localId) ?? null);
+      }, SOCIAL_COMPOSE_PIXEL_WAIT_MS);
+      signal.addEventListener("abort", onAbort);
+      const bucket = pixelWaitersRef.current.get(localId) ?? new Set();
+      bucket.add(finish);
+      pixelWaitersRef.current.set(localId, bucket);
+      const raced = pixelsRef.current.get(localId);
+      if (raced) finish(raced);
+    });
+  }
+
+  function dismissLocal(slot: WriteComposeLocal) {
+    dismissedRef.current.add(slot.localId);
+    uploadAbortRef.current.get(slot.localId)?.abort();
+    uploadAbortRef.current.delete(slot.localId);
+    pixelsRef.current.delete(slot.localId);
+    URL.revokeObjectURL(slot.previewUrl);
+    setLocals((current) => current.filter((row) => row.localId !== slot.localId));
+    if (!slot.key) return;
+    setMedia((current) => current.filter((row) => row.key !== slot.key));
+    setPreviews((current) => {
+      if (!slot.key || !(slot.key in current)) return current;
+      const next = { ...current };
+      delete next[slot.key];
+      return next;
+    });
+  }
+
+  async function attachWriteMedia(files: ArrayLike<File>) {
+    const room = SOCIAL_MEDIA_MAX_ITEMS - media.length;
+    if (room <= 0) {
+      setError(SOCIAL.home.mediaLimit);
+      return;
+    }
+    const prepared: WriteComposeLocal[] = [];
+    const filesById = new Map<string, File>();
+    for (const raw of Array.from(files).slice(0, room)) {
+      const plan = planSocialComposeAttach(raw);
+      if (!plan.ok) {
+        setError(plan.error);
+        continue;
+      }
+      const localId = crypto.randomUUID();
+      filesById.set(localId, plan.file);
+      prepared.push({
+        localId,
+        previewUrl: URL.createObjectURL(plan.file),
+        kind: plan.kind,
+        progress: plan.kind === "video" ? 0 : null,
+        key: null,
+      });
+    }
+    if (prepared.length === 0) return;
+    setLocals((current) => [...current, ...prepared]);
+    setUploading(true);
+    for (const slot of prepared) {
+      uploadAbortRef.current.set(slot.localId, new AbortController());
+    }
+    let carried = media;
+    try {
+      for (let index = 0; index < prepared.length; index += 1) {
+        const slot = prepared[index];
+        if (!slot) continue;
+        const file = filesById.get(slot.localId);
+        const controller = uploadAbortRef.current.get(slot.localId);
+        if (
+          !file ||
+          dismissedRef.current.has(slot.localId) ||
+          !controller ||
+          !composeSlotMayUpload(controller.signal)
+        ) {
+          uploadAbortRef.current.delete(slot.localId);
+          continue;
+        }
+        const measured = slot.kind === "video" ? (pixelsRef.current.get(slot.localId) ?? null) : null;
+        const result = await uploadSocialPostMedia([file], carried, SOCIAL_MEDIA_MAX_ITEMS, "posts", {
+          ...(slot.kind === "video" ? { intent: "video" as const } : {}),
+          originalQuality,
+          signal: controller.signal,
+          // Measured from the visible preview. Null skips the detached probe.
+          pixels: slot.kind === "video" ? composeVideoUploadPixels(measured) : undefined,
+          onProgress:
+            slot.kind === "video"
+              ? (progress) => {
+                  const percent = progress.percent ?? 0;
+                  setLocals((current) =>
+                    current.map((row) =>
+                      row.localId === slot.localId ? { ...row, progress: percent } : row,
+                    ),
+                  );
+                }
+              : undefined,
+        });
+        const stillWanted =
+          uploadAbortRef.current.has(slot.localId) &&
+          !dismissedRef.current.has(slot.localId) &&
+          composeSlotMayUpload(controller.signal);
+        if (!stillWanted || result.aborted) {
+          uploadAbortRef.current.delete(slot.localId);
+          continue;
+        }
+        // CI must re-run on this tip: the prior synchronize never enqueued checks, isolation, or governance.
+        const measuredNow =
+          slot.kind === "video" && !result.error
+            ? await waitForComposePixels(slot.localId, controller.signal)
+            : null;
+        uploadAbortRef.current.delete(slot.localId);
+        if (dismissedRef.current.has(slot.localId)) continue;
+        const uploaded = result.items?.[0];
+        const item = uploaded
+          ? commitSocialComposeMediaItem(uploaded, slot.kind === "video" ? measuredNow : null)
+          : null;
+        if (result.error || !item) {
+          URL.revokeObjectURL(slot.previewUrl);
+          const drop = new Set(prepared.slice(index).map((row) => row.localId));
+          setLocals((current) => current.filter((row) => !drop.has(row.localId)));
+          for (const rest of prepared.slice(index + 1)) {
+            uploadAbortRef.current.get(rest.localId)?.abort();
+            uploadAbortRef.current.delete(rest.localId);
+            URL.revokeObjectURL(rest.previewUrl);
+          }
+          setError(result.error ?? (slot.kind === "video" ? SOCIAL.home.videoPreparing : SOCIAL.home.uploadFailed));
+          break;
+        }
+        if (dismissedRef.current.has(slot.localId)) continue;
+        carried = [...carried, item];
+        setPreviews((current) => ({ ...current, [item.key]: slot.previewUrl }));
+        setMedia((current) => [...current, item]);
+        setLocals((current) =>
+          current.map((row) =>
+            row.localId === slot.localId ? { ...row, key: item.key, progress: null } : row,
+          ),
+        );
+      }
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function onPick(files: ArrayLike<File> | null) {
-    if (!files || files.length === 0 || kind !== "media") return;
+    if (!files || files.length === 0) return;
     const chosen = Array.from(files);
     setPickedFiles(chosen);
     setError("");
-    setUploading(true);
-    const result = await uploadSocialMedia(files, media, originalQuality);
-    setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
+    if (kind === "text") {
+      await attachWriteMedia(chosen);
+      return;
+    }
+    setUploading(true);
+    const result = await uploadSocialMedia(chosen, media, originalQuality);
+    setUploading(false);
     if (result.error) {
       setError(result.error);
       return;
@@ -465,7 +815,9 @@ export function SocialCreateCompose({
         return next;
       });
       setMedia((current) => [...current, ...result.items!]);
-      setStep((current) => (current === "caption" ? current : "review"));
+      if (kind === "media") {
+        setStep((current) => (current === "caption" ? current : "review"));
+      }
     }
   }
 
@@ -532,11 +884,182 @@ export function SocialCreateCompose({
     );
   }
 
+  if (kind === "text") {
+    const previewSlots =
+      locals.length > 0
+        ? locals.map((slot) => ({
+            id: slot.localId,
+            kind: slot.kind,
+            url: slot.previewUrl,
+            progress: slot.progress,
+            onRemove: () => dismissLocal(slot),
+          }))
+        : media.map((item) => ({
+            id: item.key,
+            kind: item.kind,
+            url: previews[item.key] ?? "",
+            progress: null as number | null,
+            onRemove: () => {
+              const url = previews[item.key];
+              if (url) URL.revokeObjectURL(url);
+              setMedia((current) => current.filter((row) => row.key !== item.key));
+              setPreviews((current) => {
+                if (!(item.key in current)) return current;
+                const next = { ...current };
+                delete next[item.key];
+                return next;
+              });
+            },
+          }));
+    return (
+      <form
+        ref={writeFormRef}
+        data-social-create-form=""
+        data-social-create-kind="text"
+        data-social-write-voice=""
+        className={cn(SOCIAL_WRITE_COMPOSE_HOST_CLASS, SOCIAL_STORY_STAGE_IN_CLASS)}
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (uploading) return;
+          ingestSpeechLearning({
+            text: body,
+            source: "typed",
+            workspace: "social",
+          });
+          publishOptimisticPost({
+            body,
+            media,
+            previews,
+            authorName,
+            authorHandle,
+            authorPhotoUrl,
+            onNavigate: () => {
+              router.push(SOCIAL_ROUTES.home);
+            },
+            setError,
+          });
+        }}
+      >
+        <div className={SOCIAL_WRITE_COMPOSE_CHROME_CLASS}>
+          <button
+            type="button"
+            data-social-create-dismiss=""
+            aria-label={SOCIAL.create.close}
+            className={SOCIAL_WRITE_COMPOSE_X_CLASS}
+            onClick={() =>
+              leaveSocialWriteCompose(
+                () => house?.navigateOwned(SOCIAL_ROUTES.home) ?? false,
+                () => router.push(SOCIAL_ROUTES.home),
+              )
+            }
+          >
+            <SocialIcon name="x" size={22} className="text-ink" />
+          </button>
+          <button type="submit" disabled={uploading} className={SOCIAL_WRITE_COMPOSE_POST_CLASS}>
+            {SOCIAL.home.submit}
+          </button>
+        </div>
+        <div className="mt-[var(--space-2)] flex items-center gap-[var(--space-2)]" data-social-create-author="">
+          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" className="size-8" />
+          <span className="min-w-0 t-body font-medium text-ink">{authorName}</span>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col pt-[var(--space-2)]">
+          {previewSlots.length > 0 ? (
+            <ul
+              data-social-create-preview=""
+              className="mt-[var(--space-2)] flex flex-col gap-[var(--space-2)]"
+            >
+              {previewSlots.map((slot) => (
+                <li key={slot.id}>
+                  <div className={SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS}>
+                    {slot.url && slot.kind === "video" ? (
+                      <SocialComposeVideoPreview
+                        src={slot.url}
+                        onPixels={
+                          locals.length > 0 ? (pixels) => publishComposePixels(slot.id, pixels) : undefined
+                        }
+                      />
+                    ) : slot.url ? (
+                      <Image
+                        src={slot.url}
+                        alt={SOCIAL.home.photoKind}
+                        fill
+                        unoptimized
+                        sizes="100vw"
+                        className="object-cover"
+                      />
+                    ) : null}
+                    {slot.progress !== null ? (
+                      <SocialComposeUploadProgress percent={slot.progress} />
+                    ) : null}
+                    <button
+                      type="button"
+                      aria-label={SOCIAL.home.removeAttach}
+                      className={cn(
+                        SOCIAL_POST_ACTION_HIT_CLASS,
+                        "absolute right-[var(--space-2)] top-[var(--space-2)] z-10 bg-surface",
+                      )}
+                      onClick={slot.onRemove}
+                    >
+                      <SocialIcon name="x" size={20} className="text-ink-2" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="min-h-0 flex-1" data-social-write-stage="" />
+          )}
+        </div>
+        <div className={SOCIAL_WRITE_COMPOSE_ROW_CLASS} data-social-write-compose-row="">
+          <label className="sr-only" htmlFor="social-create-body">
+            {SOCIAL.home.composerPrompt}
+          </label>
+          <Textarea
+            ref={writeBodyRef}
+            variant="bare"
+            id="social-create-body"
+            name="body"
+            rows={1}
+            value={body}
+            onChange={(e) => {
+              setBody(e.target.value);
+              fitSocialWriteComposeField(e.currentTarget);
+            }}
+            placeholder={SOCIAL.home.composerPrompt}
+            className={SOCIAL_WRITE_COMPOSE_ROW_FIELD_CLASS}
+          />
+          <button
+            type="button"
+            data-social-create-attach="library"
+            aria-label={SOCIAL.home.attach}
+            className={cn(SOCIAL_POST_ACTION_HIT_CLASS, "text-ink")}
+            disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_POST_ACTION} className="text-ink" />
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={SOCIAL_MEDIA_ACCEPT}
+            multiple
+            className="sr-only"
+            data-social-create-attach-input=""
+            aria-label={SOCIAL.home.attach}
+            onChange={(event) => void onPick(event.target.files)}
+          />
+        </div>
+        <FormError error={error} />
+      </form>
+    );
+  }
+
   return (
     <form
       data-social-create-form=""
       data-social-create-kind={kind}
-      data-social-create-media-step={kind === "media" ? "caption" : undefined}
+      data-social-create-media-step="caption"
       className={SOCIAL_CREATE_CARD_CLASS}
       onSubmit={(event) => {
         event.preventDefault();
@@ -637,14 +1160,7 @@ export function SocialCreateCompose({
           ))}
         </select>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2 t-body-sm text-ink-2">
-          <span className="hidden md:inline">{SOCIAL.home.audience}</span>
-          <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS, "inline-flex items-center gap-1.5")}>
-            <SocialIcon name="users" size={14} className="text-ink-2" />
-            {SOCIAL.home.audienceFollowing}
-          </span>
-        </p>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
           {SOCIAL.home.submit}
         </button>
@@ -844,6 +1360,7 @@ export function SocialMessageButton({ peerId }: { peerId: string }) {
 
 export function SocialDmCompose({ conversationId }: { conversationId: string }) {
   const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   return (
     <form
       data-social-dm-form=""
@@ -875,6 +1392,28 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
         <button type="submit" aria-label={SOCIAL.dms.submit} className={DM_THREAD_COMPOSER_SEND_CLASS}>
           <SocialIcon name="paper-plane-tilt" size={18} />
         </button>
+        <button
+          type="button"
+          data-social-dm-camera=""
+          aria-label={SOCIAL.home.attach}
+          className={DM_THREAD_COMPOSER_CAMERA_CLASS}
+          onClick={() => fileRef.current?.click()}
+        >
+          <SocialIcon name="camera" size={DM_THREAD_COMPOSER_CAMERA_GLYPH} className="text-ink" />
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept={SOCIAL_MEDIA_ACCEPT}
+          className="sr-only"
+          tabIndex={-1}
+          data-social-dm-attach-input=""
+          aria-label={SOCIAL.home.attach}
+          onChange={(event) => {
+            // Library open only. No DM media insert on this path.
+            event.currentTarget.value = "";
+          }}
+        />
       </div>
       <FormError error={error} />
     </form>

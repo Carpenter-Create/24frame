@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 import { SOCIAL_MUX_PLAYER_CLASS } from "@/lib/social-chrome";
 import {
   SOCIAL_MUX_PLAYBACK_ROUTE,
+  socialMuxCoveringPoster,
   socialMuxPlaybackRequiresTokens,
   socialMuxPlaybackTokensFromJson,
   socialMuxThumbnailUrl,
@@ -18,23 +19,90 @@ import {
 // static. Signed policy mints tokens on the Node route. Public policy
 // and rows with no policy play the playback id alone.
 // Adaptive Auto — no quality Settings control in v1.
+// Feed face is cover. Immersive passes contain.
+// docs/design-locks/social-feed-photo-scale-immersive-lock-v1.md
 
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
+
+function MuxPoster({
+  src,
+  fit,
+  onReady,
+}: {
+  src: string;
+  fit: "cover" | "contain";
+  onReady?: () => void;
+}) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- thumb hold until decoded frames
+    <img
+      alt=""
+      src={src}
+      data-social-mux-poster=""
+      onLoad={onReady}
+      onError={onReady}
+      className={cn(
+        "pointer-events-none absolute inset-0 size-full",
+        fit === "contain" ? "object-contain" : "object-cover",
+      )}
+    />
+  );
+}
+
+function playerStyle(chromeless: boolean, fit: "cover" | "contain") {
+  const cover = {
+    aspectRatio: "auto",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  } as const;
+  const contain = {
+    aspectRatio: "auto",
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+  } as const;
+  const base = fit === "contain" ? contain : cover;
+  if (!chromeless) return base;
+  return {
+    ...base,
+    "--controls": "none",
+  } as const;
+}
 
 export function SocialMuxPlayer({
   playbackId,
   playbackPolicy,
   className,
   fit = "cover",
+  muted = false,
+  autoPlay = false,
+  chromeless = false,
+  onPaint,
 }: {
   playbackId: string;
   playbackPolicy?: SocialMuxPlaybackPolicy;
   className?: string;
   fit?: "cover" | "contain";
+  muted?: boolean;
+  autoPlay?: boolean;
+  chromeless?: boolean;
+  onPaint?: () => void;
 }) {
   const signed = socialMuxPlaybackRequiresTokens(playbackPolicy);
   const [mint, setMint] = useState<{ playbackId: string; tokens: SocialMuxPlaybackTokens } | null>(null);
+  const [paintedId, setPaintedId] = useState<string | null>(null);
   const tokens = signed && mint?.playbackId === playbackId ? mint.tokens : null;
+  const painted = paintedId === playbackId;
+  const poster = socialMuxThumbnailUrl(playbackId, tokens?.thumbnail);
+  const releaseHold = () => {
+    onPaint?.();
+  };
+  const paint = () => {
+    setPaintedId(playbackId);
+    releaseHold();
+  };
+  const mediaClass = fit === "contain" ? "size-full object-contain" : "size-full object-cover";
 
   useEffect(() => {
     if (!signed) return;
@@ -60,47 +128,53 @@ export function SocialMuxPlayer({
       data-social-mux-playback={signed ? (tokens ? "signed" : "pending") : "public"}
       data-social-post-video=""
       className={cn(
-        fit === "contain"
-          ? "social-mux-player social-feed-immersive-media block size-full overflow-hidden object-contain"
-          : SOCIAL_MUX_PLAYER_CLASS,
+        "relative",
+        SOCIAL_MUX_PLAYER_CLASS,
+        fit === "contain" && "social-feed-immersive-media object-contain",
         className,
       )}
     >
       {signed ? (
-        tokens ? (
+        <>
+          {tokens ? (
+            <MuxPlayer
+              playbackId={playbackId}
+              tokens={{
+                playback: tokens.playback,
+                thumbnail: tokens.thumbnail,
+                storyboard: tokens.storyboard,
+              }}
+              streamType="on-demand"
+              playsInline
+              autoPlay={autoPlay}
+              muted={muted}
+              preload="metadata"
+              onLoadedData={paint}
+              poster={poster}
+              className={mediaClass}
+              style={playerStyle(chromeless, fit)}
+            />
+          ) : null}
+          {/* Unsigned signed thumbs 403 before the JWT. That error must not
+              clear the open hold. The still leaves once the player mounts. */}
+          {socialMuxCoveringPoster(signed, Boolean(tokens)) ? <MuxPoster src={poster} fit={fit} /> : null}
+        </>
+      ) : (
+        <>
           <MuxPlayer
             playbackId={playbackId}
-            tokens={{
-              playback: tokens.playback,
-              thumbnail: tokens.thumbnail,
-              storyboard: tokens.storyboard,
-            }}
             streamType="on-demand"
             playsInline
+            autoPlay={autoPlay}
+            muted={muted}
             preload="metadata"
-            poster={socialMuxThumbnailUrl(playbackId, tokens.thumbnail)}
-            className={fit === "contain" ? "size-full object-contain" : "size-full object-cover"}
-            style={
-              fit === "contain"
-                ? { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "contain" }
-                : { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }
-            }
+            onLoadedData={paint}
+            poster={poster}
+            className={mediaClass}
+            style={playerStyle(chromeless, fit)}
           />
-        ) : null
-      ) : (
-        <MuxPlayer
-          playbackId={playbackId}
-          streamType="on-demand"
-          playsInline
-          preload="metadata"
-          poster={socialMuxThumbnailUrl(playbackId)}
-          className={fit === "contain" ? "size-full object-contain" : "size-full object-cover"}
-          style={
-            fit === "contain"
-              ? { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "contain" }
-              : { aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }
-          }
-        />
+          {painted ? null : <MuxPoster src={poster} fit={fit} onReady={releaseHold} />}
+        </>
       )}
     </div>
   );

@@ -145,6 +145,7 @@ export type DmStoryShareCard = {
   kind: "image" | "video" | null;
   url: string | null;
   playbackId?: string;
+  playbackPolicy?: "public" | "signed";
   href: string | null;
 };
 
@@ -173,6 +174,7 @@ export function presentDmStoryShare(input: {
     kind,
     url: kind && item ? item.url : null,
     playbackId: kind === "video" ? item?.playbackId : undefined,
+    ...(kind === "video" && item?.playbackPolicy ? { playbackPolicy: item.playbackPolicy } : {}),
     href: kind === "image" && storyId ? socialStoryHref(storyId) : null,
   };
 }

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { socialMediaFrameClass } from "@/lib/social-media-display";
 import {
   SOCIAL_AVATAR_ROUTE,
   SOCIAL_EDGE_RUNTIME,
@@ -53,11 +54,50 @@ describe("Social Edge media proxies", () => {
     ).toEqual({ kind: "image", url: socialMediaHref(imageKey) });
     expect(
       socialStoryRailCover([{ kind: "video", key: videoKey, contentType: "video/mp4" }], AUTHOR),
-    ).toEqual({ kind: "video", url: socialMediaHref(videoKey) });
+    ).toEqual({ kind: "video", url: "" });
     expect(socialStoryRailCover([], AUTHOR)).toBeNull();
     expect(
       socialStoryRailCover([{ kind: "image", key: "avatars/x", contentType: "image/jpeg" }], AUTHOR),
     ).toBeNull();
+    const playbackId = "uNbxnGLKJ00yfbijDO8COxT";
+    expect(
+      socialStoryRailCover(
+        [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "signed" }],
+        AUTHOR,
+      ),
+    ).toEqual({ kind: "image", url: "", playbackId, playbackPolicy: "signed" });
+    expect(
+      socialStoryRailCover(
+        [{ kind: "video", key: videoKey, contentType: "video/mp4", provider: "mux", playbackId, playbackPolicy: "public" }],
+        AUTHOR,
+      ),
+    ).toEqual({
+      kind: "image",
+      url: `https://image.mux.com/${playbackId}/thumbnail.webp`,
+      playbackId,
+      playbackPolicy: "public",
+    });
+  });
+
+  it("blanks a video url when there is no playback id and keeps stills on the image proxy", () => {
+    const imageKey = `stories/${AUTHOR}/${OBJECT}.jpg`;
+    const videoKey = `stories/${AUTHOR}/${OBJECT}.mp4`;
+    const items = socialMediaProxies(
+      [
+        { kind: "image", key: imageKey, contentType: "image/jpeg" },
+        { kind: "video", key: videoKey, contentType: "video/mp4" },
+      ],
+      AUTHOR,
+      "stories",
+    );
+    expect(items[0]).toMatchObject({
+      kind: "image",
+      url: `${SOCIAL_MEDIA_ROUTE}?key=${encodeURIComponent(imageKey)}`,
+    });
+    expect(items[1]?.kind).toBe("video");
+    expect(items[1]?.url).toBe("");
+    expect(items[1]?.url).not.toContain(SOCIAL_MEDIA_ROUTE);
+    expect(items[1]).not.toHaveProperty("playbackId");
   });
 
   it("exposes Mux playback ids on Edge profile without the S3 proxy", () => {
@@ -101,6 +141,7 @@ describe("Social Edge media proxies", () => {
       AUTHOR,
     );
     expect(signed[0]?.playbackPolicy).toBe("signed");
+    expect(signed[0]?.url).toBe("");
     const legacy = socialMediaProxies(
       [
         {
@@ -115,6 +156,28 @@ describe("Social Edge media proxies", () => {
       AUTHOR,
     );
     expect(legacy[0]?.playbackPolicy).toBe("public");
+  });
+
+  it("keeps vertical source pixels so the feed frame is portrait", () => {
+    const key = `posts/${AUTHOR}/${OBJECT}.mp4`;
+    const items = socialMediaProxies(
+      [
+        {
+          kind: "video",
+          key,
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+          width: 1080,
+          height: 1920,
+        },
+      ],
+      AUTHOR,
+    );
+    expect(items[0]).toMatchObject({ kind: "video", playbackId: "uNbxnGLKJ00yfbijDO8COxT", width: 1080, height: 1920 });
+    expect(socialMediaFrameClass(items[0] ?? {})).toContain("aspect-[4/5]");
+    expect(socialMediaFrameClass(items[0] ?? {})).not.toContain("aspect-video");
   });
 });
 

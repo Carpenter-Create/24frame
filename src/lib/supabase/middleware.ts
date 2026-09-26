@@ -52,6 +52,10 @@ export async function updateSession(request: NextRequest) {
     // Stripe webhook authenticates by signature, not a user session — must not be
     // redirected to /login (it has no cookies).
     path === "/api/stripe/webhook" ||
+    // Chrome fetches the web app manifest with no session cookie. A login
+    // redirect is HTML, which the browser reports as a manifest syntax error.
+    // Session redirect skip only — the file is public metadata, not auth.
+    path === "/manifest.webmanifest" ||
     path === "/sentry-tunnel"; // Sentry tunnel; also excluded from the matcher
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

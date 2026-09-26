@@ -20,6 +20,7 @@ import {
   socialAvatarHref,
   socialMediaHref,
 } from "@/lib/social-edge";
+import { SOCIAL_WELCOME_VIDEO_PRESENT } from "@/lib/social-query";
 import {
   isLegacySocialProfilePostsTab,
   parseSocialProfileTab,
@@ -109,13 +110,12 @@ async function SocialProfileMain({
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) return null;
 
-  const [photoUrl, coverUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, postsPage] =
+  const [photoUrl, coverUrl, liveStoriesPage, counts, jar, commentsPage, postsPage] =
     await Promise.all([
       Promise.resolve(socialAvatarHref(profile.id)),
       Promise.resolve(profile.cover_key ? socialMediaHref(profile.cover_key) : null),
       loadLiveStories(supabase, [profile.id]),
       loadCachedProfileSocialCounts(supabase, profile.id),
-      Promise.resolve(profile.welcome_video_key ? socialMediaHref(profile.welcome_video_key) : null),
       cookies(),
       loadAuthorActivityComments(supabase, profile.id),
       loadAuthorActivityPosts(supabase, profile.id, "posts"),
@@ -131,7 +131,7 @@ async function SocialProfileMain({
       topics: profile.topics ?? [],
       websiteUrl: profile.website_url ?? null,
       imdbUrl: profile.imdb_url ?? null,
-      welcomeVideoUrl: welcomeUrl,
+      welcomeVideoUrl: profile.welcome_video_key ? SOCIAL_WELCOME_VIDEO_PRESENT : null,
     },
     readSocialProfileOptimisticCookie((name) => jar.get(name)?.value),
   );
@@ -211,6 +211,7 @@ async function SocialProfileMain({
               liked: liked.has(post.id),
               canLike: true,
               media: media.get(post.id) ?? [],
+              owned: true,
             }),
           ),
           imageIds: mediaIds.imageIds,
@@ -234,6 +235,7 @@ async function SocialProfileMain({
                 liked: liked.has(item.post.id),
                 canLike: true,
                 media: media.get(item.post.id) ?? [],
+                owned: item.post.author_id === profile.id,
               }),
             };
           }),

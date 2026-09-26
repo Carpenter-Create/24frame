@@ -55,7 +55,9 @@ describe("SocialFeedImmersive", () => {
     expect(html).toContain("data-social-like");
     expect(html).toContain("data-social-comment-open");
     expect(html).toContain("data-social-post-share");
-    expect(html).toContain('data-social-post-share-url="/social/p/p1"');
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(immersiveSrc).toContain("SocialPostShareButton");
+    expect(immersiveSrc).not.toContain("SocialPostShareControl");
     expect(html.indexOf("data-social-feed-immersive-caption")).toBeLessThan(
       html.indexOf("data-social-post-actions"),
     );

@@ -1,6 +1,7 @@
 import type { SocialEdgeMediaItem } from "@/lib/social-edge";
 import type { SocialFollowingWallPage, SocialPostRow, SocialProfileRow } from "@/lib/social-feed";
 import { socialPersonLabel } from "@/lib/social";
+import { socialPostOwnedBy } from "@/lib/social-post-own";
 
 // Query-owned Following wall view. RSC boot seeds this shape; the client
 // bound paints from query.data after that. Do not keep a second mapper
@@ -20,6 +21,7 @@ export type SocialFollowingWallCard = {
   groupSlug: string | null;
   groupName: string | null;
   canLike: boolean;
+  owned: boolean;
   media: SocialEdgeMediaItem[];
 };
 
@@ -37,6 +39,7 @@ export function socialFollowingWallView(input: {
   liked: ReadonlySet<string>;
   media: ReadonlyMap<string, readonly SocialEdgeMediaItem[]>;
   canLike: boolean;
+  viewerId: string;
 }): SocialFollowingWallView {
   return {
     truncated: input.wall.truncated,
@@ -54,6 +57,7 @@ function socialFollowingWallCard(
     liked: ReadonlySet<string>;
     media: ReadonlyMap<string, readonly SocialEdgeMediaItem[]>;
     canLike: boolean;
+    viewerId: string;
   },
 ): SocialFollowingWallCard {
   const author = input.authors.get(post.author_id);
@@ -75,6 +79,7 @@ function socialFollowingWallCard(
     groupSlug: group?.slug ?? null,
     groupName: group?.name ?? null,
     canLike: input.canLike,
+    owned: socialPostOwnedBy(post.author_id, input.viewerId),
     media: [...(input.media.get(post.id) ?? [])],
   };
 }
