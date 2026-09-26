@@ -1086,12 +1086,54 @@ describe("social actions", () => {
     form.set("body", "with media");
     form.set("media", JSON.stringify(media));
     await expect(createSocialPost(form)).rejects.toThrow("REDIRECT:/social");
+    expect(headSocialMediaObject).toHaveBeenCalledTimes(1);
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`);
     expect(inserts).toEqual([
       {
         table: "posts",
         row: postInsertRow({ authorId: author, body: "with media", media }),
       },
     ]);
+  });
+
+  it("rejects a post when the stored object is missing, oversized, or a different type", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const form = new FormData();
+    form.set("body", "Testing a post with a photo attached");
+    form.set(
+      "media",
+      JSON.stringify([{ kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" }]),
+    );
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce(null);
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaMissing });
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce({
+      bytes: 11 * 1024 * 1024,
+      contentType: "image/jpeg",
+    });
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaTooLarge });
+    vi.mocked(headSocialMediaObject).mockResolvedValueOnce({ bytes: 1200, contentType: "video/mp4" });
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaType });
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`);
+
+    const second = "44444444-4444-4444-8444-444444444444";
+    const pair = new FormData();
+    pair.set("body", "two stills");
+    pair.set(
+      "media",
+      JSON.stringify([
+        { kind: "image", key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" },
+        { kind: "image", key: `posts/${author}/${second}.jpg`, contentType: "image/jpeg" },
+      ]),
+    );
+    vi.mocked(headSocialMediaObject)
+      .mockResolvedValueOnce({ bytes: 1200, contentType: "image/jpeg" })
+      .mockResolvedValueOnce(null);
+    expect(await createSocialPost(pair)).toEqual({ error: SOCIAL.home.mediaMissing });
+    expect(headSocialMediaObject).toHaveBeenCalledWith(`posts/${author}/${second}.jpg`);
+    expect(inserts).toEqual([]);
   });
 
   it("rejects another author's media key on create", async () => {

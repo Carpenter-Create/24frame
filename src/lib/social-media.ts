@@ -352,7 +352,7 @@ export function validateMediaUpload(input: {
   return { ok: true, kind, contentType: input.contentType };
 }
 
-/** HeadObject must match the story row. Missing, empty, oversized, or a different type fails closed. */
+/** HeadObject must match the post or story row. Missing, empty, oversized, or a different type fails closed. */
 export function storedSocialMediaRejection(
   item: { kind: SocialMediaKind; contentType: string },
   head: { bytes: number; contentType: string | null } | null,
