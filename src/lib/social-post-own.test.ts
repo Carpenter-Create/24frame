@@ -26,12 +26,13 @@ describe("own-post caption and soft-delete", () => {
     expect(socialPostOwnedBy("u1", "u1")).toBe(true);
     expect(socialPostOwnedBy("u1", "u2")).toBe(false);
     expect(socialPostOwnedBy("u1", null)).toBe(false);
-    expect(postCaptionUpdateRow("hello", "2026-09-26T00:00:00.000Z")).toEqual({
-      body: "hello",
-      edited_at: "2026-09-26T00:00:00.000Z",
-    });
+    expect(socialPostOwnedBy("u1", undefined)).toBe(false);
+    expect(socialPostOwnedBy("u1", "")).toBe(false);
+    expect(socialPostOwnedBy("", "")).toBe(false);
+    expect(postCaptionUpdateRow("hello")).toEqual({ body: "hello" });
+    expect(postCaptionUpdateRow("hello")).not.toHaveProperty("edited_at");
     expect(postSoftDeleteUpdateRow()).toEqual({ status: "removed" });
-    expect(postCaptionUpdateRow("hello", "2026-09-26T00:00:00.000Z")).not.toHaveProperty("media");
+    expect(postCaptionUpdateRow("hello")).not.toHaveProperty("media");
     expect(postSoftDeleteUpdateRow()).not.toHaveProperty("body");
     expect(postCaptionWrite.length).toBe(2);
   });

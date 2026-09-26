@@ -2,11 +2,13 @@
 -- Author may edit caption on a new or old post and soft-delete
 -- (status = removed). Non-authors, including create_group staff, cannot.
 -- Removed posts leave feed select, comments, and the public like list.
--- The row stays. There is no DELETE policy, so a hard DELETE
--- removes nothing. Stories are not in this file.
+-- The row stays. Pack 2 grants authenticated SELECT, INSERT, UPDATE
+-- on posts and does not grant DELETE. There is no DELETE policy.
+-- A hard DELETE is permission denied, not an RLS no-op under a
+-- speculative grant. Stories are not in this file.
 
 begin;
-select plan(42);
+select plan(43);
 
 select set_config('t.author', gen_random_uuid()::text, false);
 select set_config('t.other', gen_random_uuid()::text, false);
@@ -40,6 +42,9 @@ select ok(
       and cmd = 'DELETE'
   ),
   'posts has no DELETE policy');
+select ok(
+  not has_table_privilege('authenticated', 'public.posts', 'DELETE'),
+  'authenticated has no DELETE privilege on posts');
 select ok(
   not exists (
     select 1
@@ -362,11 +367,13 @@ select is(
 select set_config('app.refreshing_post_like_count', '', true);
 select set_config('app.refreshing_post_comment_count', '', true);
 
-select lives_ok(
+select throws_ok(
   format($sql$
     delete from public.posts where id = %L
   $sql$, current_setting('t.post')),
-  'author hard-delete is not granted as an erroring command');
+  '42501',
+  'permission denied for table posts',
+  'author hard-delete is denied without a DELETE privilege');
 select is(
   (select count(*)::int from public.posts where id = current_setting('t.post')::uuid),
   1,

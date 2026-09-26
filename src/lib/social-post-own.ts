@@ -30,8 +30,9 @@ export function socialPostOwnedBy(authorId: string, viewerId: string | null | un
   return Boolean(viewerId) && authorId === viewerId;
 }
 
-export function postCaptionUpdateRow(body: string | null, editedAt: string) {
-  return { body, edited_at: editedAt };
+/** Body only. protect_post_author_mutation is the edited_at writer. */
+export function postCaptionUpdateRow(body: string | null) {
+  return { body };
 }
 
 export function postSoftDeleteUpdateRow() {

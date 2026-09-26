@@ -82,9 +82,10 @@ describe("own-post server actions", () => {
     expect(updates).toEqual([
       {
         table: "posts",
-        row: { body: "revised", edited_at: expect.any(String) },
+        row: { body: "revised" },
       },
     ]);
+    expect(updates[0]?.row).not.toHaveProperty("edited_at");
     expect(updates[0]?.row).not.toHaveProperty("media");
     expect(updates[0]?.row).not.toHaveProperty("status");
   });

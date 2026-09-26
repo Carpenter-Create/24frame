@@ -490,7 +490,7 @@ export async function updateSocialPostCaption(formData: FormData): Promise<Actio
 
   const { data: saved, error } = await supabase
     .from("posts")
-    .update(postCaptionUpdateRow(written.body, new Date().toISOString()))
+    .update(postCaptionUpdateRow(written.body))
     .eq("id", postId)
     .eq("author_id", user.id)
     .eq("status", "active")
@@ -533,6 +533,9 @@ export async function deleteSocialPost(formData: FormData): Promise<ActionResult
   if (error) return { error: error.message || SOCIAL.post.deleteFailed };
   if (!saved) return { error: SOCIAL.post.notAuthor };
 
+  // Actor feed key only. Another viewer's hot entry can linger until
+  // SOCIAL_HOT_TTL_SECONDS, and their following-wall query until
+  // SOCIAL_QUERY_STALE_MS. posts.status = removed is the tombstone.
   await bustSocialFeedHotCache(user.id);
   revalidateOwnPost(postId, String(formData.get("group_slug") ?? "").trim());
   return {};

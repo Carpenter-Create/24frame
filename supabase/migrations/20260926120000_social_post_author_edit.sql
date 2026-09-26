@@ -4,8 +4,11 @@
 -- INTENT: Own-post caption edit and soft-delete. Extends Pack 2 posts
 -- (posts_update_author, post_status active|hidden|removed, edited_at).
 -- Does not add a posts.deleted_at column. Does not add a DELETE policy.
--- Default grants may already include table DELETE for authenticated;
--- with no DELETE policy, RLS removes nothing. This file does not REVOKE.
+-- Pack 2 grants authenticated SELECT, INSERT, UPDATE on posts and does
+-- not grant DELETE. Supabase default ACL still leaves DELETE on the
+-- table (authenticated=arwd). This file revokes that residual so the
+-- privilege matches the grant. service_role keeps DELETE.
+-- The client caption write sends body only. This trigger stamps edited_at.
 --
 -- Author (auth.uid() = author_id) may:
 --   1. change body on an active post — trigger stamps edited_at.
@@ -33,9 +36,10 @@
 -- undelete, age window.
 --
 -- DESTRUCTIVE OPS (draft only; do NOT apply to production from this PR):
--- CREATE FUNCTION, CREATE TRIGGER. No DROP of existing policies, grants,
--- or tables. Forward-only.
--- ROLLBACK: drop trigger posts_apply_author_soft_delete on public.posts;
+-- CREATE FUNCTION, CREATE TRIGGER, REVOKE DELETE on public.posts from
+-- authenticated. No DROP of policies or tables. Forward-only.
+-- ROLLBACK: grant delete on public.posts to authenticated;
+-- drop trigger posts_apply_author_soft_delete on public.posts;
 -- drop trigger posts_protect_author_mutation on public.posts;
 -- drop function public.apply_post_author_soft_delete();
 -- drop function public.protect_post_author_mutation().
@@ -194,6 +198,9 @@ revoke execute on function public.protect_post_author_mutation()
 revoke execute on function public.apply_post_author_soft_delete()
   from public, anon, authenticated, service_role;
 
+-- Pack 2 omitted DELETE from the authenticated grant. Default ACL left it.
+revoke delete on table public.posts from authenticated;
+
 do $$
 begin
   if not exists (
@@ -244,6 +251,10 @@ begin
       and cmd = 'DELETE'
   ) then
     raise exception 'posts must not gain a DELETE policy';
+  end if;
+
+  if has_table_privilege('authenticated', 'public.posts', 'DELETE') then
+    raise exception 'authenticated must not hold DELETE on posts';
   end if;
 end
 $$;
