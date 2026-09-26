@@ -205,6 +205,28 @@ describe("write compose video attach", () => {
       width: 1080,
       height: 1920,
     });
+    expect(
+      commitSocialComposeMediaItem(
+        {
+          kind: "video",
+          key: "posts/org/clip.mp4",
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          playbackPolicy: "signed",
+        },
+        { width: 1080, height: 1920 },
+      ),
+    ).toEqual({
+      kind: "video",
+      key: "posts/org/clip.mp4",
+      contentType: "video/mp4",
+      provider: "mux",
+      playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+      playbackPolicy: "signed",
+      width: 1080,
+      height: 1920,
+    });
     expect(commitSocialComposeMediaItem({ kind: "image", key: "still" }, null)).toEqual({
       kind: "image",
       key: "still",

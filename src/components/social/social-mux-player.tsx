@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 import { SOCIAL_MUX_PLAYER_CLASS } from "@/lib/social-chrome";
 import {
   SOCIAL_MUX_PLAYBACK_ROUTE,
+  socialMuxCoveringPoster,
   socialMuxPlaybackRequiresTokens,
   socialMuxPlaybackTokensFromJson,
   socialMuxThumbnailUrl,
@@ -131,8 +132,8 @@ export function SocialMuxPlayer({
             />
           ) : null}
           {/* Unsigned signed thumbs 403 before the JWT. That error must not
-              clear the open hold. loadeddata is the paint. */}
-          {painted ? null : <MuxPoster src={poster} />}
+              clear the open hold. The still leaves once the player mounts. */}
+          {socialMuxCoveringPoster(signed, Boolean(tokens)) ? <MuxPoster src={poster} /> : null}
         </>
       ) : (
         <>
