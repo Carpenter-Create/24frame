@@ -20,7 +20,7 @@ import {
 // and rows with no policy play the playback id alone.
 // Adaptive Auto — no quality Settings control in v1.
 
-const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
+const MuxPlayer = dynamic(() => import("./social-mux-player-mount"), { ssr: false });
 
 function MuxPoster({ src, onReady }: { src: string; onReady?: () => void }) {
   return (
@@ -36,22 +36,15 @@ function MuxPoster({ src, onReady }: { src: string; onReady?: () => void }) {
   );
 }
 
-function playerStyle(chromeless: boolean) {
-  if (!chromeless) {
-    return {
-      aspectRatio: "auto",
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-    } as const;
-  }
-  return {
+function playerStyle(chromeless: boolean): Record<string, string> {
+  const style: Record<string, string> = {
     aspectRatio: "auto",
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    "--controls": "none",
-  } as const;
+  };
+  if (chromeless) style["--controls"] = "none";
+  return style;
 }
 
 export function SocialMuxPlayer({

@@ -75,10 +75,13 @@ export function SocialForYouRail({
         <div data-social-latest-course="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
           <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.latestCourse}</p>
           <ul className="flex min-w-0 flex-col">
+            {/* Rail is display:none until lg. An eager signed cover.png is
+                hoisted as <link rel="preload"> and Chrome warns it was unused. */}
             <CourseCard
               course={latestCourse}
               coverUrl={latestCourseCoverUrl}
               density="discover"
+              coverLoading="lazy"
             />
           </ul>
         </div>

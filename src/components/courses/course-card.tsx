@@ -26,12 +26,14 @@ export function CourseCard({
   metaLabel,
   density = "discover",
   progressPercent,
+  coverLoading,
 }: {
   course: CourseRow;
   coverUrl?: string | null;
   metaLabel?: string | null;
   density?: CourseCardDensity;
   progressPercent?: number | null;
+  coverLoading?: "eager" | "lazy";
 }) {
   const home = density === "home";
   const tone = home ? courseHomeCoverTone(coverUrl) : "photo";
@@ -49,6 +51,7 @@ export function CourseCard({
           title={course.title}
           src={coverUrl}
           tone={tone}
+          loading={coverLoading}
           plateClass={plate ? courseGlancePlateClass(course.id) : undefined}
         >
           {plate ? (

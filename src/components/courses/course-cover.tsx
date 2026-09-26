@@ -14,6 +14,7 @@ export function CourseCover({
   tone = "photo",
   plateClass,
   className,
+  loading,
   children,
 }: {
   title: string;
@@ -21,6 +22,8 @@ export function CourseCover({
   tone?: "photo" | "plate";
   plateClass?: string;
   className?: string;
+  /** Lazy skips React 19's automatic image preload. */
+  loading?: "eager" | "lazy";
   children?: React.ReactNode;
 }) {
   const plate = tone === "plate" && !src;
@@ -46,7 +49,12 @@ export function CourseCover({
       ) : src ? (
         // Signed Education source URL — not in next/image remote patterns.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={src}
+          alt=""
+          loading={loading}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       ) : null}
       {children}
     </div>
