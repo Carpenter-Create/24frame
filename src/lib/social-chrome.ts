@@ -865,6 +865,12 @@ export const SOCIAL_WRITE_COMPOSE_MIC_RECORDING_CLASS = "bg-accent/10 text-accen
 export const SOCIAL_WRITE_COMPOSE_PREVIEW_CLASS =
   "relative h-[50vh] max-h-[50vh] w-full overflow-hidden rounded-[16px] bg-surface-muted";
 
+// Upload bytes on the same preview slot. Surface track stays visible on the muted face.
+export const SOCIAL_WRITE_COMPOSE_PROGRESS_TRACK_CLASS =
+  "absolute inset-x-[var(--space-4)] bottom-[var(--space-4)] z-10 h-1.5 overflow-hidden rounded-full bg-surface";
+
+export const SOCIAL_WRITE_COMPOSE_PROGRESS_FILL_CLASS = "h-full rounded-full bg-accent";
+
 // §0.4. Media glyphs sit in the compose row, ahead of the field. Gap 8.
 export const SOCIAL_WRITE_COMPOSE_ATTACH_ROW_CLASS = "flex items-center gap-2";
 

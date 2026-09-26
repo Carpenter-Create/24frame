@@ -15,10 +15,115 @@ import { probeSocialVideoPixels, SOCIAL_MUX_PROVIDER, type SocialMuxIntent } fro
 // One client upload helper for Social posts and story video.
 // Images stay on the media S3 lane. Video goes to Mux.
 
+export type SocialUploadProgress = {
+  loaded: number;
+  total: number;
+  /** 0–100 while bytes are moving. Null when the length is unknown. */
+  percent: number | null;
+};
+
 export type SocialPostUploadOptions = {
   intent?: SocialMuxIntent;
   originalQuality?: boolean;
+  signal?: AbortSignal;
+  /**
+   * Source pixels for the Mux tier.
+   * `undefined` probes a detached video.
+   * `null` skips that probe — write compose already holds the only decoder.
+   */
+  pixels?: { width: number; height: number } | null;
+  onProgress?: (progress: SocialUploadProgress) => void;
 };
+
+export type SocialMediaUploadResult = {
+  items?: SocialMediaItem[];
+  error?: string;
+  aborted?: boolean;
+};
+
+/** Byte progress for a Mux or S3 PUT. Unknown totals stay null. */
+export function socialUploadPercent(loaded: number, total: number): number | null {
+  if (!Number.isFinite(loaded) || !Number.isFinite(total) || total <= 0) return null;
+  const percent = Math.round((loaded / total) * 100);
+  if (!Number.isFinite(percent)) return null;
+  return Math.min(100, Math.max(0, percent));
+}
+
+export function isSocialUploadAbort(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+export type SocialUploadProgressEvent = {
+  loaded: number;
+  total: number;
+  lengthComputable: boolean;
+};
+
+/** Minimal XHR surface so a test can drive upload progress without a browser. */
+export type SocialUploadXhr = {
+  status: number;
+  open: (method: string, url: string) => void;
+  setRequestHeader: (name: string, value: string) => void;
+  send: (body: Blob) => void;
+  abort: () => void;
+  upload: {
+    onprogress: ((event: SocialUploadProgressEvent) => void) | null;
+  };
+  onload: (() => void) | null;
+  onerror: (() => void) | null;
+  onabort: (() => void) | null;
+};
+
+function createBrowserUploadXhr(): SocialUploadXhr {
+  return new XMLHttpRequest() as unknown as SocialUploadXhr;
+}
+
+/** PUT with upload progress. Fetch cannot report upload bytes on Safari. */
+export function putSocialMediaWithProgress(
+  url: string,
+  file: Blob,
+  contentType: string,
+  options: {
+    signal?: AbortSignal;
+    onProgress?: (progress: SocialUploadProgress) => void;
+    createXhr?: () => SocialUploadXhr;
+  } = {},
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (options.signal?.aborted) {
+      reject(new DOMException("The operation was aborted.", "AbortError"));
+      return;
+    }
+    const xhr = (options.createXhr ?? createBrowserUploadXhr)();
+    const fail = () => reject(new Error("upload failed"));
+    const onAbort = () => xhr.abort();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", contentType);
+    xhr.upload.onprogress = (event) => {
+      const total = event.lengthComputable && event.total > 0 ? event.total : file.size;
+      options.onProgress?.({
+        loaded: event.loaded,
+        total,
+        percent: socialUploadPercent(event.loaded, total),
+      });
+    };
+    xhr.onload = () => {
+      options.signal?.removeEventListener("abort", onAbort);
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else fail();
+    };
+    xhr.onerror = () => {
+      options.signal?.removeEventListener("abort", onAbort);
+      fail();
+    };
+    xhr.onabort = () => {
+      options.signal?.removeEventListener("abort", onAbort);
+      reject(new DOMException("The operation was aborted.", "AbortError"));
+    };
+    options.signal?.addEventListener("abort", onAbort, { once: true });
+    xhr.send(file);
+  });
+}
 
 export async function uploadSocialPostMedia(
   files: ArrayLike<File> | null,
@@ -26,7 +131,7 @@ export async function uploadSocialPostMedia(
   max: number = SOCIAL_MEDIA_MAX_ITEMS,
   lane: SocialMediaLane = "posts",
   options: SocialPostUploadOptions = {},
-): Promise<{ items?: SocialMediaItem[]; error?: string }> {
+): Promise<SocialMediaUploadResult> {
   if (!files || files.length === 0) return {};
   const remaining = max - current.length;
   if (remaining <= 0) return { error: SOCIAL.home.mediaLimit };
@@ -36,11 +141,13 @@ export async function uploadSocialPostMedia(
     const kind = socialMediaKindFor(file.type);
     if (kind === "video" && (lane === "posts" || lane === "stories")) {
       const uploaded = await uploadSocialMuxVideoFile(file, { ...options, lane });
+      if (uploaded.aborted) return { aborted: true };
       if (uploaded.error || !uploaded.item) return { error: uploaded.error ?? SOCIAL.home.uploadFailed };
       next.push(uploaded.item);
       continue;
     }
-    const uploaded = await uploadSocialS3Media(file, lane);
+    const uploaded = await uploadSocialS3Media(file, lane, options.signal);
+    if (uploaded.aborted) return { aborted: true };
     if (uploaded.error || !uploaded.item) return { error: uploaded.error ?? SOCIAL.home.uploadFailed };
     next.push(uploaded.item);
   }
@@ -50,7 +157,8 @@ export async function uploadSocialPostMedia(
 async function uploadSocialS3Media(
   file: File,
   lane: SocialMediaLane,
-): Promise<{ item?: SocialMediaItem; error?: string }> {
+  signal?: AbortSignal,
+): Promise<{ item?: SocialMediaItem; error?: string; aborted?: boolean }> {
   const body = new FormData();
   body.set("content_type", file.type);
   body.set("byte_length", String(file.size));
@@ -70,8 +178,10 @@ async function uploadSocialS3Media(
       method: "PUT",
       headers: { "Content-Type": signed.contentType },
       body: file,
+      signal,
     });
-  } catch {
+  } catch (error) {
+    if (isSocialUploadAbort(error)) return { aborted: true };
     return { error: SOCIAL.home.uploadFailed };
   }
   if (!put.ok) return { error: SOCIAL.home.uploadFailed };
@@ -86,10 +196,13 @@ async function uploadSocialS3Media(
 
 export async function uploadSocialMuxVideoFile(
   file: File,
-  options: SocialPostUploadOptions & { lane?: SocialMediaLane; signal?: AbortSignal } = {},
-): Promise<{ item?: SocialMediaItem; error?: string }> {
+  options: SocialPostUploadOptions & { lane?: SocialMediaLane } = {},
+): Promise<{ item?: SocialMediaItem; error?: string; aborted?: boolean }> {
   const lane = options.lane ?? "posts";
-  const pixels = await probeSocialVideoPixels(file);
+  // A detached probe opens a second video element. On iOS Safari that holds
+  // the decoder and the compose preview stays a blank frame. Callers that
+  // already show the clip pass `pixels: null` and skip it.
+  const pixels = options.pixels === undefined ? await probeSocialVideoPixels(file) : options.pixels;
   const body = new FormData();
   body.set("content_type", file.type);
   body.set("byte_length", String(file.size));
@@ -106,21 +219,30 @@ export async function uploadSocialMuxVideoFile(
   } catch {
     return { error: SOCIAL.home.uploadFailed };
   }
+  if (options.signal?.aborted) return { aborted: true };
   if (created.error || !created.url || !created.key || !created.uploadId || !created.contentType) {
     return { error: created.error ?? SOCIAL.home.uploadFailed };
   }
-  let put: Response;
   try {
-    put = await fetch(created.url, {
-      method: "PUT",
-      headers: { "Content-Type": created.contentType },
-      body: file,
-      signal: options.signal,
-    });
-  } catch {
+    if (options.onProgress) {
+      await putSocialMediaWithProgress(created.url, file, created.contentType, {
+        signal: options.signal,
+        onProgress: options.onProgress,
+      });
+    } else {
+      const put = await fetch(created.url, {
+        method: "PUT",
+        headers: { "Content-Type": created.contentType },
+        body: file,
+        signal: options.signal,
+      });
+      if (!put.ok) return { error: SOCIAL.home.uploadFailed };
+    }
+  } catch (error) {
+    if (isSocialUploadAbort(error)) return { aborted: true };
     return { error: SOCIAL.home.uploadFailed };
   }
-  if (!put.ok) return { error: SOCIAL.home.uploadFailed };
+  if (options.signal?.aborted) return { aborted: true };
 
   const finish = new FormData();
   finish.set("upload_id", created.uploadId);
