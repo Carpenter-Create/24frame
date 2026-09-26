@@ -170,18 +170,20 @@ export function SocialComposeVideoPreview({
       if (pixels) onPixelsRef.current?.(pixels);
     };
     const paint = () => {
-      if (node.videoWidth <= 0) return;
+      if (node.videoWidth <= 0) return null;
       const canvas = node.ownerDocument.createElement("canvas");
       const url = paintSocialComposeVideoPoster(node, canvas as unknown as SocialComposePosterCanvas);
       if (url) setPoster(url);
+      return url;
     };
-    // iOS paints a blob only after muted playback. Pause on the review frame
-    // and keep that JPEG above the element so the clip cannot run out to grey.
+    // iOS paints a blob only after muted playback. Pause only once that JPEG
+    // exists and keep it above the element. Pausing on a failed draw leaves
+    // the slot grey, and a latched hold would never try the frame again.
     const holdFrame = () => {
       if (held || node.videoWidth <= 0 || node.currentTime < frame) return;
-      held = true;
       reportPixels();
-      paint();
+      if (!paint()) return;
+      held = true;
       node.pause();
     };
     const present = () => {

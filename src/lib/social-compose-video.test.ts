@@ -257,6 +257,9 @@ describe("write compose video attach", () => {
     const hold = text.slice(text.indexOf("const holdFrame"), text.indexOf("const present"));
     expect(hold).toContain("reportPixels()");
     expect(hold).toContain("node.pause()");
+    expect(hold.indexOf("if (!paint()) return")).toBeGreaterThan(-1);
+    expect(hold.indexOf("held = true")).toBeGreaterThan(hold.indexOf("if (!paint()) return"));
+    expect(hold.indexOf("node.pause()")).toBeGreaterThan(hold.indexOf("held = true"));
     const previewFn = text.slice(
       text.indexOf("export function SocialComposeVideoPreview"),
       text.indexOf("function persistKeys"),
