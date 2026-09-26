@@ -36,24 +36,25 @@ function windowStart(now: number): number {
   return Math.floor(now / windowMs) * windowMs;
 }
 
-function fingerprint(userId: string): string {
-  return createHash("sha256").update(userId).digest("hex").slice(0, 12);
+function exploreSearchUserKey(userId: string): string {
+  return createHash("sha256").update(userId).digest("hex");
 }
 
-function memoryCount(userId: string, start: number): number {
-  const existing = memory.get(userId);
+function memoryCount(userKey: string, start: number): number {
+  const existing = memory.get(userKey);
   if (!existing || existing.windowStart !== start) {
-    memory.set(userId, { windowStart: start, count: 1 });
+    memory.set(userKey, { windowStart: start, count: 1 });
     return 1;
   }
   existing.count += 1;
   return existing.count;
 }
 
-async function redisCount(userId: string, start: number): Promise<number | null> {
+async function redisCount(userKey: string, start: number): Promise<number | null> {
   const redis = socialHotCache();
   if (!redis) return null;
-  const key = `social:explore-search:${userId}:${start}`;
+  // userKey is sha256(userId). The raw id never enters Redis or the warn log.
+  const key = `social:explore-search:${userKey}:${start}`;
   try {
     const count = await redis.incr(key);
     if (count === 1) {
@@ -71,12 +72,14 @@ async function redisCount(userId: string, start: number): Promise<number | null>
 }
 
 export async function assertExploreSearchAllowed(userId: string, now = Date.now()): Promise<void> {
-  if (!userId.trim()) throw new Error("Explore search requires a signed-in user");
+  const id = userId.trim();
+  if (!id) throw new Error("Explore search requires a signed-in user");
+  const userKey = exploreSearchUserKey(id);
   const start = windowStart(now);
-  const fromRedis = await redisCount(userId, start);
-  const count = fromRedis === null ? memoryCount(userId, start) : fromRedis;
+  const fromRedis = await redisCount(userKey, start);
+  const count = fromRedis === null ? memoryCount(userKey, start) : fromRedis;
   if (count > SOCIAL_EXPLORE_SEARCH_RATE.perUserPerMinute) {
-    console.warn("[explore-search] rate limited", { user: fingerprint(userId) });
+    console.warn("[explore-search] rate limited", { user: userKey });
     throw new SocialExploreSearchRateLimitError();
   }
 }
