@@ -58,6 +58,8 @@ export type QuietMuxPlayerElement = {
   setAttribute(name: string, value: string): void;
   addEventListener(type: "loadeddata", listener: () => void): void;
   removeEventListener(type: "loadeddata", listener: () => void): void;
+  pause(): void;
+  play(): void | Promise<void>;
   remove(): void;
 };
 
@@ -92,6 +94,13 @@ export function mountQuietMuxPlayer(
 }
 
 // Mute and autoplay can change on a story without building a new element.
+// The autoplay attribute is a load-time hint, so pause or play follows it.
+// Story preview and go-live void play() the same way. The rejection is
+// AbortError when pause wins the race, or NotAllowedError when the browser blocks playback.
+function voidQuietMuxPlay(started: void | Promise<void>): void {
+  if (started instanceof Promise) void started.catch(() => undefined);
+}
+
 export function assignQuietMuxPlaybackFlags(
   player: QuietMuxPlayerElement,
   flags: Pick<QuietMuxPlayerProps, "autoPlay" | "muted">,
@@ -99,6 +108,8 @@ export function assignQuietMuxPlaybackFlags(
   assertMuxPlayerConnected(player);
   player.muted = flags.muted;
   player.autoplay = flags.autoPlay;
+  if (flags.autoPlay) voidQuietMuxPlay(player.play());
+  else player.pause();
 }
 
 export function assignConnectedMuxPlayer(

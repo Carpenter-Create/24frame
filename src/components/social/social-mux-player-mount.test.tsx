@@ -39,6 +39,7 @@ type MuxNode = {
   isConnected: boolean;
   listens: string[];
   styleCalls: string[];
+  commands: string[];
   mark?: string;
   remove?: () => void;
 };
@@ -57,12 +58,21 @@ function installMuxElements(created: MuxNode[]): () => void {
     if (tag !== "mux-player") return node;
     const listens: string[] = [];
     const styleCalls: string[] = [];
+    const commands: string[] = [];
     const mux = node as unknown as MuxNode;
     mux.listens = listens;
     mux.styleCalls = styleCalls;
+    mux.commands = commands;
     mux.muted = false;
     mux.autoplay = false;
     mux.playbackId = "";
+    const media = node as unknown as { pause: () => void; play: () => void };
+    media.pause = () => {
+      commands.push("pause");
+    };
+    media.play = () => {
+      commands.push("play");
+    };
     Object.defineProperty(node, "style", {
       configurable: true,
       writable: true,
@@ -164,6 +174,7 @@ describe("SocialMuxPlayerMount", () => {
     expect(mark(livePlayer())).toBe(id);
     expect(first.muted).toBe(false);
     expect(first.autoplay).toBe(true);
+    expect(first.commands).toEqual(["play"]);
     expect(first.playbackId).toBe(BASE.playbackId);
     const styleCalls = [...first.styleCalls];
     const listens = [...first.listens];
@@ -174,6 +185,7 @@ describe("SocialMuxPlayerMount", () => {
     expect(mark(livePlayer())).toBe(id);
     expect(first.muted).toBe(true);
     expect(first.autoplay).toBe(true);
+    expect(first.commands).toEqual(["play", "play"]);
     expect(first.listens).toEqual(listens);
     expect(first.styleCalls).toEqual(styleCalls);
 
@@ -182,9 +194,17 @@ describe("SocialMuxPlayerMount", () => {
     expect(mark(livePlayer())).toBe(id);
     expect(first.muted).toBe(true);
     expect(first.autoplay).toBe(false);
+    expect(first.commands).toEqual(["play", "play", "pause"]);
     expect(first.playbackId).toBe(BASE.playbackId);
     expect(first.listens).toEqual(listens);
     expect(first.styleCalls).toEqual(styleCalls);
+
+    await render({ ...BASE, muted: true, autoPlay: true });
+    expect(created.map(mark)).toEqual([id]);
+    expect(mark(livePlayer())).toBe(id);
+    expect(first.autoplay).toBe(true);
+    expect(first.commands).toEqual(["play", "play", "pause", "play"]);
+    expect(first.playbackId).toBe(BASE.playbackId);
   });
 
   it("mounts a new player when the playback id changes", async () => {

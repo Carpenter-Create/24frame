@@ -53,6 +53,12 @@ function fakePlayer(): QuietMuxPlayerElement & { calls: string[] } {
       calls.push(`listen:${type}`);
     },
     removeEventListener() {},
+    pause() {
+      calls.push("pause");
+    },
+    play() {
+      calls.push("play");
+    },
     remove() {},
   };
 }
@@ -78,6 +84,7 @@ describe("mountQuietMuxPlayer", () => {
     expect(player.autoplay).toBe(false);
     expect(player.tokens).toEqual(PROPS.tokens);
     expect(player.calls.slice(appendAt + 1)).toEqual([
+      "pause",
       "style:aspect-ratio=auto",
       "style:width=100%",
       "style:height=100%",
@@ -106,7 +113,39 @@ describe("mountQuietMuxPlayer", () => {
     expect(player.autoplay).toBe(true);
     expect(player.playbackId).toBe(PROPS.playbackId);
     expect(player.poster).toBe(PROPS.poster);
-    expect(player.calls).toEqual(callsAfterMount);
+    expect(player.calls).toEqual([...callsAfterMount, "play"]);
+  });
+
+  it("pauses and resumes the same connected element", () => {
+    const player = fakePlayer();
+    player.isConnected = true;
+    player.playbackId = PROPS.playbackId;
+    assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: false });
+    expect(player).toMatchObject({ muted: true, autoplay: false, playbackId: PROPS.playbackId });
+    expect(player.calls).toEqual(["pause"]);
+
+    assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true });
+    expect(player).toMatchObject({ muted: true, autoplay: true, playbackId: PROPS.playbackId });
+    expect(player.calls).toEqual(["pause", "play"]);
+
+    assignQuietMuxPlaybackFlags(player, { muted: false, autoPlay: false });
+    expect(player).toMatchObject({ muted: false, autoplay: false, playbackId: PROPS.playbackId });
+    expect(player.calls).toEqual(["pause", "play", "pause"]);
+  });
+
+  it("drops AbortError and NotAllowedError from play", async () => {
+    const player = fakePlayer();
+    player.isConnected = true;
+    const rejections = [
+      new DOMException("The operation was aborted.", "AbortError"),
+      new DOMException("The request is not allowed by the user agent.", "NotAllowedError"),
+    ];
+    for (const error of rejections) {
+      player.play = () => Promise.reject(error);
+      assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true });
+    }
+    await Promise.resolve();
+    expect(player.autoplay).toBe(true);
   });
 
   it("refuses mute and autoplay writes while the element is disconnected", () => {
