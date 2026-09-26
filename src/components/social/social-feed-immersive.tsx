@@ -22,13 +22,15 @@ import {
   SOCIAL_POST_ACTIONS_ROW_CLASS,
 } from "@/lib/social-chrome";
 import {
+  SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR,
+  SOCIAL_IMMERSIVE_SHARE_SHEET_SELECTOR,
+  socialImmersiveActiveFocusRoot,
   socialImmersiveCaptionNeedsMore,
   socialImmersiveClearShellInert,
   socialImmersiveEscapeDismisses,
   socialImmersiveFocusables,
   socialImmersiveMarkShellInert,
   socialImmersiveNestedSheetOpen,
-  socialImmersiveOutsideSheetOpen,
   socialImmersiveTabWrapIndex,
 } from "@/lib/social-feed-immersive";
 
@@ -55,21 +57,27 @@ export function SocialFeedImmersive({
   const open = Boolean(item);
 
   useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      const onEscape = (event: KeyboardEvent) => {
+        if (event.key !== "Escape") return;
+        event.stopPropagation();
+        onClose();
+      };
+      window.addEventListener("keydown", onEscape);
+      return () => window.removeEventListener("keydown", onEscape);
+    }
     const scroller = document.querySelector("[data-house-lead-scroll]");
     const top = scroller instanceof HTMLElement ? scroller.scrollTop : window.scrollY;
     const previous = scroller instanceof HTMLElement ? scroller.style.overflow : "";
     if (scroller instanceof HTMLElement) scroller.style.overflow = "hidden";
-    const dialog = dialogRef.current;
     const previouslyFocused =
       document.activeElement instanceof HTMLElement && document.activeElement !== document.body
         ? document.activeElement
         : null;
-    const inerted = dialog ? socialImmersiveMarkShellInert(document.body, dialog) : [];
-    dialog
-      ?.querySelector<HTMLElement>("[data-social-feed-immersive-close]")
-      ?.focus({ preventScroll: true });
+    const inerted = socialImmersiveMarkShellInert(document.body, dialog);
+    dialog.querySelector<HTMLElement>("[data-social-feed-immersive-close]")?.focus({ preventScroll: true });
     const onKey = (event: KeyboardEvent) => {
-      if (!dialog) return;
       // Comment listens on document. Share listens on window. Both are
       // still mounted for this Escape, so the stage must not dismiss too.
       if (event.key === "Escape") {
@@ -80,13 +88,19 @@ export function SocialFeedImmersive({
         return;
       }
       if (event.key !== "Tab") return;
-      if (socialImmersiveOutsideSheetOpen(document)) return;
-      const focusables = socialImmersiveFocusables(dialog);
+      const share = document.querySelector(SOCIAL_IMMERSIVE_SHARE_SHEET_SELECTOR);
+      const comment = dialog.querySelector(SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR);
+      const root = socialImmersiveActiveFocusRoot(
+        share instanceof HTMLElement ? share : null,
+        comment instanceof HTMLElement ? comment : null,
+        dialog,
+      );
+      const focusables = socialImmersiveFocusables(root);
       const active = document.activeElement;
       const index = socialImmersiveTabWrapIndex(
         focusables.length,
         active instanceof HTMLElement ? focusables.indexOf(active) : -1,
-        active instanceof Node && dialog.contains(active),
+        active instanceof Node && root.contains(active),
         event.shiftKey,
       );
       if (index === null) return;

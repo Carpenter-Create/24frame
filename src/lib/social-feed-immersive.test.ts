@@ -3,13 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   SOCIAL_IMMERSIVE_FOCUSABLE_SELECTOR,
   SOCIAL_IMMERSIVE_KEEP_ABOVE_SELECTOR,
+  SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR,
   SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR,
-  SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR,
+  SOCIAL_IMMERSIVE_SHARE_SHEET_SELECTOR,
+  socialImmersiveActiveFocusRoot,
   socialImmersiveCaptionNeedsMore,
   socialImmersiveEscapeDismisses,
   socialImmersiveFocusables,
   socialImmersiveNestedSheetOpen,
-  socialImmersiveOutsideSheetOpen,
   socialImmersiveShellStaysActive,
   socialImmersiveTabWrapIndex,
 } from "./social-feed-immersive";
@@ -40,13 +41,15 @@ describe("social feed immersive helpers", () => {
     ).toBe(false);
     expect(seen).toBe(SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR);
     expect(socialImmersiveNestedSheetOpen({ querySelector: () => ({}) })).toBe(true);
-    expect(SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR).toBe("[data-social-post-share-sheet]");
-    expect(
-      socialImmersiveOutsideSheetOpen({
-        querySelector: (selector) => (selector === SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR ? {} : null),
-      }),
-    ).toBe(true);
-    expect(socialImmersiveOutsideSheetOpen({ querySelector: () => null })).toBe(false);
+    const share = { id: "share" };
+    const comment = { id: "comment" };
+    const stage = { id: "stage" };
+    expect(socialImmersiveActiveFocusRoot(share, comment, stage)).toBe(share);
+    expect(socialImmersiveActiveFocusRoot(null, comment, stage)).toBe(comment);
+    expect(socialImmersiveActiveFocusRoot(null, null, stage)).toBe(stage);
+    expect(SOCIAL_IMMERSIVE_SHARE_SHEET_SELECTOR).toBe("[data-social-post-share-sheet]");
+    expect(SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR).toContain('data-house-overlay-host="house-dialog"');
+    expect(SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR).toContain('data-house-overlay-host="app-sheet"');
   });
 
   it("leaves the dialog and an already-open share sheet out of the inert set", () => {

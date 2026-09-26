@@ -15,8 +15,11 @@ export const SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR =
 export const SOCIAL_IMMERSIVE_KEEP_ABOVE_SELECTOR =
   "[data-social-post-share-sheet], [data-social-post-share-toast]";
 
-// Share portals outside the stage. Comment stays inside it.
-export const SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR = "[data-social-post-share-sheet]";
+// Top sheet owns Tab. Share is a body portal. Comment mounts inside the stage.
+export const SOCIAL_IMMERSIVE_SHARE_SHEET_SELECTOR = "[data-social-post-share-sheet]";
+
+export const SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR =
+  '[data-house-overlay-host="house-dialog"], [data-house-overlay-host="app-sheet"]';
 
 export const SOCIAL_IMMERSIVE_FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -38,10 +41,9 @@ export function socialImmersiveNestedSheetOpen(root: {
   return root.querySelector(SOCIAL_IMMERSIVE_NESTED_SHEET_SELECTOR) != null;
 }
 
-export function socialImmersiveOutsideSheetOpen(root: {
-  querySelector(selector: string): unknown;
-}): boolean {
-  return root.querySelector(SOCIAL_IMMERSIVE_OUTSIDE_SHEET_SELECTOR) != null;
+/** Share, then the comment sheet, then the stage. */
+export function socialImmersiveActiveFocusRoot<T>(share: T | null, comment: T | null, stage: T): T {
+  return share ?? comment ?? stage;
 }
 
 /** Escape dismisses the stage only when no comment or Share sheet is open. */

@@ -105,13 +105,20 @@ describe("SocialFeedImmersive", () => {
     expect(onKey).toContain("socialImmersiveNestedSheetOpen");
     expect(onKey).not.toContain('if (event.key === "Escape") onClose()');
     expect(onKey).toContain('event.key !== "Tab"');
-    expect(onKey).toContain("socialImmersiveOutsideSheetOpen");
+    expect(onKey).toContain("socialImmersiveActiveFocusRoot");
+    expect(onKey).toContain("SOCIAL_IMMERSIVE_SHARE_SHEET_SELECTOR");
+    expect(onKey).toContain("SOCIAL_IMMERSIVE_COMMENT_SHEET_SELECTOR");
     expect(onKey).toContain("socialImmersiveTabWrapIndex");
     expect(onKey).toContain("event.preventDefault()");
+    expect(onKey).not.toContain("socialImmersiveOutsideSheetOpen");
     expect(immersiveSrc).toContain("socialImmersiveMarkShellInert");
     expect(immersiveSrc).toContain("socialImmersiveClearShellInert");
     expect(immersiveSrc).toContain('querySelector<HTMLElement>("[data-social-feed-immersive-close]")');
     expect(immersiveSrc).toContain("previouslyFocused.focus({ preventScroll: true })");
+    const missingStage = immersiveSrc.slice(immersiveSrc.indexOf("if (!dialog)"));
+    expect(missingStage.indexOf('removeEventListener("keydown", onEscape)')).toBeLessThan(
+      missingStage.indexOf('scroller.style.overflow = "hidden"'),
+    );
     expect(SOCIAL_FEED_IMMERSIVE_STAGE_CLASS).toContain("z-[45]");
   });
 
