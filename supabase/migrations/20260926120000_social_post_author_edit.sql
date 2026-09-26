@@ -9,9 +9,11 @@
 --
 -- Author (auth.uid() = author_id) may:
 --   1. change body on an active post — trigger stamps edited_at.
---      No age window. Media, author, group, category, pins stay.
---      like_count, comment_count, and embedding stay with
---      protect_post_privileged_columns (including the refresh GUCs).
+--      No age window. Media, author, group, category, and pins stay.
+--      like_count and comment_count stay unless engagement refresh
+--      set app.refreshing_post_like_count or
+--      app.refreshing_post_comment_count. That write is count-only.
+--      The flag does not unlock a later posts update. embedding stays.
 --   2. set status active → removed. Other columns stay. Row remains.
 --      posts SELECT requires status = active (or create_group), and
 --      the new row of an UPDATE is checked against that visibility.
@@ -23,7 +25,8 @@
 --
 -- Non-authors: posts_update_author USING already misses. create_group
 -- staff (posts_update_staff) may set active → hidden only. They cannot
--- edit a caption or set removed. That is the author lock, not a new
+-- edit a caption, change media, or set removed. An unowned media key
+-- does not skip those locks. That is the author lock, not a new
 -- moderation product.
 --
 -- OMIT: media replace/remove, Mux asset GC, stories, hard DELETE,
@@ -52,38 +55,23 @@ begin
     return new;
   end if;
 
-  -- Counts and embedding belong to protect_post_privileged_columns,
-  -- which already lets the like/comment refresh GUCs through.
-  -- A count-only update must not be reclassified as an author edit.
-  if (
-       new.like_count is distinct from old.like_count
-       or new.comment_count is distinct from old.comment_count
-       or new.embedding is distinct from old.embedding
-     )
-     and new.id is not distinct from old.id
-     and new.author_id is not distinct from old.author_id
-     and new.group_id is not distinct from old.group_id
-     and new.body is not distinct from old.body
-     and new.media is not distinct from old.media
-     and new.status is not distinct from old.status
-     and new.edited_at is not distinct from old.edited_at
-     and new.required_entitlement_key is not distinct from old.required_entitlement_key
-     and new.pinned is not distinct from old.pinned
-     and new.created_at is not distinct from old.created_at
-     and new.category is not distinct from old.category
-  then
-    return new;
-  end if;
-
-  -- A foreign key must still fail posts_media_author_bound (23514).
   -- An owned replacement, including clearing media, is refused here.
-  if new.media is distinct from old.media then
-    if public.social_media_keys_owned(new.media, old.author_id, 'posts') then
-      raise exception 'post fields are not client-writable';
-    end if;
-    return new;
+  -- An unowned key must not return yet. posts_update_staff has no column
+  -- WITH CHECK, and posts_media_author_bound tests new.author_id, so an
+  -- early return would let create_group set author_id to the new owner
+  -- and skip the frozen-field and hide-only locks. When author_id stays
+  -- put, that CHECK still fails with 23514.
+  if new.media is distinct from old.media
+     and public.social_media_keys_owned(new.media, old.author_id, 'posts')
+  then
+    raise exception 'post fields are not client-writable';
   end if;
 
+  -- refresh_like_engagement / refresh_comment_engagement keep the caller
+  -- JWT (auth.role() stays authenticated) and set these so
+  -- protect_post_privileged_columns can write the counts. Same gate
+  -- here. Do not return the whole row: the like flag stays set for the
+  -- rest of the transaction, and a later posts update must still lock.
   if new.id is distinct from old.id
      or new.author_id is distinct from old.author_id
      or new.group_id is distinct from old.group_id
@@ -95,14 +83,49 @@ begin
     raise exception 'post fields are not client-writable';
   end if;
 
+  -- Same refusal protect_post_privileged_columns uses. Embedding stays
+  -- locked even when a refresh flag is set. Counts raise only when
+  -- neither refresh flag is on, so this trigger does not depend on
+  -- firing after that one.
+  if new.embedding is distinct from old.embedding
+     or (
+       (new.like_count is distinct from old.like_count
+        or new.comment_count is distinct from old.comment_count)
+       and current_setting('app.refreshing_post_like_count', true) is distinct from 'on'
+       and current_setting('app.refreshing_post_comment_count', true) is distinct from 'on'
+     )
+  then
+    raise exception 'privileged post columns are not client-writable';
+  end if;
+
+  -- Count-only, and only while a refresh flag is set. Media stays out
+  -- of this return so an unowned key still hits the author lock below.
+  if (current_setting('app.refreshing_post_like_count', true) = 'on'
+      or current_setting('app.refreshing_post_comment_count', true) = 'on')
+     and (new.like_count is distinct from old.like_count
+          or new.comment_count is distinct from old.comment_count)
+     and new.body is not distinct from old.body
+     and new.status is not distinct from old.status
+     and new.edited_at is not distinct from old.edited_at
+     and new.media is not distinct from old.media
+  then
+    return new;
+  end if;
+
   if auth.uid() is distinct from old.author_id then
     if old.status is distinct from 'active'::public.post_status
        or new.status is distinct from 'hidden'::public.post_status
        or new.body is distinct from old.body
        or new.edited_at is distinct from old.edited_at
+       or new.media is distinct from old.media
     then
       raise exception 'only the author may edit or remove a post';
     end if;
+    return new;
+  end if;
+
+  -- Author kept, and author_id is unchanged. A foreign key fails the CHECK.
+  if new.media is distinct from old.media then
     return new;
   end if;
 

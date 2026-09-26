@@ -6,7 +6,7 @@
 -- removes nothing. Stories are not in this file.
 
 begin;
-select plan(29);
+select plan(42);
 
 select set_config('t.author', gen_random_uuid()::text, false);
 select set_config('t.other', gen_random_uuid()::text, false);
@@ -15,6 +15,7 @@ select set_config('t.admin', gen_random_uuid()::text, false);
 -- Version-4 object id. posts_media_author_bound requires
 -- posts/{author}/{uuid}.ext; a bare posts/a.jpg key fails the CHECK.
 select set_config('t.object', '22222222-2222-4222-8222-222222222222', false);
+select set_config('t.foreign', '33333333-3333-4333-8333-333333333333', false);
 
 insert into auth.users (id) values
   (current_setting('t.author')::uuid),
@@ -123,6 +124,20 @@ select throws_ok(
   'P0001',
   'post fields are not client-writable',
   'author cannot replace media');
+select throws_ok(
+  format($sql$
+    update public.posts
+       set media = jsonb_build_array(
+         jsonb_build_object(
+           'kind', 'image',
+           'key', 'posts/' || %L || '/' || %L || '.jpg'
+         )
+       )
+     where id = %L
+  $sql$, current_setting('t.admin'), current_setting('t.foreign'), current_setting('t.post')),
+  '23514',
+  null,
+  'foreign media key still fails posts_media_author_bound');
 
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.other'), 'role', 'authenticated')::text,
@@ -157,6 +172,14 @@ select lives_ok(
     values (%L, 'post', %L)
   $sql$, current_setting('t.other'), current_setting('t.post')),
   'other user can like the visible post');
+select is(
+  (select like_count from public.posts where id = current_setting('t.post')::uuid),
+  1,
+  'like refresh writes like_count');
+select is(
+  (select comment_count from public.posts where id = current_setting('t.post')::uuid),
+  1,
+  'comment refresh writes comment_count');
 
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.reader'), 'role', 'authenticated')::text,
@@ -223,10 +246,121 @@ select throws_ok(
   'P0001',
   'only the author may edit or remove a post',
   'create_group staff cannot soft-delete another post');
+select throws_ok(
+  format($sql$
+    update public.posts
+       set author_id = %L,
+           body = 'stolen via media',
+           status = 'hidden',
+           pinned = true,
+           media = jsonb_build_array(
+             jsonb_build_object(
+               'kind', 'image',
+               'key', 'posts/' || %L || '/' || %L || '.jpg'
+             )
+           )
+     where id = %L
+  $sql$,
+    current_setting('t.admin'),
+    current_setting('t.admin'),
+    current_setting('t.foreign'),
+    current_setting('t.post')),
+  'P0001',
+  'post fields are not client-writable',
+  'create_group cannot retarget author_id through an unowned media key');
+select is(
+  (select concat_ws(
+      '|',
+      body,
+      author_id::text,
+      status::text,
+      pinned::text,
+      media->0->>'key'
+    )
+   from public.posts where id = current_setting('t.post')::uuid),
+  'revised caption|'
+    || current_setting('t.author') || '|active|false|posts/'
+    || current_setting('t.author') || '/'
+    || current_setting('t.object') || '.jpg',
+  'unowned media path does not retarget or rewrite the post');
+select throws_ok(
+  format($sql$
+    update public.posts
+       set body = 'stolen caption via media',
+           media = jsonb_build_array(
+             jsonb_build_object(
+               'kind', 'image',
+               'key', 'posts/' || %L || '/' || %L || '.jpg'
+             )
+           )
+     where id = %L
+  $sql$,
+    current_setting('t.admin'),
+    current_setting('t.foreign'),
+    current_setting('t.post')),
+  'P0001',
+  'only the author may edit or remove a post',
+  'unowned media does not skip the caption lock');
 
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.author'), 'role', 'authenticated')::text,
   true);
+
+select set_config('app.refreshing_post_like_count', '', true);
+select set_config('app.refreshing_post_comment_count', '', true);
+select throws_ok(
+  format($sql$
+    update public.posts
+       set like_count = like_count + 5
+     where id = %L
+  $sql$, current_setting('t.post')),
+  'P0001',
+  'privileged post columns are not client-writable',
+  'bare like_count bump without the refresh GUC fails');
+select throws_ok(
+  format($sql$
+    update public.posts
+       set comment_count = comment_count + 5
+     where id = %L
+  $sql$, current_setting('t.post')),
+  'P0001',
+  'privileged post columns are not client-writable',
+  'bare comment_count bump without the refresh GUC fails');
+select set_config('app.refreshing_post_like_count', 'on', true);
+select lives_ok(
+  format($sql$
+    update public.posts
+       set like_count = like_count + 1
+     where id = %L
+  $sql$, current_setting('t.post')),
+  'like-count refresh GUC can write like_count');
+select is(
+  (select like_count from public.posts where id = current_setting('t.post')::uuid),
+  2,
+  'like_count moved under the refresh GUC');
+select throws_ok(
+  format($sql$
+    update public.posts
+       set pinned = true
+     where id = %L
+  $sql$, current_setting('t.post')),
+  'P0001',
+  'post fields are not client-writable',
+  'refresh GUC does not unlock a later posts update');
+select set_config('app.refreshing_post_comment_count', 'on', true);
+select lives_ok(
+  format($sql$
+    update public.posts
+       set comment_count = comment_count + 1
+     where id = %L
+  $sql$, current_setting('t.post')),
+  'comment-count refresh GUC can write comment_count');
+select is(
+  (select comment_count from public.posts where id = current_setting('t.post')::uuid),
+  2,
+  'comment_count moved under the refresh GUC');
+select set_config('app.refreshing_post_like_count', '', true);
+select set_config('app.refreshing_post_comment_count', '', true);
 
 select lives_ok(
   format($sql$
