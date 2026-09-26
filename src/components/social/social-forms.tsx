@@ -750,6 +750,7 @@ export function SocialCreateCompose({
           uploadAbortRef.current.delete(slot.localId);
           continue;
         }
+        // CI must re-run on this tip: the prior synchronize never enqueued checks, isolation, or governance.
         const measuredNow =
           slot.kind === "video" && !result.error
             ? await waitForComposePixels(slot.localId, controller.signal)
