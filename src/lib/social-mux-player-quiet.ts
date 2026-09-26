@@ -3,7 +3,7 @@
 // does that if playback, stream, poster, muted, preload, or style are set
 // before the element is in the document — React applies those during
 // createElement, before append. Class and playsinline do not. Append first,
-// then assign the rest.
+// then assign the rest. Tokens, when present, are assigned before play().
 
 export type QuietMuxTokens = {
   playback: string;
@@ -94,20 +94,36 @@ export function mountQuietMuxPlayer(
 }
 
 // Mute and autoplay can change on a story without building a new element.
-// The autoplay attribute is a load-time hint, so pause or play follows it.
-// Story preview and go-live void play() the same way. The rejection is
-// AbortError when pause wins the race, or NotAllowedError when the browser blocks playback.
+// The autoplay attribute is a load-time hint. pause() or play() runs when
+// autoPlay is first applied or when it changes. A mute-only write does not
+// call them.
+//
+// play() rejections: drop only DOMException AbortError (pause wins the race)
+// and DOMException NotAllowedError (the browser blocks playback). Every other
+// rejection is rethrown so it stays visible.
 function voidQuietMuxPlay(started: void | Promise<void>): void {
-  if (started instanceof Promise) void started.catch(() => undefined);
+  if (!(started instanceof Promise)) return;
+  void started.catch((error: unknown) => {
+    if (
+      error instanceof DOMException &&
+      (error.name === "AbortError" || error.name === "NotAllowedError")
+    ) {
+      return;
+    }
+    throw error;
+  });
 }
 
 export function assignQuietMuxPlaybackFlags(
   player: QuietMuxPlayerElement,
-  flags: Pick<QuietMuxPlayerProps, "autoPlay" | "muted">,
+  flags: Pick<QuietMuxPlayerProps, "autoPlay" | "muted"> & { autoPlayChanged?: boolean },
 ): void {
   assertMuxPlayerConnected(player);
   player.muted = flags.muted;
   player.autoplay = flags.autoPlay;
+  // Omit autoPlayChanged, or pass true, to pause or play. Pass false when
+  // autoPlay did not change so a mute-only flip does not call play() or pause().
+  if (flags.autoPlayChanged === false) return;
   if (flags.autoPlay) voidQuietMuxPlay(player.play());
   else player.pause();
 }
@@ -121,10 +137,12 @@ export function assignConnectedMuxPlayer(
   player.streamType = props.streamType;
   player.preload = props.preload;
   player.poster = props.poster;
-  assignQuietMuxPlaybackFlags(player, props);
   if (props.tokens) player.tokens = props.tokens;
   applyQuietMuxPlayerStyle(player, props.style);
   if (props.onLoadedData) player.addEventListener("loadeddata", props.onLoadedData);
+  // First play() sees tokens when the props have them. Calling play() earlier
+  // lets a signed story start unsigned and 403.
+  assignQuietMuxPlaybackFlags(player, props);
 }
 
 function applyQuietMuxPlayerStyle(player: QuietMuxPlayerElement, style: QuietMuxPlayerStyle): void {

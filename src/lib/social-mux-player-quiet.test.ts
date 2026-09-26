@@ -30,6 +30,7 @@ const PROPS: QuietMuxPlayerProps = {
 
 function fakePlayer(): QuietMuxPlayerElement & { calls: string[] } {
   const calls: string[] = [];
+  let tokens: QuietMuxPlayerProps["tokens"];
   return {
     calls,
     isConnected: false,
@@ -40,7 +41,13 @@ function fakePlayer(): QuietMuxPlayerElement & { calls: string[] } {
     poster: "",
     muted: false,
     autoplay: false,
-    tokens: undefined,
+    get tokens() {
+      return tokens;
+    },
+    set tokens(value: QuietMuxPlayerProps["tokens"]) {
+      tokens = value;
+      calls.push("tokens");
+    },
     style: {
       setProperty(name: string, value: string) {
         calls.push(`style:${name}=${value}`);
@@ -84,13 +91,14 @@ describe("mountQuietMuxPlayer", () => {
     expect(player.autoplay).toBe(false);
     expect(player.tokens).toEqual(PROPS.tokens);
     expect(player.calls.slice(appendAt + 1)).toEqual([
-      "pause",
+      "tokens",
       "style:aspect-ratio=auto",
       "style:width=100%",
       "style:height=100%",
       "style:object-fit=cover",
       "style:--controls=none",
       "listen:loadeddata",
+      "pause",
     ]);
     expect(player.className).toBe("size-full object-cover");
     expect(player.isConnected).toBe(true);
@@ -133,19 +141,84 @@ describe("mountQuietMuxPlayer", () => {
     expect(player.calls).toEqual(["pause", "play", "pause"]);
   });
 
-  it("drops AbortError and NotAllowedError from play", async () => {
+  it("writes tokens before play() on first mount when tokens are present", () => {
+    const player = fakePlayer();
+    const host = {
+      appendChild(node: QuietMuxPlayerElement) {
+        node.isConnected = true;
+      },
+    };
+    player.play = () => {
+      player.calls.push("play");
+      expect(player.tokens).toEqual(PROPS.tokens);
+    };
+    mountQuietMuxPlayer(host, () => player, { ...PROPS, autoPlay: true });
+    const tokensAt = player.calls.indexOf("tokens");
+    const playAt = player.calls.indexOf("play");
+    expect(tokensAt).toBeGreaterThanOrEqual(0);
+    expect(playAt).toBeGreaterThan(tokensAt);
+  });
+
+  it("applies muted without play() or pause() when autoPlay did not change", () => {
     const player = fakePlayer();
     player.isConnected = true;
-    const rejections = [
-      new DOMException("The operation was aborted.", "AbortError"),
-      new DOMException("The request is not allowed by the user agent.", "NotAllowedError"),
-    ];
-    for (const error of rejections) {
-      player.play = () => Promise.reject(error);
-      assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true });
-    }
-    await Promise.resolve();
+    assignQuietMuxPlaybackFlags(player, { muted: false, autoPlay: true });
+    expect(player.calls).toEqual(["play"]);
+
+    assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true, autoPlayChanged: false });
+    expect(player.muted).toBe(true);
     expect(player.autoplay).toBe(true);
+    expect(player.calls).toEqual(["play"]);
+
+    assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: false, autoPlayChanged: true });
+    expect(player.calls).toEqual(["play", "pause"]);
+
+    assignQuietMuxPlaybackFlags(player, { muted: false, autoPlay: false, autoPlayChanged: false });
+    expect(player.muted).toBe(false);
+    expect(player.autoplay).toBe(false);
+    expect(player.calls).toEqual(["play", "pause"]);
+
+    assignQuietMuxPlaybackFlags(player, { muted: false, autoPlay: true, autoPlayChanged: true });
+    expect(player.calls).toEqual(["play", "pause", "play"]);
+  });
+
+  it("drops only DOMException AbortError and NotAllowedError from play and rethrows every other rejection", async () => {
+    const player = fakePlayer();
+    player.isConnected = true;
+    const seen: unknown[] = [];
+    const onUnhandled = (error: unknown) => {
+      seen.push(error);
+    };
+    process.on("unhandledRejection", onUnhandled);
+    try {
+      const dropped = [
+        new DOMException("The operation was aborted.", "AbortError"),
+        new DOMException("The request is not allowed by the user agent.", "NotAllowedError"),
+      ];
+      for (const error of dropped) {
+        player.play = () => Promise.reject(error);
+        assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true });
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(seen).toEqual([]);
+      expect(player.autoplay).toBe(true);
+
+      const spoofedAbort = new Error("not a media play rejection");
+      spoofedAbort.name = "AbortError";
+      const visible = [
+        new Error("decoder failed"),
+        new DOMException("The media is not supported.", "NotSupportedError"),
+        spoofedAbort,
+      ];
+      for (const error of visible) {
+        player.play = () => Promise.reject(error);
+        assignQuietMuxPlaybackFlags(player, { muted: true, autoPlay: true });
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(seen).toEqual(visible);
+    } finally {
+      process.off("unhandledRejection", onUnhandled);
+    }
   });
 
   it("refuses mute and autoplay writes while the element is disconnected", () => {

@@ -21,6 +21,9 @@ export default function SocialMuxPlayerMount(props: QuietMuxPlayerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<QuietMuxPlayerElement | null>(null);
   const propsRef = useRef(props);
+  // The value assignConnectedMuxPlayer already applied. The live-element
+  // effect calls play() or pause() only when this changes.
+  const appliedAutoPlayRef = useRef(props.autoPlay);
   useEffect(() => {
     propsRef.current = props;
   }, [props]);
@@ -68,10 +71,17 @@ export default function SocialMuxPlayerMount(props: QuietMuxPlayerProps) {
   }, [props.playbackId, props.poster, props.preload, props.streamType, styleKey, tokenKey]);
 
   useEffect(() => {
+    const autoPlayChanged = appliedAutoPlayRef.current !== props.autoPlay;
+    appliedAutoPlayRef.current = props.autoPlay;
     const player = playerRef.current;
     if (!player?.isConnected) return;
-    const current = propsRef.current;
-    assignQuietMuxPlaybackFlags(player, { autoPlay: current.autoPlay, muted: current.muted });
+    // Mute always lands. play() and pause() run only when autoPlay changed,
+    // so a mute-only flip does not call play() again.
+    assignQuietMuxPlaybackFlags(player, {
+      autoPlay: props.autoPlay,
+      muted: props.muted,
+      autoPlayChanged,
+    });
   }, [props.autoPlay, props.muted]);
 
   return <div ref={hostRef} className="size-full" />;
