@@ -65,6 +65,7 @@ describe("social media display", () => {
       "src/components/social/social-feed-video.tsx",
       "src/components/social/social-story-viewer.tsx",
       "src/components/social/social-story-rail-cover.tsx",
+      "src/components/social/social-story-mux-thumb.tsx",
       "src/components/social/social-welcome-video.tsx",
       "src/app/(app)/social/explore/page.tsx",
       "src/app/(app)/social/stories/[id]/page.tsx",
